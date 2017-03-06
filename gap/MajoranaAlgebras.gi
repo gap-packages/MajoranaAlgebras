@@ -1702,7 +1702,7 @@ function(G,T)
 
                                     # Use values to work out inner product
 
-                                    GramMatrix[j][k+t+u+v] := (13*MAJORANA_Form(str1) - MAJORANA_Form(str2))/8 + (MAJORANA_Form(str3) +MAJORANA_Form(str4) +MAJORANA_Form(str5))/128 -1/2048;
+                                    GramMatrix[j][k+t+u+v] :=  - MAJORANA_Form(str2)/8 + (13*MAJORANA_Form(str1) + MAJORANA_Form(str3) + MAJORANA_Form(str4) + MAJORANA_Form(str5))/128;
                                     GramMatrix[k+t+u+v][j]:=GramMatrix[j][k+t+u+v];
 
                                     Append(KnownInnerProducts,[[j,k+t+u+v],[k+t+u+v,j]]);
@@ -1938,7 +1938,7 @@ function(G,T)
 
                                 l:=t+1;
 
-                                GramMatrix[t+u+v+j][t+u+v+n]:= ( 25*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n] + GramMatrix[x3][t+u+v+n] + GramMatrix[x4][t+u+v+n])/4048+ 7*(GramMatrix[x1][x5] - GramMatrix[x1][x6] - GramMatrix[x1][x7]+ GramMatrix[x1][x8])/32;
+                                GramMatrix[t+u+v+j][t+u+v+n]:= ( 25*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n] + GramMatrix[x3][t+u+v+n] + GramMatrix[x4][t+u+v+n])/128+ 7*(GramMatrix[x1][x5] - GramMatrix[x1][x6] - GramMatrix[x1][x7]+ GramMatrix[x1][x8])/4096;
                                 GramMatrix[t+u+v+n][t+j+u+v]:=GramMatrix[t+u+v+j][t+u+v+n];
 
                                 Append(KnownInnerProducts,[[t+u+v+j,t+u+v+n],[t+u+v+n,t+u+v+j]]);
