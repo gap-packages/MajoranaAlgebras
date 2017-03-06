@@ -347,6 +347,39 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 		end
 		
 		);		
+		
+InstallGlobalFunction(	AlgebraProduct,
+
+		function(u,v,basis,done) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
+
+		local i, j, sum;
+
+		sum:=[];
+
+		if ForAll(u,x-> x= 0 ) or ForAll(v,x->x=0) then
+			return u*0;
+		fi;
+
+		for i in [1..Size(u)] do 
+			if u[i] <> 0 then 
+				for j in [1..Size(v)] do 
+					if v[j] <> 0 then 
+						if [i,j] in done then 
+							Append(sum,[u[i]*v[j]*basis[i][j]]);
+						else
+
+							# cannot calculate product
+
+							return 0;
+						fi;
+					fi;
+				od;
+			fi;
+		od;
+		return Sum(sum);						
+		end
+		
+		);
 
 
 InstallGlobalFunction(MajoranaRepresentation,
@@ -386,34 +419,7 @@ function(G,T)
 			# Step 7 - More algebra products		
 			Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record;
 
-	AlgebraProduct:=function(u,v,basis,done) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
-		local i, j, sum;
-
-		sum:=[];
-
-		if ForAll(u,x-> x= 0 ) or ForAll(v,x->x=0) then
-			return u*0;
-		fi;
-
-		for i in [1..Size(u)] do 
-			if u[i] <> 0 then 
-				for j in [1..Size(v)] do 
-					if v[j] <> 0 then 
-						if [i,j] in done then 
-							Append(sum,[u[i]*v[j]*basis[i][j]]);
-						else
-
-							# cannot calculate product
-
-							return 0;
-						fi;
-					fi;
-				od;
-			fi;
-		od;
-		return Sum(sum);						
-		end;
 
 	InnerProduct:=function(u,v,gram,done) # If all the relevant products are known, returns the algebra product of u and v. If not, returns [0]
 
@@ -1325,7 +1331,7 @@ function(G,T)
 				Output[i]:=[Shape,"Error","Inner product not positive definite on A", GramMatrixT];
 				break;
 			elif x = 0 then
-				NullSpT:=NullSpace(GramMatrixT);
+				NullSpT:=MAJORANA_NullSpace(GramMatrixT);
 				LI:=0;
 			fi;
 			
