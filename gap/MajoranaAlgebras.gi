@@ -580,8 +580,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
                     if x <> 0 then
                         y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
                         z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts,KnownAlgebraProducts);
-
-                        if ForAny(MAJORANA_AlgebraProduct(a,z,AlgebraProducts,KnownAlgebraProducts), z -> z <> 0)  then
+                        x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts,KnownAlgebraProducts);
+                        
+                        if x0 <> 0 and ForAny(x0, x -> x <> 0)  then
                             Add(errorfusion44,[j,k,l]);
                         fi;
                     fi;
