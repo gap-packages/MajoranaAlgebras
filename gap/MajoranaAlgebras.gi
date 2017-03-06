@@ -733,10 +733,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(G,T)
 
-    local   # function names
-            AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality,
-
-            # error checking
+    local   # error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
 
             # indexing and temporary variables
@@ -946,8 +943,8 @@ function(G,T)
 
             l:=1;
 
-            for j in [1..t] do
-                for k in [1..t] do
+            for j in [1..t+u+v+w] do
+                for k in [1..t+u+v+w] do
                     Add(KnownInnerProducts,[j,k]);
                 od;
             od;
@@ -2217,7 +2214,7 @@ function(G,T)
             UnknownInnerProducts:=[];
 
             for j in [1..dim] do
-                for k in [j+1..dim] do
+                for k in [j..dim] do
                     if not [j,k] in KnownInnerProducts then
                         Add(UnknownInnerProducts,[j,k]);
                     fi;
