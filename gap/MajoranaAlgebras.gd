@@ -16,4 +16,18 @@ DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpace" );
 
+DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
+
+DeclareGlobalFunction( "MAJORANA_InnerProduct" );
+
+DeclareGlobalFunction( "MAJORANA_Fusion" );
+
+DeclareGlobalFunction( "MAJORANA_PositiveDefinite" );
+
+DeclareGlobalFunction( "MAJORANA_AxiomM1" );
+
+DeclareGlobalFunction( "MAJORANA_AxiomM2" );
+
+DeclareGlobalFunction( "MAJORANA_Orthogonality" );
+
 
