@@ -9,3 +9,11 @@
 #!   and a <A>G</A> invariant set of generating involutions <A>T</A>.
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
+
+DeclareGlobalFunction( "MAJORANA_LDLTDecomposition" );
+
+DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
+
+DeclareGlobalFunction( "MAJORANA_NullSpace" );
+
+

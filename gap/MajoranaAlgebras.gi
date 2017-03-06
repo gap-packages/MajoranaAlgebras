@@ -4,44 +4,9 @@
 # Implementations
 #
 
-InstallGlobalFunction(MajoranaRepresentation,
+InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
-function(G,T) 
-
-	local 	# function names
-			LDLTDecomposition, SolutionMatVecs, NullSpace, AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality, 
-			
-			# error checking
-			ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
-			
-			# indexing and temporary variables 
-			i, j, k, l, m, n, x, y, z, 
-			
-			# Step 0 - Set Up 
-			Output, t, Orbitals, SizeOrbitals, 
-			
-			# Step 1 - Shape
-			Shape, RepsSquares6A, Unknowns3X, 
-			
-			# Step 2 - Possible shapes
-			Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, 5AaxesFixed, u, v, w, 
-			
-			# Step 3 - Products and evecs I
-			GramMatrix, GramMatrixT, LI, NullSpT, AlgebraProducts, EigenVectors, KnownInnerProducts, KnownAlgebraProducts, EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x6, x7, x8, x2A, x3A, 
-			
-			# Step 4 - More products and evecs
-			h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a, 
-			
-			# Step 5 - More evecs
-			switch, Dimensions, NewDimensions, NewEigenVectors,
-			
-			# Step 6 - More inner products
-			UnknownInnerProducts, mat, vec, sum, row, Solution,
-			
-			# Step 7 - More algebra products		
-			Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record;
-
-	LDLTDecomposition:=function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
+function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
 	
 		local B, n, L, D, i, j, k, temp;
 
@@ -81,9 +46,12 @@ function(G,T)
 		od;
 		
 		return Concatenation([L],[D]); 
-		end;
-		
-	SolutionMatVecs:=function(mat,vecs) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
+		end
+	);
+
+InstallGlobalFunction(MAJORANA_SolutionMatVecs,
+
+function(mat,vecs) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
 		
 		local A, C, n, m, d, absd, B, i, j, k, x, imax, temp, tempv, tempi, sol, list, newmat, newvec, pos, p, unsolved, zeros, error;
 		
@@ -243,9 +211,13 @@ function(G,T)
 		return [sol,unsolved];
 		
 		
-		end;		
-			
-	NullSpace:=function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
+		end
+		
+		);
+		
+InstallGlobalFunction(MAJORANA_NullSpace,
+
+		function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
 		
 		local A, C, n, m, d, absd, i, j, k, x, imax, temp, tempi, basis, basic, free, vec;
 		
@@ -372,7 +344,47 @@ function(G,T)
 		
 		return basis;
 		
-		end;
+		end
+		
+		);		
+
+
+InstallGlobalFunction(MajoranaRepresentation,
+
+function(G,T) 
+
+	local 	# function names
+			AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality, 
+			
+			# error checking
+			ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
+			
+			# indexing and temporary variables 
+			i, j, k, l, m, n, x, y, z, 
+			
+			# Step 0 - Set Up 
+			Output, t, Orbitals, SizeOrbitals, 
+			
+			# Step 1 - Shape
+			Shape, RepsSquares6A, Unknowns3X, 
+			
+			# Step 2 - Possible shapes
+			Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, 5AaxesFixed, u, v, w, 
+			
+			# Step 3 - Products and evecs I
+			GramMatrix, GramMatrixT, LI, NullSpT, AlgebraProducts, EigenVectors, KnownInnerProducts, KnownAlgebraProducts, EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x6, x7, x8, x2A, x3A, 
+			
+			# Step 4 - More products and evecs
+			h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a, 
+			
+			# Step 5 - More evecs
+			switch, Dimensions, NewDimensions, NewEigenVectors,
+			
+			# Step 6 - More inner products
+			UnknownInnerProducts, mat, vec, sum, row, Solution,
+			
+			# Step 7 - More algebra products		
+			Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record;
 
 	AlgebraProduct:=function(u,v,basis,done) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
@@ -432,7 +444,7 @@ function(G,T)
 	
 		local L, Diagonals, i;
 
-		L:=LDLTDecomposition(GramMatrix);	
+		L:=MAJORANA_LDLTDecomposition(GramMatrix);	
 
 		Diagonals:=[];
 		
@@ -684,7 +696,7 @@ function(G,T)
 			od;
 		od;
 
-		L:=LDLTDecomposition(B);
+		L:=MAJORANA_LDLTDecomposition(B);
 		
 		Diagonals:=[];
 		
@@ -2387,7 +2399,7 @@ function(G,T)
 					od;	
 				od;
 			
-				Solution:=SolutionMatVecs(mat,vec);
+				Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
 				if Size(Solution) = 2 then
 					if Size(Solution[2])>0 then 
@@ -2411,7 +2423,7 @@ function(G,T)
 			
 			# Check that GramMatrix matrix is pd
 		
-			#~ L:=LDLTDecomposition(GramMatrix);
+			#~ L:=MAJORANA_LDLTDecomposition(GramMatrix);
 			
 			#~ Diagonals:=[];
 
@@ -2423,7 +2435,7 @@ function(G,T)
 				#~ Output[i]:=[Shape,"Error","The inner product is not positive definite",3Aaxes, 4Aaxes, 5Aaxes, GramMatrix];
 				#~ break;
 			#~ elif ForAny(Diagonals, x->x=0) then
-				#~ NullSp:=NullSpace(GramMatrix);
+				#~ NullSp:=MAJORANA_NullSpace(GramMatrix);
 				#~ LI:=0;
 			#~ else
 				#~ LI:=1;
@@ -2574,7 +2586,7 @@ function(G,T)
 					od;
 
 
-					Solution:=SolutionMatVecs(mat,vec);
+					Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
 					if Size(Solution) = 2 then
 							for k in [1..Size(Solution[1])] do
@@ -2756,7 +2768,7 @@ function(G,T)
 					od;
 				od;
 
-				Solution:=SolutionMatVecs(mat,vec);
+				Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
 				if Size(Solution)  = 2 then
 					if Size(Solution[2]) = 0 then 
@@ -2789,10 +2801,10 @@ function(G,T)
 
 					mat:=TransposedMat(mat);	
 
-					EigenVectors[j][1]:=NullSpace(mat);
-					EigenVectors[j][2]:=NullSpace(mat - IdentityMat(dim)/4);
-					EigenVectors[j][3]:=NullSpace(mat - IdentityMat(dim)/32);
-					EigenVectors[j][4]:=NullSpace(mat - IdentityMat(dim) );
+					EigenVectors[j][1]:=MAJORANA_NullSpace(mat);
+					EigenVectors[j][2]:=MAJORANA_NullSpace(mat - IdentityMat(dim)/4);
+					EigenVectors[j][3]:=MAJORANA_NullSpace(mat - IdentityMat(dim)/32);
+					EigenVectors[j][4]:=MAJORANA_NullSpace(mat - IdentityMat(dim) );
 					
 					if Size(EigenVectors[j][4]) <> 1 then
 						Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
@@ -2976,7 +2988,7 @@ function(G,T)
 					od;
 				od;
 
-				Solution:=SolutionMatVecs(mat,vec);
+				Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
 				if Size(Solution)  = 2 then
 					if Size(Solution[2]) = 0 then 
