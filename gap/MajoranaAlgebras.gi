@@ -7,19 +7,19 @@
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
 function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
-    
+
         local B, n, L, D, i, j, k, temp;
 
         B:=ShallowCopy(A); n:=Size(B); L:=NullMat(n,n); D:=NullMat(n,n);
 
         for i in [1..n] do
             temp:=[];
-            for j in [1..i-1] do 
+            for j in [1..i-1] do
                 Append(temp,[L[i][j]*L[i][j]*D[j][j]]);
             od;
-            
+
             D[i][i] := B[i][i] - Sum(temp);
-            
+
             if D[i][i] =0 then
                     for j in [i+1..n] do
                         temp:=[];
@@ -33,7 +33,7 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                         fi;
                     od;
                     L[i][i]:=1;
-            else        
+            else
                 for j in [i+1..n] do
                     temp:=[];
                     for k in [1..i-1] do
@@ -44,114 +44,114 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                 L[i][i]:=1;
             fi;
         od;
-        
-        return Concatenation([L],[D]); 
+
+        return Concatenation([L],[D]);
         end
     );
 
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
 function(mat,vecs) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
-        
+
         local A, C, n, m, d, absd, B, i, j, k, x, imax, temp, tempv, tempi, sol, list, newmat, newvec, pos, p, unsolved, zeros, error;
-        
+
         A:=StructuralCopy(mat);
         B:=StructuralCopy(vecs);
-        
+
         n:=Size(A);
         m:=Size(A[1]);
-        
-        if n<m then 
+
+        if n<m then
             A{[n+1..m]} := NullMat(m-n,m);
         elif m<n then
             for i in [1..n] do
                 A[i]{[m+1..n]} := NullMat(1,n-m)[1];
             od;
         fi;
-        
+
         p:=Maximum(n,m);
-        
+
         d:=NullMat(1,p)[1];
-        
+
         C:=IdentityMat(p);
 
         # Put matrix in row echelon form
-        
+
         i:=1;
-        
+
         while i <= p do
-        
+
             for j in [i..p] do
                 d[j]:=A[j][i];
             od;
-            
+
             absd:=List(d,x->AbsoluteValue(x));
-            
+
             imax:=Position(absd,Maximum(absd));
-            
-            if d[imax] = 0 then 
-            
+
+            if d[imax] = 0 then
+
                 k:=i+1;
-            
+
                 while k <= p do
-                    if A[i][k] <> 0 then 
+                    if A[i][k] <> 0 then
                         C[i] := C[i]/A[i][k];
                         B[i] := B[i]/A[i][k];
                         A[i] := A[i]/A[i][k];
-                        
-                        
+
+
                         k:=p+1;
                     else
                         k:=k+1;
                     fi;
                 od;
-            
+
                 i:=i+1;
-                
-            else 
-            
+
+            else
+
                 # Swap rows i and imax
-                
+
                 temp:=ShallowCopy(A[imax]); tempv:=ShallowCopy(B[imax]); tempi:=ShallowCopy(C[imax]);
                 A[imax]:=ShallowCopy(A[i]); A[i]:=ShallowCopy(temp);
                 B[imax]:=ShallowCopy(B[i]); B[i]:=ShallowCopy(tempv);
                 C[imax]:=ShallowCopy(C[i]); C[i]:=ShallowCopy(tempi);
-                
-                for k in [i+1..p] do 
-                    
+
+                for k in [i+1..p] do
+
                     x:=A[k][i]/A[i][i];
 
                     B[k]:=B[k] - x*B[i];
-                    C[k]:=C[k] - x*C[i];                
+                    C[k]:=C[k] - x*C[i];
                     A[k]:=A[k] - x*A[i];
-                
+
                 od;
-                
+
                 C[i]:=C[i]/A[i][i];
                 B[i]:=B[i]/A[i][i];
                 A[i]:=A[i]/A[i][i];
-                
-                
+
+
                 d[i]:=0;
-                
+
                 i:=i+1;
-                
+
             fi;
-            
+
         od;
-        
+
         # Check if we can solve the system of equations
-        
+
         newmat:=NullMat(p,p);
         newvec:=NullMat((p),Size(vecs[1]));
         error:=[];
-        
+
         for i in [1..p] do
             if ForAll(A[i],x->x=0) then
-                if ForAny(B[i],x->x<> 0 ) then 
-            
+                if ForAny(B[i],x->x<> 0 ) then
+
                     Append(error,[i]);
-                
+
                 fi;
             else
                 pos:=Position(A[i],1);
@@ -159,35 +159,35 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
                 newvec[pos] := StructuralCopy(B[i]);
             fi;
         od;
-        
-        if Size(error) >0 then 
+
+        if Size(error) >0 then
             # no solutions
             return [error,C,A,B];
         fi;
-        
+
         zeros:=NullMat(1,p)[1];
         sol:=NullMat(1,m)[1];
         unsolved:=[];
-        
-        if newmat[m] = zeros then 
+
+        if newmat[m] = zeros then
             # sol[m] is unknown
-            
+
             sol[m]:=[];
             Append(unsolved,[m]);
-            
-        else 
-            sol[m]:=newvec[m];  
+
+        else
+            sol[m]:=newvec[m];
         fi;
-        
+
         for i in [1..m-1] do
-            if newmat[m-i] = zeros then 
+            if newmat[m-i] = zeros then
                 sol[m-i] := [];
                 Append(unsolved,[m-i]);
             else
                 list:=[];
                 j:=m-i+1;
                 while j<=m do
-                    if newmat[m-i][j] <> 0 then 
+                    if newmat[m-i][j] <> 0 then
                         if not j in unsolved then
                             Append(list,[newmat[m-i][j]*sol[j]]);
                             j:=j+1;
@@ -205,117 +205,117 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
                 fi;
             fi;
         od;
-                                    
-        
-        
+
+
+
         return [sol,unsolved];
-        
-        
+
+
         end
-        
+
         );
-        
+
 InstallGlobalFunction(MAJORANA_NullSpace,
 
         function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
-        
+
         local A, C, n, m, d, absd, i, j, k, x, imax, temp, tempi, basis, basic, free, vec;
-        
+
         A:=ShallowCopy(mat);
-        
+
         n:=Size(A);
         m:=Size(A[1]);
-            
+
         d:=NullMat(1,n)[1];
-        
+
         C:=IdentityMat(n);
 
         # Put matrix in row echelon form
-        
+
         i:=1;
-        
+
         while i <= n do
-        
+
             for j in [i..n] do
                 d[j]:=A[j][i];
             od;
-            
+
             absd:=List(d,x->AbsoluteValue(x));
-            
+
             imax:=Position(absd,Maximum(absd));
-            
-            if d[imax] = 0 then 
-            
+
+            if d[imax] = 0 then
+
                 k:=i+1;
-            
+
                 while k <= m do
-                    if A[i][k] <> 0 then 
-                    
+                    if A[i][k] <> 0 then
+
                         # Turn leading coefficient of row i (at pos k) into 1
-                    
+
                         C[i] := C[i]/A[i][k];
                         A[i] := A[i]/A[i][k];
-                        
+
                         k:=m+1;
                     else
                         k:=k+1;
                     fi;
                 od;
-            
+
                 i:=i+1;
-                
-            else 
-            
+
+            else
+
                 # Swap rows i and imax
-                
+
                 temp:=ShallowCopy(A[imax]); tempi:=ShallowCopy(C[imax]);
                 A[imax]:=ShallowCopy(A[i]); A[i]:=ShallowCopy(temp);
                 C[imax]:=ShallowCopy(C[i]); C[i]:=ShallowCopy(tempi);
-                
-                for k in [i+1..n] do 
-                    
+
+                for k in [i+1..n] do
+
                     x:=A[k][i]/A[i][i];
 
-                    C[k]:=C[k] - x*C[i];                
+                    C[k]:=C[k] - x*C[i];
                     A[k]:=A[k] - x*A[i];
-                
+
                 od;
-                
+
                 C[i]:=C[i]/A[i][i];
                 A[i]:=A[i]/A[i][i];
-                
-                
+
+
                 d[i]:=0;
-                
+
                 i:=i+1;
-                
+
             fi;
-            
+
         od;
 
         # Compute null space
-        
+
         basis:=[];
-        
+
         basic:=[];
         free:=[];
 
-        
+
         for i in [1..n] do
             Append(basic,[Position(A[i],1)]);
         od;
-        
+
         for i in [0..m-1] do
             if not m-i in basic then
                 Append(free,[m-i]);
             fi;
         od;
-        
+
         for i in free do
-        
+
             vec:=NullMat(1,m)[1];
-        
-            for j in [0..m-1] do    
+
+            for j in [0..m-1] do
                 if i = m-j then
                     vec[m-j] :=1;
                 elif m-j in basic then
@@ -327,7 +327,7 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
             Append(basis,[vec]);
         od;
-        
+
         for j in [1..Size(basis)] do
             basis[j]:=basis[j]/basis[j][m-j+1];
 
@@ -335,19 +335,19 @@ InstallGlobalFunction(MAJORANA_NullSpace,
                 basis[j]:=basis[j] - basis[j][m-k+1]*basis[k];
             od;
         od;
-        
+
         for j in [1..Size(basis)] do
             for k in [1..(Size(basis)-j)] do
                 basis[j]:=basis[j] - basis[j][m-k]*basis[m-k];
             od;
         od;
-        
+
         return basis;
-        
+
         end
-        
-        );      
-        
+
+        );
+
 InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
         function(u,v,basis,done) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
@@ -360,11 +360,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             return u*0;
         fi;
 
-        for i in [1..Size(u)] do 
-            if u[i] <> 0 then 
-                for j in [1..Size(v)] do 
-                    if v[j] <> 0 then 
-                        if [i,j] in done then 
+        for i in [1..Size(u)] do
+            if u[i] <> 0 then
+                for j in [1..Size(v)] do
+                    if v[j] <> 0 then
+                        if [i,j] in done then
                             Append(sum,[u[i]*v[j]*basis[i][j]]);
                         else
 
@@ -376,9 +376,9 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 od;
             fi;
         od;
-        return Sum(sum);                        
+        return Sum(sum);
         end
-        
+
         );
 
 InstallGlobalFunction(  MAJORANA_InnerProduct,
@@ -389,11 +389,11 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
         sum:=[];
 
-        for i in [1..Size(u)] do 
-            if u[i] <> 0 then 
-                for j in [1..Size(v)] do 
-                    if v[j] <> 0 then 
-                        if [i,j] in done then 
+        for i in [1..Size(u)] do
+            if u[i] <> 0 then
+                for j in [1..Size(v)] do
+                    if v[j] <> 0 then
+                        if [i,j] in done then
                             Append(sum,[u[i]*v[j]*gram[i][j]]);
                         else
 
@@ -405,25 +405,25 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 od;
             fi;
         od;
-        return Sum(sum);                        
+        return Sum(sum);
         end
-        
+
     );
-    
+
 InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
         function(GramMatrix) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
-    
+
         local L, Diagonals, i;
 
-        L:=MAJORANA_LDLTDecomposition(GramMatrix);  
+        L:=MAJORANA_LDLTDecomposition(GramMatrix);
 
         Diagonals:=[];
-        
+
         for i in [1..Size(GramMatrix)] do
             Append(Diagonals,[L[2][i][i]]);
         od;
-        
+
         if ForAny(Diagonals, x->x<0) then
             return -1;
         elif ForAny(Diagonals, x->x=0) then
@@ -432,9 +432,9 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
             return 1;
         fi;
         end
-        
+
         );
-        
+
 InstallGlobalFunction(MAJORANA_AxiomM1,
 
         function(GramMatrix,AlgebraProducts) # Checks if bilinear and algebra products obey axiom M1, outputs a list which is empty if they do obey the axiom
@@ -442,10 +442,10 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         local sum1, sum2, ErrorM1, j, k, l, m, dim;
 
         dim:=Size(AlgebraProducts);
-        
+
         ErrorM1:=[];
 
-        for j in [1..dim] do    
+        for j in [1..dim] do
             for k in [1..dim] do
                 for l in [1..dim] do
 
@@ -453,7 +453,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     sum2:=[];
 
                     for m in [1..dim] do
-                        if AlgebraProducts[k][l][m] <> 0 then 
+                        if AlgebraProducts[k][l][m] <> 0 then
                             Append(sum1,[AlgebraProducts[k][l][m]*GramMatrix[j][m]]);
                         fi;
                         if AlgebraProducts[j][k][m] <> 0 then
@@ -461,18 +461,18 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                         fi;
                     od;
 
-                    if Sum(sum1) <> Sum(sum2) then 
+                    if Sum(sum1) <> Sum(sum2) then
                         Add(ErrorM1,[j,k,l]);
                     fi;
 
                 od;
             od;
         od;
-        
+
         return ErrorM1;
-            
+
         end
-        
+
         );
 
 InstallGlobalFunction(MAJORANA_Fusion,
@@ -501,11 +501,11 @@ InstallGlobalFunction(MAJORANA_Fusion,
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][1][l],AlgebraProducts,KnownAlgebraProducts);
                     if x<>0 then
                         y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts);
-                        if y <> 0 then 
+                        if y <> 0 then
                             if ForAny(y, z-> z <> 0) then
                                 Add(errorfusion00,[j,k,l]);
                             fi;
-                        fi; 
+                        fi;
                     fi;
                 od;
             od;
@@ -545,8 +545,8 @@ InstallGlobalFunction(MAJORANA_Fusion,
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][2][l],AlgebraProducts,KnownAlgebraProducts);
                     if x<>0 then
                         if MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts) <> [0] then
-                        
-                            y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;                     
+
+                            y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
                             z:=MAJORANA_AlgebraProduct(a,y,AlgebraProducts,KnownAlgebraProducts);
 
                             if z <> 0 and ForAny(z, x -> x <> 0)  then
@@ -557,7 +557,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
                 od;
             od;
 
-            # 1/4,1/32 fusion  
+            # 1/4,1/32 fusion
 
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][3])] do
@@ -574,11 +574,11 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
             for k in [1..Size(EigenVectors[j][3])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                
+
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][3][k],EigenVectors[j][3][l],AlgebraProducts,KnownAlgebraProducts);
-                    
-                    if x <> 0 then                  
-                        y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a; 
+
+                    if x <> 0 then
+                        y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
                         z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts,KnownAlgebraProducts);
 
                         if ForAny(MAJORANA_AlgebraProduct(a,z,AlgebraProducts,KnownAlgebraProducts), z -> z <> 0)  then
@@ -592,15 +592,15 @@ InstallGlobalFunction(MAJORANA_Fusion,
         return [errorfusion00,errorfusion02,errorfusion04,errorfusion22,errorfusion24,errorfusion44];
 
         end
-        
+
         );
 
 InstallGlobalFunction(MAJORANA_Orthogonality,
 
         function(T,KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors) # Tests that eigenspaces are orthogonal with respect to the inner product
-        
+
         local a, b, t, errorortho01, errorortho02, errorortho04, errorortho12, errorortho14, errorortho24, j, k, l;
-        
+
         t:=Size(T);
 
         for j in [1..t] do
@@ -615,13 +615,13 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
             errorortho14:=[];
             errorortho24:=[];
 
-            for k in [1..Size(EigenVectors[j][1])] do 
+            for k in [1..Size(EigenVectors[j][1])] do
                 if MAJORANA_InnerProduct(EigenVectors[j][1][k],a,GramMatrix,KnownInnerProducts) <> 0 then
                     Append(errorortho01,[[j,k]]);
                 fi;
             od;
 
-            for k in [1..Size(EigenVectors[j][1])] do 
+            for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][2])] do
                     if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],GramMatrix,KnownInnerProducts) <> 0 then
                         Append(errorortho02,[[j,k,l]]);
@@ -629,7 +629,7 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
                 od;
             od;
 
-            for k in [1..Size(EigenVectors[j][1])] do 
+            for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][3])] do
                     if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],GramMatrix,KnownInnerProducts) <> 0 then
                         Append(errorortho02,[[j,k,l]]);
@@ -637,19 +637,19 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
                 od;
             od;
 
-            for k in [1..Size(EigenVectors[j][2])] do 
+            for k in [1..Size(EigenVectors[j][2])] do
                 if MAJORANA_InnerProduct(EigenVectors[j][2][k],a,GramMatrix,KnownInnerProducts) <> 0 then
                     Append(errorortho12,[[j,k]]);
                 fi;
             od;
 
-            for k in [1..Size(EigenVectors[j][3])] do 
+            for k in [1..Size(EigenVectors[j][3])] do
                 if MAJORANA_InnerProduct(EigenVectors[j][3][k],a,GramMatrix,KnownInnerProducts) <> 0 then
                     Append(errorortho14,[[j,k]]);
                 fi;
             od;
 
-            for k in [1..Size(EigenVectors[j][2])] do 
+            for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][3])] do
                     if MAJORANA_InnerProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],GramMatrix,KnownInnerProducts) <> 0 then
                         Append(errorortho24,[[j,k,l]]);
@@ -657,27 +657,27 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
                 od;
             od;
         od;
-        
+
         return [errorortho01,errorortho02,errorortho04,errorortho12,errorortho14,errorortho24];
-        
+
         end
-        
+
         );
-        
+
 InstallGlobalFunction(MAJORANA_AxiomM2,
 
         function(KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts) # Tests that the algebra obeys axiom M2
 
         local B, dim, L, i, j , k , l, m, Diagonals;
-        
+
         dim:=Size(AlgebraProducts);
 
         B:=NullMat(dim^2,dim^2);
 
         for j in [1..dim] do
-            for k in [1..dim] do    
-                for l in [1..dim] do 
-                    for m in [1..dim] do 
+            for k in [1..dim] do
+                for l in [1..dim] do
+                    for m in [1..dim] do
                         B[dim*(j-1) + k][dim*(l-1) +m]:= MAJORANA_InnerProduct(AlgebraProducts[j][l],AlgebraProducts[k][m],GramMatrix,KnownInnerProducts) - MAJORANA_InnerProduct(AlgebraProducts[k][l],AlgebraProducts[m][j],GramMatrix,KnownInnerProducts);
                     od;
                 od;
@@ -685,13 +685,13 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
         od;
 
         L:=MAJORANA_LDLTDecomposition(B);
-        
+
         Diagonals:=[];
-        
+
         for i in [1..Size(B)] do
             Append(Diagonals,[L[2][i][i]]);
         od;
-        
+
         if ForAny(Diagonals, x->x<0) then
             return -1;
         else
@@ -699,13 +699,13 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
         fi;
 
         end
-        
+
         );
 
 InstallGlobalFunction(MAJORANA_Form,
 
         function(str) # Outputs value of bilinear product depending on shape of orbital
-        
+
         if str = ['1','A'] then
             return 1;
         elif str = ['2','A'] then
@@ -726,47 +726,47 @@ InstallGlobalFunction(MAJORANA_Form,
             return 5/256;
         fi;
         end
-        
+
         );
 
 InstallGlobalFunction(MajoranaRepresentation,
 
-function(G,T) 
+function(G,T)
 
     local   # function names
-            AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality, 
-            
+            AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality,
+
             # error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
-            
-            # indexing and temporary variables 
-            i, j, k, l, m, n, x, y, z, 
-            
-            # Step 0 - Set Up 
-            Output, t, Orbitals, SizeOrbitals, 
-            
+
+            # indexing and temporary variables
+            i, j, k, l, m, n, x, y, z,
+
+            # Step 0 - Set Up
+            Output, t, Orbitals, SizeOrbitals,
+
             # Step 1 - Shape
-            Shape, RepsSquares6A, Unknowns3X, 
-            
+            Shape, RepsSquares6A, Unknowns3X,
+
             # Step 2 - Possible shapes
-            Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, 5AaxesFixed, u, v, w, 
-            
+            Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, 5AaxesFixed, u, v, w,
+
             # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixT, LI, NullSpT, AlgebraProducts, EigenVectors, KnownInnerProducts, KnownAlgebraProducts, EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x6, x7, x8, x2A, x3A, 
-            
+            GramMatrix, GramMatrixT, LI, NullSpT, AlgebraProducts, EigenVectors, KnownInnerProducts, KnownAlgebraProducts, EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x6, x7, x8, x2A, x3A,
+
             # Step 4 - More products and evecs
-            h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a, 
-            
+            h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a,
+
             # Step 5 - More evecs
             switch, Dimensions, NewDimensions, NewEigenVectors,
-            
+
             # Step 6 - More inner products
             UnknownInnerProducts, mat, vec, sum, row, Solution,
-            
-            # Step 7 - More algebra products        
+
+            # Step 7 - More algebra products
             Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record;
 
-    
+
                                             ## STEP 0: SETUP ##
 
     Output:=[];
@@ -786,7 +786,7 @@ function(G,T)
     # Construct orbitals of G on T
 
     Orbitals:=OrbitsDomain(G,Cartesian(T,T),OnPairs);
-    
+
     SizeOrbitals:=Size(Orbitals);
 
                                         ## STEP 1: SHAPE ##
@@ -797,7 +797,7 @@ function(G,T)
 
     RepsSquares6A:=[];
 
-    for i in [1..SizeOrbitals] do 
+    for i in [1..SizeOrbitals] do
         x:=Representative(Orbitals[i]);
         if Order(x[1]*x[2]) = 1 then
             Shape[i]:="1A";
@@ -813,20 +813,20 @@ function(G,T)
         fi;
         if Order(x[1]*x[2]) = 4 and not (x[1]*x[2])^2 in T then
             Shape[i]:="4A";
-        fi; 
+        fi;
         if Order(x[1]*x[2]) = 4 and (x[1]*x[2])^2 in T then
             Shape[i]:="4B";
-        fi; 
+        fi;
         if Order(x[1]*x[2]) = 5 then
             Shape[i]:="5A";
-        fi; 
-        if Order(x[1]*x[2])=6 then 
+        fi;
+        if Order(x[1]*x[2])=6 then
             Shape[i]:="6A";
             Add(RepsSquares6A,(x[1]*x[2])^2);
         fi;
     od;
 
-    # Check for inclusions of 3A in 6A 
+    # Check for inclusions of 3A in 6A
 
     for i in [1..SizeOrbitals] do
         if Shape[i][1] = '3' then
@@ -834,12 +834,12 @@ function(G,T)
             while j<Size(Orbitals[i]) do
                 j:=j+1;
                 if Orbitals[i][j][1]*Orbitals[i][j][2] in RepsSquares6A then
-                    Shape[i]:="3A";;  
+                    Shape[i]:="3A";;
                     j:=Size(Orbitals[i])+1;;
                 fi;
             od;
         fi;
-    od; 
+    od;
 
     Unknowns3X:=[];
 
@@ -851,17 +851,17 @@ function(G,T)
 
                                             ## STEP 2: POSSIBLE SHAPES ##
 
-    # Run through possibilities for unknowns 
+    # Run through possibilities for unknowns
 
     Binaries:=AsList(FullRowSpace(GF(2),Size(Unknowns3X)));
-    
-    for i in [1..Size(Binaries)] do 
-    
+
+    for i in [1..Size(Binaries)] do
+
         Output[i]:=[];
-        
+
         master:=1;
-    
-        while master = 1 do 
+
+        while master = 1 do
 
             # Add new values in the shape
 
@@ -871,7 +871,7 @@ function(G,T)
                     Shape[k]:="3A";
                 else
                     Shape[k]:="3C";
-                fi;         
+                fi;
             od;
 
             # Create lists of 3A, 4A and 5A axes
@@ -880,19 +880,19 @@ function(G,T)
             4Aaxes:=[];
             5Aaxes:=[];
 
-            for j in [1..SizeOrbitals] do 
+            for j in [1..SizeOrbitals] do
                 if Shape[j]=['3','A'] then
-                    for k in [1..Size(Orbitals[j])] do 
+                    for k in [1..Size(Orbitals[j])] do
                         Add(3Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
                     od;
                 fi;
                 if Shape[j]=['4','A'] then
-                    for k in [1..Size(Orbitals[j])] do 
+                    for k in [1..Size(Orbitals[j])] do
                         Add(4Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
                     od;
                 fi;
                 if Shape[j]=['5','A'] then
-                    for k in [1..Size(Orbitals[j])] do 
+                    for k in [1..Size(Orbitals[j])] do
                         Add(5Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
                     od;
                 fi;
@@ -901,35 +901,35 @@ function(G,T)
             3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
-            
+
             5AaxesFixed:=NullMat(w,0);
-            
+
             for j in [1..w] do
                 x:=5Aaxes[j].1;
                 5AaxesFixed[j]:=[x,x^4];
             od;
-                
+
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
 
             # Set up Gram matrix
-            
+
             dim:= t+u+v+w;
 
             GramMatrix:=NullMat(dim,dim);
-            
+
             KnownInnerProducts:=[];
 
             # Set up algebra product matrix
 
             AlgebraProducts:=NullMat(dim,dim);
 
-            for j in [1..dim] do 
+            for j in [1..dim] do
                 for k in [1..dim] do
                     AlgebraProducts[j][k]:=NullMat(1,dim)[1];
                 od;
             od;
-            
+
             KnownAlgebraProducts:=[];
 
             # Set up eigenvector matrix
@@ -940,7 +940,7 @@ function(G,T)
                 for k in [1..3] do
                     EigenVectors[j][k]:=[];
                 od;
-            od;     
+            od;
 
             # Start filling in values and products!
 
@@ -965,62 +965,62 @@ function(G,T)
                 AlgebraProducts[j][j][j]:=1;
             od;
 
-            for j in [(t+1)..dim] do 
+            for j in [(t+1)..dim] do
                 Add(KnownAlgebraProducts,[j,j]);
             od;
-            
+
             # Add products of 5A axes with themselves
-            
+
             for j in [1..w] do
                 GramMatrix[t+u+v+j][t+u+v+j]:=875/524288;
-                
+
                 l:=1;
-                        
+
                 while l < t+1 do
                     h:=5AaxesFixed[j][1];
                     if T[l]*h in T then
                         x:=T[l]; x1:=Position(T,x*h); x2:=Position(T,x*h*h); x3:=Position(T,x*h*h*h); x4:=Position(T,x*h*h*h*h);
-                        
+
                         AlgebraProducts[t+u+v+j][t+u+v+j][l]:=175/524288;
                         AlgebraProducts[t+u+v+j][t+u+v+j][x1]:=175/524288;
                         AlgebraProducts[t+u+v+j][t+u+v+j][x2]:=175/524288;
                         AlgebraProducts[t+u+v+j][t+u+v+j][x3]:=175/524288;
                         AlgebraProducts[t+u+v+j][t+u+v+j][x4]:=175/524288;
-                                                
+
                         l:=t+1;
-                    else    
+                    else
                         l:=l+1;
                     fi;
                 od;
-                
+
             od;
-            
-            
-            
+
+
+
             # Remaining products from IPSS10
 
             for j in [1..SizeOrbitals] do
                 if Shape[j] = ['2','A'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
+
                         x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); x2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        
+
                         GramMatrix[x0][x1]:=1/8;
 
-                        AlgebraProducts[x0][x1][x0]:= 1/8; 
+                        AlgebraProducts[x0][x1][x0]:= 1/8;
                         AlgebraProducts[x0][x1][x1]:= 1/8;
                         AlgebraProducts[x0][x1][x2]:=-1/8;
 
                         EigenVector:=NullMat(1,dim)[1];
-                        
+
                         EigenVector[x1]:=1;
                         EigenVector[x2]:=1;
                         EigenVector[x0]:=-1/4;
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
-                        
+
                         EigenVector[x1]:=1;
                         EigenVector[x2]:=-1;
 
@@ -1030,24 +1030,24 @@ function(G,T)
                 fi;
                 if Shape[j] = ['2','B'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
+
                         x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]);
-                        
+
                         EigenVector:=NullMat(1,dim)[1];
-                        
+
                         EigenVector[x1]:=1;
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
 
                     od;
-                fi;     
+                fi;
                 if Shape[j] = ['3','A'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
+
                         x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x3:=Position(3Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
 
                         GramMatrix[x0][x1]:=13/256;
-                        
+
                         AlgebraProducts[x0][x1][x0]:=1/16;
                         AlgebraProducts[x0][x1][x1]:=1/16;
                         AlgebraProducts[x0][x1][xm1]:=1/32;
@@ -1069,30 +1069,30 @@ function(G,T)
                         EigenVector[x1]:=32/27;
                         EigenVector[xm1]:=32/27;
                         EigenVector[t+x3]:=1;
-                        
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
-                        
+
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=-8/45;
                         EigenVector[x1]:=-32/45;
                         EigenVector[xm1]:=-32/45;
                         EigenVector[t+x3]:=1;
-                        
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector)); 
+
+                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=-1;
-                        
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
+
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
 
                     od;
                 fi;
                 if Shape[j] = ['3','C'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
+
                         x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
 
                         GramMatrix[x0][x1]:=1/64;
@@ -1100,31 +1100,31 @@ function(G,T)
                         AlgebraProducts[x0][x1][x0]:=1/64;
                         AlgebraProducts[x0][x1][x1]:=1/64;
                         AlgebraProducts[x0][x1][xm1]:=-1/64;
-                        
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=-1/32;
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=1;
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
-                        
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+
                         EigenVector:=NullMat(1,dim)[1];
-                
+
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=-1;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
                     od;
                 fi;
                 if Shape[j] = ['4','A'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
-                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]); 
+
+                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
                         x4:=Position(4Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
-                        
+
                         GramMatrix[x0][x1]:=1/32;
-                        
+
                         AlgebraProducts[x0][x1][x0]:=3/64;
                         AlgebraProducts[x0][x1][x1]:=3/64;
                         AlgebraProducts[x0][x1][xm1]:=1/64;
@@ -1142,7 +1142,7 @@ function(G,T)
                         AlgebraProducts[t+u+x4][x0][xm1]:=-1/8;
                         AlgebraProducts[t+u+x4][x0][x2]:=-1/16;
                         AlgebraProducts[t+u+x4][x0][t+u+x4]:= 3/16;
-                        
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=-1/2;
@@ -1152,7 +1152,7 @@ function(G,T)
                         EigenVector[t+u+x4]:=1;
 
                         Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
-                        
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=-1/3;
@@ -1161,31 +1161,31 @@ function(G,T)
                         EigenVector[x2]:=-1/3;
                         EigenVector[t+u+x4]:=1;
 
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector)); 
-                        
+                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=-1;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
 
                     od;
                 fi;
                 if Shape[j] = ['4','B'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
-                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]); 
-                        x4:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]); 
-                        
+
+                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
+                        x4:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
+
                         GramMatrix[x0][x1]:=1/64;
 
                         AlgebraProducts[x0][x1][x0]:=1/64;
                         AlgebraProducts[x0][x1][x1]:=1/64;
                         AlgebraProducts[x0][x1][xm1]:=-1/64;
                         AlgebraProducts[x0][x1][x2]:=-1/64;
-                        AlgebraProducts[x0][x1][x4]:= 1/64;                 
-                    
+                        AlgebraProducts[x0][x1][x4]:= 1/64;
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=-1/32;
@@ -1200,23 +1200,23 @@ function(G,T)
 
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=-1;
-                        
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));               
+
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
 
                     od;
                 fi;
                 if Shape[j] = ['5','A'] then
                     for k in [1..Size(Orbitals[j])] do
-                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]); 
-                        xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
-                        x5:=Position(5Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2])); 
-                        
+                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
+                        xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
+                        x5:=Position(5Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+
                         if Orbitals[j][k][1]*Orbitals[j][k][2] in 5AaxesFixed[x5] then
                             sign:=1;
                         else
                             sign:=-1;
-                        fi;         
-                                                
+                        fi;
+
                         GramMatrix[x0][x1]:=3/128;
 
                         AlgebraProducts[x0][x1][x0]:=3/128;
@@ -1224,7 +1224,7 @@ function(G,T)
                         AlgebraProducts[x0][x1][xm1]:=-1/128;
                         AlgebraProducts[x0][x1][x2]:=-1/128;
                         AlgebraProducts[x0][x1][xm2]:=-1/128;
-                        AlgebraProducts[x0][x1][t+u+v+x5] := sign*1; 
+                        AlgebraProducts[x0][x1][t+u+v+x5] := sign*1;
 
                         AlgebraProducts[x0][t+u+v+x5][x1]:=sign*7/4096;
                         AlgebraProducts[x0][t+u+v+x5][xm1]:=sign*7/4096;
@@ -1237,7 +1237,7 @@ function(G,T)
                         AlgebraProducts[t+u+v+x5][x0][x2]:=-sign*7/4096;
                         AlgebraProducts[t+u+v+x5][x0][xm2]:=-sign*7/4096;
                         AlgebraProducts[t+u+v+x5][x0][t+u+v+x5] := 7/32;
-                        
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=3/512;
@@ -1246,8 +1246,8 @@ function(G,T)
                         EigenVector[x2]:=-1/128;
                         EigenVector[xm2]:=-1/128;
                         EigenVector[t+u+v+x5]:=sign*1;
-                        
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
+
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
 
@@ -1258,37 +1258,37 @@ function(G,T)
                         EigenVector[xm2]:=15/128;
                         EigenVector[t+u+v+x5]:=sign*1;
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
-                        
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+
                         EigenVector:=NullMat(1,dim)[1];
-                        
+
                         EigenVector[x1]:=1/128;
                         EigenVector[xm1]:=1/128;
                         EigenVector[x2]:=-1/128;
                         EigenVector[xm2]:=-1/128;
                         EigenVector[t+u+v+x5]:=sign*1;
-                        
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector)); 
+
+                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=-1;
-                        
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
-                        
+
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x2]:=1;
                         EigenVector[xm2]:=-1;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
                     od;
                 fi;
                 if Shape[j] = ['6','A'] then
                     for k in [1..Size(Orbitals[j])] do
-                    
-                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]); 
+
+                        x0:=Position(T,Orbitals[j][k][1]); x1:=Position(T,Orbitals[j][k][2]); xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
                         xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); x3:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
                         x2A:=Position(T,(Orbitals[j][k][1]*Orbitals[j][k][2])^3); x3A:=Position(3Aaxes,Group((Orbitals[j][k][1]*Orbitals[j][k][2])^2));
 
@@ -1302,7 +1302,7 @@ function(G,T)
                         AlgebraProducts[x0][x1][x3] := -1/64;
                         AlgebraProducts[x0][x1][x2A] := 1/64;
                         AlgebraProducts[x0][x1][t+x3A] := 45/2048;
-                        
+
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x0]:=2/45;
@@ -1314,7 +1314,7 @@ function(G,T)
                         EigenVector[x2A]:=32/45;
                         EigenVector[t+x3A]:=1;
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
 
@@ -1325,35 +1325,35 @@ function(G,T)
                         EigenVector[x2A]:=32/45;
                         EigenVector[t+x3A]:=1;
 
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x1]:=1;
                         EigenVector[xm1]:=-1;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
 
                         EigenVector:=NullMat(1,dim)[1];
 
                         EigenVector[x2]:=1;
                         EigenVector[xm2]:=-1;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector)); 
+                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
                     od;
-                fi; 
+                fi;
             od;
-            
+
             LI:=1;
-            
+
             GramMatrixT:=[];
-            
+
             for j in [1..t] do
                 GramMatrixT[j]:=GramMatrix[j]{[1..t]};
             od;
-            
+
             x:=MAJORANA_PositiveDefinite(GramMatrixT);
-            
+
             if x = -1 then
                 Output[i]:=[Shape,"Error","Inner product not positive definite on A", GramMatrixT];
                 break;
@@ -1361,30 +1361,30 @@ function(G,T)
                 NullSpT:=MAJORANA_NullSpace(GramMatrixT);
                 LI:=0;
             fi;
-            
+
             if LI=0 then
-                
+
                 n:=Size(NullSpT);
-                
+
                 Display(n);
-                
-                T:=T{[1..t-n]};         
-                
+
+                T:=T{[1..t-n]};
+
                 # Change Gram matrix to get rid of any axes not in basis
-                
+
                 GramMatrix:=GramMatrix{Concatenation([1..t-n],[t+1..dim])};
-                
+
                 for j in [1..dim-n] do
                     GramMatrix[j]:=GramMatrix[j]{Concatenation([1..t-n],[t+1..dim])};
                 od;
-                
+
                 # Change alg products to get rid of any axes not in the basis
 
                 AlgebraProducts:=AlgebraProducts{Concatenation([1..t-n],[t+1..dim])};
 
                 for j in [1..dim-n] do
                     AlgebraProducts[j]:=AlgebraProducts[j]{Concatenation([1..t-n],[t+1..dim])};
-                od; 
+                od;
 
                 for j in [1..n] do
                     for k in [1..dim-n] do
@@ -1404,34 +1404,34 @@ function(G,T)
 
                 for j in [1..t] do
                     for k in [1..3] do
-                        for l in [1..Size(EigenVectors[j][k])] do 
+                        for l in [1..Size(EigenVectors[j][k])] do
                             for m in [1..Size(NullSpT)] do
                                 EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSpT[m]*EigenVectors[j][k][l][dim - m+1];
                             od;
                             EigenVectors[j][k][l]:=EigenVectors[j][k][l]{Concatenation([1..t-n],[t+1..dim])};
                         od;
                     od;
-                od; 
-                
+                od;
+
                 t:=t-n;
-                
+
                 dim:=dim-n;
-                
-                
-                
+
+
+
             else
                 dim:=t+u+v+w;
             fi;
-            
-                    
+
+
 
                                         ## STEP 4: MORE PRODUCTS ##
-                                                
-            # (2,3) values  
+
+            # (2,3) values
 
             for j in [1..t] do
                 for k in [1 .. u] do
-                    x:=T[j]; h:=3Aaxes[k].1; 
+                    x:=T[j]; h:=3Aaxes[k].1;
 
                     if x*h in T then
                         # D6
@@ -1443,7 +1443,7 @@ function(G,T)
 
                         Append(KnownInnerProducts,[[j,k+t],[k+t,j]]);
                         Append(KnownAlgebraProducts,[[j,k+t],[k+t,j]]);
-                            
+
                     elif Order(x*h)=3 then
 
                         # Case (2A,3A) in IPSS10
@@ -1468,9 +1468,9 @@ function(G,T)
 
                         Append(KnownInnerProducts,[[j,k+t],[k+t,j]]);
                         Append(KnownAlgebraProducts,[[j,k+t],[k+t,j]]);
-                         
+
                     elif Order(x*h)=4 then
-                        if (x*h)^2 in T then 
+                        if (x*h)^2 in T then
 
                             # Case (2A,3A) in IPSS10
 
@@ -1513,7 +1513,7 @@ function(G,T)
 
                             Append(KnownInnerProducts,[[j,k+t],[k+t,j]]);
                             Append(KnownAlgebraProducts,[[j,k+t],[k+t,j]]);
-                        else 
+                        else
                             GramMatrix[j][k+t] := -13/8192;
                             GramMatrix[k+t][j] := -13/8192;
 
@@ -1523,24 +1523,24 @@ function(G,T)
 
                             Append(KnownInnerProducts,[[j,k+t],[k+t,j]]);
                         fi;
-                    else                
+                    else
                         l:=1;
-                        while l<t+1 do  
-                            s:=T[l];    
+                        while l<t+1 do
+                            s:=T[l];
                             if s*h in T and Order(x*s*h) = 2 then
                                 Append(KnownInnerProducts,[[j,k+t],[k+t,j]]); l:=t+1; m:=1;
                                 if x*s*h in T then
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}) and (a_t, a_{sh^2})
 
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [s,x*s*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [s,x*s*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1554,11 +1554,11 @@ function(G,T)
 
                                     # Need to know values of (a_t,a_s) and (a_t, a_{sh^2})
 
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1576,14 +1576,14 @@ function(G,T)
                 od;
             od;
 
-            l:=1;   
+            l:=1;
 
             # (2,4) values
 
             for j in [1..t] do
                 for k in [1 .. v] do
                     x:=T[j]; h:=4Aaxes[k].1;
-                    if x*h in T then 
+                    if x*h in T then
 
                         # D8
 
@@ -1594,29 +1594,29 @@ function(G,T)
 
                         Append(KnownInnerProducts,[[j,k+t+u],[k+t+u,j]]);
                         Append(KnownAlgebraProducts,[[j,k+t+u],[k+t+u,j]]);
-                            
+
                     else
                         l:=1;
-                        while l<t+1 do      
+                        while l<t+1 do
                             if T[l]*h in T and Order(x*T[l]*h) = 2 then
-                            
+
                                 s:=T[l]; Append(KnownInnerProducts,[[j,k+t+u],[k+t+u,j]]); l:=t+1; m:=1;
-                                
+
                                 if x*s*h in T then
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}), (a_t, a_{sh^2}) and (a_t, a_{sh^3})
 
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                         od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [s,x*s*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [s,x*s*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1630,14 +1630,14 @@ function(G,T)
 
                                     # Need to know values of (a_t,a_s), (a_t, a_{sh^2}) and (a_t, a_{sh^3})
 
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1656,14 +1656,14 @@ function(G,T)
             od;
             l:=1;
 
-            # (2,5) values 
+            # (2,5) values
 
             for j in [1..t] do
                 for k in [1 .. w] do
                     x:=T[j]; h:=5AaxesFixed[k][1];
-                    
-                    
-                    
+
+
+
                     if x*h in T then
 
                         # D10
@@ -1678,27 +1678,27 @@ function(G,T)
 
                     else
                         l:=1;
-                        while l<t+1 do      
+                        while l<t+1 do
                             if T[l]*h in T and Order(x*T[l]*h) = 2 then
                                 s:=T[l]; Append(KnownInnerProducts,[[j,k+t+u+v],[k+t+u+v,j]]); l:=t+1; m:=1;
                                 if x*s*h in T then
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}), (a_t, a_{sh^2}), (a_t, a_{sh^3}) and (a_t, a_{sh^4})
 
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [s,x*s*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [s,x*s*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h*h*h] in Orbitals[m] then str5:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h*h*h] in Orbitals[m] then str5:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
 
 
@@ -1713,17 +1713,17 @@ function(G,T)
 
                                     # Need to know values of (a_t,a_s), (a_t, a_{sh^2}), (a_t, a_{sh^3}) and (a_t, a_{sh^4})
 
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do 
-                                        if [x,s*h*h*h*h] in Orbitals[m] then str5:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi; 
+                                    while m < SizeOrbitals+1  do
+                                        if [x,s*h*h*h*h] in Orbitals[m] then str5:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1756,8 +1756,8 @@ function(G,T)
                             x2:=Position(T,x*h*h);
                             x3:=Position(T,x*k);
                             x4:=Position(T,x*k*k);
-                            
-                            if [x1,t+n] in KnownInnerProducts and [x2,t+n] in KnownInnerProducts then 
+
+                            if [x1,t+n] in KnownInnerProducts and [x2,t+n] in KnownInnerProducts then
 
                                 GramMatrix[t+j][t+n]:= 64*( -3*GramMatrix[x1][t+n] + GramMatrix[x2][t+n])/135 + 2048*(GramMatrix[x1][x3] + GramMatrix[x1][x4])/1215 + 16/243;
                                 GramMatrix[t+n][t+j]:=GramMatrix[t+j][t+n];
@@ -1828,7 +1828,7 @@ function(G,T)
                             x6:=Position(T,x*k*k*k*k);
 
                             if ForAll([[x1,t+u+v+n],[x2,t+u+v+n]], x-> x in KnownInnerProducts) then
-                            
+
                                 l:=t+1;
 
                                 GramMatrix[t+j][t+u+v+n]:= 64*( -5*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n])/135 + 7*(GramMatrix[x1][x3] - GramMatrix[x1][x4] - GramMatrix[x1][x5] + GramMatrix[x1][x6])/270;
@@ -1855,7 +1855,7 @@ function(G,T)
                     while l < t+1 do
                         x:=T[l];
                         if x*h in T and x*k in T then
-                        
+
                             x1:=Position(T,x*h);
                             x2:=Position(T,x*h*h);
                             x3:=Position(T,x*h*h*h);
@@ -1917,7 +1917,7 @@ function(G,T)
                 od;
             od;
 
-            l:=1;       
+            l:=1;
 
             # (5,5) values
 
@@ -1935,9 +1935,9 @@ function(G,T)
                             x6:=Position(T,x*k*k);
                             x7:=Position(T,x*k*k*k);
                             x8:=Position(T,x*k*k*k*k);
-                            
+
                             if ForAll([[x1,t++v+n],[x2,t+u+v+n],[x3,t+u+v+n],[x4,t+u+v+n]],x -> x in KnownInnerProducts) then
-                                                            
+
                                 l:=t+1;
 
                                 GramMatrix[t+u+v+j][t+u+v+n]:= ( 25*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n] + GramMatrix[x3][t+u+v+n] + GramMatrix[x4][t+u+v+n])/4048+ 7*(GramMatrix[x1][x5] - GramMatrix[x1][x6] - GramMatrix[x1][x7]+ GramMatrix[x1][x8])/32;
@@ -1955,7 +1955,7 @@ function(G,T)
             od;
 
             # Redo 2,3 vals
-            
+
             ### Not really sure what this is, need to work out the theory again
 
 #           for j in [1..t] do
@@ -1967,46 +1967,46 @@ function(G,T)
 #                           s:=T[l];
 #                           if s*h in T then
 #                               if s*x in T then
-#                               
+#
 #                                   x1:=Position(T,s*x);;
-#                                   
+#
 #                                   if [x1,k] in KnownInnerProducts then
-#                                   
+#
 #                                       x2:=Position(T,s*h);
 #                                       x3:=Position(T,s*h^2);
-#                                       
+#
 #                                       GramMatrix[j][k]:=2/45 + 32*(GramMatrix[j][x2] + GramMatrix[j][x3] + GramMatrix[x1][x2] + GramMatrix[x1][x3])/45 - GramMatrix[x1][k];
 #                                       GramMatrix[k][j]:=GramMatrix[j][k];
-#                                       
+#
 #                                       Append(KnownInnerProducts,[[j,k],[k,j]]);
-#                                       
+#
 #                                       l:=t+1;
-#                                   else    
+#                                   else
 #                                       l:=l+1;
 #                                   fi;
 #                               elif Order(s*x) = 2 and not s*x in T then
-#                               
+#
 #                                   x2:=Position(T,s*h);
 #                                   x3:=Position(T,s*h^2);
-#                                   
+#
 #                                   GramMatrix[j][k]:= 32*(GramMatrix[x2][j] + GramMatrix[x3][j])/45;
 #                                   GramMatrix[k][j]:=GramMatrix[j][k];
-#                                   
+#
 #                                   Append(KnownInnerProducts,[[j,k],[k,j]]);
-#                                   
+#
 #                                   l:=t+1;
-#                               elif Order(s*x) = 3 then    
+#                               elif Order(s*x) = 3 then
 #                                   if GramMatrix[UnknownInnerProducts[j][1]][l] = 13/256 then
-#                                   
+#
 #                                       x1:=Position(3Aaxes,Group(x*s));
 #                                       x2:=Position(T,s*h);
 #                                       x3:=Position(T,s*h^2);
-#                                       
+#
 #                                       if [x1,k] in KnownInnerProducts and [x2,k] in KnownInnerProducts and  [x3,k] in KnownInnerProducts then
-#                                       
+#
 #                                           GramMatrix[j][k]:=1/36 - 27*GramMatrix[x1][k]/64 +3*(GramMatrix[x1][x2]+GramMatrix[x1][x2])/10 +32*(GramMatrix[j][x2]+GramMatrix[j][x3])/45;
 #                                           GramMatrix[k][j]:=GramMatrix[j][k];
-#                                           
+#
 #                                           Append(KnownInnerProducts,[[j,k],[k,j]]);
 #
 #                                           l:=t+1;
@@ -2023,15 +2023,15 @@ function(G,T)
 #                               l:=l+1;
 #                           fi;
 #                       od;
-#                   fi;         
+#                   fi;
 #               od;
 #           od;
 
-            
+
                                         ## STEP 5: MORE EVECS ##
 
-            # Find linearly independent subsets of eigenvectors 
-            
+            # Find linearly independent subsets of eigenvectors
+
             Dimensions:=[];
 
             for j in [1..t] do
@@ -2046,13 +2046,13 @@ function(G,T)
             # Use these eigenvectors and the fusion rules to find more
 
             switch:=0;
-            
+
             if ForAll(Dimensions,x->x=dim-1) then
                 switch:=1;
             fi;
-            
+
             NewEigenVectors:=NullMat(t,3);
-    
+
             for j in [1..t] do
                 for k in [1..3] do
                     NewEigenVectors[j][k]:=[];
@@ -2075,7 +2075,7 @@ function(G,T)
 
                             x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][1][l],AlgebraProducts,KnownAlgebraProducts);
 
-                            if x<> 0 then 
+                            if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> zeros and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
                                     Output[i]:=[Shape,"Error","Fusion of 0,0 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][1][l],KnownAlgebraProducts,AlgebraProducts];
                                     break;
@@ -2084,7 +2084,7 @@ function(G,T)
                             fi;
                         od;
                     od;
-                    
+
                     if Output[i] <> [] then
                         break;
                     fi;
@@ -2093,10 +2093,10 @@ function(G,T)
 
                     for k in [1..Size(EigenVectors[j][1])] do
                         for l in [1..Size(EigenVectors[j][2])] do
-                        
+
                             x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],AlgebraProducts,KnownAlgebraProducts);
 
-                            if x<> 0 then 
+                            if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> x/4 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
                                     Output[i]:=[Shape,"Error","Fusion of 0,1/4 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][2][l],KnownAlgebraProducts,AlgebraProducts];
                                     break;
@@ -2105,19 +2105,19 @@ function(G,T)
                             fi;
                         od;
                     od;
-                    
+
                     if Output[i] <> [] then
                         break;
                     fi;
 
-                    # 0,1/32 fusion     
+                    # 0,1/32 fusion
 
                     for k in [1..Size(EigenVectors[j][1])] do
                         for l in [1..Size(EigenVectors[j][3])] do
 
                             x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],AlgebraProducts,KnownAlgebraProducts);
 
-                            if x<> 0 then 
+                            if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> x/32 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
                                     Output[i]:=[Shape,"Error","Fusion of 0,1/32 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][3][l],KnownAlgebraProducts,AlgebraProducts];
                                     break;
@@ -2126,11 +2126,11 @@ function(G,T)
                             fi;
                         od;
                     od;
-                    
+
                     if Output[i] <> [] then
                         break;
                     fi;
-                    
+
                     # 1/4,1/32 fusion
 
                     for k in [1..Size(EigenVectors[j][2])] do
@@ -2138,7 +2138,7 @@ function(G,T)
 
                             x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts,KnownAlgebraProducts);
 
-                            if x<> 0 then 
+                            if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> x/32 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
                                     Output[i]:=[Shape,"Error","Fusion of 1/4,1/32 eigenvectors does not hold",j,EigenVectors[j][2][k],EigenVectors[j][3][l],KnownAlgebraProducts,AlgebraProducts];
                                     break;;
@@ -2147,11 +2147,11 @@ function(G,T)
                             fi;
                         od;
                     od;
-                        
+
                     if Output[i] <> [] then
                         break;
                     fi;
-                        
+
                     # 1/4,1/4 Fusion
 
                     for k in [1..Size(EigenVectors[j][2])] do
@@ -2172,17 +2172,17 @@ function(G,T)
                             fi;
                         od;
                     od;
-                    
+
                     if Output[i] <> [] then
                         break;
                     fi;
-                    
+
                     Append(EigenVectors[j][1],NewEigenVectors[j][1]);
                     Append(EigenVectors[j][2],NewEigenVectors[j][2]);
-                    Append(EigenVectors[j][3],NewEigenVectors[j][3]); 
-                    
+                    Append(EigenVectors[j][3],NewEigenVectors[j][3]);
+
                 od;
-                
+
                 if Output[i] <> [] then
                     break;
                 fi;
@@ -2198,7 +2198,7 @@ function(G,T)
                     Append(NewDimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
                 od;
 
-                if NewDimensions = Dimensions then 
+                if NewDimensions = Dimensions then
                     switch := 1;
                 elif ForAll(NewDimensions,x->x=dim-1) then
                     switch := 1;
@@ -2207,15 +2207,15 @@ function(G,T)
                 fi;
 
             od;
-            
+
             if Output[i] <> [] then
                 break;
             fi;
 
                                         ## STEP 6: MORE INNER PRODUCTS ##
-                                        
+
             UnknownInnerProducts:=[];
-            
+
             for j in [1..dim] do
                 for k in [j+1..dim] do
                     if not [j,k] in KnownInnerProducts then
@@ -2223,219 +2223,219 @@ function(G,T)
                     fi;
                 od;
             od;
-            
+
             # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
-            
+
             if Size(UnknownInnerProducts) > 0 then
-                
+
                 mat:=[];
                 vec:=[];
-                
-                for j in [1..t] do      
-                
+
+                for j in [1..t] do
+
                     # 1- eigenvectors and 0-eigenvectors
-                
+
                     for k in [1..Size(EigenVectors[j][1])] do
-                    
+
                         sum:=[];
-                            
+
                         Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-                    
-                        for m in [1..j] do 
-                            
-                            if [m,j] in KnownInnerProducts then 
+
+                        for m in [1..j] do
+
+                            if [m,j] in KnownInnerProducts then
                                 Add(sum,-EigenVectors[j][1][k][m]*GramMatrix[j][m]);
                             else
                                 mat[Size(mat)][Position(UnknownInnerProducts,[m,j])]:=EigenVectors[j][1][k][m];
                             fi;
-                            
+
                         od;
-                        
+
                         for m in [j+1..dim] do
-                            
-                            if [j,m] in KnownInnerProducts then 
+
+                            if [j,m] in KnownInnerProducts then
                                 Add(sum,-EigenVectors[j][1][k][m]*GramMatrix[j][m]);
                             else
                                 mat[Size(mat)][Position(UnknownInnerProducts,[j,m])]:=EigenVectors[j][1][k][m];
                             fi;
-                            
-                        od; 
-                        
-                        Add(vec,Sum(sum));
-                        
-                    od;
-                    
-                    # 1- eigenvectors and 1/4-eigenvectors
-                
-                    for k in [1..Size(EigenVectors[j][2])] do
-                    
-                        sum:=[];
-                            
-                        Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-                    
-                        for m in [1..j] do 
 
-                            if [m,j] in KnownInnerProducts then 
+                        od;
+
+                        Add(vec,Sum(sum));
+
+                    od;
+
+                    # 1- eigenvectors and 1/4-eigenvectors
+
+                    for k in [1..Size(EigenVectors[j][2])] do
+
+                        sum:=[];
+
+                        Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
+
+                        for m in [1..j] do
+
+                            if [m,j] in KnownInnerProducts then
                                 Add(sum,-EigenVectors[j][2][k][m]*GramMatrix[j][m]);
                             else
                                 mat[Size(mat)][Position(UnknownInnerProducts,[m,j])]:=EigenVectors[j][2][k][m];
                             fi;
-                            
+
                         od;
-                        
+
                         for m in [j+1..dim] do
-                            
-                            if [j,m] in KnownInnerProducts then 
+
+                            if [j,m] in KnownInnerProducts then
                                 Add(sum,-EigenVectors[j][2][k][m]*GramMatrix[j][m]);
                             else
                                 mat[Size(mat)][Position(UnknownInnerProducts,[j,m])]:=EigenVectors[j][2][k][m];
                             fi;
-                            
-                        od; 
-                        
+
+                        od;
+
                         Add(vec,Sum(sum));
-                        
+
                     od;
-                    
+
                     # 1- eigenvectors and 1/32-eigenvectors
-                
+
                     for k in [1..Size(EigenVectors[j][3])] do
-                    
+
                         sum:=[];
-                            
+
                         Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-                    
-                        for m in [1..j] do 
-                            
-                            if [m,j] in KnownInnerProducts then 
+
+                        for m in [1..j] do
+
+                            if [m,j] in KnownInnerProducts then
                                 Add(sum,-EigenVectors[j][3][k][m]*GramMatrix[j][m]);
                             else
                                 mat[Size(mat)][Position(UnknownInnerProducts,[m,j])]:=EigenVectors[j][3][k][m];
                             fi;
-                            
+
                         od;
-                        
+
                         for m in [j+1..dim] do
-                                                        
-                            if [j,m] in KnownInnerProducts then 
+
+                            if [j,m] in KnownInnerProducts then
                                 Add(sum,-EigenVectors[j][3][k][m]*GramMatrix[j][m]);
                             else
                                 mat[Size(mat)][Position(UnknownInnerProducts,[j,m])]:=EigenVectors[j][3][k][m];
                             fi;
-                            
-                        od; 
-                        
+
+                        od;
+
                         Add(vec,Sum(sum));
-                        
+
                     od;
-                    
+
                     # 0-eigenvectors and 1/4-eigenvectors
-                                
+
                     for k in [1..Size(EigenVectors[j][1])] do
                         for l in [1..Size(EigenVectors[j][2])] do
-                    
+
                             sum:=[];
                             Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-                                    
+
                             for m in [1..dim] do
-                                for n in [1..m] do 
-                                                                    
-                                    if [n,m] in KnownInnerProducts then 
+                                for n in [1..m] do
+
+                                    if [n,m] in KnownInnerProducts then
                                         Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n]*GramMatrix[m][n]);
                                     else
                                         mat[Size(mat)][Position(UnknownInnerProducts,[n,m])]:=EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n];
                                     fi;
-                                
+
                                 od;
-                                
+
                                 for n in [m+1..dim] do
-                                                            
-                                    if [m,n] in KnownInnerProducts then 
+
+                                    if [m,n] in KnownInnerProducts then
                                         Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n]*GramMatrix[m][n]);
                                     else
                                         mat[Size(mat)][Position(UnknownInnerProducts,[m,n])]:=EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n];
                                     fi;
                                 od;
-                            od; 
-                            
+                            od;
+
                             Add(vec,Sum(sum));
-                            
+
                         od;
-                    od;             
-                    
+                    od;
+
                     # 0-eigenvectors and 1/32-eigenvectors
-                                
+
                     for k in [1..Size(EigenVectors[j][1])] do
                         for l in [1..Size(EigenVectors[j][3])] do
-                    
+
                             sum:=[];
                             Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-                                    
+
                             for m in [1..dim] do
-                                for n in [1..m] do 
-                                                                    
-                                    if [n,m] in KnownInnerProducts then 
+                                for n in [1..m] do
+
+                                    if [n,m] in KnownInnerProducts then
                                         Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
                                     else
                                         mat[Size(mat)][Position(UnknownInnerProducts,[n,m])]:=EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n];
                                     fi;
-                                
+
                                 od;
-                                
+
                                 for n in [m+1..dim] do
-                                                            
-                                    if [m,n] in KnownInnerProducts then 
+
+                                    if [m,n] in KnownInnerProducts then
                                         Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
                                     else
                                         mat[Size(mat)][Position(UnknownInnerProducts,[m,n])]:=EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n];
                                     fi;
                                 od;
-                            od; 
-                            
+                            od;
+
                             Add(vec,Sum(sum));
-                            
+
                         od;
-                    od; 
-                            
+                    od;
+
                     # 1/4-eigenvectors and 1/32-eigenvectors
-                                
+
                     for k in [1..Size(EigenVectors[j][2])] do
                         for l in [1..Size(EigenVectors[j][3])] do
-                    
+
                             sum:=[];
                             Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-                                    
+
                             for m in [1..dim] do
-                                for n in [1..m] do 
-                                                                    
-                                    if [n,m] in KnownInnerProducts then 
+                                for n in [1..m] do
+
+                                    if [n,m] in KnownInnerProducts then
                                         Add(sum,-EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
                                     else
                                         mat[Size(mat)][Position(UnknownInnerProducts,[n,m])]:=EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n];
                                     fi;
-                                
+
                                 od;
-                                
+
                                 for n in [m+1..dim] do
-                                                            
-                                    if [m,n] in KnownInnerProducts then 
+
+                                    if [m,n] in KnownInnerProducts then
                                         Add(sum,-EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
                                     else
                                         mat[Size(mat)][Position(UnknownInnerProducts,[m,n])]:=EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n];
                                     fi;
                                 od;
-                            od; 
-                            
+                            od;
+
                             Add(vec,Sum(sum));
-                            
+
                         od;
-                    od; 
+                    od;
                 od;
-            
+
                 Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                 if Size(Solution) = 2 then
-                    if Size(Solution[2])>0 then 
+                    if Size(Solution[2])>0 then
                         Output[i]:=[Shape,"Fail","Missing inner product values",KnownInnerProducts,GramMatrix];
                     else
                         for k in [1..Size(Solution[1])] do
@@ -2447,17 +2447,17 @@ function(G,T)
                     fi;
                 else
                     Output[i]:=[Shape,"Error","Inconsistent system of unknown inner products"];
-                fi;     
+                fi;
             fi;
-                    
-            if Size(Output[i]) > 0 then 
+
+            if Size(Output[i]) > 0 then
                 break;
             fi;
-            
+
             # Check that GramMatrix matrix is pd
-        
+
             #~ L:=MAJORANA_LDLTDecomposition(GramMatrix);
-            
+
             #~ Diagonals:=[];
 
             #~ for j in [1..Size(GramMatrix)] do
@@ -2473,7 +2473,7 @@ function(G,T)
             #~ else
                 #~ LI:=1;
             #~ fi;
-            
+
             LI:=1;
 
 
@@ -2495,7 +2495,7 @@ function(G,T)
 
                 for j in [1..dim] do
                     AlgebraProducts[j]:=AlgebraProducts[j]{[1..dim]};
-                od; 
+                od;
 
                 for j in [1..Size(NullSp)] do
                     for k in [1..dim] do
@@ -2515,106 +2515,106 @@ function(G,T)
 
                 for j in [1..t] do
                     for k in [1..3] do
-                        for l in [1..Size(EigenVectors[j][k])] do 
+                        for l in [1..Size(EigenVectors[j][k])] do
                             for m in [1..Size(NullSp)] do
                                 EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim+ Size(NullSp) - m+1];
                             od;
                             EigenVectors[j][k][l]:=EigenVectors[j][k][l]{[1..dim]};
                         od;
                     od;
-                od; 
+                od;
             else
                 dim:=t+u+v+w;
             fi;
-                                
+
                                         ## STEP 7: MORE PRODUCTS II ##
-                                        
+
             # Check fusion and M1
-            
+
             ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
-            
+
             if Size(ErrorM1)>0 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M1 step 7",GramMatrix,KnownAlgebraProducts,AlgebraProducts,ErrorM1];
             fi;
-            
+
             ErrorFusion:=MAJORANA_Fusion(T,KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors);
-            
+
             if ForAny(ErrorFusion, x->Size(x) > 0) then
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules step 7",GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors,ErrorFusion];
                 break;
             fi;
-        
-                                        
+
+
             # Use eigenvectors to find more products
 
             for j in [1..t] do
-            
+
                 UnknownAlgebraProducts:=[];
-            
+
                 for k in [t+1..dim] do
-                    if not [j,k] in KnownAlgebraProducts then 
+                    if not [j,k] in KnownAlgebraProducts then
                         Add(UnknownAlgebraProducts,[j,k]);
                     fi;
                 od;
-            
+
                 if Size(UnknownAlgebraProducts) > 0 then
-                                
+
                     mat:=NullMat(Size(Union(EigenVectors[j][1],EigenVectors[j][2],EigenVectors[j][3])),Size(UnknownAlgebraProducts));
                     vec:=NullMat(Size(mat),dim);
 
                     for k in [1..Size(EigenVectors[j][1])] do
-                    
+
                         sum:=[];
 
                         for l in [1..dim] do
-                            if EigenVectors[j][1][k][l] <> 0 then 
+                            if EigenVectors[j][1][k][l] <> 0 then
                                 if [j,l] in KnownAlgebraProducts then
                                         Add(sum, EigenVectors[j][1][k][l]*AlgebraProducts[j][l]);
                                 else
                                     mat[k][Position(UnknownAlgebraProducts,[j,l])] := EigenVectors[j][1][k][l];
                                 fi;
-                            fi; 
+                            fi;
                         od;
-                        
+
                         x:=Sum(sum);
-                        
-                        if x <> 0 then 
+
+                        if x <> 0 then
                             vec[k]:= -x;
                         fi;
                     od;
 
                     for k in [1..Size(EigenVectors[j][2])] do
-                    
+
                         sum:=[];
-                        
+
                         for l in [1..dim] do
-                            if EigenVectors[j][2][k][l] <> 0 then 
+                            if EigenVectors[j][2][k][l] <> 0 then
                                 if [j,l] in KnownAlgebraProducts then
                                     Add(sum, EigenVectors[j][2][k][l]*AlgebraProducts[j][l]);
                                 else
                                     mat[k+Size(EigenVectors[j][1])][Position(UnknownAlgebraProducts,[j,l])] := EigenVectors[j][2][k][l];
                                 fi;
-                            fi; 
+                            fi;
                         od;
-                        
+
                         vec[k+Size(EigenVectors[j][1])]:= (-1)*Sum(sum) + EigenVectors[j][2][k]/4;
-                        
+
                     od;
 
                     for k in [1..Size(EigenVectors[j][3])] do
-                    
+
                         sum:=[];
-                                                
+
                         for l in [1..dim] do
-                            if EigenVectors[j][3][k][l] <> 0 then 
+                            if EigenVectors[j][3][k][l] <> 0 then
                                 if [j,l] in KnownAlgebraProducts then
                                     Add(sum, EigenVectors[j][3][k][l]*AlgebraProducts[j][l]);
                                 else
                                     mat[k+Size(EigenVectors[j][1])+Size(EigenVectors[j][2])][Position(UnknownAlgebraProducts,[j,l])] := EigenVectors[j][3][k][l];
                                 fi;
-                            fi; 
+                            fi;
                         od;
-                                            
+
                         vec[k+Size(EigenVectors[j][1])+Size(EigenVectors[j][2])]:= (-1)*Sum(sum) + EigenVectors[j][3][k]/32;
                     od;
 
@@ -2623,13 +2623,13 @@ function(G,T)
 
                     if Size(Solution) = 2 then
                             for k in [1..Size(Solution[1])] do
-                                if not k in Solution[2] then 
-                                                            
+                                if not k in Solution[2] then
+
                                     x:=UnknownAlgebraProducts[k][1]; y:=UnknownAlgebraProducts[k][2];
-                                    
+
                                     AlgebraProducts[x][y]:=Solution[1][k];
                                     AlgebraProducts[y][x]:=Solution[1][k];
-                                    
+
                                     Append(KnownAlgebraProducts,[[x,y],[y,x]]);
                                 fi;
                             od;
@@ -2639,11 +2639,11 @@ function(G,T)
                     fi;
                 fi;
             od;
-            
-            if Size(Output[i])>0 then 
+
+            if Size(Output[i])>0 then
                 break;
             fi;
-            
+
                                         ## STEP 8: RESURRECTION PRINCIPLE I ##
 
             # Use resurrection principle (Step 7 Seress)
@@ -2651,15 +2651,15 @@ function(G,T)
             UnknownAlgebraProducts:=[];
 
             for j in [1..t] do
-                for k in [j..dim] do    
-                    if not [j,k] in KnownAlgebraProducts then 
+                for k in [j..dim] do
+                    if not [j,k] in KnownAlgebraProducts then
                         Append(UnknownAlgebraProducts,[[j,k]]);
                     fi;
                 od;
             od;
 
             if Size(UnknownAlgebraProducts) > 0 then
-            
+
                 mat:=[];
                 vec:=[];
                 record:=[];
@@ -2674,18 +2674,18 @@ function(G,T)
                     Beta2:=[];
 
                     for k in [1..Size(EigenVectors[j][1])] do
-                        if Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t-1 then 
+                        if Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t-1 then
                             Append(Alpha,[k]);
                         elif Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t then
                             Append(Alpha2,[k]);
                         fi;
-                    od;     
+                    od;
 
                     for k in [1..Size(EigenVectors[j][2])] do
                         if Size(Positions(EigenVectors[j][2][k]{[t+1..dim]},0)) = dim-t then
                             Append(Beta2,[k]);
                         fi;
-                    od; 
+                    od;
 
                     for k in Alpha do
 
@@ -2693,8 +2693,8 @@ function(G,T)
 
                         l:=t+1;
 
-                        while l <= dim do 
-                            if EigenVectors[j][1][k][l] <> 0 then 
+                        while l <= dim do
+                            if EigenVectors[j][1][k][l] <> 0 then
                                 c:=l;
                                 l:=dim+1;
                             else
@@ -2703,7 +2703,7 @@ function(G,T)
                         od;
 
                         for l in [1..Size(EigenVectors[j][2])] do
-                            if Size(Positions(EigenVectors[j][2][l]{[t+1..dim]},0)) = dim-t-1 and EigenVectors[j][2][l][c] <>0 then 
+                            if Size(Positions(EigenVectors[j][2][l]{[t+1..dim]},0)) = dim-t-1 and EigenVectors[j][2][l][c] <>0 then
                                 Append(Beta,[l]);
                             fi;
                         od;
@@ -2719,7 +2719,7 @@ function(G,T)
 
                             ## first part
 
-                            for l in Alpha2 do  
+                            for l in Alpha2 do
 
                                 sum:=[];
                                 row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
@@ -2728,11 +2728,11 @@ function(G,T)
 
                                 x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,KnownAlgebraProducts);
 
-                                for n in [1..dim] do    
-                                    if x[n] <> 0 then 
+                                for n in [1..dim] do
+                                    if x[n] <> 0 then
                                         if [j,n] in KnownAlgebraProducts then
                                             Append(sum,-[AlgebraProducts[j][n]*x[n]]);
-                                        else    
+                                        else
                                             row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
                                         fi;
                                     fi;
@@ -2758,7 +2758,7 @@ function(G,T)
 
                             ## Second part
 
-                            for l in Beta2 do   
+                            for l in Beta2 do
 
                                 sum:=[];
                                 row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
@@ -2767,11 +2767,11 @@ function(G,T)
 
                                 x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,KnownAlgebraProducts);
 
-                                for n in [1..dim] do    
-                                    if x[n] <> 0 then 
+                                for n in [1..dim] do
+                                    if x[n] <> 0 then
                                         if [j,n] in KnownAlgebraProducts then
                                             Append(sum,-[AlgebraProducts[j][n]*x[n]]);
-                                        else    
+                                        else
                                             row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
                                         fi;
                                     fi;
@@ -2796,7 +2796,7 @@ function(G,T)
                                     Append(vec,[Sum(sum)+MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,KnownAlgebraProducts)/4 - x*a/4]);
                                     Append(record,[[2,j,k,l,m]]);
                                 fi;
-                            od; 
+                            od;
                         od;
                     od;
                 od;
@@ -2804,7 +2804,7 @@ function(G,T)
                 Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                 if Size(Solution)  = 2 then
-                    if Size(Solution[2]) = 0 then 
+                    if Size(Solution[2]) = 0 then
                         for k in [1..Size(UnknownAlgebraProducts)] do
                             x:=UnknownAlgebraProducts[k][1]; y:=UnknownAlgebraProducts[k][2];
                             AlgebraProducts[x][y]:=Solution[1][k];
@@ -2822,23 +2822,23 @@ function(G,T)
 
                                         ## STEP 9: MORE EVECS II ##
 
-            # Step 8 - check if we have full espace decomp, if not find it 
+            # Step 8 - check if we have full espace decomp, if not find it
 
             for j in [1..t] do
-                if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then 
+                if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then
                     mat:=[];
 
                     for k in [1..dim] do
                         Append(mat,[AlgebraProducts[j][k]]);
                     od;
 
-                    mat:=TransposedMat(mat);    
+                    mat:=TransposedMat(mat);
 
                     EigenVectors[j][1]:=MAJORANA_NullSpace(mat);
                     EigenVectors[j][2]:=MAJORANA_NullSpace(mat - IdentityMat(dim)/4);
                     EigenVectors[j][3]:=MAJORANA_NullSpace(mat - IdentityMat(dim)/32);
                     EigenVectors[j][4]:=MAJORANA_NullSpace(mat - IdentityMat(dim) );
-                    
+
                     if Size(EigenVectors[j][4]) <> 1 then
                         Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
                         break;
@@ -2848,7 +2848,7 @@ function(G,T)
                     fi;
                 fi;
             od;
-            
+
             if Size(Output[i]) > 0 then
                 break;
             fi;
@@ -2858,19 +2858,19 @@ function(G,T)
             # Check that eigenvectors obey the fusion rules
 
             ErrorFusion:=MAJORANA_Fusion(T,KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors);
-            
+
             if ForAny(ErrorFusion,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];
                 break;
             fi;
-            
+
             # Use resurrection principle
 
             UnknownAlgebraProducts:=[];
 
-            for j in [t+1..dim] do  
+            for j in [t+1..dim] do
                 for k in [j+1..dim] do
-                    if not [j,k] in KnownAlgebraProducts then 
+                    if not [j,k] in KnownAlgebraProducts then
                         Append(UnknownAlgebraProducts,[[j,k]]);
                     fi;
                 od;
@@ -2891,15 +2891,15 @@ function(G,T)
                     Beta2:=[];
 
                     for k in [1..Size(EigenVectors[j][1])] do
-                        if Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t-1 then 
+                        if Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t-1 then
                             Append(Alpha,[k]);
                         fi;
                         Append(Alpha2,[k]);
-                    od;     
+                    od;
 
                     for k in [1..Size(EigenVectors[j][2])] do
                         Append(Beta2,[k]);
-                    od; 
+                    od;
 
                     for k in Alpha do
 
@@ -2907,8 +2907,8 @@ function(G,T)
 
                         l:=t+1;
 
-                        while l <= dim do 
-                            if EigenVectors[j][1][k][l] <> 0 then 
+                        while l <= dim do
+                            if EigenVectors[j][1][k][l] <> 0 then
                                 c:= l;
                                 l:=dim+1;
                             else
@@ -2917,7 +2917,7 @@ function(G,T)
                         od;
 
                         for l in [1..Size(EigenVectors[j][2])] do
-                            if Size(Positions(EigenVectors[j][2][l]{[t+1..dim]},0)) = dim-t-1 and EigenVectors[j][2][l][c] <>0 then 
+                            if Size(Positions(EigenVectors[j][2][l]{[t+1..dim]},0)) = dim-t-1 and EigenVectors[j][2][l][c] <>0 then
                                 Append(Beta,[l]);
                             fi;
                         od;
@@ -2933,28 +2933,28 @@ function(G,T)
 
                             ## first part
 
-                            for l in Alpha2 do  
+                            for l in Alpha2 do
 
                                 sum:=[];
                                 row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
 
                                 # calculate unknowns
 
-                                for n in [1..c] do  
-                                    if EigenVectors[j][1][l][n] <> 0 then 
+                                for n in [1..c] do
+                                    if EigenVectors[j][1][l][n] <> 0 then
                                         if [n,c] in KnownAlgebraProducts then
                                             Append(sum,-[AlgebraProducts[c][n]*EigenVectors[j][1][l][n]/4]);
-                                        else    
+                                        else
                                             row[Position(UnknownAlgebraProducts,[n,c])]:=EigenVectors[j][1][l][n]/4;
                                         fi;
                                     fi;
                                 od;
 
-                                for n in [c+1..dim] do  
-                                    if EigenVectors[j][1][l][n] <> 0 then 
+                                for n in [c+1..dim] do
+                                    if EigenVectors[j][1][l][n] <> 0 then
                                         if [c,n] in KnownAlgebraProducts then
                                             Append(sum,-[AlgebraProducts[c][n]*EigenVectors[j][1][l][n]/4]);
-                                        else    
+                                        else
                                             row[Position(UnknownAlgebraProducts,[c,n])]:=EigenVectors[j][1][l][n]/4;
                                         fi;
                                     fi;
@@ -2974,28 +2974,28 @@ function(G,T)
 
                             ## Second part
 
-                            for l in Beta2 do   
+                            for l in Beta2 do
 
                                 sum:=[];
                                 row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
 
                                 # calculate unknowns
 
-                                for n in [1..c] do  
-                                    if EigenVectors[j][2][l][n] <> 0 then 
+                                for n in [1..c] do
+                                    if EigenVectors[j][2][l][n] <> 0 then
                                         if [n,c] in KnownAlgebraProducts then
                                             Append(sum,[AlgebraProducts[c][n]*EigenVectors[j][2][l][n]/4]);
-                                        else    
+                                        else
                                             row[Position(UnknownAlgebraProducts,[n,c])]:=-EigenVectors[j][2][l][n]/4;
                                         fi;
                                     fi;
                                 od;
 
-                                for n in [c+1..dim] do  
-                                    if EigenVectors[j][2][l][n] <> 0 then 
+                                for n in [c+1..dim] do
+                                    if EigenVectors[j][2][l][n] <> 0 then
                                         if [c,n] in KnownAlgebraProducts then
                                             Append(sum,[AlgebraProducts[c][n]*EigenVectors[j][2][l][n]/4]);
-                                        else    
+                                        else
                                             row[Position(UnknownAlgebraProducts,[c,n])]:=-EigenVectors[j][2][l][n]/4;
                                         fi;
                                     fi;
@@ -3016,7 +3016,7 @@ function(G,T)
                                     Append(vec,[Sum(sum)]);
                                     Append(record,[[2,j,k,l,m]]);
                                 fi;
-                            od; 
+                            od;
                         od;
                     od;
                 od;
@@ -3024,14 +3024,14 @@ function(G,T)
                 Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                 if Size(Solution)  = 2 then
-                    if Size(Solution[2]) = 0 then 
+                    if Size(Solution[2]) = 0 then
                         for k in [1..Size(UnknownAlgebraProducts)] do
-                        
+
                             x:=UnknownAlgebraProducts[k][1]; y:=UnknownAlgebraProducts[k][2];
-                            
+
                             AlgebraProducts[x][y]:=Solution[1][k];
                             AlgebraProducts[y][x]:=Solution[1][k];
-                            
+
                             Append(KnownAlgebraProducts,[[x,y],[y,x]]);
                         od;
                     else
@@ -3051,11 +3051,11 @@ function(G,T)
             if MAJORANA_PositiveDefinite(GramMatrix) <0 then
                 Output[i]:=[Shape,"Error","Gram Matrix is not positive definite",GramMatrix, AlgebraProducts, EigenVectors];
             fi;
-            
-            # Check that all triples obey axiom M1  
+
+            # Check that all triples obey axiom M1
 
             ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
-            
+
             if Size(ErrorM1)>0 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M1",GramMatrix,AlgebraProducts,ErrorM1];
             fi;
@@ -3068,7 +3068,7 @@ function(G,T)
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];
                 break;
             fi;
-            
+
             # Check that the eigenspaces are orthogonal
 
             ErrorOrthogonality:=MAJORANA_Orthogonality(T,KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors);
@@ -3077,26 +3077,26 @@ function(G,T)
                 Output[i]:=[Shape,"Error","Eigenspaces are not orthogonal with respect to the inner product",GramMatrix,AlgebraProducts,EigenVector,ErrorOrthogonality];
                 break;
             fi;
-            
+
             # Check M2
 
             ErrorM2:=MAJORANA_AxiomM2(KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts);
-            
-            if ErrorM2 = -1 then 
+
+            if ErrorM2 = -1 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M2",GramMatrix,AlgebraProducts,ErrorM2];
                 break;
             fi;
-            
+
             Output[i]:=[Shape,"Success",GramMatrix,AlgebraProducts,EigenVectors];
-            
+
             master:=0;
         od;
     od;
-    
+
     return Output;
-    
+
     end
-    
+
     );
 
 
