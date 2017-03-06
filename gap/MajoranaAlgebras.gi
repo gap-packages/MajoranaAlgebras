@@ -2452,25 +2452,25 @@ function(G,T)
                 break;
             fi;
 
-            # Check that GramMatrix matrix is pd
+            Check that GramMatrix matrix is pd
 
-            #~ L:=MAJORANA_LDLTDecomposition(GramMatrix);
+            L:=MAJORANA_LDLTDecomposition(GramMatrix);
 
-            #~ Diagonals:=[];
+            Diagonals:=[];
 
-            #~ for j in [1..Size(GramMatrix)] do
-                #~ Append(Diagonals,[L[2][j][j]]);
-            #~ od;
+            for j in [1..Size(GramMatrix)] do
+                Append(Diagonals,[L[2][j][j]]);
+            od;
 
-            #~ if ForAny(Diagonals, x->x<0) then
-                #~ Output[i]:=[Shape,"Error","The inner product is not positive definite",3Aaxes, 4Aaxes, 5Aaxes, GramMatrix];
-                #~ break;
-            #~ elif ForAny(Diagonals, x->x=0) then
-                #~ NullSp:=MAJORANA_NullSpace(GramMatrix);
-                #~ LI:=0;
-            #~ else
-                #~ LI:=1;
-            #~ fi;
+            if ForAny(Diagonals, x->x<0) then
+                Output[i]:=[Shape,"Error","The inner product is not positive definite",3Aaxes, 4Aaxes, 5Aaxes, GramMatrix];
+                break;
+            elif ForAny(Diagonals, x->x=0) then
+                NullSp:=MAJORANA_NullSpace(GramMatrix);
+                LI:=0;
+            else
+                LI:=1;
+            fi;
 
             LI:=1;
 
