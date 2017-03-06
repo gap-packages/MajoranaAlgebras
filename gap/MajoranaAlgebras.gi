@@ -2452,7 +2452,7 @@ function(G,T)
                 break;
             fi;
 
-            Check that GramMatrix matrix is pd
+            # Check that GramMatrix matrix is pd
 
             L:=MAJORANA_LDLTDecomposition(GramMatrix);
 
@@ -2471,9 +2471,6 @@ function(G,T)
             else
                 LI:=1;
             fi;
-
-            LI:=1;
-
 
             if LI=0 then
 
