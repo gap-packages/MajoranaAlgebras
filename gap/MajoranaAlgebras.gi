@@ -1353,7 +1353,7 @@ function(G,T)
             x:=MAJORANA_PositiveDefinite(GramMatrixT);
 
             if x = -1 then
-                Output[i]:=[Shape,"Error","Inner product not positive definite on A", GramMatrixT];
+                Output[i]:=[StructuralCopy(Shape),"Error","Inner product not positive definite on A", StructuralCopy(GramMatrixT)];
                 break;
             elif x = 0 then
                 NullSpT:=MAJORANA_NullSpace(GramMatrixT);
@@ -2075,7 +2075,7 @@ function(G,T)
 
                             if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> zeros and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
-                                    Output[i]:=[Shape,"Error","Fusion of 0,0 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][1][l],KnownAlgebraProducts,AlgebraProducts];
+                                    Output[i]:=[StructuralCopy(Shape),"Error","Fusion of 0,0 eigenvectors does not hold",StructuralCopy(j),StructuralCopy(EigenVectors[j][1][k]),StructuralCopy(EigenVectors[j][1][l]),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts)];
                                     break;
                                 fi;
                                 Add(NewEigenVectors[j][1],x);
@@ -2096,7 +2096,7 @@ function(G,T)
 
                             if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> x/4 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
-                                    Output[i]:=[Shape,"Error","Fusion of 0,1/4 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][2][l],KnownAlgebraProducts,AlgebraProducts];
+                                    Output[i]:=[StructuralCopy(Shape),"Error","Fusion of 0,1/4 eigenvectors does not hold",StructuralCopy(j),StructuralCopy(EigenVectors[j][1][k]),StructuralCopy(EigenVectors[j][2][l]),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts)];
                                     break;
                                 fi;
                                 Add(NewEigenVectors[j][2],x);
@@ -2117,7 +2117,7 @@ function(G,T)
 
                             if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> x/32 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
-                                    Output[i]:=[Shape,"Error","Fusion of 0,1/32 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][3][l],KnownAlgebraProducts,AlgebraProducts];
+                                    Output[i]:=[StructuralCopy(Shape),"Error","Fusion of 0,1/32 eigenvectors does not hold",StructuralCopy(j),StructuralCopy(EigenVectors[j][1][k]),StructuralCopy(EigenVectors[j][3][l]),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts)];
                                     break;
                                 fi;
                                 Add(NewEigenVectors[j][3],x);
@@ -2138,7 +2138,7 @@ function(G,T)
 
                             if x<> 0 then
                                 if MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> x/32 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
-                                    Output[i]:=[Shape,"Error","Fusion of 1/4,1/32 eigenvectors does not hold",j,EigenVectors[j][2][k],EigenVectors[j][3][l],KnownAlgebraProducts,AlgebraProducts];
+                                    Output[i]:=[StructuralCopy(Shape),"Error","Fusion of 1/4,1/32 eigenvectors does not hold",StructuralCopy(j),StructuralCopy(EigenVectors[j][2][k]),StructuralCopy(EigenVectors[j][3][l]),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts)];
                                     break;;
                                 fi;
                                 Add(NewEigenVectors[j][3],x);
@@ -2162,7 +2162,7 @@ function(G,T)
                                 if y <> 0 then
                                     z:=x-y*a;
                                     if MAJORANA_AlgebraProduct(a,z,AlgebraProducts,KnownAlgebraProducts) <> zeros and MAJORANA_AlgebraProduct(a,x,AlgebraProducts,KnownAlgebraProducts) <> 0 then
-                                        Output[i]:=[Shape,"Error","Fusion of 1/4,1/4 eigenvectors does not hold",j,EigenVectors[j][1][k],EigenVectors[j][1][l],KnownAlgebraProducts,AlgebraProducts,KnownInnerProducts,GramMatrix];
+                                        Output[i]:=[StructuralCopy(Shape),"Error","Fusion of 1/4,1/4 eigenvectors does not hold",StructuralCopy(j),StructuralCopy(EigenVectors[j][1][k]),StructuralCopy(EigenVectors[j][1][l]),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts),StructuralCopy(KnownInnerProducts),StructuralCopy(GramMatrix)];
                                     break;
                                     fi;
                                     Add(NewEigenVectors[j][1],z);
@@ -2434,7 +2434,7 @@ function(G,T)
 
                 if Size(Solution) = 2 then
                     if Size(Solution[2])>0 then
-                        Output[i]:=[Shape,"Fail","Missing inner product values",KnownInnerProducts,GramMatrix];
+                        Output[i]:=[StructuralCopy(Shape),"Fail","Missing inner product values",StructuralCopy(KnownInnerProducts),StructuralCopy(GramMatrix)];
                     else
                         for k in [1..Size(Solution[1])] do
                             x:=UnknownInnerProducts[k][1]; y:=UnknownInnerProducts[k][2];
@@ -2444,7 +2444,7 @@ function(G,T)
                         od;
                     fi;
                 else
-                    Output[i]:=[Shape,"Error","Inconsistent system of unknown inner products"];
+                    Output[i]:=[StructuralCopy(Shape),"Error","Inconsistent system of unknown inner products"];
                 fi;
             fi;
 
@@ -2463,7 +2463,7 @@ function(G,T)
             od;
 
             if ForAny(Diagonals, x->x<0) then
-                Output[i]:=[Shape,"Error","The inner product is not positive definite",3Aaxes, 4Aaxes, 5Aaxes, GramMatrix];
+                Output[i]:=[StructuralCopy(Shape),"Error","The inner product is not positive definite",StructuralCopy(3Aaxes), StructuralCopy(4Aaxes), StructuralCopy(5Aaxes), StructuralCopy(GramMatrix)];
                 break;
             elif ForAny(Diagonals, x->x=0) then
                 NullSp:=MAJORANA_NullSpace(GramMatrix);
@@ -2529,13 +2529,13 @@ function(G,T)
             ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
 
             if Size(ErrorM1)>0 then
-                Output[i]:=[Shape,"Error","Algebra does not obey axiom M1 step 7",GramMatrix,KnownAlgebraProducts,AlgebraProducts,ErrorM1];
+                Output[i]:=[StructuralCopy(Shape),"Error","Algebra does not obey axiom M1 step 7",StructuralCopy(GramMatrix),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts),StructuralCopy(ErrorM1)];
             fi;
 
             ErrorFusion:=MAJORANA_Fusion(T,KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors);
 
             if ForAny(ErrorFusion, x->Size(x) > 0) then
-                Output[i]:=[Shape,"Error","Algebra does not obey fusion rules step 7",GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors,ErrorFusion];
+                Output[i]:=[StructuralCopy(Shape),"Error","Algebra does not obey fusion rules step 7",StructuralCopy(GramMatrix),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts),StructuralCopy(EigenVectors),StructuralCopy(ErrorFusion)];
                 break;
             fi;
 
@@ -2629,7 +2629,7 @@ function(G,T)
                                 fi;
                             od;
                     else
-                        Output[i]:=[Shape,"Error","Inconsistent system of unknown algebra products step 7",GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors,mat,vec,Solution,UnknownAlgebraProducts];
+                        Output[i]:=[StructuralCopy(Shape),"Error","Inconsistent system of unknown algebra products step 7",StructuralCopy(GramMatrix),StructuralCopy(KnownAlgebraProducts),StructuralCopy(AlgebraProducts),StructuralCopy(EigenVectors),StructuralCopy(mat),StructuralCopy(vec),StructuralCopy(Solution),StructuralCopy(UnknownAlgebraProducts)];
                         break;
                     fi;
                 fi;
@@ -2808,10 +2808,12 @@ function(G,T)
                         od;
                     else
                         Output[i]:=[Shape,"Fail","Missing algebra product values",GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors];
+                        Output[i]:=StructuralCopy(Output[i]);
                         break;
                     fi;
                 else
                     Output[i]:=[Shape,"Error","Inconsistent system of unknown algebra products"];
+                    Output[i]:=StructuralCopy(Output[i]);
                 fi;
             fi;
 
@@ -2836,9 +2838,11 @@ function(G,T)
 
                     if Size(EigenVectors[j][4]) <> 1 then
                         Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
+                        Output[i]:=StructuralCopy(Output[i]);
                         break;
                     elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) <> dim then
                         Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
+                        Output[i]:=StructuralCopy(Output[i]);
                         break;
                     fi;
                 fi;
@@ -2856,6 +2860,7 @@ function(G,T)
 
             if ForAny(ErrorFusion,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];
+                Output[i]:=StructuralCopy(Output[i]);
                 break;
             fi;
 
@@ -3031,10 +3036,12 @@ function(G,T)
                         od;
                     else
                         Output[i]:=[Shape,"Fail","Missing algebra products",GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors];
+                        Output[i]:=StructuralCopy(Output[i]);
                         break;
                     fi;
                 else
                     Output[i]:=[Shape,"Error","Inconsistent system of unknown algebra products",GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors];
+                    Output[i]:=StructuralCopy(Output[i]);
                     break;
                 fi;
             fi;
@@ -3045,6 +3052,7 @@ function(G,T)
 
             if MAJORANA_PositiveDefinite(GramMatrix) <0 then
                 Output[i]:=[Shape,"Error","Gram Matrix is not positive definite",GramMatrix, AlgebraProducts, EigenVectors];
+                Output[i]:=StructuralCopy(Output[i]);
             fi;
 
             # Check that all triples obey axiom M1
@@ -3053,6 +3061,7 @@ function(G,T)
 
             if Size(ErrorM1)>0 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M1",GramMatrix,AlgebraProducts,ErrorM1];
+                Output[i]:=StructuralCopy(Output[i]);
             fi;
 
             # Check that eigenvectors obey the fusion rules
@@ -3061,6 +3070,7 @@ function(G,T)
 
             if ForAny(ErrorFusion,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];
+                Output[i]:=StructuralCopy(Output[i]);
                 break;
             fi;
 
@@ -3070,6 +3080,7 @@ function(G,T)
 
             if ForAny(ErrorOrthogonality,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Eigenspaces are not orthogonal with respect to the inner product",GramMatrix,AlgebraProducts,EigenVector,ErrorOrthogonality];
+                Output[i]:=StructuralCopy(Output[i]);
                 break;
             fi;
 
@@ -3079,10 +3090,12 @@ function(G,T)
 
             if ErrorM2 = -1 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M2",GramMatrix,AlgebraProducts,ErrorM2];
+                Output[i]:=StructuralCopy(Output[i]);
                 break;
             fi;
 
             Output[i]:=[Shape,"Success",GramMatrix,AlgebraProducts,EigenVectors];
+            Output[i]:=StructuralCopy(Output[i]);
 
             master:=0;
         od;
