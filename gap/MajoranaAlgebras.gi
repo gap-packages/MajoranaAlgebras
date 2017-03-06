@@ -410,7 +410,7 @@ InstallGlobalFunction(	MAJORANA_InnerProduct,
 		
 	);
 	
-InstallGlobalFunction(MAJORANA_PositiveDefinite
+InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
 		function(GramMatrix) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
 	
@@ -702,7 +702,7 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
 		
 		);
 
-InstallGlobalFunction(Form
+InstallGlobalFunction(MAJORANA_Form,
 
 		function(str) # Outputs value of bilinear product depending on shape of orbital
 		
@@ -734,7 +734,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T) 
 
 	local 	# function names
-			MAJORANA_AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality, 
+			AlgebraProduct, InnerProduct, Fusion, PositiveDefinite, AxiomM1, AxiomM2, Orthogonality, 
 			
 			# error checking
 			ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
@@ -1545,7 +1545,7 @@ function(G,T)
 
 									# Use values to work out inner product
 
-									GramMatrix[j][k+t] := (64/135)*(-2*Form(str1) + 4*Form(str2) + Form(str3)) + 1/45;
+									GramMatrix[j][k+t] := (64/135)*(-2*MAJORANA_Form(str1) + 4*MAJORANA_Form(str2) + MAJORANA_Form(str3)) + 1/45;
 									GramMatrix[k+t][j]:=GramMatrix[j][k+t];
 
 									Append(KnownInnerProducts,[[j,k+t],[k+t,j]]);
@@ -1563,7 +1563,7 @@ function(G,T)
 
 									# Use values to work out inner product
 
-									GramMatrix[j][k+t] := (64/135)*(2*Form(str1) + Form(str3));
+									GramMatrix[j][k+t] := (64/135)*(2*MAJORANA_Form(str1) + MAJORANA_Form(str3));
 									GramMatrix[k+t][j]:=GramMatrix[j][k+t];
 
 									Append(KnownInnerProducts,[[j,k+t],[k+t,j]]);
@@ -1621,7 +1621,7 @@ function(G,T)
 
 									# Use values to work out inner product
 
-									GramMatrix[j][k+t+u] := ( - 5*Form(str1) + Form(str2) +Form(str3) + 8*Form(str4))/3 +1/24;
+									GramMatrix[j][k+t+u] := ( - 5*MAJORANA_Form(str1) + MAJORANA_Form(str2) +MAJORANA_Form(str3) + 8*MAJORANA_Form(str4))/3 +1/24;
 									GramMatrix[k+t+u][j]:=GramMatrix[j][k+t+u];
 
 									Append(KnownInnerProducts,[[j,k+t+u],[k+t+u,j]]);
@@ -1642,7 +1642,7 @@ function(G,T)
 
 									# Use values to work out inner product
 
-									GramMatrix[j][k+t+u] := (3*Form(str1) + Form(str2) + 2*Form(str3))/3;
+									GramMatrix[j][k+t+u] := (3*MAJORANA_Form(str1) + MAJORANA_Form(str2) + 2*MAJORANA_Form(str3))/3;
 									GramMatrix[k+t+u][j]:=GramMatrix[j][k+t+u];
 
 									Append(KnownInnerProducts,[[j,k+t+u],[k+t+u,j]]);
@@ -1704,7 +1704,7 @@ function(G,T)
 
 									# Use values to work out inner product
 
-									GramMatrix[j][k+t+u+v] := (13*Form(str1) - Form(str2))/8 + (Form(str3) +Form(str4) +Form(str5))/128 -1/2048;
+									GramMatrix[j][k+t+u+v] := (13*MAJORANA_Form(str1) - MAJORANA_Form(str2))/8 + (MAJORANA_Form(str3) +MAJORANA_Form(str4) +MAJORANA_Form(str5))/128 -1/2048;
 									GramMatrix[k+t+u+v][j]:=GramMatrix[j][k+t+u+v];
 
 									Append(KnownInnerProducts,[[j,k+t+u+v],[k+t+u+v,j]]);
@@ -1728,7 +1728,7 @@ function(G,T)
 
 									# Use values to work out inner product
 
-									GramMatrix[j][k+t+u+v] := (-3*Form(str1) + Form(str3) +Form(str4) +Form(str5))/128;
+									GramMatrix[j][k+t+u+v] := (-3*MAJORANA_Form(str1) + MAJORANA_Form(str3) +MAJORANA_Form(str4) +MAJORANA_Form(str5))/128;
 									GramMatrix[k+t+u+v][j]:=GramMatrix[j][k+t+u+v];
 
 									Append(KnownInnerProducts,[[j,k+t+u+v],[k+t+u+v,j]]);

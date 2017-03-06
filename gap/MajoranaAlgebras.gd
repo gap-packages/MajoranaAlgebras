@@ -30,4 +30,6 @@ DeclareGlobalFunction( "MAJORANA_AxiomM2" );
 
 DeclareGlobalFunction( "MAJORANA_Orthogonality" );
 
+DeclareGlobalFunction( "MAJORANA_Form" );
+
 
