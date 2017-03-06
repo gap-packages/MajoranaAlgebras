@@ -13,3 +13,11 @@ BindGlobal("2XD8",function()
     return([G,T]);
     end
     );
+    
+BindGlobal("S5",function()
+    local G, T;
+    G:=SymmetricGroup(5);
+    T:=Filtered(AsList(G),x->Order(x) = 2);
+    return([G,T]);
+    end
+    );
