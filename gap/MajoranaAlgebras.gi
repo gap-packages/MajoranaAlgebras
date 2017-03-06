@@ -479,7 +479,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
         function(T,KnownInnerProducts,GramMatrix,KnownAlgebraProducts,AlgebraProducts,EigenVectors) # Checks if algebra obeys the fusion rules, outputs list of six lists which are empty if it does obey fusion rules
 
-        local errorfusion00, errorfusion02, errorfusion04, errorfusion22, errorfusion24, errorfusion44, a, t, j, k, l, x, y, z;
+        local errorfusion00, errorfusion02, errorfusion04, errorfusion22, errorfusion24, errorfusion44, a, t, j, k, l, x, y, z, x0;
 
         errorfusion00:=[];
         errorfusion02:=[];
