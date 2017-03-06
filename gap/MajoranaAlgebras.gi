@@ -2463,7 +2463,7 @@ function(G,T)
             od;
 
             if ForAny(Diagonals, x->x<0) then
-                Output[i]:=[StructuralCopy(Shape),"Error","The inner product is not positive definite",StructuralCopy(3Aaxes), StructuralCopy(4Aaxes), StructuralCopy(5Aaxes), StructuralCopy(GramMatrix)];
+                Output[i]:=[StructuralCopy(Shape),"Error","The inner product is not positive definite",StructuralCopy(3Aaxes), StructuralCopy(4Aaxes), StructuralCopy(5Aaxes), StructuralCopy(5AaxesFixed) StructuralCopy(GramMatrix)];
                 break;
             elif ForAny(Diagonals, x->x=0) then
                 NullSp:=MAJORANA_NullSpace(GramMatrix);
