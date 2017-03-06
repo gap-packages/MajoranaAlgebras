@@ -5,5 +5,7 @@
 #
 
 #! @Description
-#!   Insert documentation for you function here
-DeclareGlobalFunction( "MajoranaAlgebras_Example" );
+#!   Constructs a Majorana representation given a finite group <A>G</A> 
+#!   and a <A>G</A> invariant set of generating involutions <A>T</A>.
+#! @Arguments G, T
+DeclareGlobalFunction( "MajoranaRepresentation" );
