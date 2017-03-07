@@ -436,7 +436,9 @@ InstallGlobalFunction(MAJORANA_NullSpace,
         od;
 
         for j in [1..Size(basis)] do
-            basis[j]:=basis[j]/basis[j][m-j+1];
+            if basis[j][m-j+1] <> 0 then
+                basis[j]:=basis[j]/basis[j][m-j+1];
+            fi;
 
             for k in [1..j-1] do
                 basis[j]:=basis[j] - basis[j][m-k+1]*basis[k];
@@ -445,7 +447,7 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
         for j in [1..Size(basis)] do
             for k in [1..(Size(basis)-j)] do
-                basis[j]:=basis[j] - basis[j][m-k]*basis[m-k];
+                basis[j]:=basis[j] - basis[j][m-k]*basis[k+1];
             od;
         od;
 
