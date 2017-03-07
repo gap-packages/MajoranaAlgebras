@@ -2172,8 +2172,7 @@ function(G,T)
                                                  , StructuralCopy(j)
                                                  , StructuralCopy(EigenVectors[j][1][k])
                                                  , StructuralCopy(EigenVectors[j][1][l])
-                                                 , StructuralCopy(AlgebraProducts)
-                                                 , StructuralCopy(5AaxesFixed)];
+                                                 , StructuralCopy(AlgebraProducts)];
                                     break;
                                 fi;
                                 Add(NewEigenVectors[j][1],x);
