@@ -24,8 +24,91 @@ function(AlgebraProducts)
 end);
 
 
+BindGlobal("MAJORANA_FusionTable",
+           [ [    1,    0,   1/4, 1/32]
+            ,[    0,    0,   1/4, 1/32]
+            ,[  1/4,  1/4, [1,0], 1/32]
+            ,[ 1/32, 1/32,  1/32, []] ]);
 
+# This is the test function for fusion
+InstallGlobalFunction( MAJORANA_TestFusion,
+function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, KnownInnerProducts)
+    local u, zeros, x, y, z, k, l, NewEigenVectors, ev_a, ev_b, ev, table, dim;
 
+    table := [0, 1/4, 1/32];
+    ev := MAJORANA_FusionTable[a+1][b+1];
+    dim := Length(AlgebraProducts);
+
+    zeros := [1..dim] * 0;
+    u := ShallowCopy(zeros);
+    u[j] := 1;
+    NewEigenVectors := [];
+
+    ev_a := EigenVectors[j][a];
+    ev_b := EigenVectors[j][b];
+
+    # the 1/4,1/4 case is special
+    if (a=2) and (b=2) then
+        for k in [1..Size(ev_a)] do
+            for l in [1..Size(ev_b)] do
+
+                x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts );
+
+                if x <> 0 then
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, KnownInnerProducts);
+                    if y <> 0 then
+                        z := x - y*u;
+
+                        if MAJORANA_AlgebraProduct( u, x, AlgebraProducts) <> 0 and
+                           MAJORANA_AlgebraProduct( u, z, AlgebraProducts ) <> zeros then
+                            return [false, StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of ",
+                                                        table[a], ",", table[b],
+                                                        " eigenvectors does not hold" )
+                                           , j
+                                           , ev_a[k]
+                                           , ev_b[l]
+                                           , AlgebraProducts
+                                           , KnownInnerProducts
+                                           , GramMatrix ])];
+                        else
+                            Add(NewEigenVectors, z);
+                        fi;
+                    fi;
+                fi;
+            od;
+        od;
+    else
+        for k in [1..Size(ev_a)] do
+            for l in [1..Size(ev_b)] do
+
+                x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts );
+
+                if x <> 0 then
+                    if MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> 0 and
+                       MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> ev * x then
+                        Error("fusion error: ");
+                        
+                        return [false, StructuralCopy([ Shape
+                                       , "Error"
+                                       , STRINGIFY( "Fusion of ",
+                                                    table[a], ",", table[b],
+                                                    " eigenvectors does not hold" )
+                                       , j
+                                       , ev_a[k]
+                                       , ev_b[l]
+                                       , AlgebraProducts ])];
+                    else
+                        Add(NewEigenVectors, x);
+                    fi;
+                fi;
+            od;
+        od;
+    fi;
+
+    return [true, NewEigenVectors];
+end);
 
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
@@ -791,7 +874,8 @@ function(G,T)
             UnknownInnerProducts, mat, vec, sum, row, Solution,
 
             # Step 7 - More algebra products
-            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record;
+            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record,
+            fres;
 
 
                                             ## STEP 0: SETUP ##
@@ -2149,162 +2233,58 @@ function(G,T)
             od;
 
             while switch=0 do
-
                 for j in [1..t] do
-
-                    a:=NullMat(1,dim)[1]; a[j]:=1;
-                    zeros:=NullMat(1,dim)[1];
-
                     # 1, x fusion is a waste of time because a_0 obviously just preserves the evectors!
+                    Output[i] := [];
 
                     # 0,0 fusion
-
-                    for k in [1..Size(EigenVectors[j][1])] do
-                        for l in [1..Size(EigenVectors[j][1])] do
-
-                            x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][1][l],AlgebraProducts);
-
-                            if x<> 0 then
-                                if MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> zeros and MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> 0 then
-                                    Output[i] := [ StructuralCopy(Shape)
-                                                 , "Error"
-                                                 , "Fusion of 0,0 eigenvectors does not hold"
-                                                 , StructuralCopy(j)
-                                                 , StructuralCopy(EigenVectors[j][1][k])
-                                                 , StructuralCopy(EigenVectors[j][1][l])
-                                                 , StructuralCopy(AlgebraProducts)];
-                                    break;
-                                fi;
-                                Add(NewEigenVectors[j][1],x);
-                            fi;
-                        od;
-                    od;
-
-                    if Output[i] <> [] then
+                    fres := MAJORANA_TestFusion(1,1,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, KnownInnerProducts);
+                    if fres[1] then
+                        Append(NewEigenVectors[j][1], fres[2]);
+                    else
+                        Output[i] := fres[2];
                         break;
                     fi;
 
                     # 0,1/4 fusion
-
-                    for k in [1..Size(EigenVectors[j][1])] do
-                        for l in [1..Size(EigenVectors[j][2])] do
-
-                            x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],AlgebraProducts);
-
-                            if x<> 0 then
-                                if MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> x/4 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> 0 then
-                                    Output[i] := [ StructuralCopy(Shape)
-                                                 , "Error"
-                                                 , "Fusion of 0,1/4 eigenvectors does not hold"
-                                                 , StructuralCopy(j)
-                                                 , StructuralCopy(EigenVectors[j][1][k])
-                                                 , StructuralCopy(EigenVectors[j][2][l])
-                                                 , []
-                                                 , StructuralCopy(AlgebraProducts)];
-                                    break;
-                                fi;
-                                Add(NewEigenVectors[j][2],x);
-                            fi;
-                        od;
-                    od;
-
-                    if Output[i] <> [] then
+                    fres := MAJORANA_TestFusion(1,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, KnownInnerProducts);
+                    if fres[1] then
+                        Append(NewEigenVectors[j][2], fres[2]);
+                    else
+                        Output[i] := fres[2];
                         break;
                     fi;
 
                     # 0,1/32 fusion
-
-                    for k in [1..Size(EigenVectors[j][1])] do
-                        for l in [1..Size(EigenVectors[j][3])] do
-
-                            x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],AlgebraProducts);
-
-                            if x<> 0 then
-                                if MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> x/32 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> 0 then
-                                    Output[i] := [ StructuralCopy(Shape)
-                                                 , "Error"
-                                                 , "Fusion of 0,1/32 eigenvectors does not hold"
-                                                 , StructuralCopy(j)
-                                                 , StructuralCopy(EigenVectors[j][1][k])
-                                                 , StructuralCopy(EigenVectors[j][3][l])
-                                                 , [] # StructuralCopy(KnownAlgebraProducts)
-                                                 , StructuralCopy(AlgebraProducts)];
-                                    break;
-                                fi;
-                                Add(NewEigenVectors[j][3],x);
-                            fi;
-                        od;
-                    od;
-
-                    if Output[i] <> [] then
+                    fres := MAJORANA_TestFusion(1,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, KnownInnerProducts);
+                    if fres[1] then
+                        Append(NewEigenVectors[j][3], fres[2]);
+                    else
+                        Output[i] := fres[2];
                         break;
                     fi;
 
                     # 1/4,1/32 fusion
-
-                    for k in [1..Size(EigenVectors[j][2])] do
-                        for l in [1..Size(EigenVectors[j][3])] do
-
-                            x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts);
-
-                            if x<> 0 then
-                                if MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> x/32 and MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> 0 then
-                                    Output[i] := [ StructuralCopy(Shape)
-                                                 , "Error"
-                                                 , "Fusion of 1/4,1/32 eigenvectors does not hold"
-                                                 , StructuralCopy(j)
-                                                 , StructuralCopy(EigenVectors[j][2][k])
-                                                 , StructuralCopy(EigenVectors[j][3][l])
-                                                 , [] # StructuralCopy(KnownAlgebraProducts)
-                                                 , StructuralCopy(AlgebraProducts)];
-                                    break;;
-                                fi;
-                                Add(NewEigenVectors[j][3],x);
-                            fi;
-                        od;
-                    od;
-
-                    if Output[i] <> [] then
+                    fres := MAJORANA_TestFusion(2,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, KnownInnerProducts);
+                    if fres[1] then
+                        Append(NewEigenVectors[j][3], fres[2]);
+                    else
+                        Output[i] := fres[2];
                         break;
                     fi;
 
                     # 1/4,1/4 Fusion
-
-                    for k in [1..Size(EigenVectors[j][2])] do
-                        for l in [1..Size(EigenVectors[j][2])] do
-
-                            x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][2][l],AlgebraProducts);
-
-                            if x <> 0 then
-                                y:=MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts);
-                                if y <> 0 then
-                                    z:=x-y*a;
-                                    if MAJORANA_AlgebraProduct(a,z,AlgebraProducts) <> zeros and MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> 0 then
-                                        Output[i] := [ StructuralCopy(Shape)
-                                                     , "Error"
-                                                     , "Fusion of 1/4,1/4 eigenvectors does not hold"
-                                                     , StructuralCopy(j)
-                                                     , StructuralCopy(EigenVectors[j][1][k])
-                                                     , StructuralCopy(EigenVectors[j][1][l])
-                                                     , [] # StructuralCopy(KnownAlgebraProducts)
-                                                     , StructuralCopy(AlgebraProducts)
-                                                     , StructuralCopy(KnownInnerProducts),StructuralCopy(GramMatrix)];
-                                    break;
-                                    fi;
-                                    Add(NewEigenVectors[j][1],z);
-                                fi;
-                            fi;
-                        od;
-                    od;
-
-                    if Output[i] <> [] then
+                    fres := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, KnownInnerProducts);
+                    if fres[1] then
+                        Append(NewEigenVectors[j][1], fres[2]);
+                    else
+                        Output[i] := fres[2];
                         break;
                     fi;
 
                     Append(EigenVectors[j][1],NewEigenVectors[j][1]);
                     Append(EigenVectors[j][2],NewEigenVectors[j][2]);
                     Append(EigenVectors[j][3],NewEigenVectors[j][3]);
-
                 od;
 
                 if Output[i] <> [] then
