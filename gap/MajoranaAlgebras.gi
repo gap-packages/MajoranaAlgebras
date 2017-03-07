@@ -2227,6 +2227,7 @@ function(G,T)
 
                 mat:=[];
                 vec:=[];
+                record:=[];
 
                 for j in [1..t] do
 
@@ -2259,6 +2260,7 @@ function(G,T)
                         od;
 
                         Add(vec,[Sum(sum)]);
+                        Add(record,[1,j,k]);
 
                     od;
 
@@ -2291,6 +2293,7 @@ function(G,T)
                         od;
 
                         Add(vec,[Sum(sum)]);
+                        Add(record,[2,j,k]);
 
                     od;
 
@@ -2323,6 +2326,7 @@ function(G,T)
                         od;
 
                         Add(vec,[Sum(sum)]);
+                        Add(record,[3,j,k]);
 
                     od;
 
@@ -2356,6 +2360,7 @@ function(G,T)
                             od;
 
                             Add(vec,[Sum(sum)]);
+                            Add(record,[4,j,k,l]);
 
                         od;
                     od;
@@ -2390,6 +2395,7 @@ function(G,T)
                             od;
 
                             Add(vec,[Sum(sum)]);
+                            Add(record,[5,j,k,l]);
 
                         od;
                     od;
@@ -2424,6 +2430,7 @@ function(G,T)
                             od;
 
                             Add(vec,[Sum(sum)]);
+                            Add(record,[6,j,k,l]);
 
                         od;
                     od;
@@ -2443,7 +2450,7 @@ function(G,T)
                         od;
                     fi;
                 else
-                    Output[i]:=[Shape,"Error","Inconsistent system of unknown inner products",mat,vec];
+                    Output[i]:=[Shape,"Error","Inconsistent system of unknown inner products",mat,vec,record,EigenVectors,AlgebraProducts,GramMatrix,UnknownInnerProducts];
                     Output[i]:=StructuralCopy(Output[i]);
                 fi;
             fi;
