@@ -602,7 +602,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
                         y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
                         z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
                         x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts);
-                        
+
                         if x0 <> 0 and ForAny(x0, x -> x <> 0)  then
                             Add(errorfusion44,[j,k,l]);
                         fi;
@@ -976,10 +976,28 @@ function(G,T)
             od;
 
             # (2,2) products and eigenvectors from IPSS10
+
             for j in [1..(t+u+v)] do
-                GramMatrix[j][j]:=1;
                 AlgebraProducts[j][j][j]:=1;
             od;
+
+            for j in [1..t] do
+                GramMatrix[j][j]:=1;
+            od;
+
+            for j in [t+1..t+u] do
+                GramMatrix[j][j]:=8/5;
+            od;
+
+            for j in [t+u+1..t+u+v] do
+                GramMatrix[j][j]:=2;
+            od;
+
+            for j in [t+u+v+1..t+u+v+w] do
+                GramMatrix[j][j]:=125*7/2^(19);
+            od;
+
+
 
             # Add products of 5A axes with themselves
             for j in [1..w] do
