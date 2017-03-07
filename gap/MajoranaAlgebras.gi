@@ -474,18 +474,18 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     sum1:=[];
                     sum2:=[];
 
-                    for m in [1..dim] do
-						if AlgebraProducts[k][l] <> 0 then
-							if AlgebraProducts[k][l][m] <> 0 then
-								Append(sum1,[AlgebraProducts[k][l][m]*GramMatrix[j][m]]);
-							fi;
-						fi;
-						if AlgebraProducts[j][k] <> 0 then
-							if AlgebraProducts[j][k][m] <> 0 then
-								Append(sum2,[AlgebraProducts[j][k][m]*GramMatrix[m][l]]);
-							fi;
-						fi;
-                    od;
+                    if AlgebraProducts[k][l] <> 0 and AlgebraProducts[j][k] <> 0 then
+                        for m in [1..dim] do
+
+                            if AlgebraProducts[k][l][m] <> 0 then
+                                Append(sum1,[AlgebraProducts[k][l][m]*GramMatrix[j][m]]);
+                            fi;
+
+                            if AlgebraProducts[j][k][m] <> 0 then
+                                Append(sum2,[AlgebraProducts[j][k][m]*GramMatrix[m][l]]);
+                            fi;
+                        od;
+                    fi;
 
                     if Sum(sum1) <> Sum(sum2) then
                         Add(ErrorM1,[j,k,l]);
@@ -589,7 +589,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
                 for l in [1..Size(EigenVectors[j][3])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts);
                     if x <> 0 then
-						y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
+                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
                         if y <> 0 and y <> x/32 then
                             Add(errorfusion24,[j,k,l]);
                         fi;
@@ -978,7 +978,7 @@ function(G,T)
             # (2,2) products and eigenvectors from IPSS10
 
             for j in [1..(t+u+v)] do
-				AlgebraProducts[j][j]:=NullMat(1,dim)[1]; 
+                AlgebraProducts[j][j]:=NullMat(1,dim)[1];
                 AlgebraProducts[j][j][j]:=1;
             od;
 
@@ -1010,9 +1010,9 @@ function(G,T)
                     h:=5AaxesFixed[j][1];
                     if T[l]*h in T then
                         x:=T[l]; x1:=Position(T,x*h); x2:=Position(T,x*h*h); x3:=Position(T,x*h*h*h); x4:=Position(T,x*h*h*h*h);
-						
-						AlgebraProducts[t+u+v+j][t+u+v+j]:=NullMat(1,dim)[1]; 
-						
+
+                        AlgebraProducts[t+u+v+j][t+u+v+j]:=NullMat(1,dim)[1];
+
                         AlgebraProducts[t+u+v+j][t+u+v+j][l]:=175/524288;
                         AlgebraProducts[t+u+v+j][t+u+v+j][x1]:=175/524288;
                         AlgebraProducts[t+u+v+j][t+u+v+j][x2]:=175/524288;
@@ -1034,13 +1034,13 @@ function(G,T)
                 if Shape[j] = ['2','A'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
                         x2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]);
 
                         GramMatrix[x0][x1]:=1/8;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:= 1/8;
                         AlgebraProducts[x0][x1][x1]:= 1/8;
@@ -1066,9 +1066,9 @@ function(G,T)
                 if Shape[j] = ['2','B'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
                         x1:=Position(T,Orbitals[j][k][2]);
-                        
+
                         AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         EigenVector:=NullMat(1,dim)[1];
@@ -1082,28 +1082,28 @@ function(G,T)
                 if Shape[j] = ['3','A'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
+                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x3:=Position(3Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
 
                         GramMatrix[x0][x1]:=13/256;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:=1/16;
                         AlgebraProducts[x0][x1][x1]:=1/16;
                         AlgebraProducts[x0][x1][xm1]:=1/32;
                         AlgebraProducts[x0][x1][t+x3]:= - 135/2048;
-                        
-                        AlgebraProducts[x0][t+x3]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][t+x3]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][t+x3][x0]:=2/9;
                         AlgebraProducts[x0][t+x3][x1]:=-1/9;
                         AlgebraProducts[x0][t+x3][xm1]:=-1/9;
                         AlgebraProducts[x0][t+x3][t+x3]:=5/32;
-                        
-                        AlgebraProducts[t+x3][x0]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[t+x3][x0]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[t+x3][x0][x0]:=2/9;
                         AlgebraProducts[t+x3][x0][x1]:=-1/9;
@@ -1140,13 +1140,13 @@ function(G,T)
                 if Shape[j] = ['3','C'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
                         xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
 
                         GramMatrix[x0][x1]:=1/64;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:=1/64;
                         AlgebraProducts[x0][x1][x1]:=1/64;
@@ -1171,31 +1171,31 @@ function(G,T)
                 if Shape[j] = ['4','A'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
+                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
                         x4:=Position(4Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
 
                         GramMatrix[x0][x1]:=1/32;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:=3/64;
                         AlgebraProducts[x0][x1][x1]:=3/64;
                         AlgebraProducts[x0][x1][xm1]:=1/64;
                         AlgebraProducts[x0][x1][x2]:=1/64;
                         AlgebraProducts[x0][x1][t+u+x4]:= -3/64;
-                        
-                        AlgebraProducts[x0][t+u+x4]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][t+u+x4]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][t+u+x4][x0]:=5/16;
                         AlgebraProducts[x0][t+u+x4][x1]:=-1/8;
                         AlgebraProducts[x0][t+u+x4][xm1]:=-1/8;
                         AlgebraProducts[x0][t+u+x4][x2]:=-1/16;
                         AlgebraProducts[x0][t+u+x4][t+u+x4]:= 3/16;
-                        
-                        AlgebraProducts[t+u+x4][x0]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[t+u+x4][x0]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[t+u+x4][x0][x0]:=5/16;
                         AlgebraProducts[t+u+x4][x0][x1]:=-1/8;
@@ -1235,15 +1235,15 @@ function(G,T)
                 if Shape[j] = ['4','B'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
+                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
                         x4:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
 
                         GramMatrix[x0][x1]:=1/64;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:=1/64;
                         AlgebraProducts[x0][x1][x1]:=1/64;
@@ -1272,9 +1272,9 @@ function(G,T)
                 fi;
                 if Shape[j] = ['5','A'] then
                     for k in [1..Size(Orbitals[j])] do
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
+                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
                         xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x5:=Position(5Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
@@ -1286,8 +1286,8 @@ function(G,T)
                         fi;
 
                         GramMatrix[x0][x1]:=3/128;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:=3/128;
                         AlgebraProducts[x0][x1][x1]:=3/128;
@@ -1295,16 +1295,16 @@ function(G,T)
                         AlgebraProducts[x0][x1][x2]:=-1/128;
                         AlgebraProducts[x0][x1][xm2]:=-1/128;
                         AlgebraProducts[x0][x1][t+u+v+x5] := sign*1;
-                        
-                        AlgebraProducts[x0][t+u+v+x5]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][t+u+v+x5]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][t+u+v+x5][x1]:=sign*7/4096;
                         AlgebraProducts[x0][t+u+v+x5][xm1]:=sign*7/4096;
                         AlgebraProducts[x0][t+u+v+x5][x2]:=-sign*7/4096;
                         AlgebraProducts[x0][t+u+v+x5][xm2]:=-sign*7/4096;
                         AlgebraProducts[x0][t+u+v+x5][t+u+v+x5] := 7/32;
-                        
-                        AlgebraProducts[t+u+v+x5][x0]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[t+u+v+x5][x0]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[t+u+v+x5][x0][x1]:=sign*7/4096;
                         AlgebraProducts[t+u+v+x5][x0][xm1]:=sign*7/4096;
@@ -1362,18 +1362,18 @@ function(G,T)
                 if Shape[j] = ['6','A'] then
                     for k in [1..Size(Orbitals[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]); 
-                        x1:=Position(T,Orbitals[j][k][2]); 
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
+                        x0:=Position(T,Orbitals[j][k][1]);
+                        x1:=Position(T,Orbitals[j][k][2]);
+                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]); 
+                        xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
                         x3:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        x2A:=Position(T,(Orbitals[j][k][1]*Orbitals[j][k][2])^3); 
+                        x2A:=Position(T,(Orbitals[j][k][1]*Orbitals[j][k][2])^3);
                         x3A:=Position(3Aaxes,Group((Orbitals[j][k][1]*Orbitals[j][k][2])^2));
 
                         GramMatrix[x0][x1]:=5/256;
-                        
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[x0][x1][x0]:=1/64;
                         AlgebraProducts[x0][x1][x1]:=1/64;
@@ -1470,8 +1470,8 @@ function(G,T)
                 for j in [1..n] do
                     for k in [1..dim-n] do
                         for l in [1..dim-n] do
-							if AlgebraProducts[k][l] <> 0 then
-								AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSpT[j]*AlgebraProducts[k][l][dim-j+1];
+                            if AlgebraProducts[k][l] <> 0 then
+                                AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSpT[j]*AlgebraProducts[k][l][dim-j+1];
                             fi;
                         od;
                     od;
@@ -1479,9 +1479,9 @@ function(G,T)
 
                 for j in [1..dim] do
                     for k in [1..dim] do
-						if AlgebraProducts[j][k] <> 0 then
-							AlgebraProducts[j][k]:=AlgebraProducts[j][k]{Concatenation([1..t-n],[t+1..dim])};
-						fi;
+                        if AlgebraProducts[j][k] <> 0 then
+                            AlgebraProducts[j][k]:=AlgebraProducts[j][k]{Concatenation([1..t-n],[t+1..dim])};
+                        fi;
                     od;
                 od;
 
@@ -1538,17 +1538,17 @@ function(G,T)
                         xj:=Position(3Aaxes,Group(x*h*x));
                         xk:=Position(3Aaxes,Group(h*x*h*h*x*h*h));
                         xl:=Position(3Aaxes,Group(h*h*x*h*x*h));
-                        
-                        AlgebraProducts[j][k+t]:=NullMat(1,dim)[1]; 
+
+                        AlgebraProducts[j][k+t]:=NullMat(1,dim)[1];
 
                         AlgebraProducts[j][k+t][j]:=1/9;
                         AlgebraProducts[j][k+t][k+t]:=5/64;
                         AlgebraProducts[j][k+t][xj+t]:=3/64;
                         AlgebraProducts[j][k+t][xk+t]:=-1/16;
                         AlgebraProducts[j][k+t][xl+t]:=-1/16;
-                        
-                        AlgebraProducts[k+t][j]:=NullMat(1,dim)[1]; 
-                        
+
+                        AlgebraProducts[k+t][j]:=NullMat(1,dim)[1];
+
                         AlgebraProducts[k+t][j][j]:=1/9;
                         AlgebraProducts[k+t][j][k+t]:=5/64;
                         AlgebraProducts[k+t][j][xj+t]:=3/64;
@@ -1574,8 +1574,8 @@ function(G,T)
                             xj:=Position(3Aaxes,Group(x*h*x));
                             xk:=Position(3Aaxes,Group(h*h*x*h*x*h));
                             xl:=Position(3Aaxes,Group(h*x*h*x*h*h));
-                            
-                            AlgebraProducts[j][k+t]:=NullMat(1,dim)[1]; 
+
+                            AlgebraProducts[j][k+t]:=NullMat(1,dim)[1];
 
                             AlgebraProducts[j][k+t][j]:=1/45;
                             AlgebraProducts[j][k+t][k+t]:=1/64;
@@ -1588,7 +1588,7 @@ function(G,T)
                             AlgebraProducts[j][k+t][xj+t]:=-1/64;
                             AlgebraProducts[j][k+t][xk+t]:=1/64;
                             AlgebraProducts[j][k+t][xl+t]:=1/64;
-                            
+
                             AlgebraProducts[k+t][j]:=NullMat(1,dim)[1];
 
                             AlgebraProducts[k+t][j][j]:=1/45;
@@ -2629,18 +2629,18 @@ function(G,T)
                 for j in [1..Size(NullSp)] do
                     for k in [1..dim] do
                         for l in [1..dim] do
-							if AlgebraProducts[k][l] <> 0 then
-								AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSp[j]*AlgebraProducts[k][l][dim+Size(NullSp)-j+1];
-							fi;
+                            if AlgebraProducts[k][l] <> 0 then
+                                AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSp[j]*AlgebraProducts[k][l][dim+Size(NullSp)-j+1];
+                            fi;
                         od;
                     od;
                 od;
 
                 for j in [1..dim] do
                     for k in [1..dim] do
-						if AlgebraProducts[j][k] <> 0 then
-							AlgebraProducts[j][k]:=AlgebraProducts[j][k]{[1..dim]};
-						fi;
+                        if AlgebraProducts[j][k] <> 0 then
+                            AlgebraProducts[j][k]:=AlgebraProducts[j][k]{[1..dim]};
+                        fi;
                     od;
                 od;
 
