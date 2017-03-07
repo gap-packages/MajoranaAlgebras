@@ -1068,6 +1068,8 @@ function(G,T)
 
                         x0:=Position(T,Orbitals[j][k][1]); 
                         x1:=Position(T,Orbitals[j][k][2]);
+                        
+                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
 
                         EigenVector:=NullMat(1,dim)[1];
 
