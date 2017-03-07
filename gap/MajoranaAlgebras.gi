@@ -16,11 +16,11 @@ function(AlgebraProducts)
     for i in [1..dim] do
         for j in [1..dim] do
             if AlgebraProducts[i][j] = false then
-                Add(table, [i,j]);
+                Add(table, Set([i,j]));
             fi;
         od;
     od;
-    return table;
+    return AsSet(table);
 end);
 
 
@@ -54,15 +54,9 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix)
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts );
 
-<<<<<<< HEAD
                 if x <> false then
-                    y := MAJORANA_InnerProduct(u, x, GramMatrix, KnownInnerProducts);
-                    if y <> false then
-=======
-                if x <> 0 then
                     y := MAJORANA_InnerProduct(u, x, GramMatrix);
-                    if y <> 0 then
->>>>>>> Remove KnownInnerProduct table
+                    if y <> false then
                         z := x - y*u;
 
                         if MAJORANA_AlgebraProduct( u, x, AlgebraProducts) <> false and
@@ -2784,7 +2778,7 @@ function(G,T)
                              , StructuralCopy(ErrorM1)];
             fi;
 
-            ErrorFusion:=MAJORANA_Fusion(T,KnownInnerProducts,GramMatrix, AlgebraProducts,EigenVectors);
+            ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts,EigenVectors);
 
             if ForAny(ErrorFusion, x->Size(x) > 0) then
                 Output[i] := [ StructuralCopy(Shape)
