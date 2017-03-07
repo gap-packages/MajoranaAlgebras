@@ -54,12 +54,12 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, KnownInnerPr
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts );
 
-                if x <> 0 then
+                if x <> false then
                     y := MAJORANA_InnerProduct(u, x, GramMatrix, KnownInnerProducts);
-                    if y <> 0 then
+                    if y <> false then
                         z := x - y*u;
 
-                        if MAJORANA_AlgebraProduct( u, x, AlgebraProducts) <> 0 and
+                        if MAJORANA_AlgebraProduct( u, x, AlgebraProducts) <> false and
                            MAJORANA_AlgebraProduct( u, z, AlgebraProducts ) <> zeros then
                             return [false, StructuralCopy([ Shape
                                            , "Error"
@@ -85,11 +85,11 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, KnownInnerPr
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts );
 
-                if x <> 0 then
-                    if MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> 0 and
+                if x <> false then
+                    if MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> false and
                        MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> ev * x then
                         Error("fusion error: ");
-                        
+
                         return [false, StructuralCopy([ Shape
                                        , "Error"
                                        , STRINGIFY( "Fusion of ",
@@ -473,11 +473,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             if u[i] <> 0 then
                 for j in [1..Size(v)] do
                     if v[j] <> 0 then
-                        if basis[i][j] <> 0 then
+                        if basis[i][j] <> false then
                             Append(sum,[u[i]*v[j]*basis[i][j]]);
                         else
                             # cannot calculate product
-                            return 0;
+                            return false;
                         fi;
                     fi;
                 od;
@@ -559,14 +559,14 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     sum1:=[];
                     sum2:=[];
 
-                    if AlgebraProducts[k][l] <> 0 and AlgebraProducts[j][k] <> 0 then
+                    if AlgebraProducts[k][l] <> false and AlgebraProducts[j][k] <> false then
                         for m in [1..dim] do
 
-                            if AlgebraProducts[k][l][m] <> 0 then
+                            if AlgebraProducts[k][l][m] <> false then
                                 Append(sum1,[AlgebraProducts[k][l][m]*GramMatrix[j][m]]);
                             fi;
 
-                            if AlgebraProducts[j][k][m] <> 0 then
+                            if AlgebraProducts[j][k][m] <> false then
                                 Append(sum2,[AlgebraProducts[j][k][m]*GramMatrix[m][l]]);
                             fi;
                         od;
@@ -610,9 +610,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][1])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][1][l],AlgebraProducts);
-                    if x<>0 then
+                    if x <> false then
                         y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
-                        if y <> 0 then
+                        if y <> false then
                             if ForAny(y, z-> z <> 0) then
                                 Add(errorfusion00,[j,k,l]);
                             fi;
@@ -626,9 +626,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][2])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],AlgebraProducts);
-                    if x<>0 then
+                    if x<> false then
                         y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
-                        if y <> 0 and y <> x/4 then
+                        if y <> false and y <> x/4 then
                             Add(errorfusion02,[j,k,l]);
                         fi;
                     fi;
@@ -640,9 +640,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][3])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],AlgebraProducts);
-                    if x <> 0 then
+                    if x <> false then
                         y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
-                        if y <> 0 and y <> x/32 then
+                        if y <> false and y <> x/32 then
                             Add(errorfusion04,[j,k,l]);
                         fi;
                     fi;
@@ -654,13 +654,13 @@ InstallGlobalFunction(MAJORANA_Fusion,
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][2])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][2][l],AlgebraProducts);
-                    if x<>0 then
+                    if x<> false then
                         if MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts) <> [0] then
 
                             y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
                             z:=MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
 
-                            if z <> 0 and ForAny(z, x -> x <> 0)  then
+                            if z <> false and ForAny(z, x -> x <> 0)  then
                                 Add(errorfusion22,[j,k,l]);
                             fi;
                         fi;
@@ -673,33 +673,34 @@ InstallGlobalFunction(MAJORANA_Fusion,
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][3])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts);
-                    if x <> 0 then
+                    if x <> false then
                         y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
-                        if y <> 0 and y <> x/32 then
+                        if y <> false and y <> x/32 then
                             Add(errorfusion24,[j,k,l]);
                         fi;
                     fi;
                 od;
             od;
 
-            # 1/32,1/32 fusion
+            # 1/32,1/32 fusion ## I think this is mathematically wrong, need to look at again
 
-            for k in [1..Size(EigenVectors[j][3])] do
-                for l in [1..Size(EigenVectors[j][3])] do
-
-                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][3][k],EigenVectors[j][3][l],AlgebraProducts);
-
-                    if x <> 0 then
-                        y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
-                        z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
-                        x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts);
-
-                        if x0 <> 0 and ForAny(x0, x -> x <> 0)  then
-                            Add(errorfusion44,[j,k,l]);
-                        fi;
-                    fi;
-                od;
-            od;
+#            for k in [1..Size(EigenVectors[j][3])] do
+#                for l in [1..Size(EigenVectors[j][3])] do
+#
+#                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][3][k],EigenVectors[j][3][l],AlgebraProducts);
+#
+#                    if x <> false then
+#                        y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
+#                        
+#                        z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
+#                        x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts);
+#
+#                        if x0 <> false and ForAny(x0, x -> x <> 0)  then
+#                            Add(errorfusion44,[j,k,l]);
+#                        fi;
+#                    fi;
+#                od;
+#            od;
         od;
 
         return [errorfusion00,errorfusion02,errorfusion04,errorfusion22,errorfusion24,errorfusion44];
@@ -729,14 +730,14 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
             errorortho24:=[];
 
             for k in [1..Size(EigenVectors[j][1])] do
-                if MAJORANA_InnerProduct(EigenVectors[j][1][k],a,GramMatrix,KnownInnerProducts) <> 0 then
+                if MAJORANA_InnerProduct(EigenVectors[j][1][k],a,GramMatrix,KnownInnerProducts) <> false then
                     Append(errorortho01,[[j,k]]);
                 fi;
             od;
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][2])] do
-                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],GramMatrix,KnownInnerProducts) <> 0 then
+                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],GramMatrix,KnownInnerProducts) <> false then
                         Append(errorortho02,[[j,k,l]]);
                     fi;
                 od;
@@ -744,27 +745,27 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],GramMatrix,KnownInnerProducts) <> 0 then
+                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],GramMatrix,KnownInnerProducts) <> false then
                         Append(errorortho02,[[j,k,l]]);
                     fi;
                 od;
             od;
 
             for k in [1..Size(EigenVectors[j][2])] do
-                if MAJORANA_InnerProduct(EigenVectors[j][2][k],a,GramMatrix,KnownInnerProducts) <> 0 then
+                if MAJORANA_InnerProduct(EigenVectors[j][2][k],a,GramMatrix,KnownInnerProducts) <> false then
                     Append(errorortho12,[[j,k]]);
                 fi;
             od;
 
             for k in [1..Size(EigenVectors[j][3])] do
-                if MAJORANA_InnerProduct(EigenVectors[j][3][k],a,GramMatrix,KnownInnerProducts) <> 0 then
+                if MAJORANA_InnerProduct(EigenVectors[j][3][k],a,GramMatrix,KnownInnerProducts) <> false then
                     Append(errorortho14,[[j,k]]);
                 fi;
             od;
 
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                    if MAJORANA_InnerProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],GramMatrix,KnownInnerProducts) <> 0 then
+                    if MAJORANA_InnerProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],GramMatrix,KnownInnerProducts) <> false then
                         Append(errorortho24,[[j,k,l]]);
                     fi;
                 od;
@@ -1036,6 +1037,13 @@ function(G,T)
             # Set up algebra product matrix
 
             AlgebraProducts := NullMat(dim,dim);
+
+            for j in [1..dim] do
+                for k in [1..dim] do
+                    AlgebraProducts[j][k]:=false;
+                od;
+            od;
+
 
             # Set up eigenvector matrix
 
@@ -1556,7 +1564,7 @@ function(G,T)
                 for j in [1..n] do
                     for k in [1..dim-n] do
                         for l in [1..dim-n] do
-                            if AlgebraProducts[k][l] <> 0 then
+                            if AlgebraProducts[k][l] <> false then
                                 AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSpT[j]*AlgebraProducts[k][l][dim-j+1];
                             fi;
                         od;
@@ -1565,7 +1573,7 @@ function(G,T)
 
                 for j in [1..dim] do
                     for k in [1..dim] do
-                        if AlgebraProducts[j][k] <> 0 then
+                        if AlgebraProducts[j][k] <> false then
                             AlgebraProducts[j][k]:=AlgebraProducts[j][k]{Concatenation([1..t-n],[t+1..dim])};
                         fi;
                     od;
@@ -2611,7 +2619,7 @@ function(G,T)
                 for j in [1..Size(NullSp)] do
                     for k in [1..dim] do
                         for l in [1..dim] do
-                            if AlgebraProducts[k][l] <> 0 then
+                            if AlgebraProducts[k][l] <> false then
                                 AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSp[j]*AlgebraProducts[k][l][dim+Size(NullSp)-j+1];
                             fi;
                         od;
@@ -2620,7 +2628,7 @@ function(G,T)
 
                 for j in [1..dim] do
                     for k in [1..dim] do
-                        if AlgebraProducts[j][k] <> 0 then
+                        if AlgebraProducts[j][k] <> false then
                             AlgebraProducts[j][k]:=AlgebraProducts[j][k]{[1..dim]};
                         fi;
                     od;
@@ -2688,7 +2696,7 @@ function(G,T)
 
                         for l in [1..dim] do
                             if EigenVectors[j][1][k][l] <> 0 then
-                                if AlgebraProducts[j][l] <> 0 then
+                                if AlgebraProducts[j][l] <> false then
                                     Add(sum, EigenVectors[j][1][k][l]*AlgebraProducts[j][l]);
                                 else
                                     mat[k][Position(UnknownAlgebraProducts,[j,l])] := EigenVectors[j][1][k][l];
@@ -2709,7 +2717,7 @@ function(G,T)
 
                         for l in [1..dim] do
                             if EigenVectors[j][2][k][l] <> 0 then
-                                if AlgebraProducts[j][l] <> 0 then
+                                if AlgebraProducts[j][l] <> false then
                                     Add(sum, EigenVectors[j][2][k][l]*AlgebraProducts[j][l]);
                                 else
                                     mat[k+Size(EigenVectors[j][1])][Position(UnknownAlgebraProducts,[j,l])] := EigenVectors[j][2][k][l];
@@ -2727,7 +2735,7 @@ function(G,T)
 
                         for l in [1..dim] do
                             if EigenVectors[j][3][k][l] <> 0 then
-                                if AlgebraProducts[j][l] <> 0 then
+                                if AlgebraProducts[j][l] <> false then
                                     Add(sum, EigenVectors[j][3][k][l]*AlgebraProducts[j][l]);
                                 else
                                     mat[k+Size(EigenVectors[j][1])+Size(EigenVectors[j][2])][Position(UnknownAlgebraProducts,[j,l])] := EigenVectors[j][3][k][l];
@@ -2773,6 +2781,34 @@ function(G,T)
             fi;
 
                                         ## STEP 8: RESURRECTION PRINCIPLE I ##
+
+            # Check fusion and M1
+
+            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
+
+            if Size(ErrorM1)>0 then
+                Output[i] := [ StructuralCopy(Shape)
+                             , "Error"
+                             , "Algebra does not obey axiom M1 step 8"
+                             , StructuralCopy(GramMatrix)
+                             , [] # StructuralCopy(KnownAlgebraProducts)
+                             , StructuralCopy(AlgebraProducts)
+                             , StructuralCopy(ErrorM1)];
+            fi;
+
+            ErrorFusion:=MAJORANA_Fusion(T,KnownInnerProducts,GramMatrix, AlgebraProducts,EigenVectors);
+
+            if ForAny(ErrorFusion, x->Size(x) > 0) then
+                Output[i] := [ StructuralCopy(Shape)
+                             , "Error"
+                             , "Algebra does not obey fusion rules step 8"
+                             , StructuralCopy(GramMatrix)
+                             , []
+                             , StructuralCopy(AlgebraProducts)
+                             , StructuralCopy(EigenVectors)
+                             , StructuralCopy(ErrorFusion)];
+                break;
+            fi;
 
             # Use resurrection principle (Step 7 Seress)
 
@@ -2846,22 +2882,24 @@ function(G,T)
                                 # calculate lhs
 
                                 x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts);
-
-                                for n in [1..dim] do
-                                    if x[n] <> 0 then
-                                        if AlgebraProducts[j][n] <> 0 then
-                                            Append(sum,-[AlgebraProducts[j][n]*x[n]]);
-                                        else
-                                            row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
-                                        fi;
-                                    fi;
-                                od;
+								
+								if x <> false then
+									for n in [1..dim] do
+										if x[n] <> 0 then
+											if AlgebraProducts[j][n] <> false then
+												Append(sum,-[AlgebraProducts[j][n]*x[n]]);
+											else
+												row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
+											fi;
+										fi;
+									od;
+								fi;
 
                                 # calculate rhs
 
                                 for n in [1..t] do
                                     if EigenVectors[j][1][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> 0 then
+                                        if AlgebraProducts[n][c] <> false then
                                             Append(sum,[-EigenVectors[j][1][l][n]*AlgebraProducts[n][c]/4]);
                                         else
                                             row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][1][l][n]/4;
@@ -2885,22 +2923,24 @@ function(G,T)
                                 # calculate lhs
 
                                 x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts);
-
-                                for n in [1..dim] do
-                                    if x[n] <> 0 then
-                                        if AlgebraProducts[j][n] <> 0 then
-                                            Append(sum,-[AlgebraProducts[j][n]*x[n]]);
-                                        else
-                                            row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
-                                        fi;
-                                    fi;
-                                od;
+                                
+								if x <> false then
+									for n in [1..dim] do
+										if x[n] <> 0 then
+											if AlgebraProducts[j][n] <> 0 then
+												Append(sum,-[AlgebraProducts[j][n]*x[n]]);
+											else
+												row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
+											fi;
+										fi;
+									od;
+								fi;
 
                                 # calculate rhs
 
                                 for n in [1..t] do
                                     if EigenVectors[j][2][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> 0 then
+                                        if AlgebraProducts[n][c] <> false then
                                             Append(sum,[EigenVectors[j][2][l][n]*AlgebraProducts[n][c]/4]);
                                         else
                                             row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][2][l][n]/4;
@@ -2910,7 +2950,7 @@ function(G,T)
 
                                 x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix,KnownInnerProducts);
 
-                                if x<>0 then
+                                if x<> false then
                                     Append(mat,[row]);
                                     Append(vec,[Sum(sum)+MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts)/4 - x*a/4]);
                                     Append(record,[[2,j,k,l,m]]);
@@ -2935,10 +2975,14 @@ function(G,T)
                         break;
                     fi;
                 else
-                    Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products"];
+                    Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
                     Output[i] := StructuralCopy(Output[i]);
+                    # Error("Inconsistent system of unknown algebra products");
+                    break;
                 fi;
             fi;
+
+
 
                                         ## STEP 9: MORE EVECS II ##
 
@@ -3057,7 +3101,7 @@ function(G,T)
 
                                 for n in [1..c] do
                                     if EigenVectors[j][1][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> 0 then
+                                        if AlgebraProducts[n][c] <> false then
                                             Append(sum,-[AlgebraProducts[c][n]*EigenVectors[j][1][l][n]/4]);
                                         else
                                             row[Position(UnknownAlgebraProducts,[n,c])]:=EigenVectors[j][1][l][n]/4;
@@ -3067,7 +3111,7 @@ function(G,T)
 
                                 for n in [c+1..dim] do
                                     if EigenVectors[j][1][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> 0 then
+                                        if AlgebraProducts[n][c] <> false then
                                             Append(sum,-[AlgebraProducts[c][n]*EigenVectors[j][1][l][n]/4]);
                                         else
                                             row[Position(UnknownAlgebraProducts,[c,n])]:=EigenVectors[j][1][l][n]/4;
@@ -3098,7 +3142,7 @@ function(G,T)
 
                                 for n in [1..c] do
                                     if EigenVectors[j][2][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> 0 then
+                                        if AlgebraProducts[n][c] <> false then
                                             Append(sum,[AlgebraProducts[c][n]*EigenVectors[j][2][l][n]/4]);
                                         else
                                             row[Position(UnknownAlgebraProducts,[n,c])]:=-EigenVectors[j][2][l][n]/4;
@@ -3108,7 +3152,7 @@ function(G,T)
 
                                 for n in [c+1..dim] do
                                     if EigenVectors[j][2][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> 0 then
+                                        if AlgebraProducts[n][c] <> false then
                                             Append(sum,[AlgebraProducts[c][n]*EigenVectors[j][2][l][n]/4]);
                                         else
                                             row[Position(UnknownAlgebraProducts,[c,n])]:=-EigenVectors[j][2][l][n]/4;
@@ -3126,7 +3170,7 @@ function(G,T)
 
                                 Append(sum,-[a*x/4]);
 
-                                if x<>0 then
+                                if x<> false then
                                     Append(mat,[row]);
                                     Append(vec,[Sum(sum)]);
                                     Append(record,[[2,j,k,l,m]]);
