@@ -1829,7 +1829,7 @@ function(G,T)
 
                                 l:=t+1;
 
-                                GramMatrix[t+j][t+u+v+n]:= 64*( -5*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n])/135 + 7*(GramMatrix[x1][x3] - GramMatrix[x1][x4] - GramMatrix[x1][x5] + GramMatrix[x1][x6])/270;
+                                GramMatrix[t+j][t+u+v+n]:= 64*( -5*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n])/135 - 7*(GramMatrix[x1][x3] - GramMatrix[x1][x4] - GramMatrix[x1][x5] + GramMatrix[x1][x6])/270;
                                 GramMatrix[t+u+v+n][t+j]:=GramMatrix[t+j][t+u+v+n];
 
                                 Append(KnownInnerProducts,[[t+j,t+u+v+n],[t+u+v+n,t+j]]);
