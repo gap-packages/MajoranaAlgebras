@@ -32,4 +32,4 @@ DeclareGlobalFunction( "MAJORANA_Orthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_Form" );
 
-
+DeclareGlobalFunction( "MAJORANA_TestFusion" );
