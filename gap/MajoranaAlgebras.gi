@@ -944,16 +944,15 @@ function(G,T)
 
             l:=1;
 
-            for j in [1..t+u+v+w] do
-                for k in [1..t+u+v+w] do
+            for j in [1..t] do
+                for k in [1..t] do
                     Add(KnownInnerProducts,[j,k]);
+                    Add(KnownAlgebraProducts,[j,k]);
                 od;
             od;
 
-            for j in [1..t] do
-                for k in [1..t] do
-                    Add(KnownAlgebraProducts,[j,k]);
-                od;
+            for j in [1..t+u+v+w] do
+                Add(KnownInnerProducts,[j,j]);
             od;
 
             # (2,2) products and eigenvectors from IPSS10
@@ -2259,7 +2258,7 @@ function(G,T)
 
                         od;
 
-                        Add(vec,Sum(sum));
+                        Add(vec,[Sum(sum)]);
 
                     od;
 
@@ -2291,7 +2290,7 @@ function(G,T)
 
                         od;
 
-                        Add(vec,Sum(sum));
+                        Add(vec,[Sum(sum)]);
 
                     od;
 
@@ -2323,7 +2322,7 @@ function(G,T)
 
                         od;
 
-                        Add(vec,Sum(sum));
+                        Add(vec,[Sum(sum)]);
 
                     od;
 
@@ -2356,7 +2355,7 @@ function(G,T)
                                 od;
                             od;
 
-                            Add(vec,Sum(sum));
+                            Add(vec,[Sum(sum)]);
 
                         od;
                     od;
@@ -2390,7 +2389,7 @@ function(G,T)
                                 od;
                             od;
 
-                            Add(vec,Sum(sum));
+                            Add(vec,[Sum(sum)]);
 
                         od;
                     od;
@@ -2424,7 +2423,7 @@ function(G,T)
                                 od;
                             od;
 
-                            Add(vec,Sum(sum));
+                            Add(vec,[Sum(sum)]);
 
                         od;
                     od;
@@ -2444,7 +2443,8 @@ function(G,T)
                         od;
                     fi;
                 else
-                    Output[i]:=[StructuralCopy(Shape),"Error","Inconsistent system of unknown inner products"];
+                    Output[i]:=[Shape,"Error","Inconsistent system of unknown inner products",mat,vec];
+                    Output[i]:=StructuralCopy(Output[i]);
                 fi;
             fi;
 
@@ -2463,7 +2463,7 @@ function(G,T)
             od;
 
             if ForAny(Diagonals, x->x<0) then
-                Output[i]:=[StructuralCopy(Shape),"Error","The inner product is not positive definite",StructuralCopy(3Aaxes), StructuralCopy(4Aaxes), StructuralCopy(5Aaxes), StructuralCopy(5AaxesFixed), StructuralCopy(GramMatrix)];
+                Output[i]:=[StructuralCopy(Shape),"Error","The inner product is not positive definite",StructuralCopy(3Aaxes), StructuralCopy(4Aaxes), StructuralCopy(5Aaxes), StructuralCopy(5AaxesFixed), StructuralCopy(GramMatrix), StructuralCopy(KnownInnerProducts)];
                 break;
             elif ForAny(Diagonals, x->x=0) then
                 NullSp:=MAJORANA_NullSpace(GramMatrix);
