@@ -86,6 +86,7 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
 
         if n<m then
             A{[n+1..m]} := NullMat(m-n,m);
+            B{[n+1..m]} := NullMat(m-n,Size(vecs[1]));
         elif m<n then
             for i in [1..n] do
                 A[i]{[m+1..n]} := NullMat(1,n-m)[1];
@@ -588,7 +589,8 @@ InstallGlobalFunction(MAJORANA_Fusion,
                 for l in [1..Size(EigenVectors[j][3])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts);
                     if x <> 0 then
-                        if MAJORANA_AlgebraProduct(a,x,AlgebraProducts) <> x/32 then
+						y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
+                        if y <> 0 and y <> x/32 then
                             Add(errorfusion24,[j,k,l]);
                         fi;
                     fi;
