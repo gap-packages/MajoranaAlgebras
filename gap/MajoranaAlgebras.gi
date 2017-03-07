@@ -15,7 +15,7 @@ function(AlgebraProducts)
 
     for i in [1..dim] do
         for j in [1..dim] do
-            if AlgebraProducts[i][j] = 0 then
+            if AlgebraProducts[i][j] = false then
                 Add(table, [i,j]);
             fi;
         od;
@@ -691,7 +691,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 #
 #                    if x <> false then
 #                        y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
-#                        
+#
 #                        z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
 #                        x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts);
 #
@@ -2882,18 +2882,18 @@ function(G,T)
                                 # calculate lhs
 
                                 x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts);
-								
-								if x <> false then
-									for n in [1..dim] do
-										if x[n] <> 0 then
-											if AlgebraProducts[j][n] <> false then
-												Append(sum,-[AlgebraProducts[j][n]*x[n]]);
-											else
-												row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
-											fi;
-										fi;
-									od;
-								fi;
+
+                                if x <> false then
+                                    for n in [1..dim] do
+                                        if x[n] <> 0 then
+                                            if AlgebraProducts[j][n] <> false then
+                                                Append(sum,-[AlgebraProducts[j][n]*x[n]]);
+                                            else
+                                                row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
+                                            fi;
+                                        fi;
+                                    od;
+                                fi;
 
                                 # calculate rhs
 
@@ -2923,18 +2923,18 @@ function(G,T)
                                 # calculate lhs
 
                                 x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts);
-                                
-								if x <> false then
-									for n in [1..dim] do
-										if x[n] <> 0 then
-											if AlgebraProducts[j][n] <> 0 then
-												Append(sum,-[AlgebraProducts[j][n]*x[n]]);
-											else
-												row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
-											fi;
-										fi;
-									od;
-								fi;
+
+                                if x <> false then
+                                    for n in [1..dim] do
+                                        if x[n] <> 0 then
+                                            if AlgebraProducts[j][n] <> false then
+                                                Append(sum,-[AlgebraProducts[j][n]*x[n]]);
+                                            else
+                                                row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
+                                            fi;
+                                        fi;
+                                    od;
+                                fi;
 
                                 # calculate rhs
 
