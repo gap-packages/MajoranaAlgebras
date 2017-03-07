@@ -21,3 +21,11 @@ BindGlobal("S5",function()
     return([G,T]);
     end
     );
+ 
+BindGlobal("A5",function()
+    local G, T;
+    G:=AlternatingGroup(5);
+    T:=Filtered(AsList(G),x->Order(x) = 2);
+    return([G,T]);
+    end
+    );
