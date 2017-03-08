@@ -1720,6 +1720,8 @@ function(G,T)
                                 else
 
                                     # Need to know values of (a_t,a_s) and (a_t, a_{sh^2})
+                                    
+                                    m:=1;
 
                                     while m < SizeOrbitals+1  do
                                         if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
@@ -1768,6 +1770,8 @@ function(G,T)
                                 if x*s*h in T then
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}), (a_t, a_{sh^2}) and (a_t, a_{sh^3})
+                                    
+                                    m:=1;
 
                                     while m < SizeOrbitals+1  do
                                         if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
@@ -1790,6 +1794,8 @@ function(G,T)
                                 else
 
                                     # Need to know values of (a_t,a_s), (a_t, a_{sh^2}) and (a_t, a_{sh^3})
+                                    
+                                    m:=1;
 
                                     while m < SizeOrbitals+1  do
                                         if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
@@ -1842,6 +1848,8 @@ function(G,T)
                                 if x*s*h in T then
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}), (a_t, a_{sh^2}), (a_t, a_{sh^3}) and (a_t, a_{sh^4})
+                                    
+                                    m:=1;
 
                                     while m < SizeOrbitals+1  do
                                         if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
@@ -1868,6 +1876,8 @@ function(G,T)
                                 else
 
                                     # Need to know values of (a_t,a_s), (a_t, a_{sh^2}), (a_t, a_{sh^3}) and (a_t, a_{sh^4})
+                                    
+                                    m:=1;
 
                                     while m < SizeOrbitals+1  do
                                         if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
