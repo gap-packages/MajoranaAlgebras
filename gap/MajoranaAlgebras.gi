@@ -856,7 +856,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T)
 
     local   # Seress
-			coordinates, 
+			coordinates, representatives, conjelements, orbitlist,
     
 			# error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
@@ -865,7 +865,7 @@ function(G,T)
             i, j, k, l, m, n, x, y, z,
 
             # Step 0 - Set Up
-            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT,
+            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT, orbits, SizeOrbits, OrbitsT,
 
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
@@ -1028,6 +1028,8 @@ function(G,T)
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
             
+            dim:=t+u+v+w;
+            
             coordinates:=[];
             
             for j in [1..t] do
@@ -1044,6 +1046,32 @@ function(G,T)
 			
 			for j in [1..w] do
 				Add(coordinates, 5Aaxes[j].1);
+			od;
+			
+			orbits:=Orbits(G,coordinates);
+					
+			SizeOrbits:=Size(orbits);
+			
+			representatives:=[];
+			
+			for j in [1..SizeOrbits] do 
+				Add(representatives,Representative(orbits[j]));
+			od;
+			
+			conjelements:=[];
+			orbitlist:=[];
+			
+			for j in [1..dim] do
+				k:=1;
+				while k < SizeOrbits + 1 do
+					if coordinates[j] in orbits[k] then 
+						Add(orbitlist,k);
+						Add(conjelements,RepresentativeAction(G,representatives[k],coordinates[j]));
+						k := SizeOrbits + 1;
+					else
+						k := k + 1;
+					fi;
+				od;
 			od;
 			
 			Orbitals:=Orbits(G,Cartesian(coordinates,coordinates),OnPairs);
