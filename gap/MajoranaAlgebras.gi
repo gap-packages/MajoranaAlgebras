@@ -856,7 +856,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T)
 
     local   # Seress
-			coordinates, representatives, conjelements, orbitlist,
+			coordinates, representatives, conjelements, orbitlist, pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist,
     
 			# error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
@@ -1055,7 +1055,8 @@ function(G,T)
 			representatives:=[];
 			
 			for j in [1..SizeOrbits] do 
-				Add(representatives,Representative(orbits[j]));
+				x := Representative(orbits[j]);
+				Add(representatives,Position(coordinates,x));
 			od;
 			
 			conjelements:=[];
@@ -1077,8 +1078,56 @@ function(G,T)
 			Orbitals:=Orbits(G,Cartesian(coordinates,coordinates),OnPairs);
 
 			SizeOrbitals:=Size(Orbitals);
+			
+			pairrepresentatives:=[];
        
-            5AaxesFixed:=NullMat(w,0);
+			for j in [1..SizeOrbitals] do
+				x := Representative(Orbitals[j]);
+				Add(pairrepresentatives, [Position(coordinates,x[1]), Position(coordinates,x[2])]);
+			od;
+			
+			pairconjelements:=NullMat(dim,dim); 
+			pairorbitlist := NullMat(dim,dim);
+			
+			for j in [1..dim] do
+				for k in [1..dim] do
+					l:=1;
+					while l < SizeOrbitals + 1 do
+						if [coordinates[j],coordinates[k]] in Orbitals[l] then 
+							pairorbitlist[j][k] := l;
+							pairconjelements[j][k] := RepresentativeAction(G,[coordinates[pairrepresentatives[l][1]],coordinates[pairrepresentatives[l][2]]],[coordinates[j],coordinates[k]],OnPairs);
+							l := SizeOrbitals + 1;
+						else
+							l := l+1;
+						fi;
+					od;
+				od;
+			od;
+			
+			longcoordinates:=[];
+			positionlist:=[];
+			
+			for j in [1..t] do
+				Add(longcoordinates, coordinates[j]);
+				Add(positionlist,j);
+			od;
+			
+			for j in [t+1..t+u] do 
+				Append(longcoordinates, [coordinates[j], coordinates[j]^2]);
+				Append(positionlist,[j,j]);
+			od;
+			
+			for j in [t+u+1..t+u+v] do
+				Append(longcoordinates, [coordinates[j], coordinates[j]^3]);
+				Append(positionlist,[j,j]);
+			od;
+			
+			for j in [t+u+v+1..t+u+v+w] do
+				Append(longcoordinates, [coordinates[j], coordinates[j]^2, coordinates[j]^3, coordinates[j]^4]);
+				Append(positionlist,[j,-j,-j,j]);
+			od;
+			
+			5AaxesFixed:=NullMat(w,0);
 
             for j in [1..w] do
                 x:=5Aaxes[j].1;
