@@ -1706,9 +1706,10 @@ function(G,T)
                         while l<t+1 do
                             s:=T[l];
                             if s*h in T and Order(x*s*h) = 2 then
+                            
+                                l := t+1;
+                                    
                                 if x*s*h in T then
-
-                                    l := t+1;
                                     m := 1;
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}) and (a_t, a_{sh^2})
@@ -1777,6 +1778,7 @@ function(G,T)
                             if T[l]*h in T and Order(x*T[l]*h) = 2 then
 
                                 s:=T[l];
+                                l := t+1;
 
                                 if x*s*h in T then
 
@@ -1838,8 +1840,6 @@ function(G,T)
             for j in [1..t] do
                 for k in [1 .. w] do
                     x:=T[j]; h:=5AaxesFixed[k][1];
-
-
 
                     if x*h in T then
 
