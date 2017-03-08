@@ -162,6 +162,17 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
 
         A:=StructuralCopy(mat);
         B:=StructuralCopy(vecs);
+        
+        i:=1;
+        
+        while i < Size(A) do
+            if ForAll(A[i], x-> x =0) and ForAll(B[i], x-> x = 0) then 
+                Remove(A,i); 
+                Remove(B,i);
+            else 
+                i:=i+1;
+            fi;
+        od;
 
         n:=Size(A);
         m:=Size(A[1]);
