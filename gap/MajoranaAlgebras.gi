@@ -855,14 +855,17 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(G,T)
 
-    local   # error checking
+    local   # Seress
+			coordinates, 
+    
+			# error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
 
             # indexing and temporary variables
             i, j, k, l, m, n, x, y, z,
 
             # Step 0 - Set Up
-            Output, t, Orbitals, SizeOrbitals,
+            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT,
 
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
@@ -908,20 +911,20 @@ function(G,T)
 
     # Construct orbitals of G on T
 
-    Orbitals:=OrbitsDomain(G,Cartesian(T,T),OnPairs);
+    OrbitalsT:=OrbitsDomain(G,Cartesian(T,T),OnPairs);
 
-    SizeOrbitals:=Size(Orbitals);
+    SizeOrbitalsT:=Size(OrbitalsT);
 
                                         ## STEP 1: SHAPE ##
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    Shape:=NullMat(1,SizeOrbitals)[1];
+    Shape:=NullMat(1,SizeOrbitalsT)[1];
 
     RepsSquares6A:=[];
 
-    for i in [1..SizeOrbitals] do
-        x:=Representative(Orbitals[i]);
+    for i in [1..SizeOrbitalsT] do
+        x:=Representative(OrbitalsT[i]);
         if Order(x[1]*x[2]) = 1 then
             Shape[i]:="1A";
         fi;
@@ -951,14 +954,14 @@ function(G,T)
 
     # Check for inclusions of 3A in 6A
 
-    for i in [1..SizeOrbitals] do
+    for i in [1..SizeOrbitalsT] do
         if Shape[i][1] = '3' then
             j:=0;
-            while j<Size(Orbitals[i]) do
+            while j<Size(OrbitalsT[i]) do
                 j:=j+1;
-                if Orbitals[i][j][1]*Orbitals[i][j][2] in RepsSquares6A then
+                if OrbitalsT[i][j][1]*OrbitalsT[i][j][2] in RepsSquares6A then
                     Shape[i]:="3A";;
-                    j:=Size(Orbitals[i])+1;;
+                    j:=Size(OrbitalsT[i])+1;;
                 fi;
             od;
         fi;
@@ -966,7 +969,7 @@ function(G,T)
 
     Unknowns3X:=[];
 
-    for i in [1..SizeOrbitals] do
+    for i in [1..SizeOrbitalsT] do
         if Shape[i] = ['3','X'] then
             Add(Unknowns3X,i);
         fi;
@@ -1003,20 +1006,20 @@ function(G,T)
             4Aaxes:=[];
             5Aaxes:=[];
 
-            for j in [1..SizeOrbitals] do
+            for j in [1..SizeOrbitalsT] do
                 if Shape[j]=['3','A'] then
-                    for k in [1..Size(Orbitals[j])] do
-                        Add(3Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+                    for k in [1..Size(OrbitalsT[j])] do
+                        Add(3Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
                     od;
                 fi;
                 if Shape[j]=['4','A'] then
-                    for k in [1..Size(Orbitals[j])] do
-                        Add(4Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+                    for k in [1..Size(OrbitalsT[j])] do
+                        Add(4Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
                     od;
                 fi;
                 if Shape[j]=['5','A'] then
-                    for k in [1..Size(Orbitals[j])] do
-                        Add(5Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+                    for k in [1..Size(OrbitalsT[j])] do
+                        Add(5Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
                     od;
                 fi;
             od;
@@ -1024,7 +1027,29 @@ function(G,T)
             3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
+            
+            coordinates:=[];
+            
+            for j in [1..t] do
+				Add(coordinates,T[j]);
+			od;
+            
+            for j in [1..u] do
+				Add(coordinates,3Aaxes[j].1);
+			od;
+			
+			for j in [1..v] do
+				Add(coordinates,4Aaxes[j].1);
+			od;
+			
+			for j in [1..w] do
+				Add(coordinates, 5Aaxes[j].1);
+			od;
+			
+			Orbitals:=Orbits(G,Cartesian(coordinates,coordinates),OnPairs);
 
+			SizeOrbitals:=Size(Orbitals);
+       
             5AaxesFixed:=NullMat(w,0);
 
             for j in [1..w] do
@@ -1055,7 +1080,6 @@ function(G,T)
                     AlgebraProducts[j][k]:=false;
                 od;
             od;
-
 
             # Set up eigenvector matrix
 
@@ -1121,13 +1145,13 @@ function(G,T)
             od;
 
             # Remaining products from IPSS10
-            for j in [1..SizeOrbitals] do
+            for j in [1..SizeOrbitalsT] do
                 if Shape[j] = ['2','A'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        x2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]);
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        x2:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
 
                         GramMatrix[x0][x1]:=1/8;
 
@@ -1155,10 +1179,10 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['2','B'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
                         
                         GramMatrix[x0][x1]:=0;
 
@@ -1173,12 +1197,12 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['3','A'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x3:=Position(3Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x3:=Position(3Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
 
                         GramMatrix[x0][x1]:=13/256;
 
@@ -1231,11 +1255,11 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['3','C'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
 
                         GramMatrix[x0][x1]:=1/64;
 
@@ -1262,13 +1286,13 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['4','A'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        x4:=Position(4Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
+                        x4:=Position(4Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
 
                         GramMatrix[x0][x1]:=1/32;
 
@@ -1326,13 +1350,13 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['4','B'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        x4:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
+                        x4:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
 
                         GramMatrix[x0][x1]:=1/64;
 
@@ -1364,15 +1388,15 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['5','A'] then
-                    for k in [1..Size(Orbitals[j])] do
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x5:=Position(5Aaxes,Group(Orbitals[j][k][1]*Orbitals[j][k][2]));
+                    for k in [1..Size(OrbitalsT[j])] do
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
+                        xm2:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x5:=Position(5Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
 
-                        if Orbitals[j][k][1]*Orbitals[j][k][2] in 5AaxesFixed[x5] then
+                        if OrbitalsT[j][k][1]*OrbitalsT[j][k][2] in 5AaxesFixed[x5] then
                             sign:=1;
                         else
                             sign:=-1;
@@ -1453,16 +1477,16 @@ function(G,T)
                     od;
                 fi;
                 if Shape[j] = ['6','A'] then
-                    for k in [1..Size(Orbitals[j])] do
+                    for k in [1..Size(OrbitalsT[j])] do
 
-                        x0:=Position(T,Orbitals[j][k][1]);
-                        x1:=Position(T,Orbitals[j][k][2]);
-                        xm1:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x2:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        xm2:=Position(T,Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]);
-                        x3:=Position(T,Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]*Orbitals[j][k][1]*Orbitals[j][k][2]);
-                        x2A:=Position(T,(Orbitals[j][k][1]*Orbitals[j][k][2])^3);
-                        x3A:=Position(3Aaxes,Group((Orbitals[j][k][1]*Orbitals[j][k][2])^2));
+                        x0:=Position(T,OrbitalsT[j][k][1]);
+                        x1:=Position(T,OrbitalsT[j][k][2]);
+                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
+                        xm2:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
+                        x3:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
+                        x2A:=Position(T,(OrbitalsT[j][k][1]*OrbitalsT[j][k][2])^3);
+                        x3A:=Position(3Aaxes,Group((OrbitalsT[j][k][1]*OrbitalsT[j][k][2])^2));
 
                         GramMatrix[x0][x1]:=5/256;
 
@@ -1714,14 +1738,14 @@ function(G,T)
 
                                     # Need to know values of (a_t,a_s) and (a_s, a_{tsh}) and (a_t, a_{sh^2})
 
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [s,x*s*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [s,x*s*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1735,11 +1759,11 @@ function(G,T)
                                     
                                     m:=1;
 
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1786,17 +1810,17 @@ function(G,T)
                                     
                                     m:=1;
 
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                         od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [s,x*s*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [s,x*s*h] in OrbitalsT[m] then str4:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1810,14 +1834,14 @@ function(G,T)
                                     
                                     m:=1;
 
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
@@ -1862,20 +1886,20 @@ function(G,T)
                                     
                                     m:=1;
 
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [s,x*s*h] in Orbitals[m] then str2:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [s,x*s*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h*h] in OrbitalsT[m] then str4:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h*h*h] in Orbitals[m] then str5:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h*h*h] in OrbitalsT[m] then str5:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
 
 
@@ -1890,17 +1914,17 @@ function(G,T)
                                     
                                     m:=1;
 
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s] in Orbitals[m] then str1:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h] in Orbitals[m] then str3:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h*h] in Orbitals[m] then str4:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h*h] in OrbitalsT[m] then str4:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
-                                    while m < SizeOrbitals+1  do
-                                        if [x,s*h*h*h*h] in Orbitals[m] then str5:=Shape[m]; m:=SizeOrbitals+1; else m:=m+1; fi;
+                                    while m < SizeOrbitalsT+1  do
+                                        if [x,s*h*h*h*h] in OrbitalsT[m] then str5:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
                                     od; m:=1;
 
                                     # Use values to work out inner product
