@@ -162,14 +162,14 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
 
         A:=StructuralCopy(mat);
         B:=StructuralCopy(vecs);
-        
+
         i:=1;
-        
+
         while i < Size(A) do
-            if ForAll(A[i], x-> x =0) and ForAll(B[i], x-> x = 0) then 
-                Remove(A,i); 
+            if ForAll(A[i], x-> x =0) and ForAll(B[i], x-> x = 0) then
+                Remove(A,i);
                 Remove(B,i);
-            else 
+            else
                 i:=i+1;
             fi;
         od;
@@ -467,33 +467,75 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
         );
 
+#InstallGlobalFunction(  MAJORANA_AlgebraProduct,
+#
+#       function(u,v,basis) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
+#
+#        local i, j, sum;
+#
+#        sum:=[];
+#
+#        if ForAll(u,x-> x= 0 ) or ForAll(v,x->x=0) then
+#            return u*0;
+#        fi;
+#
+#        for i in [1..Size(u)] do
+#            if u[i] <> 0 then
+#                for j in [1..Size(v)] do
+#                    if v[j] <> 0 then
+#                        if basis[i][j] <> false then
+#                            Append(sum,[u[i]*v[j]*basis[i][j]]);
+#                        else
+#                            # cannot calculate product
+#                            return false;
+#                        fi;
+#                    fi;
+#                od;
+#            fi;
+#        od;
+#        return Sum(sum);
+#        end
+#
+#        );
+
 InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
-        function(u,v,basis) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
+        function(u,v,AlgebraProducts,list) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
-        local i, j, sum;
+        # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist]
+
+        local i, j, k, s, sum, dim, vec, x;
 
         sum:=[];
+        dim:=Size(u);
+        vec:=[1..dim]*0;
 
         if ForAll(u,x-> x= 0 ) or ForAll(v,x->x=0) then
             return u*0;
         fi;
 
-        for i in [1..Size(u)] do
-            if u[i] <> 0 then
-                for j in [1..Size(v)] do
-                    if v[j] <> 0 then
-                        if basis[i][j] <> false then
-                            Append(sum,[u[i]*v[j]*basis[i][j]]);
+        for i in [1..dim] do
+            for j in [1..dim] do
+                x:=AlgebraProducts[list[3][i][j]];
+                if x <> false then
+                    for k in [1..dim] do
+                        s:=list[5][Position(list[2],list[1][k]^list[4][i][j])];
+                        if s > 0 then
+                            vec[s]:=u[i]*v[i]*x[k];
                         else
-                            # cannot calculate product
-                            return false;
+                            vec[s]:=-u[i]*v[i]*x[k];
                         fi;
+                    od;
+                    sum:=sum + vec;
+                else
+                    if u[i] <> 0 and v[i] <> 0 then
+                        # cannot calculate product
+                        return false;
                     fi;
-                od;
-            fi;
+                fi;
+            od;
         od;
-        return Sum(sum);
+        return sum;
         end
 
         );
@@ -598,7 +640,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
         function(T,GramMatrix,AlgebraProducts,EigenVectors) # Checks if algebra obeys the fusion rules, outputs list of six lists which are empty if it does obey fusion rules
 
-        local errorfusion00, errorfusion02, errorfusion04, errorfusion22, errorfusion24, errorfusion44, a, t, j, k, l, x, y, z, x0;
+        local errorfusion00, errorfusion02, errorfusion04, errorfusion22, errorfusion24, errorfusion44, a, t, j, k, l, x, y, z, x0, ProductList;
 
         errorfusion00:=[];
         errorfusion02:=[];
@@ -617,9 +659,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][1])] do
-                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][1][l],AlgebraProducts);
+                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][1][l],AlgebraProducts,ProductList);
                     if x <> false then
-                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
+                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts,ProductList);
                         if y <> false then
                             if ForAny(y, z-> z <> 0) then
                                 Add(errorfusion00,[j,k,l]);
@@ -633,9 +675,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][2])] do
-                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],AlgebraProducts);
+                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],AlgebraProducts,ProductList);
                     if x<> false then
-                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
+                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts,ProductList);
                         if y <> false and y <> x/4 then
                             Add(errorfusion02,[j,k,l]);
                         fi;
@@ -647,9 +689,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],AlgebraProducts);
+                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],AlgebraProducts,ProductList);
                     if x <> false then
-                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
+                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts,ProductList);
                         if y <> false and y <> x/32 then
                             Add(errorfusion04,[j,k,l]);
                         fi;
@@ -661,12 +703,12 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][2])] do
-                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][2][l],AlgebraProducts);
+                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][2][l],AlgebraProducts,ProductList);
                     if x<> false then
                         if MAJORANA_InnerProduct(a,x,GramMatrix) <> fail then
 
                             y:= x - MAJORANA_InnerProduct(a,x,GramMatrix)*a;
-                            z:=MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
+                            z:=MAJORANA_AlgebraProduct(a,y,AlgebraProducts,ProductList);
 
                             if z <> false and ForAny(z, x -> x <> 0)  then
                                 Add(errorfusion22,[j,k,l]);
@@ -680,9 +722,9 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts);
+                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],AlgebraProducts,ProductList);
                     if x <> false then
-                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts);
+                        y:=MAJORANA_AlgebraProduct(a,x,AlgebraProducts,ProductList);
                         if y <> false and y <> x/32 then
                             Add(errorfusion24,[j,k,l]);
                         fi;
@@ -695,13 +737,13 @@ InstallGlobalFunction(MAJORANA_Fusion,
 #            for k in [1..Size(EigenVectors[j][3])] do
 #                for l in [1..Size(EigenVectors[j][3])] do
 #
-#                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][3][k],EigenVectors[j][3][l],AlgebraProducts);
+#                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][3][k],EigenVectors[j][3][l],AlgebraProducts,ProductList);
 #
 #                    if x <> false then
 #                        y:= x - MAJORANA_InnerProduct(a,x,GramMatrix,KnownInnerProducts)*a;
 #
-#                        z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts);
-#                        x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts);
+#                        z:= y - 4*MAJORANA_AlgebraProduct(a,y,AlgebraProducts,ProductList);
+#                        x0:=MAJORANA_AlgebraProduct(a,z,AlgebraProducts,ProductList);
 #
 #                        if x0 <> false and ForAny(x0, x -> x <> 0)  then
 #                            Add(errorfusion44,[j,k,l]);
@@ -824,48 +866,50 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
 
         );
 
-InstallGlobalFunction(MAJORANA_Form,
+#InstallGlobalFunction(MAJORANA_Form,
 
-        function(str) # Outputs value of bilinear product depending on shape of orbital
+ #       function(str) # Outputs value of bilinear product depending on shape of orbital
 
-        if str = ['1','A'] then
-            return 1;
-        elif str = ['2','A'] then
-            return 1/8;
-        elif str = ['2','B'] then
-            return 0;
-        elif str = ['3','A'] then
-            return 13/256;
-        elif str = ['3','C'] then
-            return 1/64;
-        elif str = ['4','A'] then
-            return 1/32;
-        elif str = ['4','B'] then
-            return 1/64;
-        elif str = ['5','A'] then
-            return 3/128;
-        elif str = ['6','A'] then
-            return 5/256;
-        fi;
-        end
+#        if str = ['1','A'] then
+#            return 1;
+#        elif str = ['2','A'] then
+#            return 1/8;
+#        elif str = ['2','B'] then
+#            return 0;
+#        elif str = ['3','A'] then
+#            return 13/256;
+#        elif str = ['3','C'] then
+#            return 1/64;
+#        elif str = ['4','A'] then
+#            return 1/32;
+#        elif str = ['4','B'] then
+#            return 1/64;
+#        elif str = ['5','A'] then
+#            return 3/128;
+#        elif str = ['6','A'] then
+#            return 5/256;
+#        fi;
+#        end
 
-        );
+#       );
 
 InstallGlobalFunction(MajoranaRepresentation,
 
 function(G,T)
 
     local   # Seress
-			coordinates, representatives, conjelements, orbitlist, pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist,
-    
-			# error checking
+            coordinates, representatives, conjelements, orbitlist, pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist, ProductList,
+            
+            long3Aaxes, long4Aaxes, long5Aaxes,
+
+            # error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
 
             # indexing and temporary variables
             i, j, k, l, m, n, x, y, z,
 
             # Step 0 - Set Up
-            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT, orbits, SizeOrbits, OrbitsT,
+            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT, orbits, SizeOrbits, OrbitsT, SizeOrbitsT,
 
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
@@ -889,8 +933,10 @@ function(G,T)
             UnknownInnerProducts, mat, vec, sum, row, Solution,
 
             # Step 7 - More algebra products
-            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, str1, str2, str3, str4, str5, zeros,  UnknownAlgebraProducts, record,
+            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, zeros,  UnknownAlgebraProducts, record,
             fres;
+            
+            # str1, str2, str3, str4, str5,
 
 
                                             ## STEP 0: SETUP ##
@@ -1027,119 +1073,149 @@ function(G,T)
             3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
-            
-            dim:=t+u+v+w;
-            
-            coordinates:=[];
-            
-            for j in [1..t] do
-				Add(coordinates,T[j]);
-			od;
-            
-            for j in [1..u] do
-				Add(coordinates,3Aaxes[j].1);
-			od;
-			
-			for j in [1..v] do
-				Add(coordinates,4Aaxes[j].1);
-			od;
-			
-			for j in [1..w] do
-				Add(coordinates, 5Aaxes[j].1);
-			od;
-			
-			orbits:=Orbits(G,coordinates);
-					
-			SizeOrbits:=Size(orbits);
-			
-			representatives:=[];
-			
-			for j in [1..SizeOrbits] do 
-				x := Representative(orbits[j]);
-				Add(representatives,Position(coordinates,x));
-			od;
-			
-			conjelements:=[];
-			orbitlist:=[];
-			
-			for j in [1..dim] do
-				k:=1;
-				while k < SizeOrbits + 1 do
-					if coordinates[j] in orbits[k] then 
-						Add(orbitlist,k);
-						Add(conjelements,RepresentativeAction(G,representatives[k],coordinates[j]));
-						k := SizeOrbits + 1;
-					else
-						k := k + 1;
-					fi;
-				od;
-			od;
-			
-			Orbitals:=Orbits(G,Cartesian(coordinates,coordinates),OnPairs);
 
-			SizeOrbitals:=Size(Orbitals);
-			
-			pairrepresentatives:=[];
-       
-			for j in [1..SizeOrbitals] do
-				x := Representative(Orbitals[j]);
-				Add(pairrepresentatives, [Position(coordinates,x[1]), Position(coordinates,x[2])]);
-			od;
-			
-			pairconjelements:=NullMat(dim,dim); 
-			pairorbitlist := NullMat(dim,dim);
-			
-			for j in [1..dim] do
-				for k in [1..dim] do
-					l:=1;
-					while l < SizeOrbitals + 1 do
-						if [coordinates[j],coordinates[k]] in Orbitals[l] then 
-							pairorbitlist[j][k] := l;
-							pairconjelements[j][k] := RepresentativeAction(G,[coordinates[pairrepresentatives[l][1]],coordinates[pairrepresentatives[l][2]]],[coordinates[j],coordinates[k]],OnPairs);
-							l := SizeOrbitals + 1;
-						else
-							l := l+1;
-						fi;
-					od;
-				od;
-			od;
-			
-			longcoordinates:=[];
-			positionlist:=[];
-			
-			for j in [1..t] do
-				Add(longcoordinates, coordinates[j]);
-				Add(positionlist,j);
-			od;
-			
-			for j in [t+1..t+u] do 
-				Append(longcoordinates, [coordinates[j], coordinates[j]^2]);
-				Append(positionlist,[j,j]);
-			od;
-			
-			for j in [t+u+1..t+u+v] do
-				Append(longcoordinates, [coordinates[j], coordinates[j]^3]);
-				Append(positionlist,[j,j]);
-			od;
-			
-			for j in [t+u+v+1..t+u+v+w] do
-				Append(longcoordinates, [coordinates[j], coordinates[j]^2, coordinates[j]^3, coordinates[j]^4]);
-				Append(positionlist,[j,-j,-j,j]);
-			od;
-			
-			5AaxesFixed:=NullMat(w,0);
+            for j in [1..u] do
+                3Aaxes[j] := 3Aaxes[j].1;
+            od;
+
+            for j in [1..v] do
+                4Aaxes[j] := 4Aaxes[j].1;
+            od;
 
             for j in [1..w] do
-                x:=5Aaxes[j].1;
-                5AaxesFixed[j]:=[x,x^4];
+                5Aaxes[j] := 5Aaxes[j].1;
             od;
+
+            dim:=t+u+v+w;
+
+            coordinates:=[];
+            
+            Append(coordinates,T);
+            Append(coordinates,3Aaxes);
+            Append(coordinates,4Aaxes);
+            Append(coordinates,5Aaxes);
+
+            long3Aaxes:=[];
+            long4Aaxes:=[];
+            long5Aaxes:=[];
+            positionlist:=[];
+
+			for j in [1..t] do
+				Append(positionlist,[j]);
+			od;
+
+            for j in [t+1..t+u] do
+                Append(long3Aaxes, [coordinates[j], coordinates[j]^2]);
+                Append(positionlist,[j,j]);
+            od;
+
+            for j in [t+u+1..t+u+v] do
+                Append(long4Aaxes, [coordinates[j], coordinates[j]^3]);
+                Append(positionlist,[j,j]);
+            od;
+
+            for j in [t+u+v+1..dim] do
+                Append(long5Aaxes, [coordinates[j], coordinates[j]^2, coordinates[j]^3, coordinates[j]^4]);
+                Append(positionlist,[j,-j,-j,j]);
+            od;
+
+            longcoordinates:=Union(T,long3Aaxes,long4Aaxes,long5Aaxes);
+
+            orbits:=Orbits(G,coordinates);
+
+            SizeOrbits:=Size(orbits);
+
+            OrbitsT:=Filtered(orbits,x->Order(Representative(x)) = 2);
+
+            SizeOrbitsT := Size(OrbitsT);
+
+            representatives:=[];
+
+            for j in [1..SizeOrbitsT] do
+                x := Representative(OrbitsT[j]);
+                Add(representatives,Position(coordinates,x));
+            od;
+            
+            for j in [1..SizeOrbits] do
+				x := Representative(orbits[j]);
+				if Order(x) <> 2 then 
+					Add(representatives,Position(coordinates,x));
+				fi;
+			od;
+            
+
+            conjelements:=[];
+            orbitlist:=[];
+
+            for j in [1..dim] do
+                k:=1;
+                while k < SizeOrbits + 1 do
+                    if coordinates[j] in orbits[k] then
+                        Add(orbitlist,k);
+                        Add(conjelements,RepresentativeAction(G,representatives[k],coordinates[j]));
+                        k := SizeOrbits + 1;
+                    else
+                        k := k + 1;
+                    fi;
+                od;
+            od;
+
+            Orbitals:=ShallowCopy(Orbits(G,Cartesian(coordinates,coordinates),OnPairs));
+            
+            # This is a bit of a patch, ask Markus tomorrow
+            
+            j:=1;
+            
+            while j < Size(Orbitals) + 1 do	
+				if Order(Representative(Orbitals[j])[1]) = 2 and Order(Representative(Orbitals[j])[2]) = 2 then
+					Remove(Orbitals,j);
+				else
+					j := j+1;
+				fi;
+			od;	
+				
+			Orbitals := Concatenation(OrbitalsT,Orbitals);	
+					
+			SizeOrbitals:=Size(Orbitals);
+
+            pairrepresentatives:=[];
+
+            for j in [1..SizeOrbitals] do
+                x := Representative(Orbitals[j]);
+                Add(pairrepresentatives, [Position(coordinates,x[1]), Position(coordinates,x[2])]);
+            od;
+
+            pairconjelements:=NullMat(dim,dim);
+            pairorbitlist := NullMat(dim,dim);
+
+            for j in [1..dim] do
+                for k in [1..dim] do
+                    l:=1;
+                    while l < SizeOrbitals + 1 do
+                        if [coordinates[j],coordinates[k]] in Orbitals[l] then
+                            pairorbitlist[j][k] := l;
+                            pairconjelements[j][k] := RepresentativeAction(G,[coordinates[pairrepresentatives[l][1]],coordinates[pairrepresentatives[l][2]]],[coordinates[j],coordinates[k]],OnPairs);
+                            l := SizeOrbitals + 1;
+                        else
+                            l := l+1;
+                        fi;
+                    od;
+                od;
+            od;
+
+            ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist];
+
+#           5AaxesFixed:=NullMat(w,0);
+#
+ #           for j in [1..w] do
+ #               x:=5Aaxes[j].1;
+ #               5AaxesFixed[j]:=[x,x^4];
+ #           od;
 
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
 
             # Set up Gram matrix
-
-            dim:= t+u+v+w;
 
             GramMatrix := NullMat(dim,dim);
             for j in [1..dim] do
@@ -1150,19 +1226,17 @@ function(G,T)
 
             # Set up algebra product matrix
 
-            AlgebraProducts := NullMat(dim,dim);
+            AlgebraProducts := NullMat(1,SizeOrbitals)[1];
 
-            for j in [1..dim] do
-                for k in [1..dim] do
-                    AlgebraProducts[j][k]:=false;
-                od;
+            for j in [1..SizeOrbitals] do
+                AlgebraProducts[j]:=false;
             od;
 
             # Set up eigenvector matrix
 
-            EigenVectors:=NullMat(t,3);
+            EigenVectors:=NullMat(SizeOrbitsT,3);
 
-            for j in [1..t] do
+            for j in [1..SizeOrbitsT] do
                 for k in [1..3] do
                     EigenVectors[j][k]:=[];
                 od;
@@ -1172,12 +1246,10 @@ function(G,T)
 
             l:=1;
 
-            # (2,2) products and eigenvectors from IPSS10
 
-            for j in [1..(t+u+v)] do
-                AlgebraProducts[j][j]:=NullMat(1,dim)[1];
-                AlgebraProducts[j][j][j]:=1;
-            od;
+
+
+            # (2,2) products and eigenvectors from IPSS10
 
             for j in [1..t] do
                 GramMatrix[j][j]:=1;
@@ -1195,427 +1267,1054 @@ function(G,T)
                 GramMatrix[j][j]:=125*7/2^(19);
             od;
 
-            # Add products of 5A axes with themselves
-            for j in [1..w] do
-                GramMatrix[t+u+v+j][t+u+v+j]:=875/524288;
+            # Add eigenvectors from IPSS10
 
-                l:=1;
+            for j in [1..SizeOrbitsT] do
 
-                while l < t+1 do
-                    h:=5AaxesFixed[j][1];
-                    if T[l]*h in T then
-                        x:=T[l]; x1:=Position(T,x*h); x2:=Position(T,x*h*h); x3:=Position(T,x*h*h*h); x4:=Position(T,x*h*h*h*h);
+                x0:=representatives[j];
 
-                        AlgebraProducts[t+u+v+j][t+u+v+j]:=NullMat(1,dim)[1];
+                for l in [1..t] do
+                    
+                    k:=pairorbitlist[x0][l];
 
-                        AlgebraProducts[t+u+v+j][t+u+v+j][l]:=175/524288;
-                        AlgebraProducts[t+u+v+j][t+u+v+j][x1]:=175/524288;
-                        AlgebraProducts[t+u+v+j][t+u+v+j][x2]:=175/524288;
-                        AlgebraProducts[t+u+v+j][t+u+v+j][x3]:=175/524288;
-                        AlgebraProducts[t+u+v+j][t+u+v+j][x4]:=175/524288;
+					x1 := Position(pairorbitlist[x0],k);
+					
+					if Shape[k] = ['2','A'] then
 
-                        l:=t+1;
-                    else
-                        l:=l+1;
-                    fi;
+						x2 := Position(T,T[x0]*T[x1]);
+
+						EigenVector:=[1..dim]*0;
+
+						EigenVector[x0] :=-1/4;
+						EigenVector[x1] :=1;
+						EigenVector[x2] :=1;
+
+						Append(EigenVectors[j][1],EigenVector);
+
+						EigenVector:=[1..dim]*0;
+
+						EigenVector[x1]:=1;
+						EigenVector[x2]:=-1;
+
+						Append(EigenVectors[j][2],EigenVector);
+
+					fi;
+
+					if Shape[k] = ['2','B'] then
+
+						EigenVector := [1..dim]*0;
+
+						EigenVector[x1] := 1;
+
+						Add(EigenVectors[j][1],EigenVector);
+					fi;
+
+					if Shape[k] = ['3','A'] then
+
+						xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+						x3 := positionlist[t + Position(long3Aaxes,T[x0]*T[x1])];
+
+						EigenVector := [1..dim]*0;;
+
+						EigenVector[x0]:=-10/27;
+						EigenVector[x1]:=32/27;
+						EigenVector[xm1]:=32/27;
+						EigenVector[x3]:=1;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-8/45;
+						EigenVector[x1]:=-32/45;
+						EigenVector[xm1]:=-32/45;
+						EigenVector[x3]:=1;
+
+						Add(EigenVectors[j][2],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+					fi;
+
+					if Shape[k] = ['3','C'] then
+
+						xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-1/32;
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=1;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+					fi;
+
+					if Shape[k] = ['4','A'] then
+
+						xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+						x2 := Position(T, T[x1]*T[x0]*T[x1]);
+						x4 := positionlist[t + 2*u + Position(long4Aaxes,T[x0]*T[x1])];
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-1/2;
+						EigenVector[x1]:=2;
+						EigenVector[xm1]:=2;
+						EigenVector[x2]:=1;
+						EigenVector[x4]:=1;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-1/3;
+						EigenVector[x1]:=-2/3;
+						EigenVector[xm1]:=-2/3;
+						EigenVector[x2]:=-1/3;
+						EigenVector[x4]:=1;
+
+						Add(EigenVectors[j][2],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+					fi;
+
+					if Shape[k] = ['4','B'] then
+
+						xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+						x2 := Position(T, T[x1]*T[x0]*T[x1]);
+						x4 := Position(T, (T[x0]*T[x1])^2);
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-1/32;
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=1;
+						EigenVector[x2]:=1/8;
+						EigenVector[x4]:=-1/8;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+					fi;
+
+					if Shape[k] = ['5','A'] then
+
+						xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+						x2 := Position(T, T[x1]*T[x0]*T[x1]);
+						xm2 := Position(T, T[x0]*T[x1]*T[x0]*T[x1]*T[x0]);
+						x5 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,T[x0]*T[x1])];
+
+						if x5 < 0 then
+							x5 := -x5;
+							sign := -1;
+						else
+							sign := 1;
+						fi;
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=3/512;
+						EigenVector[x1]:=-15/128;
+						EigenVector[xm1]:=-15/128;
+						EigenVector[x2]:=-1/128;
+						EigenVector[xm2]:=-1/128;
+						EigenVector[x5]:=sign*1;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-3/512;
+						EigenVector[x1]:=1/128;
+						EigenVector[xm1]:=1/128;
+						EigenVector[x2]:=15/128;
+						EigenVector[xm2]:=15/128;
+						EigenVector[x5]:=sign*1;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1/128;
+						EigenVector[xm1]:=1/128;
+						EigenVector[x2]:=-1/128;
+						EigenVector[xm2]:=-1/128;
+						EigenVector[x5]:=sign*1;
+
+						Add(EigenVectors[j][2],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x2]:=1;
+						EigenVector[xm2]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+					fi;
+
+					if Shape[k] = ['6','A'] then
+
+						xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+						x2 := Position(T, T[x1]*T[x0]*T[x1]);
+						xm2 := Position(T, T[x0]*T[x1]*T[x0]*T[x1]*T[x0]);
+						x3 := Position(T, T[x1]*T[x0]*T[x1]*T[x0]*T[x1]);
+						x2A := Position(T, (T[x0]*T[x1])^3);
+						x3A := positionlist[t + Position(long3Aaxes,(T[x0]*T[x1])^2)];
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=2/45;
+						EigenVector[x1]:=-256/45;
+						EigenVector[xm1]:=-256/45;
+						EigenVector[x2]:=-32/45;
+						EigenVector[xm2]:=-32/45;
+						EigenVector[x3]:=-32/45;
+						EigenVector[x2A]:=32/45;
+						EigenVector[x3A]:=1;
+
+						Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x0]:=-8/45;
+						EigenVector[x2]:=-32/45;
+						EigenVector[xm2]:=-32/45;
+						EigenVector[x3]:=-32/45;
+						EigenVector[x2A]:=32/45;
+						EigenVector[x3A]:=1;
+
+						Add(EigenVectors[j][2],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x1]:=1;
+						EigenVector[xm1]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+						EigenVector:=NullMat(1,dim)[1];
+
+						EigenVector[x2]:=1;
+						EigenVector[xm2]:=-1;
+
+						Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+
+					fi;
                 od;
             od;
 
-            # Remaining products from IPSS10
-            for j in [1..SizeOrbitalsT] do
-                if Shape[j] = ['2','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
+            # Products from IPSS10
 
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        x2:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
+            for j in [1..SizeOrbitals] do
 
-                        GramMatrix[x0][x1]:=1/8;
+                x := pairrepresentatives[j][1];
+                y := pairrepresentatives[j][2];
 
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
+                if Order(coordinates[x]) = 2 and Order(coordinates[y]) = 2 then
 
-                        AlgebraProducts[x0][x1][x0]:= 1/8;
-                        AlgebraProducts[x0][x1][x1]:= 1/8;
-                        AlgebraProducts[x0][x1][x2]:=-1/8;
+                    if Shape[j] = ['1','A'] then
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        AlgebraProducts[j] := NullMat(1,dim)[1];
 
-                        EigenVector[x1]:=1;
-                        EigenVector[x2]:=1;
-                        EigenVector[x0]:=-1/4;
+                        AlgebraProducts[j][x] := 1;
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+                    elif Shape[j] = ['2','A'] then
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        x2:=Position(T,T[x]*T[y]);
 
-                        EigenVector[x1]:=1;
-                        EigenVector[x2]:=-1;
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
+                        AlgebraProducts[j][x]:= 1/8;
+                        AlgebraProducts[j][y]:= 1/8;
+                        AlgebraProducts[j][x2]:=-1/8;
 
-                    od;
-                fi;
-                if Shape[j] = ['2','B'] then
-                    for k in [1..Size(OrbitalsT[j])] do
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=1/8;
+                        od;
 
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        
-                        GramMatrix[x0][x1]:=0;
+                    elif Shape[j] = ['2','B'] then
 
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=0;
+                        od;
 
-                        EigenVector[x1]:=1;
+                    elif Shape[j] = ['3','A'] then
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+                        xm1 := Position(T,T[x]*T[y]*T[x]);
+                        x3 := positionlist[t + Position(long3Aaxes,T[x]*T[y])];
 
-                    od;
-                fi;
-                if Shape[j] = ['3','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x3:=Position(3Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
+                        AlgebraProducts[j][x]:=1/16;
+                        AlgebraProducts[j][y]:=1/16;
+                        AlgebraProducts[j][xm1]:=1/32;
+                        AlgebraProducts[j][x3]:= - 135/2048;
 
-                        GramMatrix[x0][x1]:=13/256;
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=13/256;
+                        od;
 
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
+                    elif Shape[j] = ['3','C'] then
 
-                        AlgebraProducts[x0][x1][x0]:=1/16;
-                        AlgebraProducts[x0][x1][x1]:=1/16;
-                        AlgebraProducts[x0][x1][xm1]:=1/32;
-                        AlgebraProducts[x0][x1][t+x3]:= - 135/2048;
+                        xm1 := Position(T,T[x]*T[y]*T[x]);
 
-                        AlgebraProducts[x0][t+x3]:=NullMat(1,dim)[1];
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        AlgebraProducts[x0][t+x3][x0]:=2/9;
-                        AlgebraProducts[x0][t+x3][x1]:=-1/9;
-                        AlgebraProducts[x0][t+x3][xm1]:=-1/9;
-                        AlgebraProducts[x0][t+x3][t+x3]:=5/32;
+                        AlgebraProducts[j][x]:=1/64;
+                        AlgebraProducts[j][y]:=1/64;
+                        AlgebraProducts[j][xm1]:=-1/64;
 
-                        AlgebraProducts[t+x3][x0]:=NullMat(1,dim)[1];
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=1/64;
+                        od;
 
-                        AlgebraProducts[t+x3][x0][x0]:=2/9;
-                        AlgebraProducts[t+x3][x0][x1]:=-1/9;
-                        AlgebraProducts[t+x3][x0][xm1]:=-1/9;
-                        AlgebraProducts[t+x3][x0][t+x3]:=5/32;
+                    elif Shape[j] = ['4','A'] then
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        xm1 := Position(T,T[x]*T[y]*T[x]);
+                        x2 := Position(T,T[y]*T[x]*T[y]);
+                        x4 := positionlist[t + 2*u + Position(long4Aaxes,T[x]*T[y])];
 
-                        EigenVector[x0]:=-10/27;
-                        EigenVector[x1]:=32/27;
-                        EigenVector[xm1]:=32/27;
-                        EigenVector[t+x3]:=1;
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+                        AlgebraProducts[j][x]:=3/64;
+                        AlgebraProducts[j][y]:=3/64;
+                        AlgebraProducts[j][xm1]:=1/64;
+                        AlgebraProducts[j][x2]:=1/64;
+                        AlgebraProducts[j][x4]:= -3/64;
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=1/32;
+                        od;
 
-                        EigenVector[x0]:=-8/45;
-                        EigenVector[x1]:=-32/45;
-                        EigenVector[xm1]:=-32/45;
-                        EigenVector[t+x3]:=1;
+                    elif Shape[j] = ['4','B'] then
 
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
+                        xm1 := Position(T,T[x]*T[y]*T[x]);
+                        x2 := Position(T,T[y]*T[x]*T[y]);
+                        x2A := Position(T,(T[x]*T[y])^2);
 
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
-
-                    od;
-                fi;
-                if Shape[j] = ['3','C'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-
-                        GramMatrix[x0][x1]:=1/64;
-
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[x0][x1][x0]:=1/64;
-                        AlgebraProducts[x0][x1][x1]:=1/64;
-                        AlgebraProducts[x0][x1][xm1]:=-1/64;
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/32;
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=1;
-
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
-                    od;
-                fi;
-                if Shape[j] = ['4','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
-                        x4:=Position(4Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
-
-                        GramMatrix[x0][x1]:=1/32;
-
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[x0][x1][x0]:=3/64;
-                        AlgebraProducts[x0][x1][x1]:=3/64;
-                        AlgebraProducts[x0][x1][xm1]:=1/64;
-                        AlgebraProducts[x0][x1][x2]:=1/64;
-                        AlgebraProducts[x0][x1][t+u+x4]:= -3/64;
-
-                        AlgebraProducts[x0][t+u+x4]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[x0][t+u+x4][x0]:=5/16;
-                        AlgebraProducts[x0][t+u+x4][x1]:=-1/8;
-                        AlgebraProducts[x0][t+u+x4][xm1]:=-1/8;
-                        AlgebraProducts[x0][t+u+x4][x2]:=-1/16;
-                        AlgebraProducts[x0][t+u+x4][t+u+x4]:= 3/16;
-
-                        AlgebraProducts[t+u+x4][x0]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[t+u+x4][x0][x0]:=5/16;
-                        AlgebraProducts[t+u+x4][x0][x1]:=-1/8;
-                        AlgebraProducts[t+u+x4][x0][xm1]:=-1/8;
-                        AlgebraProducts[t+u+x4][x0][x2]:=-1/16;
-                        AlgebraProducts[t+u+x4][x0][t+u+x4]:= 3/16;
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/2;
-                        EigenVector[x1]:=2;
-                        EigenVector[xm1]:=2;
-                        EigenVector[x2]:=1;
-                        EigenVector[t+u+x4]:=1;
-
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/3;
-                        EigenVector[x1]:=-2/3;
-                        EigenVector[xm1]:=-2/3;
-                        EigenVector[x2]:=-1/3;
-                        EigenVector[t+u+x4]:=1;
-
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
-
-                    od;
-                fi;
-                if Shape[j] = ['4','B'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
-                        x4:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
-
-                        GramMatrix[x0][x1]:=1/64;
-
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[x0][x1][x0]:=1/64;
-                        AlgebraProducts[x0][x1][x1]:=1/64;
-                        AlgebraProducts[x0][x1][xm1]:=-1/64;
-                        AlgebraProducts[x0][x1][x2]:=-1/64;
-                        AlgebraProducts[x0][x1][x4]:= 1/64;
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/32;
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=1;
-                        EigenVector[x2]:=1/8;
-                        EigenVector[x4]:=-1/8;
-
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
-
-                    od;
-                fi;
-                if Shape[j] = ['5','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
-                        xm2:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x5:=Position(5Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
-
-                        if OrbitalsT[j][k][1]*OrbitalsT[j][k][2] in 5AaxesFixed[x5] then
-                            sign:=1;
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
+
+                        AlgebraProducts[j][x]:=1/64;
+                        AlgebraProducts[j][y]:=1/64;
+                        AlgebraProducts[j][xm1]:=-1/64;
+                        AlgebraProducts[j][x2]:=-1/64;
+                        AlgebraProducts[j][x4]:= 1/64;
+
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=1/64;
+                        od;
+
+                    elif  Shape[j] = ['5','A'] then
+
+                        xm1 := Position(T,T[x]*T[y]*T[x]);
+                        x2 := Position(T,T[y]*T[x]*T[y]);
+                        xm2 := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
+                        x5 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,T[x]*T[y])];
+
+                        if x5 < 0 then
+                            x5 := -x5;
+                            sign := -1;
                         else
-                            sign:=-1;
+                            sign:=1;
                         fi;
 
-                        GramMatrix[x0][x1]:=3/128;
+                        AlgebraProducts[x][y]:=NullMat(1,dim)[1];
 
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
+                        AlgebraProducts[x][y][x]:=3/128;
+                        AlgebraProducts[x][y][y]:=3/128;
+                        AlgebraProducts[x][y][xm1]:=-1/128;
+                        AlgebraProducts[x][y][x2]:=-1/128;
+                        AlgebraProducts[x][y][xm2]:=-1/128;
+                        AlgebraProducts[x][y][x5] := sign*1;
 
-                        AlgebraProducts[x0][x1][x0]:=3/128;
-                        AlgebraProducts[x0][x1][x1]:=3/128;
-                        AlgebraProducts[x0][x1][xm1]:=-1/128;
-                        AlgebraProducts[x0][x1][x2]:=-1/128;
-                        AlgebraProducts[x0][x1][xm2]:=-1/128;
-                        AlgebraProducts[x0][x1][t+u+v+x5] := sign*1;
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=3/128;
+                        od;
 
-                        AlgebraProducts[x0][t+u+v+x5]:=NullMat(1,dim)[1];
+                    elif Shape[j] = ['6','A'] then
 
-                        AlgebraProducts[x0][t+u+v+x5][x1]:=sign*7/4096;
-                        AlgebraProducts[x0][t+u+v+x5][xm1]:=sign*7/4096;
-                        AlgebraProducts[x0][t+u+v+x5][x2]:=-sign*7/4096;
-                        AlgebraProducts[x0][t+u+v+x5][xm2]:=-sign*7/4096;
-                        AlgebraProducts[x0][t+u+v+x5][t+u+v+x5] := 7/32;
+                        xm1 := Position(T,T[x]*T[y]*T[x]);
+                        x2 := Position(T,T[y]*T[x]*T[y]);
+                        xm2 := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
+                        x3 := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
+                        x2A := Position(T,(T[x]*T[y])^3);
+                        x3A := positionlist[t + Position(long3Aaxes,(T[x]*T[y])^2)];
 
-                        AlgebraProducts[t+u+v+x5][x0]:=NullMat(1,dim)[1];
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        AlgebraProducts[t+u+v+x5][x0][x1]:=sign*7/4096;
-                        AlgebraProducts[t+u+v+x5][x0][xm1]:=sign*7/4096;
-                        AlgebraProducts[t+u+v+x5][x0][x2]:=-sign*7/4096;
-                        AlgebraProducts[t+u+v+x5][x0][xm2]:=-sign*7/4096;
-                        AlgebraProducts[t+u+v+x5][x0][t+u+v+x5] := 7/32;
+                        AlgebraProducts[j][x]:=1/64;
+                        AlgebraProducts[j][y]:=1/64;
+                        AlgebraProducts[j][xm1]:=-1/64;
+                        AlgebraProducts[j][x2]:=-1/64;
+                        AlgebraProducts[j][xm2]:=-1/64;
+                        AlgebraProducts[j][x3] := -1/64;
+                        AlgebraProducts[j][x2A] := 1/64;
+                        AlgebraProducts[j][t+x3A] := 45/2048;
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := Position(T,Orbitals[j][k][2]);
+                            GramMatrix[x][y]:=5/256;
+                        od;
+                    fi;
 
-                        EigenVector[x0]:=3/512;
-                        EigenVector[x1]:=-15/128;
-                        EigenVector[xm1]:=-15/128;
-                        EigenVector[x2]:=-1/128;
-                        EigenVector[xm2]:=-1/128;
-                        EigenVector[t+u+v+x5]:=sign*1;
+                # 2,3 products
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+                elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 3 then
+                    if Order(coordinates[x]*coordinates[y]) in T then
 
-                        EigenVector:=NullMat(1,dim)[1];
+						s := coordinates[x]; h := coordinates[y];
 
-                        EigenVector[x0]:=-3/512;
-                        EigenVector[x1]:=1/128;
-                        EigenVector[xm1]:=1/128;
-                        EigenVector[x2]:=15/128;
-                        EigenVector[xm2]:=15/128;
-                        EigenVector[t+u+v+x5]:=sign*1;
+                        # Inside a 3A algebra
+                        
+                        x1 := Position(T,s*h);
+                        xm1 := Position(T,s*h*h);
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+                        AlgebraProducts[j] := NullMat(1,dim)[1];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        AlgebraProducts[j][x]:=2/9;
+                        AlgebraProducts[j][x1]:=-1/9;
+                        AlgebraProducts[j][xm1]:=-1/9;
+                        AlgebraProducts[j][y]:=5/32;
 
-                        EigenVector[x1]:=1/128;
-                        EigenVector[xm1]:=1/128;
-                        EigenVector[x2]:=-1/128;
-                        EigenVector[xm2]:=-1/128;
-                        EigenVector[t+u+v+x5]:=sign*1;
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := positionlist[t + Position(long3Aaxes,Orbitals[j][k][2])];
+                            GramMatrix[x][y]:=1/4;
+                        od;
+                    elif Order(coordinates[x]*coordinates[y]) = 3 then
 
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
+                        s := coordinates[x]; h := coordinates[y];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        # Case (2A,3A) in IPSS10
 
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
+                        xj := positionlist[t + Position(long3Aaxes,s*h*s)];
+                        xk := positionlist[t + Position(long3Aaxes,h*s*h*h*s*h*h)];
+                        xl := positionlist[t + Position(long3Aaxes,h*h*s*h*s*h)];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        EigenVector[x2]:=1;
-                        EigenVector[xm2]:=-1;
+                        AlgebraProducts[j][x]:=1/9;
+                        AlgebraProducts[j][y]:=5/64;
+                        AlgebraProducts[j][xj]:=3/64;
+                        AlgebraProducts[j][xk]:=-1/16;
+                        AlgebraProducts[j][xl]:=-1/16;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
-                    od;
-                fi;
-                if Shape[j] = ['6','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
+                        for k in [1..Size(Orbitals[j])] do
+                            x := Position(T,Orbitals[j][k][1]);
+                            y := positionlist[t + Position(long3Aaxes,Orbitals[j][k][2])];
+                            GramMatrix[x][y]:=1/9;
+                        od;
+                    elif Order(coordinates[x]*coordinates[y]) =4 and (coordinates[x]*coordinates[y])^2 in T then
 
-                        x0:=Position(T,OrbitalsT[j][k][1]);
-                        x1:=Position(T,OrbitalsT[j][k][2]);
-                        xm1:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x2:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
-                        xm2:=Position(T,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]);
-                        x3:=Position(T,OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]*OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
-                        x2A:=Position(T,(OrbitalsT[j][k][1]*OrbitalsT[j][k][2])^3);
-                        x3A:=Position(3Aaxes,Group((OrbitalsT[j][k][1]*OrbitalsT[j][k][2])^2));
+						s := coordinates[x]; h := coordinates[y];
 
-                        GramMatrix[x0][x1]:=5/256;
+						# Case (2A,3A) in IPSS10
 
-                        AlgebraProducts[x0][x1]:=NullMat(1,dim)[1];
+						xik:=Position(T,h*h*s*h);
+						xil:=Position(T,h*s*h*h);
+						xjk:=Position(T,s*h*h*s*h*s);
+						xjl:=Position(T,s*h*s*h*h*s);
+						xkl:=Position(T,h*s*h*s*h*h*s*h*h);
+						xx:=Position(T,h*h*s*h*s*h*h);
+						xj := positionlist[t + Position(long3Aaxes,s*h*s)];
+						xk := positionlist[t + Position(long3Aaxes,h*s*h*h*s*h*h)];
+						xl := positionlist[t + Position(long3Aaxes,h*h*s*h*s*h)];
 
-                        AlgebraProducts[x0][x1][x0]:=1/64;
-                        AlgebraProducts[x0][x1][x1]:=1/64;
-                        AlgebraProducts[x0][x1][xm1]:=-1/64;
-                        AlgebraProducts[x0][x1][x2]:=-1/64;
-                        AlgebraProducts[x0][x1][xm2]:=-1/64;
-                        AlgebraProducts[x0][x1][x3] := -1/64;
-                        AlgebraProducts[x0][x1][x2A] := 1/64;
-                        AlgebraProducts[x0][x1][t+x3A] := 45/2048;
+						AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        EigenVector:=NullMat(1,dim)[1];
+						AlgebraProducts[j][x]:=1/45;
+						AlgebraProducts[j][y]:=1/64;
+						AlgebraProducts[j][xik]:=-1/90;
+						AlgebraProducts[j][xil]:=-1/90;
+						AlgebraProducts[j][xjk]:=-1/90;
+						AlgebraProducts[j][xjl]:=-1/90;
+						AlgebraProducts[j][xkl]:=1/45;
+						AlgebraProducts[j][xx]:=-1/45;
+						AlgebraProducts[j][xj]:=-1/64;
+						AlgebraProducts[j][xk]:=1/64;
+						AlgebraProducts[j][xl]:=1/64;
 
-                        EigenVector[x0]:=2/45;
-                        EigenVector[x1]:=-256/45;
-                        EigenVector[xm1]:=-256/45;
-                        EigenVector[x2]:=-32/45;
-                        EigenVector[xm2]:=-32/45;
-                        EigenVector[x3]:=-32/45;
-                        EigenVector[x2A]:=32/45;
-                        EigenVector[t+x3A]:=1;
+						for k in [1..Size(Orbitals[j])] do
+							x := Position(T,Orbitals[j][k][1]);
+							y := positionlist[t + Position(long3Aaxes,Orbitals[j][k][2])];
+							GramMatrix[x][y]:=1/36;
+						od;
+                    else
+                        l:=1;
+                        while l<t+1 do
+                            z:=T[l];
+                            if z*h in T and Order(s*z*h) = 2 then
 
-                        Add(EigenVectors[x0][1],StructuralCopy(EigenVector));
+                                if s*z*h in T then
 
-                        EigenVector:=NullMat(1,dim)[1];
+									x2A := Position( T, s*z*h);
+									x2 := Position( T, z*h*h);
+									
+									# Use values to work out inner product
+										
+									for k in [1..Size(Orbitals[j])] do
+									
+										s := Orbitals[j][k][1];
+										h := Orbitals[j][k][2];
+									
+										x0 := Position(T,s);
+										x1 := positionlist[t + Position(long3Aaxes,h)];
+										GramMatrix[x0][x1] := (64/135)*(-2*GramMatrix[x][l] + 4*GramMatrix[l][x2A] + GramMatrix[x][x2]) + 1/45;
+										
+									od;
+								else
+								
+									x2 := Position( T, z*h*h);
+									
+									# Use values to work out inner product
+									for k in [1..Size(Orbitals[j])] do
+										
+										s := Orbitals[j][k][1];
+										h := Orbitals[j][k][2];
+									
+										x0 := Position(T,s);
+										x1 := positionlist[t + Position(long3Aaxes,h)];
+										GramMatrix[x0][x1] := (64/135)*(2*GramMatrix[x][l] + GramMatrix[x][x2]);
+										
+									od;
 
-                        EigenVector[x0]:=-8/45;
-                        EigenVector[x2]:=-32/45;
-                        EigenVector[xm2]:=-32/45;
-                        EigenVector[x3]:=-32/45;
-                        EigenVector[x2A]:=32/45;
-                        EigenVector[t+x3A]:=1;
+                                fi;
+                                
+                                l := t+1;
+                                
+                            else
+                                l:=l+1;
+                            fi;
+                        od;
+                    fi;
 
-                        Add(EigenVectors[x0][2],StructuralCopy(EigenVector));
+                # 2,4 products
 
-                        EigenVector:=NullMat(1,dim)[1];
+                elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 4 then
 
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
+					s := coordinates[x];
+					h := coordinates[y];
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
+					if s*h in T then
+					
+						# Inside a 4A algebra
+						
+						x1 := Position(T,s*h);
+                        xm1 := Position(T,s*h*h*h);
+                        x2 := Position(T,s*h*h);
 
-                        EigenVector:=NullMat(1,dim)[1];
+						AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        EigenVector[x2]:=1;
-                        EigenVector[xm2]:=-1;
+						AlgebraProducts[j][x]:=5/16;
+						AlgebraProducts[j][x1]:=-1/8;
+						AlgebraProducts[j][xm1]:=-1/8;
+						AlgebraProducts[j][x2]:=-1/16;
+						AlgebraProducts[j][y]:= 3/16;
+						
+						for k in [1..Size(Orbitals[j])] do
+							x := Position(T,Orbitals[j][k][1]);
+							y := positionlist[t + 2*u + Position(long4Aaxes,Orbitals[j][k][2])];
+							GramMatrix[x][y]:=3/8;
+						od;
 
-                        Add(EigenVectors[x0][3],StructuralCopy(EigenVector));
-                    od;
+					else
+					
+						l:=1;
+						
+                        while l<t+1 do
+                            if T[l]*h in T and Order(s*T[l]*h) = 2 then
+
+                                z:=T[l];
+                                
+                                if s*z*h in T then
+								
+									x2A := Position( T, s*z*h);
+									x2 := Position( T, z*h*h);
+									x3 := Position( T, z*h^3);
+										
+									for k in [1..Size(Orbitals[j])] do
+									
+										s := Orbitals[j][k][1];
+										h := Orbitals[j][k][2];
+									
+										x0 := Position(T,s);
+										x1 := positionlist[t + 2*u + Position(long4Aaxes,h)];
+										
+										GramMatrix[x0][x1] := ( - 5*GramMatrix[x][l] + GramMatrix[x][x2] + GramMatrix[x][x3] + 8*GramMatrix[l][x2A])/3 +1/24;
+									od;
+
+                                else
+                                
+									x2 := Position( T, z*h*h);
+									x3 := Position( T, z*h^3);
+										
+									for k in [1..Size(Orbitals[j])] do
+									
+										s := Orbitals[j][k][1];
+										h := Orbitals[j][k][2];
+									
+										x0 := Position(T,s);
+										x1 := positionlist[t + 2*u + Position(long4Aaxes,h)];
+										
+										GramMatrix[x][y] := (3*GramMatrix[x][l] + GramMatrix[x][x2] + 2*GramMatrix[x][x3])/3;
+									od;
+
+                                fi;
+                                
+                                l := t+1;
+                                
+                            else
+                                l:=l+1;
+                            fi; 
+
+						od;
+					fi;
+					
+				# (2,5) values
+				
+				 elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 5 then
+
+					s := coordinates[x];
+					h := coordinates[y];
+
+					if s*h in T then
+					
+						# Inside a 5A algebra
+						
+						x1 := Position(T,s*h);
+                        xm1 := Position(T,s*h^4);
+                        x2 := Position(T,s*h^2);
+                        xm2 := Position(T,s*h^4);
+
+						AlgebraProducts[j]:=NullMat(1,dim)[1];
+
+						AlgebraProducts[j][x1] := 7/4096;
+						AlgebraProducts[j][xm1] := 7/4096;
+						AlgebraProducts[j][x2] := -7/4096;
+						AlgebraProducts[j][xm2] := -7/4096;
+						AlgebraProducts[j][y] := 7/32;
+						
+						for k in [1..Size(Orbitals[j])] do
+							x := Position(T,Orbitals[j][k][1]);
+							y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,Orbitals[j][k][2])];
+							GramMatrix[x][y]:=0;
+						od;
+					else
+						
+						l:=1;
+						
+                        while l<t+1 do
+                            if T[l]*h in T and Order(s*T[l]*h) = 2 then
+
+                                z:=T[l];
+                                
+                                if s*z*h in T then
+									
+									x2A := Position( T, s*z*h);
+									x2 := Position( T, z*h*h);
+									x3 := Position( T, z*h^3);
+									x4 := Position( T, z*h^4);
+
+									# Use values to work out inner product
+										
+									for k in [1..Size(Orbitals[j])] do
+										
+										s := Orbitals[j][k][1];
+										h := Orbitals[j][k][2];
+									
+										x0 := Position(T,Orbitals[j][k][1]);
+										x1 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,Orbitals[j][k][2])];
+										
+										GramMatrix[x0][x1] :=  - GramMatrix[l][x2A]/8 + (13*GramMatrix[x][l] + GramMatrix[x][x2] + GramMatrix[x][x3] + GramMatrix[x][x4])/128;
+									od;
+
+                                else
+
+									x2 := Position( T, z*h*h);
+									x3 := Position( T, z*h^3);
+									x4 := Position( T, z*h^4);
+										
+									for k in [1..Size(Orbitals[j])] do
+									
+										s := Orbitals[j][k][1];
+										h := Orbitals[j][k][2];
+									
+										x0 := Position(T,Orbitals[j][k][1]);
+										x1 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,Orbitals[j][k][2])];
+										
+										GramMatrix[x0][x1] := (-3*GramMatrix[x][l] + GramMatrix[x][x2] + GramMatrix[x][x3] + GramMatrix[x][x4])/128;
+									od;
+
+                                fi;
+                                
+                                l:=t+1;
+                                
+                            else
+                                l:=l+1;
+                            fi;
+						od;
+					fi;
+					
+				# 3,3 values
+                
+                elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 3 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+                
+					if x = y then
+					
+						AlgebraProducts[j] := NullMat(1,dim)[1];
+						
+						AlgebraProducts[j][x] := 1;
+						
+					else
+						for m in [1..Size(Orbitals[j])] do
+									
+							h := Orbitals[j][m][1];
+							k := Orbitals[j][m][2];
+						
+							x := positionlist[t + Position(long3Aaxes,h)];
+							y := positionlist[t + Position(long3Aaxes,k)];
+
+							while l < t+1 do
+							
+								s:=T[l];
+								
+								if s*h in T and s*k in T then
+								
+									x1:=Position(T,s*h);
+									x2:=Position(T,s*h*h);
+									x3:=Position(T,s*k);
+									x4:=Position(T,s*k*k);
+
+									if GramMatrix[x1][y] <> false and GramMatrix[x2][y] <> false then
+
+										GramMatrix[x][y]:= 64*( -3*GramMatrix[x1][y] + GramMatrix[x2][y])/135 + 2048*(GramMatrix[x1][x3] + GramMatrix[x1][x4])/1215 + 16/243;
+
+										l:=t+1;
+									else
+										l:=l+1;
+									fi;
+								else
+									l:=l+1;
+								fi;
+							od;
+						od;
+					fi;
+					
+				# (3,4) values
+					
+				elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 4 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+					
+					for m in [1..Size(Orbitals[j])] do
+									
+						h := Orbitals[j][m][1];
+						k := Orbitals[j][m][2];
+					
+						x := positionlist[t + Position(long3Aaxes,h)];
+						y := positionlist[t + 2*u + Position(long4Aaxes,k)];
+
+						while l < t+1 do
+						
+							s:=T[l];
+							
+							if s*h in T and s*k in T then
+							
+								x1:=Position(T,s*h);
+								x2:=Position(T,s*h*h);
+								x3:=Position(T,s*k);
+								x4:=Position(T,s*k*k);
+								x5:=Position(T,s*k*k*k);
+
+								if (GramMatrix[x1][y] <> false) and
+								   (GramMatrix[x2][y] <> false) and
+								   (GramMatrix[x3][y] <> false) then
+
+									l:=t+1;
+
+									GramMatrix[x][y]:= 64*( -4*GramMatrix[x1][y] + GramMatrix[x2][y] +4*GramMatrix[x1][x3] +2*GramMatrix[x1][x4] + 4*GramMatrix[x1][x5])/135 + 127/270;
+
+									l:=t+1;
+								else
+									l:=l+1;
+								fi;
+							else
+								l:=l+1;
+							fi;
+						od;
+					od;
+					
+				# (3,5) values
+				
+				elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 5 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+					
+					for m in [1..Size(Orbitals[j])] do
+									
+						h := Orbitals[j][m][1];
+						k := Orbitals[j][m][2];
+					
+						x := positionlist[t + Position(long3Aaxes,h)];
+						y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,k)];
+
+						while l < t+1 do
+						
+							s:=T[l];
+							
+							if s*h in T and s*k in T then
+							
+								x1:=Position(T,s*h);
+								x2:=Position(T,s*h*h);
+								x3:=Position(T,s*k);
+								x4:=Position(T,s*k*k);
+								x5:=Position(T,s*k*k*k);
+								x6:=Position(T,s*k*k*k*k);
+
+								if (GramMatrix[x1][y] <> false) and
+								   (GramMatrix[x2][y] <> false) then
+
+									GramMatrix[x][y]:= 64*( -5*GramMatrix[x1][y] + GramMatrix[x2][y])/135 - 7*(GramMatrix[x1][x3] - GramMatrix[x1][x4] - GramMatrix[x1][x5] + GramMatrix[x1][x6])/270;
+									
+									l:=t+1;
+								else
+									l:=l+1;
+								fi;
+							else
+								l:=l+1;
+							fi;
+						od;
+					od;
+					
+				# (4,4) values
+				
+				elif Order(coordinates[x]) = 4 and Order(coordinates[y]) = 4 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+                
+					if x = y then
+					
+						AlgebraProducts[j] := NullMat(1,dim)[1];
+						
+						AlgebraProducts[j][x] := 1;
+						
+					else
+						for m in [1..Size(Orbitals[j])] do
+									
+							h := Orbitals[j][m][1];
+							k := Orbitals[j][m][2];
+						
+							x := positionlist[t + 2*u + Position(long4Aaxes,h)];
+							y := positionlist[t + 2*u + Position(long4Aaxes,k)];
+
+							while l < t+1 do
+							
+								s:=T[l];
+								
+								if s*h in T and s*k in T then
+								
+									x1:=Position(T,s*h);
+									x2:=Position(T,s*h*h);
+									x3:=Position(T,s*h*h*h);
+									x4:=Position(T,s*k);
+									x5:=Position(T,s*k*k);
+									x6:=Position(T,s*k*k*k);
+
+									if (GramMatrix[x1][y] <> false) and
+									   (GramMatrix[x2][y] <> false) and
+									   (GramMatrix[x3][y] <> false) then
+
+										l:=t+1;
+
+										GramMatrix[x][y]:= ( -9*GramMatrix[x1][y] + GramMatrix[x2][y] + GramMatrix[x3][y] + 8*GramMatrix[x1][x4] +4*GramMatrix[x1][x5] +8*GramMatrix[x1][x6])/3 + 1/6;
+										
+
+										l:=t+1;
+									else
+										l:=l+1;
+									fi;
+								else
+									l:=l+1;
+								fi;
+							od;
+						od;
+					fi;
+					
+				# (4,5) values
+				
+				elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 5 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+					
+					for m in [1..Size(Orbitals[j])] do
+									
+						h := Orbitals[j][m][1];
+						k := Orbitals[j][m][2];
+					
+						x := positionlist[t + 2*u + Position(long4Aaxes,h)];
+						y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,k)];
+
+						while l < t+1 do
+						
+							s:=T[l];
+							
+							if s*h in T and s*k in T then
+							
+								x1:=Position(T,s*h);
+								x2:=Position(T,s*h*h);
+								x3:=Position(T,s*h*h*h);
+								x4:=Position(T,s*k);
+								x5:=Position(T,s*k*k);
+								x6:=Position(T,s*k*k*k);
+								x7:=Position(T,s*k*k*k*k);
+
+								if (GramMatrix[x1][y] <> false) and
+								   (GramMatrix[x2][y] <> false) and
+								   (GramMatrix[x3][y] <> false) then
+									l:=t+1;
+
+									GramMatrix[x][y]:= ( -11*GramMatrix[x1][y] + GramMatrix[x2][y] + GramMatrix[x3][y])/3+ 7*(GramMatrix[x1][x4] - GramMatrix[x1][x5] - GramMatrix[x1][x6]+ GramMatrix[x1][x6])/192;
+                                
+									l:=t+1;
+								else
+									l:=l+1;
+								fi;
+							else
+								l:=l+1;
+							fi;
+						od;
+					od;
+				
+				# (5,5) values
+				
+				elif Order(coordinates[x]) = 5 and Order(coordinates[y]) = 5 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+                
+					if x = y then					
+
+						l:=1;
+		
+						while l < t+1 do
+						
+							if T[l]*h in T then
+							
+								s:=T[l]; x1:=Position(T,s*h); x2:=Position(T,s*h*h); x3:=Position(T,s*h*h*h); x4:=Position(T,s*h*h*h*h);
+		
+								AlgebraProducts[j]:=NullMat(1,dim)[1];
+		
+								AlgebraProducts[j][l]:=175/524288;
+								AlgebraProducts[j][x1]:=175/524288;
+								AlgebraProducts[j][x2]:=175/524288;
+								AlgebraProducts[j][x3]:=175/524288;
+								AlgebraProducts[j][x4]:=175/524288;
+		
+								l:=t+1;
+							else
+								l:=l+1;
+							fi;
+						od;
+						
+					else
+						for m in [1..Size(Orbitals[j])] do
+									
+							h := Orbitals[j][m][1];
+							k := Orbitals[j][m][2];
+						
+							x := positionlist[t + 2*u + 2*v + Position(long5Aaxes,h)];
+							y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,k)];
+
+							while l < t+1 do
+							
+								s:=T[l];
+								
+								if s*h in T and s*k in T then
+								
+									x1:=Position(T,s*h);
+									x2:=Position(T,s*h*h);
+									x3:=Position(T,s*h*h*h);
+									x4:=Position(T,s*h*h*h*h);
+									x5:=Position(T,s*k);
+									x6:=Position(T,s*k*k);
+									x7:=Position(T,s*k*k*k);
+									x8:=Position(T,s*k*k*k*k);
+
+									if (GramMatrix[x1][y] <> false) and
+									   (GramMatrix[x2][y] <> false) and
+									   (GramMatrix[x3][y] <> false) and
+									   (GramMatrix[x4][y] <> false) then
+
+										GramMatrix[x][y]:= ( 25*GramMatrix[x1][y] + GramMatrix[x2][y] + GramMatrix[x3][y] + GramMatrix[x4][y])/128+ 7*(GramMatrix[x1][x5] - GramMatrix[x1][x6] - GramMatrix[x1][x7]+ GramMatrix[x1][x8])/4096;
+
+										l:=t+1;
+									else
+										l:=l+1;
+									fi;
+								else
+									l:=l+1;
+								fi;
+							od;
+						od;
+					fi;
+					
                 fi;
             od;
 
@@ -1637,594 +2336,72 @@ function(G,T)
                 LI:=0;
             fi;
 
-            if LI=0 then
+#            if LI=0 then
 
-                n:=Size(NullSpT);
+#                n:=Size(NullSpT);
 
-                Display(n);
+#                Display(n);
 
-                T:=T{[1..t-n]};
+#                T:=T{[1..t-n]};
 
                 # Change Gram matrix to get rid of any axes not in basis
 
-                GramMatrix:=GramMatrix{Concatenation([1..t-n],[t+1..dim])};
+#                GramMatrix:=GramMatrix{Concatenation([1..t-n],[t+1..dim])};
 
-                for j in [1..dim-n] do
-                    GramMatrix[j]:=GramMatrix[j]{Concatenation([1..t-n],[t+1..dim])};
-                od;
+ #               for j in [1..dim-n] do
+#                    GramMatrix[j]:=GramMatrix[j]{Concatenation([1..t-n],[t+1..dim])};
+#                od;
 
                 # Change alg products to get rid of any axes not in the basis
 
-                AlgebraProducts:=AlgebraProducts{Concatenation([1..t-n],[t+1..dim])};
+#                AlgebraProducts:=AlgebraProducts{Concatenation([1..t-n],[t+1..dim])};
 
-                for j in [1..dim-n] do
-                    AlgebraProducts[j]:=AlgebraProducts[j]{Concatenation([1..t-n],[t+1..dim])};
-                od;
+ #               for j in [1..dim-n] do
+#                    AlgebraProducts[j]:=AlgebraProducts[j]{Concatenation([1..t-n],[t+1..dim])};
+#                od;
 
-                for j in [1..n] do
-                    for k in [1..dim-n] do
-                        for l in [1..dim-n] do
-                            if AlgebraProducts[k][l] <> false then
-                                AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSpT[j]*AlgebraProducts[k][l][dim-j+1];
-                            fi;
-                        od;
-                    od;
-                od;
+#                for j in [1..n] do
+#                    for k in [1..dim-n] do
+#                        for l in [1..dim-n] do
+#                            if AlgebraProducts[k][l] <> false then
+#                                AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSpT[j]*AlgebraProducts[k][l][dim-j+1];
+#                            fi;
+#                        od;
+#                    od;
+#                od;
 
-                for j in [1..dim] do
-                    for k in [1..dim] do
-                        if AlgebraProducts[j][k] <> false then
-                            AlgebraProducts[j][k]:=AlgebraProducts[j][k]{Concatenation([1..t-n],[t+1..dim])};
-                        fi;
-                    od;
-                od;
+ #               for j in [1..dim] do
+#                    for k in [1..dim] do
+#                        if AlgebraProducts[j][k] <> false then
+#                            AlgebraProducts[j][k]:=AlgebraProducts[j][k]{Concatenation([1..t-n],[t+1..dim])};
+#                        fi;
+#                    od;
+#                od;
 
                 # Change evecs to get rid of any axes not in the basis
 
-                for j in [1..t] do
-                    for k in [1..3] do
-                        for l in [1..Size(EigenVectors[j][k])] do
-                            for m in [1..Size(NullSpT)] do
-                                EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSpT[m]*EigenVectors[j][k][l][dim - m+1];
-                            od;
-                            EigenVectors[j][k][l]:=EigenVectors[j][k][l]{Concatenation([1..t-n],[t+1..dim])};
-                        od;
-                    od;
-                od;
+#                for j in [1..t] do
+#                    for k in [1..3] do
+#                        for l in [1..Size(EigenVectors[j][k])] do
+#                            for m in [1..Size(NullSpT)] do
+#                                EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSpT[m]*EigenVectors[j][k][l][dim - m+1];
+#                            od;
+#                            EigenVectors[j][k][l]:=EigenVectors[j][k][l]{Concatenation([1..t-n],[t+1..dim])};
+#                        od;
+#                    od;
+#                od;
 
-                t:=t-n;
+#                t:=t-n;
 
-                dim:=dim-n;
-
-
-
-            else
-                dim:=t+u+v+w;
-            fi;
+#                dim:=dim-n;
+#            else
+#                dim:=t+u+v+w;
+#            fi;
 
 
 
                                         ## STEP 4: MORE PRODUCTS ##
 
-            # (2,3) values
-
-            for j in [1..t] do
-                for k in [1 .. u] do
-                    x:=T[j]; h:=3Aaxes[k].1;
-
-                    if x*h in T then
-                        # D6
-
-                        GramMatrix[j][k+t] := 1/4;
-                        GramMatrix[k+t][j] := 1/4;
-
-                        # Products and eigenvalues were done in 2,2 case
-
-                    elif Order(x*h)=3 then
-
-                        # Case (2A,3A) in IPSS10
-
-                        GramMatrix[j][k+t] := 1/9;
-                        GramMatrix[k+t][j] := 1/9;
-
-                        xj:=Position(3Aaxes,Group(x*h*x));
-                        xk:=Position(3Aaxes,Group(h*x*h*h*x*h*h));
-                        xl:=Position(3Aaxes,Group(h*h*x*h*x*h));
-
-                        AlgebraProducts[j][k+t]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][k+t][j]:=1/9;
-                        AlgebraProducts[j][k+t][k+t]:=5/64;
-                        AlgebraProducts[j][k+t][xj+t]:=3/64;
-                        AlgebraProducts[j][k+t][xk+t]:=-1/16;
-                        AlgebraProducts[j][k+t][xl+t]:=-1/16;
-
-                        AlgebraProducts[k+t][j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[k+t][j][j]:=1/9;
-                        AlgebraProducts[k+t][j][k+t]:=5/64;
-                        AlgebraProducts[k+t][j][xj+t]:=3/64;
-                        AlgebraProducts[k+t][j][xk+t]:=-1/16;
-                        AlgebraProducts[k+t][j][xl+t]:=-1/16;
-
-                    elif Order(x*h)=4 then
-                        if (x*h)^2 in T then
-
-                            # Case (2A,3A) in IPSS10
-
-                            GramMatrix[j][k+t] := 1/36;
-                            GramMatrix[k+t][j] := 1/36;
-
-                            xik:=Position(T,h*h*x*h);
-                            xil:=Position(T,h*x*h*h);
-                            xjk:=Position(T,x*h*h*x*h*x);
-                            xjl:=Position(T,x*h*x*h*h*x);
-                            xkl:=Position(T,h*x*h*x*h*h*x*h*h);
-                            xx:=Position(T,h*h*x*h*x*h*h);
-                            xj:=Position(3Aaxes,Group(x*h*x));
-                            xk:=Position(3Aaxes,Group(h*h*x*h*x*h));
-                            xl:=Position(3Aaxes,Group(h*x*h*x*h*h));
-
-                            AlgebraProducts[j][k+t]:=NullMat(1,dim)[1];
-
-                            AlgebraProducts[j][k+t][j]:=1/45;
-                            AlgebraProducts[j][k+t][k+t]:=1/64;
-                            AlgebraProducts[j][k+t][xik]:=-1/90;
-                            AlgebraProducts[j][k+t][xil]:=-1/90;
-                            AlgebraProducts[j][k+t][xjk]:=-1/90;
-                            AlgebraProducts[j][k+t][xjl]:=-1/90;
-                            AlgebraProducts[j][k+t][xkl]:=1/45;
-                            AlgebraProducts[j][k+t][xx]:=-1/45;
-                            AlgebraProducts[j][k+t][xj+t]:=-1/64;
-                            AlgebraProducts[j][k+t][xk+t]:=1/64;
-                            AlgebraProducts[j][k+t][xl+t]:=1/64;
-
-                            AlgebraProducts[k+t][j]:=NullMat(1,dim)[1];
-
-                            AlgebraProducts[k+t][j][j]:=1/45;
-                            AlgebraProducts[k+t][j][k+t]:=1/64;
-                            AlgebraProducts[k+t][j][xik]:=-1/90;
-                            AlgebraProducts[k+t][j][xil]:=-1/90;
-                            AlgebraProducts[k+t][j][xjk]:=-1/90;
-                            AlgebraProducts[k+t][j][xjl]:=-1/90;
-                            AlgebraProducts[k+t][j][xkl]:=1/45;
-                            AlgebraProducts[k+t][j][xx]:=-1/45;
-                            AlgebraProducts[k+t][j][xj+t]:=-1/64;
-                            AlgebraProducts[k+t][j][xk+t]:=1/64;
-                            AlgebraProducts[k+t][j][xl+t]:=1/64;
-
-                        else
-                            GramMatrix[j][k+t] := -13/8192;
-                            GramMatrix[k+t][j] := -13/8192;
-
-                            # Means we have to add extra vectors on, might need to do this at the end, this is case (2B,3A) in IPSS10 ******************************
-
-                            Print("Not 2-closed, have a Maj rep of s4 of shape (2B,3A) for (2,3) value with [j,k] =",[j,k]);
-
-                        fi;
-                    else
-                        l:=1;
-                        while l<t+1 do
-                            s:=T[l];
-                            if s*h in T and Order(x*s*h) = 2 then
-                            
-                                l := t+1;
-                                    
-                                if x*s*h in T then
-                                    m := 1;
-
-                                    # Need to know values of (a_t,a_s) and (a_s, a_{tsh}) and (a_t, a_{sh^2})
-
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [s,x*s*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-
-                                    # Use values to work out inner product
-
-                                    GramMatrix[j][k+t] := (64/135)*(-2*MAJORANA_Form(str1) + 4*MAJORANA_Form(str2) + MAJORANA_Form(str3)) + 1/45;
-                                    GramMatrix[k+t][j]:=GramMatrix[j][k+t];
-
-                                else
-
-                                    # Need to know values of (a_t,a_s) and (a_t, a_{sh^2})
-                                    
-                                    m:=1;
-
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-
-                                    # Use values to work out inner product
-
-                                    GramMatrix[j][k+t] := (64/135)*(2*MAJORANA_Form(str1) + MAJORANA_Form(str3));
-                                    GramMatrix[k+t][j]:=GramMatrix[j][k+t];
-
-                                fi;
-                            else
-                                l:=l+1;
-                            fi;
-                        od;
-                    fi;
-                od;
-            od;
-
-            l:=1;
-
-            # (2,4) values
-
-            for j in [1..t] do
-                for k in [1 .. v] do
-                    x:=T[j]; h:=4Aaxes[k].1;
-                    if x*h in T then
-
-                        # D8
-
-                        GramMatrix[j][k+t+u] := 3/8;
-                        GramMatrix[k+t+u][j] := 3/8;
-
-                        # Prod done in 2,2 case
-
-                    else
-                        l:=1;
-                        while l<t+1 do
-                            if T[l]*h in T and Order(x*T[l]*h) = 2 then
-
-                                s:=T[l];
-                                l := t+1;
-
-                                if x*s*h in T then
-
-                                    # Need to know values of (a_t,a_s) and (a_s, a_{tsh}), (a_t, a_{sh^2}) and (a_t, a_{sh^3})
-                                    
-                                    m:=1;
-
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                        od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [s,x*s*h] in OrbitalsT[m] then str4:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-
-                                    # Use values to work out inner product
-
-                                    GramMatrix[j][k+t+u] := ( - 5*MAJORANA_Form(str1) + MAJORANA_Form(str2) +MAJORANA_Form(str3) + 8*MAJORANA_Form(str4))/3 +1/24;
-                                    GramMatrix[k+t+u][j]:=GramMatrix[j][k+t+u];
-
-                                else
-
-                                    # Need to know values of (a_t,a_s), (a_t, a_{sh^2}) and (a_t, a_{sh^3})
-                                    
-                                    m:=1;
-
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-
-                                    # Use values to work out inner product
-
-                                    GramMatrix[j][k+t+u] := (3*MAJORANA_Form(str1) + MAJORANA_Form(str2) + 2*MAJORANA_Form(str3))/3;
-                                    GramMatrix[k+t+u][j]:=GramMatrix[j][k+t+u];
-
-                                fi;
-                            else
-                                l:=l+1;
-                            fi;
-                        od;
-                    fi;
-                od;
-            od;
-            l:=1;
-
-            # (2,5) values
-
-            for j in [1..t] do
-                for k in [1 .. w] do
-                    x:=T[j]; h:=5AaxesFixed[k][1];
-
-                    if x*h in T then
-
-                        # D10
-
-                        GramMatrix[j][k+t+u+v] := 0;
-                        GramMatrix[k+t+u+v][j] := 0;
-
-                        # Products done in 2,2 case
-
-                    else
-                        l:=1;
-                        while l<t+1 do
-                            if T[l]*h in T and Order(x*T[l]*h) = 2 then
-                                s:=T[l];
-                                l:=t+1; m:=1;
-                                if x*s*h in T then
-
-                                    # Need to know values of (a_t,a_s) and (a_s, a_{tsh}), (a_t, a_{sh^2}), (a_t, a_{sh^3}) and (a_t, a_{sh^4})
-                                    
-                                    m:=1;
-
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [s,x*s*h] in OrbitalsT[m] then str2:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h*h] in OrbitalsT[m] then str4:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h*h*h] in OrbitalsT[m] then str5:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-
-
-                                    # Use values to work out inner product
-
-                                    GramMatrix[j][k+t+u+v] :=  - MAJORANA_Form(str2)/8 + (13*MAJORANA_Form(str1) + MAJORANA_Form(str3) + MAJORANA_Form(str4) + MAJORANA_Form(str5))/128;
-                                    GramMatrix[k+t+u+v][j]:=GramMatrix[j][k+t+u+v];
-
-                                else
-
-                                    # Need to know values of (a_t,a_s), (a_t, a_{sh^2}), (a_t, a_{sh^3}) and (a_t, a_{sh^4})
-                                    
-                                    m:=1;
-
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s] in OrbitalsT[m] then str1:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h] in OrbitalsT[m] then str3:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h*h] in OrbitalsT[m] then str4:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-                                    while m < SizeOrbitalsT+1  do
-                                        if [x,s*h*h*h*h] in OrbitalsT[m] then str5:=Shape[m]; m:=SizeOrbitalsT+1; else m:=m+1; fi;
-                                    od; m:=1;
-
-                                    # Use values to work out inner product
-
-                                    GramMatrix[j][k+t+u+v] := (-3*MAJORANA_Form(str1) + MAJORANA_Form(str3) +MAJORANA_Form(str4) +MAJORANA_Form(str5))/128;
-                                    GramMatrix[k+t+u+v][j]:=GramMatrix[j][k+t+u+v];
-
-                                fi;
-                            else
-                                l:=l+1;
-                            fi;
-                        od;
-                    fi;
-                od;
-            od;
-
-            l:=1;
-
-            # (3,3) values
-
-            for j in [1..u] do
-                for n in [j+1..u] do
-                    h:=3Aaxes[j].1; k:=3Aaxes[n].1; l:=1;
-                    while l < t+1 do
-                        x:=T[l];
-                        if x*h in T and x*k in T then
-                            x1:=Position(T,x*h);
-                            x2:=Position(T,x*h*h);
-                            x3:=Position(T,x*k);
-                            x4:=Position(T,x*k*k);
-
-                            if GramMatrix[x1][t+n] <> false and GramMatrix[x2][t+n] <> false then
-
-                                GramMatrix[t+j][t+n]:= 64*( -3*GramMatrix[x1][t+n] + GramMatrix[x2][t+n])/135 + 2048*(GramMatrix[x1][x3] + GramMatrix[x1][x4])/1215 + 16/243;
-                                GramMatrix[t+n][t+j]:=GramMatrix[t+j][t+n];
-
-                                l:=t+1;
-                            else
-                                l:=l+1;
-                            fi;
-                        else
-                            l:=l+1;
-                        fi;
-                    od;
-                od;
-            od;
-
-            l:=1;
-
-            # (3,4) values
-
-            for j in [1..u] do
-                for n in [1..v] do
-                    h:=3Aaxes[j].1; k:=4Aaxes[n].1; l:=1;
-                    while l < t+1 do
-                        x:=T[l];
-                        if x*h in T and x*k in T then
-
-                            x1:=Position(T,x*h);
-                            x2:=Position(T,x*h*h);
-                            x3:=Position(T,x*k);
-                            x4:=Position(T,x*k*k);
-                            x5:=Position(T,x*k*k*k);
-
-                            if (GramMatrix[x1][t+u+n] <> false) and
-                               (GramMatrix[x2][t+u+n] <> false) and
-                               (GramMatrix[x3][t+u+n] <> false) then
-
-                                l:=t+1;
-
-                                GramMatrix[t+j][t+u+n]:= 64*( -4*GramMatrix[x1][t+u+n] + GramMatrix[x2][t+u+n] +4*GramMatrix[x1][x3] +2*GramMatrix[x1][x4] + 4*GramMatrix[x1][x5])/135 + 127/270;
-                                GramMatrix[t+u+n][t+j]:=GramMatrix[t+j][t+u+n];
-                            else
-                                l:=l+1;
-                            fi;
-                        else
-                            l:=l+1;
-                        fi;
-                    od;
-                od;
-            od;
-
-            l:=1;
-
-            # (3,5) values
-
-            for j in [1..u] do
-                for n in [1..w] do
-                    h:=3Aaxes[j].1; k:=5AaxesFixed[n][1]; l:=1;
-                    while l < t+1 do
-                        x:=T[l];
-                        if x*h in T and x*k in T then
-                            x1:=Position(T,x*h);
-                            x2:=Position(T,x*h*h);
-                            x3:=Position(T,x*k);
-                            x4:=Position(T,x*k*k);
-                            x5:=Position(T,x*k*k*k);
-                            x6:=Position(T,x*k*k*k*k);
-
-                            if (GramMatrix[x1][t+u+v+n] <> false) and
-                               (GramMatrix[x2][t+u+v+n] <> false) then
-                                l:=t+1;
-
-                                GramMatrix[t+j][t+u+v+n]:= 64*( -5*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n])/135 - 7*(GramMatrix[x1][x3] - GramMatrix[x1][x4] - GramMatrix[x1][x5] + GramMatrix[x1][x6])/270;
-                                GramMatrix[t+u+v+n][t+j]:=GramMatrix[t+j][t+u+v+n];
-                            else
-                                l:=l+1;
-                            fi;
-                        else
-                            l:=l+1;
-                        fi;
-                    od;
-                od;
-            od;
-
-            l:=1;
-
-            # (4,4) values
-
-            for j in [1..v] do
-                for n in [j+1..v] do
-                    h:=4Aaxes[j].1; k:=4Aaxes[n].1; l:=1;
-                    while l < t+1 do
-                        x:=T[l];
-                        if x*h in T and x*k in T then
-
-                            x1:=Position(T,x*h);
-                            x2:=Position(T,x*h*h);
-                            x3:=Position(T,x*h*h*h);
-                            x4:=Position(T,x*k);
-                            x5:=Position(T,x*k*k);
-                            x6:=Position(T,x*k*k*k);
-
-                            if (GramMatrix[x1][t+u+n] <> false) and
-                               (GramMatrix[x2][t+u+n] <> false) and
-                               (GramMatrix[x3][t+u+n] <> false) then
-
-                                l:=t+1;
-
-                                GramMatrix[t+u+j][t+u+n]:= ( -9*GramMatrix[x1][t+u+n] + GramMatrix[x2][t+u+n] + GramMatrix[x3][t+u+n] + 8*GramMatrix[x1][x4] +4*GramMatrix[x1][x5] +8*GramMatrix[x1][x6])/3 + 1/6;
-                                GramMatrix[t+u+n][t+u+j]:=GramMatrix[t+u+j][t+u+n];
-                            else
-                                l:=l+1;
-                            fi;
-                        else
-                            l:=l+1;
-                        fi;
-                    od;
-                od;
-            od;
-
-            l:=1;
-
-            # (4,5) values
-
-            for j in [1..v] do
-                for n in [1..w] do
-                    h:=4Aaxes[j].1; k:=5AaxesFixed[n][1]; l:=1;
-                    while l < t+1 do
-                        x:=T[l];
-                        if  x*h in T and x*k in T then
-                            x1:=Position(T,x*h);
-                            x2:=Position(T,x*h*h);
-                            x3:=Position(T,x*h*h*h);
-                            x4:=Position(T,x*k);
-                            x5:=Position(T,x*k*k);
-                            x6:=Position(T,x*k*k*k);
-                            x7:=Position(T,x*k*k*k*k);
-
-                            if (GramMatrix[x1][t+u+v+n] <> false) and
-                               (GramMatrix[x2][t+u+v+n] <> false) and
-                               (GramMatrix[x3][t+u+v+n] <> false) then
-                                l:=t+1;
-
-                                GramMatrix[t+u+j][t+u+v+n]:= ( -11*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n] + GramMatrix[x3][t+u+v+n])/3+ 7*(GramMatrix[x1][x4] - GramMatrix[x1][x5] - GramMatrix[x1][x6]+ GramMatrix[x1][x6])/192;
-                                GramMatrix[t+u+v+n][t+u+j]:=GramMatrix[t+u+j][t+u+v+n];
-                            else
-                                l:=l+1;
-                            fi;
-                        else
-                            l:=l+1;
-                        fi;
-                    od;
-                od;
-            od;
-
-            l:=1;
-
-            # (5,5) values
-
-            for j in [1..w] do
-                for n in [j+1..w] do
-                    h:=5AaxesFixed[j][1]; k:=5AaxesFixed[n][1]; l:=1;
-                    while l < t+1 do
-                        x:=T[l];
-                        if  x*h in T and x*k in T then
-                            x1:=Position(T,x*h);
-                            x2:=Position(T,x*h*h);
-                            x3:=Position(T,x*h*h*h);
-                            x4:=Position(T,x*h*h*h*h);
-                            x5:=Position(T,x*k);
-                            x6:=Position(T,x*k*k);
-                            x7:=Position(T,x*k*k*k);
-                            x8:=Position(T,x*k*k*k*k);
-
-                            if (GramMatrix[x1][t++v+n] <> false) and
-                               (GramMatrix[x2][t+u+v+n] <> false) and
-                               (GramMatrix[x3][t+u+v+n] <> false) and
-                               (GramMatrix[x4][t+u+v+n] <> false) then
-
-                                l:=t+1;
-
-                                GramMatrix[t+u+v+j][t+u+v+n]:= ( 25*GramMatrix[x1][t+u+v+n] + GramMatrix[x2][t+u+v+n] + GramMatrix[x3][t+u+v+n] + GramMatrix[x4][t+u+v+n])/128+ 7*(GramMatrix[x1][x5] - GramMatrix[x1][x6] - GramMatrix[x1][x7]+ GramMatrix[x1][x8])/4096;
-                                GramMatrix[t+u+v+n][t+j+u+v]:=GramMatrix[t+u+v+j][t+u+v+n];
-                            else
-                                l:=l+1;
-                            fi;
-                        else
-                            l:=l+1;
-                        fi;
-                    od;
-                od;
-            od;
 
             # Redo 2,3 vals
 
@@ -2987,7 +3164,7 @@ function(G,T)
 
                                 # calculate lhs
 
-                                x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts);
+                                x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,ProductList);
 
                                 if x <> false then
                                     for n in [1..dim] do
@@ -3014,7 +3191,7 @@ function(G,T)
                                 od;
 
                                 Append(mat,[row]);
-                                Append(vec,[Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts)/4]);
+                                Append(vec,[Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4]);
                                 Append(record,[[1,j,k,l,m]]);
 
                             od;
@@ -3028,7 +3205,7 @@ function(G,T)
 
                                 # calculate lhs
 
-                                x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts);
+                                x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,ProductList);
 
                                 if x <> false then
                                     for n in [1..dim] do
@@ -3058,7 +3235,7 @@ function(G,T)
 
                                 if x<> false then
                                     Append(mat,[row]);
-                                    Append(vec,[Sum(sum)+MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts)/4 - x*a/4]);
+                                    Append(vec,[Sum(sum)+MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)/4 - x*a/4]);
                                     Append(record,[[2,j,k,l,m]]);
                                 fi;
                             od;
@@ -3227,9 +3404,9 @@ function(G,T)
 
                                 # calculate knowns
 
-                                Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts),AlgebraProducts)]);
+                                Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,ProductList),AlgebraProducts,ProductList)]);
 
-                                Append(sum,-[MAJORANA_AlgebraProduct(EigenVectors[j][1][l],wbeta,AlgebraProducts)]/4);
+                                Append(sum,-[MAJORANA_AlgebraProduct(EigenVectors[j][1][l],wbeta,AlgebraProducts,ProductList)]/4);
 
                                 Append(mat,[row]);
                                 Append(vec,[Sum(sum)]);
@@ -3268,9 +3445,9 @@ function(G,T)
 
                                 # calculate knowns
 
-                                Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts),AlgebraProducts)]);
+                                Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,ProductList),AlgebraProducts,ProductList)]);
 
-                                Append(sum,[MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts)]/4);
+                                Append(sum,[MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)]/4);
 
                                 x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix);
 
