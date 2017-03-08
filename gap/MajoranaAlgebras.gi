@@ -87,7 +87,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix)
                 if x <> false then
                     if MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> false and
                        MAJORANA_AlgebraProduct( u, x, AlgebraProducts ) <> ev * x then
-                        Error("fusion error: ");
+                        # Error("fusion error: ");
 
                         return [false, StructuralCopy([ Shape
                                        , "Error"
