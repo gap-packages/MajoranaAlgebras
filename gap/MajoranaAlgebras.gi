@@ -2881,8 +2881,8 @@ function(G,T)
 
             # Use eigenvectors to find more products
 
-            UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
             for j in [1..t] do
+                UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
                 if Size(UnknownAlgebraProducts) > 0 then
 
                     mat:=NullMat(Size(Union(EigenVectors[j][1],EigenVectors[j][2],EigenVectors[j][3])),Size(UnknownAlgebraProducts));
