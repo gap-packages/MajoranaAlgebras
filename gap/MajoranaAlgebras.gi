@@ -525,7 +525,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         if s > 0 then
                             vec[s]:=u[i]*v[i]*x[k];
                         else
-                            vec[s]:=-u[i]*v[i]*x[k];
+                            vec[-s]:=-u[i]*v[i]*x[k];
                         fi;
                     od;
                     sum:=sum + vec;
@@ -761,7 +761,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
         );
 
-InstallGlobalFunction(MAJORANA_Orthogonality,
+InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
         function(T,GramMatrix,AlgebraProducts,EigenVectors,positionlist) # Tests that eigenspaces are orthogonal with respect to the inner product
 
@@ -870,33 +870,6 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
 
         );
 
-#InstallGlobalFunction(MAJORANA_Form,
-
- #       function(str) # Outputs value of bilinear product depending on shape of orbital
-
-#        if str = ['1','A'] then
-#            return 1;
-#        elif str = ['2','A'] then
-#            return 1/8;
-#        elif str = ['2','B'] then
-#            return 0;
-#        elif str = ['3','A'] then
-#            return 13/256;
-#        elif str = ['3','C'] then
-#            return 1/64;
-#        elif str = ['4','A'] then
-#            return 1/32;
-#        elif str = ['4','B'] then
-#            return 1/64;
-#        elif str = ['5','A'] then
-#            return 3/128;
-#        elif str = ['6','A'] then
-#            return 5/256;
-#        fi;
-#        end
-
-#       );
-
 InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
 function(GramMatrix, Orbitals, longcoordinates, positionlist, dim)
@@ -916,6 +889,75 @@ function(GramMatrix, Orbitals, longcoordinates, positionlist, dim)
 	od;
 	
 	return GramMatrixFull;
+	
+	end
+	
+	);
+	
+InstallGlobalFunction(MAJORANA_Orthogonality,
+
+function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim) 
+
+	local mat, vec, sum, i, j, k, l, m;
+	
+	mat := [];
+	vec := [];
+
+	if a = 0 then
+	
+		for i in [1..Size(EigenVectors[n][b])] do
+
+			sum:=[];
+
+			Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
+
+			for j in [1..dim] do
+			
+				m := pairorbitlist[j][representatives[n]];
+
+				if GramMatrix[m] <> false then
+					Add(sum,-EigenVectors[n][b][i][j]*GramMatrix[m]);
+				else
+					mat[Size(mat)][Position(UnknownInnerProducts,m)]:=EigenVectors[n][b][i][j];
+				fi;
+
+			od;
+
+			Add(vec,[Sum(sum)]);
+
+		od;
+	
+	else
+	
+		for i in [1..Size(EigenVectors[n][a])] do
+			for j in [1..Size(EigenVectors[n][b])] do
+
+				sum:=[];
+				
+				Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
+
+				for k in [1..dim] do
+					for l in [1..dim] do
+					
+						m := pairorbitlist[k][l];
+
+						if GramMatrix[m] <> false then
+							Add(sum,-EigenVectors[n][a][i][k]*EigenVectors[n][b][j][l]*GramMatrix[m]);
+						else
+							mat[Size(mat)][Position(UnknownInnerProducts,m)]:=EigenVectors[n][a][i][k]*EigenVectors[n][b][j][l];
+						fi;
+
+					od;
+				od;
+
+				Add(vec,[Sum(sum)]);
+				
+			od;
+		od;
+	
+	fi;
+	
+	return [mat,vec];
 	
 	end
 	
@@ -1225,13 +1267,6 @@ function(G,T)
             od;
 
             ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist];
-
-#           5AaxesFixed:=NullMat(w,0);
-#
- #           for j in [1..w] do
- #               x:=5Aaxes[j].1;
- #               5AaxesFixed[j]:=[x,x^4];
- #           od;
 
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
@@ -1637,14 +1672,14 @@ function(G,T)
                             sign:=1;
                         fi;
 
-                        AlgebraProducts[x][y]:=NullMat(1,dim)[1];
+                        AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        AlgebraProducts[x][y][x]:=3/128;
-                        AlgebraProducts[x][y][y]:=3/128;
-                        AlgebraProducts[x][y][xm1]:=-1/128;
-                        AlgebraProducts[x][y][x2]:=-1/128;
-                        AlgebraProducts[x][y][xm2]:=-1/128;
-                        AlgebraProducts[x][y][x5] := sign*1;
+                        AlgebraProducts[j][x]:=3/128;
+                        AlgebraProducts[j][y]:=3/128;
+                        AlgebraProducts[j][xm1]:=-1/128;
+                        AlgebraProducts[j][x2]:=-1/128;
+                        AlgebraProducts[j][xm2]:=-1/128;
+                        AlgebraProducts[j][x5] := sign*1;
 
                         GramMatrix[j]:=3/128;
 
@@ -2481,12 +2516,10 @@ function(G,T)
 
             UnknownInnerProducts:=[];
 
-            for j in [1..dim] do
-                for k in [j..dim] do
-                    if GramMatrix[j][k] = false then
-                        Add(UnknownInnerProducts,[j,k]);
-                    fi;
-                od;
+            for j in [1..SizeOrbitals] do
+				if GramMatrix[j] = false then
+					Add(UnknownInnerProducts,j);
+				fi;
             od;
 
             # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
@@ -2495,213 +2528,50 @@ function(G,T)
 
                 mat:=[];
                 vec:=[];
-                record:=[];
 
-                for j in [1..t] do
+                for j in [1..SizeOrbitsT] do
 
                     # 1- eigenvectors and 0-eigenvectors
+                    
+                    x := MAJORANA_Orthogonality(0,1,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);  
 
-                    for k in [1..Size(EigenVectors[j][1])] do
-
-                        sum:=[];
-
-                        Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-
-                        for m in [1..j] do
-
-                            if GramMatrix[m][j] <> false then
-                                Add(sum,-EigenVectors[j][1][k][m]*GramMatrix[j][m]);
-                            else
-                                mat[Size(mat)][Position(UnknownInnerProducts,[m,j])]:=EigenVectors[j][1][k][m];
-                            fi;
-
-                        od;
-
-                        for m in [j+1..dim] do
-
-                            if GramMatrix[j][m] <> false then
-                                Add(sum,-EigenVectors[j][1][k][m]*GramMatrix[j][m]);
-                            else
-                                mat[Size(mat)][Position(UnknownInnerProducts,[j,m])]:=EigenVectors[j][1][k][m];
-                            fi;
-
-                        od;
-
-                        Add(vec,[Sum(sum)]);
-                        Add(record,[1,j,k]);
-
-                    od;
+					Append(mat,x[1]);
+					Append(vec,x[2]);
 
                     # 1- eigenvectors and 1/4-eigenvectors
+                    
+                    x := MAJORANA_Orthogonality(0,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim); 
 
-                    for k in [1..Size(EigenVectors[j][2])] do
-
-                        sum:=[];
-
-                        Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-
-                        for m in [1..j] do
-
-                            if GramMatrix[m][j] <> false then
-                                Add(sum,-EigenVectors[j][2][k][m]*GramMatrix[j][m]);
-                            else
-                                mat[Size(mat)][Position(UnknownInnerProducts,[m,j])]:=EigenVectors[j][2][k][m];
-                            fi;
-
-                        od;
-
-                        for m in [j+1..dim] do
-
-                            if GramMatrix[j][m] <> false then
-                                Add(sum,-EigenVectors[j][2][k][m]*GramMatrix[j][m]);
-                            else
-                                mat[Size(mat)][Position(UnknownInnerProducts,[j,m])]:=EigenVectors[j][2][k][m];
-                            fi;
-
-                        od;
-
-                        Add(vec,[Sum(sum)]);
-                        Add(record,[2,j,k]);
-
-                    od;
+					Append(mat,x[1]);
+					Append(vec,x[2]);
 
                     # 1- eigenvectors and 1/32-eigenvectors
 
-                    for k in [1..Size(EigenVectors[j][3])] do
+					x := MAJORANA_Orthogonality(0,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim); 
 
-                        sum:=[];
-
-                        Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-
-                        for m in [1..j] do
-
-                            if GramMatrix[m][j] <> false then
-                                Add(sum,-EigenVectors[j][3][k][m]*GramMatrix[j][m]);
-                            else
-                                mat[Size(mat)][Position(UnknownInnerProducts,[m,j])]:=EigenVectors[j][3][k][m];
-                            fi;
-
-                        od;
-
-                        for m in [j+1..dim] do
-
-                            if GramMatrix[j][m] <> false then
-                                Add(sum,-EigenVectors[j][3][k][m]*GramMatrix[j][m]);
-                            else
-                                mat[Size(mat)][Position(UnknownInnerProducts,[j,m])]:=EigenVectors[j][3][k][m];
-                            fi;
-
-                        od;
-
-                        Add(vec,[Sum(sum)]);
-                        Add(record,[3,j,k]);
-
-                    od;
+					Append(mat,x[1]);
+					Append(vec,x[2]);
 
                     # 0-eigenvectors and 1/4-eigenvectors
 
-                    for k in [1..Size(EigenVectors[j][1])] do
-                        for l in [1..Size(EigenVectors[j][2])] do
+                    x := MAJORANA_Orthogonality(1,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim); 
 
-                            sum:=[];
-                            Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-
-                            for m in [1..dim] do
-                                for n in [1..m] do
-
-                                    if GramMatrix[n][m] <> false then
-                                        Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n]*GramMatrix[m][n]);
-                                    else
-                                        mat[Size(mat)][Position(UnknownInnerProducts,[n,m])]:=EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n];
-                                    fi;
-
-                                od;
-
-                                for n in [m+1..dim] do
-
-                                    if GramMatrix[m][n] <> false then
-                                        Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n]*GramMatrix[m][n]);
-                                    else
-                                        mat[Size(mat)][Position(UnknownInnerProducts,[m,n])]:=EigenVectors[j][1][k][m]*EigenVectors[j][2][l][n];
-                                    fi;
-                                od;
-                            od;
-
-                            Add(vec,[Sum(sum)]);
-                            Add(record,[4,j,k,l]);
-
-                        od;
-                    od;
+					Append(mat,x[1]);
+					Append(vec,x[2]);
 
                     # 0-eigenvectors and 1/32-eigenvectors
 
-                    for k in [1..Size(EigenVectors[j][1])] do
-                        for l in [1..Size(EigenVectors[j][3])] do
+                    x := MAJORANA_Orthogonality(1,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim); 
 
-                            sum:=[];
-                            Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-
-                            for m in [1..dim] do
-                                for n in [1..m] do
-
-                                    if GramMatrix[n][m] <> false then
-                                        Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
-                                    else
-                                        mat[Size(mat)][Position(UnknownInnerProducts,[n,m])]:=EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n];
-                                    fi;
-
-                                od;
-
-                                for n in [m+1..dim] do
-
-                                    if GramMatrix[m][n] <> false then
-                                        Add(sum,-EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
-                                    else
-                                        mat[Size(mat)][Position(UnknownInnerProducts,[m,n])]:=EigenVectors[j][1][k][m]*EigenVectors[j][3][l][n];
-                                    fi;
-                                od;
-                            od;
-
-                            Add(vec,[Sum(sum)]);
-                            Add(record,[5,j,k,l]);
-
-                        od;
-                    od;
+					Append(mat,x[1]);
+					Append(vec,x[2]);
 
                     # 1/4-eigenvectors and 1/32-eigenvectors
 
-                    for k in [1..Size(EigenVectors[j][2])] do
-                        for l in [1..Size(EigenVectors[j][3])] do
+					x := MAJORANA_Orthogonality(2,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim); 
 
-                            sum:=[];
-                            Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
-
-                            for m in [1..dim] do
-                                for n in [1..m] do
-
-                                    if GramMatrix[n][m] <> false then
-                                        Add(sum,-EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
-                                    else
-                                        mat[Size(mat)][Position(UnknownInnerProducts,[n,m])]:=EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n];
-                                    fi;
-
-                                od;
-
-                                for n in [m+1..dim] do
-
-                                    if GramMatrix[m][n] <> false then
-                                        Add(sum,-EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n]*GramMatrix[m][n]);
-                                    else
-                                        mat[Size(mat)][Position(UnknownInnerProducts,[m,n])]:=EigenVectors[j][2][k][m]*EigenVectors[j][3][l][n];
-                                    fi;
-                                od;
-                            od;
-
-                            Add(vec,[Sum(sum)]);
-                            Add(record,[6,j,k,l]);
-
-                        od;
-                    od;
+					Append(mat,x[1]);
+					Append(vec,x[2]);
                 od;
 
                 Solution:=MAJORANA_SolutionMatVecs(mat,vec);
@@ -2726,7 +2596,6 @@ function(G,T)
                                  , "Inconsistent system of unknown inner products"
                                  , mat
                                  , vec
-                                 , record
                                  , EigenVectors
                                  , AlgebraProducts
                                  , GramMatrix
@@ -3401,7 +3270,7 @@ function(G,T)
 
             # Check that the eigenspaces are orthogonal
 
-            ErrorOrthogonality:=MAJORANA_Orthogonality(T,GramMatrix,AlgebraProducts,EigenVectors,positionlist);
+            ErrorOrthogonality:=MAJORANA_TestOrthogonality(T,GramMatrix,AlgebraProducts,EigenVectors,positionlist);
 
             if ForAny(ErrorOrthogonality,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Eigenspaces are not orthogonal with respect to the inner product",GramMatrix,AlgebraProducts,EigenVector,ErrorOrthogonality];
