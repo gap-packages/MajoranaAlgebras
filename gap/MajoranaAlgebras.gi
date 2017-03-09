@@ -893,6 +893,26 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
 
 #       );
 
+InstallGlobalFunction(MAJORANA_FillGramMatrix,
+
+function(GramMatrix, Orbitals, longcoordinates, positionlist)
+
+	local i, j, x, y, GramMatrixFull;
+	
+	for i in [1..Size(GramMatrix)] do
+		for j in [1..Size(Orbitals[i])] do
+		
+			x := positionlist[Position(longcoordinates,Orbitals[i][1])];
+			y := positionlist[Position(longcoordinates,Orbitals[i][2])];
+			
+			GramMatrixFull[x][y] := GramMatrix[i];
+		od;	
+	od;
+	
+	end
+	
+	);
+
 InstallGlobalFunction(MajoranaRepresentation,
 
 function(G,T)
@@ -1217,19 +1237,23 @@ function(G,T)
 
             # Set up Gram matrix
 
-            GramMatrix := NullMat(dim,dim);
+            GramMatrix := 
+            
+            NullMat(dim,dim);
             for j in [1..dim] do
                 for k in [1..dim] do
                     GramMatrix[j][k] := false;
                 od;
             od;
 
-            # Set up algebra product matrix
+            # Set up algebra product and gram matrices
 
             AlgebraProducts := NullMat(1,SizeOrbitals)[1];
-
+			GramMatrix := NullMat(1,SizeOrbitals)[1];
+			
             for j in [1..SizeOrbitals] do
                 AlgebraProducts[j]:=false;
+                GramMatrix[j]:=false;
             od;
 
             # Set up eigenvector matrix
@@ -1251,21 +1275,21 @@ function(G,T)
 
             # (2,2) products and eigenvectors from IPSS10
 
-            for j in [1..t] do
-                GramMatrix[j][j]:=1;
-            od;
+#            for j in [1..t] do
+#                GramMatrix[j][j]:=1;
+#            od;
 
-            for j in [t+1..t+u] do
-                GramMatrix[j][j]:=8/5;
-            od;
+#            for j in [t+1..t+u] do
+#                GramMatrix[j][j]:=8/5;
+#            od;
 
-            for j in [t+u+1..t+u+v] do
-                GramMatrix[j][j]:=2;
-            od;
+#            for j in [t+u+1..t+u+v] do
+#                GramMatrix[j][j]:=2;
+#            od;
 
-            for j in [t+u+v+1..t+u+v+w] do
-                GramMatrix[j][j]:=125*7/2^(19);
-            od;
+#            for j in [t+u+v+1..t+u+v+w] do
+#                GramMatrix[j][j]:=125*7/2^(19);
+#            od;
 
             # Add eigenvectors from IPSS10
 
@@ -1559,22 +1583,14 @@ function(G,T)
                         AlgebraProducts[j][x]:= 1/8;
                         AlgebraProducts[j][y]:= 1/8;
                         AlgebraProducts[j][x2]:=-1/8;
-
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=1/8;
-                        od;
+                        
+                        GramMatrix[j] := 1/8;
 
                     elif Shape[j] = ['2','B'] then
 
                         AlgebraProducts[j]:=NullMat(1,dim)[1];
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=0;
-                        od;
+                        GramMatrix[j]:=0;
 
                     elif Shape[j] = ['3','A'] then
 
@@ -1588,11 +1604,7 @@ function(G,T)
                         AlgebraProducts[j][xm1]:=1/32;
                         AlgebraProducts[j][x3]:= - 135/2048;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=13/256;
-                        od;
+                        GramMatrix[j]:=13/256;
 
                     elif Shape[j] = ['3','C'] then
 
@@ -1604,11 +1616,7 @@ function(G,T)
                         AlgebraProducts[j][y]:=1/64;
                         AlgebraProducts[j][xm1]:=-1/64;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=1/64;
-                        od;
+                        GramMatrix[j]:=1/64;
 
                     elif Shape[j] = ['4','A'] then
 
@@ -1624,11 +1632,7 @@ function(G,T)
                         AlgebraProducts[j][x2]:=1/64;
                         AlgebraProducts[j][x4]:= -3/64;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=1/32;
-                        od;
+                        GramMatrix[j]:=1/32;
 
                     elif Shape[j] = ['4','B'] then
 
@@ -1644,11 +1648,7 @@ function(G,T)
                         AlgebraProducts[j][x2]:=-1/64;
                         AlgebraProducts[j][x4]:= 1/64;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=1/64;
-                        od;
+                        GramMatrix[j]:=1/64;
 
                     elif  Shape[j] = ['5','A'] then
 
@@ -1673,11 +1673,7 @@ function(G,T)
                         AlgebraProducts[x][y][xm2]:=-1/128;
                         AlgebraProducts[x][y][x5] := sign*1;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=3/128;
-                        od;
+                        GramMatrix[j]:=3/128;
 
                     elif Shape[j] = ['6','A'] then
 
@@ -1699,11 +1695,7 @@ function(G,T)
                         AlgebraProducts[j][x2A] := 1/64;
                         AlgebraProducts[j][t+x3A] := 45/2048;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := Position(T,Orbitals[j][k][2]);
-                            GramMatrix[x][y]:=5/256;
-                        od;
+                        GramMatrix[j]:=5/256;
                     fi;
 
                 # 2,3 products
@@ -1725,18 +1717,14 @@ function(G,T)
                         AlgebraProducts[j][xm1]:=-1/9;
                         AlgebraProducts[j][y]:=5/32;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := positionlist[t + Position(long3Aaxes,Orbitals[j][k][2])];
-                            GramMatrix[x][y]:=1/4;
-                        od;
+                        GramMatrix[x][y]:=1/4;
+
                     elif Order(coordinates[x]*coordinates[y]) = 3 then
 
                         s := coordinates[x]; h := coordinates[y];
 
                         # Case (2A,3A) in IPSS10
-
-
+                        
                         xj := positionlist[t + Position(long3Aaxes,s*h*s)];
                         xk := positionlist[t + Position(long3Aaxes,h*s*h*h*s*h*h)];
                         xl := positionlist[t + Position(long3Aaxes,h*h*s*h*s*h)];
@@ -1749,11 +1737,8 @@ function(G,T)
                         AlgebraProducts[j][xk]:=-1/16;
                         AlgebraProducts[j][xl]:=-1/16;
 
-                        for k in [1..Size(Orbitals[j])] do
-                            x := Position(T,Orbitals[j][k][1]);
-                            y := positionlist[t + Position(long3Aaxes,Orbitals[j][k][2])];
-                            GramMatrix[x][y]:=1/9;
-                        od;
+                        GramMatrix[j]:=1/9;
+                        
                     elif Order(coordinates[x]*coordinates[y]) =4 and (coordinates[x]*coordinates[y])^2 in T then
 
 						s := coordinates[x]; h := coordinates[y];
@@ -1784,11 +1769,8 @@ function(G,T)
 						AlgebraProducts[j][xk]:=1/64;
 						AlgebraProducts[j][xl]:=1/64;
 
-						for k in [1..Size(Orbitals[j])] do
-							x := Position(T,Orbitals[j][k][1]);
-							y := positionlist[t + Position(long3Aaxes,Orbitals[j][k][2])];
-							GramMatrix[x][y]:=1/36;
-						od;
+						GramMatrix[j]:=1/36;
+
                     else
                         l:=1;
                         while l<t+1 do
@@ -1802,31 +1784,13 @@ function(G,T)
 									
 									# Use values to work out inner product
 										
-									for k in [1..Size(Orbitals[j])] do
-									
-										s := Orbitals[j][k][1];
-										h := Orbitals[j][k][2];
-									
-										x0 := Position(T,s);
-										x1 := positionlist[t + Position(long3Aaxes,h)];
-										GramMatrix[x0][x1] := (64/135)*(-2*GramMatrix[x][l] + 4*GramMatrix[l][x2A] + GramMatrix[x][x2]) + 1/45;
+									GramMatrix[j] := (64/135)*(-2*GramMatrix[pairorbitlist[x][l]] + 4*GramMatrix[pairorbitlist[l][x2A]] + GramMatrix[pairorbitlist[x][x2]]) + 1/45;
 										
-									od;
 								else
 								
 									x2 := Position( T, z*h*h);
-									
-									# Use values to work out inner product
-									for k in [1..Size(Orbitals[j])] do
-										
-										s := Orbitals[j][k][1];
-										h := Orbitals[j][k][2];
-									
-										x0 := Position(T,s);
-										x1 := positionlist[t + Position(long3Aaxes,h)];
-										GramMatrix[x0][x1] := (64/135)*(2*GramMatrix[x][l] + GramMatrix[x][x2]);
-										
-									od;
+
+									GramMatrix[j] := (64/135)*(2*GramMatrix[pairorbitlist[x][l]] + GramMatrix[pairorbitlist[x][x2]]);
 
                                 fi;
                                 
@@ -1861,11 +1825,7 @@ function(G,T)
 						AlgebraProducts[j][x2]:=-1/16;
 						AlgebraProducts[j][y]:= 3/16;
 						
-						for k in [1..Size(Orbitals[j])] do
-							x := Position(T,Orbitals[j][k][1]);
-							y := positionlist[t + 2*u + Position(long4Aaxes,Orbitals[j][k][2])];
-							GramMatrix[x][y]:=3/8;
-						od;
+						GramMatrix[j]:=3/8;
 
 					else
 					
@@ -1882,32 +1842,19 @@ function(G,T)
 									x2 := Position( T, z*h*h);
 									x3 := Position( T, z*h^3);
 										
-									for k in [1..Size(Orbitals[j])] do
-									
-										s := Orbitals[j][k][1];
-										h := Orbitals[j][k][2];
-									
-										x0 := Position(T,s);
-										x1 := positionlist[t + 2*u + Position(long4Aaxes,h)];
-										
-										GramMatrix[x0][x1] := ( - 5*GramMatrix[x][l] + GramMatrix[x][x2] + GramMatrix[x][x3] + 8*GramMatrix[l][x2A])/3 +1/24;
-									od;
+									GramMatrix[j] := ( 	- 5*GramMatrix[pairorbitlist[x][l]] 
+														+ GramMatrix[pairorbitlist[x][x2]] 
+														+ GramMatrix[pairorbitlist[x][x3]] 
+														+ 8*GramMatrix[pairorbitlist[l][x2A]])/3 +1/24;
 
                                 else
                                 
 									x2 := Position( T, z*h*h);
 									x3 := Position( T, z*h^3);
 										
-									for k in [1..Size(Orbitals[j])] do
-									
-										s := Orbitals[j][k][1];
-										h := Orbitals[j][k][2];
-									
-										x0 := Position(T,s);
-										x1 := positionlist[t + 2*u + Position(long4Aaxes,h)];
-										
-										GramMatrix[x][y] := (3*GramMatrix[x][l] + GramMatrix[x][x2] + 2*GramMatrix[x][x3])/3;
-									od;
+									GramMatrix[j] := (3*GramMatrix[pairorbitlist[x][l]]
+														+ GramMatrix[pairorbitlist[x][x2]]
+														+ 2*GramMatrix[pairorbitlist[x][x3]])/3;
 
                                 fi;
                                 
@@ -1943,12 +1890,8 @@ function(G,T)
 						AlgebraProducts[j][x2] := -7/4096;
 						AlgebraProducts[j][xm2] := -7/4096;
 						AlgebraProducts[j][y] := 7/32;
-						
-						for k in [1..Size(Orbitals[j])] do
-							x := Position(T,Orbitals[j][k][1]);
-							y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,Orbitals[j][k][2])];
-							GramMatrix[x][y]:=0;
-						od;
+
+						GramMatrix[j]:=0;
 					else
 						
 						l:=1;
@@ -1967,16 +1910,11 @@ function(G,T)
 
 									# Use values to work out inner product
 										
-									for k in [1..Size(Orbitals[j])] do
-										
-										s := Orbitals[j][k][1];
-										h := Orbitals[j][k][2];
-									
-										x0 := Position(T,Orbitals[j][k][1]);
-										x1 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,Orbitals[j][k][2])];
-										
-										GramMatrix[x0][x1] :=  - GramMatrix[l][x2A]/8 + (13*GramMatrix[x][l] + GramMatrix[x][x2] + GramMatrix[x][x3] + GramMatrix[x][x4])/128;
-									od;
+									GramMatrix[j] :=  	- GramMatrix[pairorbitlist[l][x2A]]/8
+														+ (13*GramMatrix[pairorbitlist[x][l]]
+														+ GramMatrix[pairorbitlist[x][x2]]
+														+ GramMatrix[pairorbitlist[x][x3]]
+														+ GramMatrix[pairorbitlist[x][x4]])/128;
 
                                 else
 
@@ -1984,16 +1922,10 @@ function(G,T)
 									x3 := Position( T, z*h^3);
 									x4 := Position( T, z*h^4);
 										
-									for k in [1..Size(Orbitals[j])] do
-									
-										s := Orbitals[j][k][1];
-										h := Orbitals[j][k][2];
-									
-										x0 := Position(T,Orbitals[j][k][1]);
-										x1 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,Orbitals[j][k][2])];
-										
-										GramMatrix[x0][x1] := (-3*GramMatrix[x][l] + GramMatrix[x][x2] + GramMatrix[x][x3] + GramMatrix[x][x4])/128;
-									od;
+									GramMatrix[j] := (	-3*GramMatrix[pairorbitlist[x][l]]
+														+ GramMatrix[pairorbitlist[x][x2]]
+														+ GramMatrix[pairorbitlist[x][x3]]
+														+ GramMatrix[pairorbitlist[x][x4]])/128;
 
                                 fi;
                                 
@@ -2018,38 +1950,37 @@ function(G,T)
 						
 						AlgebraProducts[j][x] := 1;
 						
-					else
-						for m in [1..Size(Orbitals[j])] do
-									
-							h := Orbitals[j][m][1];
-							k := Orbitals[j][m][2];
+						GramMatrix[j] := 8/5;
 						
-							x := positionlist[t + Position(long3Aaxes,h)];
-							y := positionlist[t + Position(long3Aaxes,k)];
+					else
 
-							while l < t+1 do
+
+						while l < t+1 do
+						
+							s:=T[l];
 							
-								s:=T[l];
-								
-								if s*h in T and s*k in T then
-								
-									x1:=Position(T,s*h);
-									x2:=Position(T,s*h*h);
-									x3:=Position(T,s*k);
-									x4:=Position(T,s*k*k);
+							if s*h in T and s*k in T then
+							
+								x1:=Position(T,s*h);
+								x2:=Position(T,s*h*h);
+								x3:=Position(T,s*k);
+								x4:=Position(T,s*k*k);
 
-									if GramMatrix[x1][y] <> false and GramMatrix[x2][y] <> false then
+								if 	(GramMatrix[pairorbitlist[x1][y]] <> false) and 
+									(GramMatrix[pairorbitlist[x2][y]] <> false) then
 
-										GramMatrix[x][y]:= 64*( -3*GramMatrix[x1][y] + GramMatrix[x2][y])/135 + 2048*(GramMatrix[x1][x3] + GramMatrix[x1][x4])/1215 + 16/243;
+									GramMatrix[j]:= 64*( -3*GramMatrix[pairorbitlist[x1][y]]
+														+ GramMatrix[pairorbitlist[x2][y]])/135
+														+ 2048*(GramMatrix[pairorbitlist[x1][x3]]
+														+ GramMatrix[pairorbitlist[x1][x4]])/1215 + 16/243;
 
-										l:=t+1;
-									else
-										l:=l+1;
-									fi;
+									l:=t+1;
 								else
 									l:=l+1;
 								fi;
-							od;
+							else
+								l:=l+1;
+							fi;
 						od;
 					fi;
 					
@@ -2060,43 +1991,37 @@ function(G,T)
 					h := coordinates[x];
 					k := coordinates[y];
 					
-					for m in [1..Size(Orbitals[j])] do
-									
-						h := Orbitals[j][m][1];
-						k := Orbitals[j][m][2];
+					while l < t+1 do
 					
-						x := positionlist[t + Position(long3Aaxes,h)];
-						y := positionlist[t + 2*u + Position(long4Aaxes,k)];
-
-						while l < t+1 do
+						s:=T[l];
 						
-							s:=T[l];
-							
-							if s*h in T and s*k in T then
-							
-								x1:=Position(T,s*h);
-								x2:=Position(T,s*h*h);
-								x3:=Position(T,s*k);
-								x4:=Position(T,s*k*k);
-								x5:=Position(T,s*k*k*k);
+						if s*h in T and s*k in T then
+						
+							x1:=Position(T,s*h);
+							x2:=Position(T,s*h*h);
+							x3:=Position(T,s*k);
+							x4:=Position(T,s*k*k);
+							x5:=Position(T,s*k*k*k);
 
-								if (GramMatrix[x1][y] <> false) and
-								   (GramMatrix[x2][y] <> false) and
-								   (GramMatrix[x3][y] <> false) then
+							if (GramMatrix[pairorbitlist[x1][y]] <> false) and
+							   (GramMatrix[pairorbitlist[x2][y]] <> false) and
+							   (GramMatrix[pairorbitlist[x3][y]] <> false) then
 
-									l:=t+1;
+								GramMatrix[j]:= 64*( -4*GramMatrix[pairorbitlist[x1][y]]
+													+ GramMatrix[pairorbitlist[x2][y]]
+													+ 4*GramMatrix[pairorbitlist[x1][x3]]
+													+ 2*GramMatrix[pairorbitlist[x1][x4]]
+													+ 4*GramMatrix[pairorbitlist[x1][x5]])/135 + 127/270;
 
-									GramMatrix[x][y]:= 64*( -4*GramMatrix[x1][y] + GramMatrix[x2][y] +4*GramMatrix[x1][x3] +2*GramMatrix[x1][x4] + 4*GramMatrix[x1][x5])/135 + 127/270;
-
-									l:=t+1;
-								else
-									l:=l+1;
-								fi;
+								l:=t+1;
 							else
 								l:=l+1;
 							fi;
-						od;
+						else
+							l:=l+1;
+						fi;
 					od;
+
 					
 				# (3,5) values
 				
@@ -2104,41 +2029,37 @@ function(G,T)
                 
 					h := coordinates[x];
 					k := coordinates[y];
-					
-					for m in [1..Size(Orbitals[j])] do
-									
-						h := Orbitals[j][m][1];
-						k := Orbitals[j][m][2];
-					
-						x := positionlist[t + Position(long3Aaxes,h)];
-						y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,k)];
 
-						while l < t+1 do
+					while l < t+1 do
+					
+						s:=T[l];
 						
-							s:=T[l];
-							
-							if s*h in T and s*k in T then
-							
-								x1:=Position(T,s*h);
-								x2:=Position(T,s*h*h);
-								x3:=Position(T,s*k);
-								x4:=Position(T,s*k*k);
-								x5:=Position(T,s*k*k*k);
-								x6:=Position(T,s*k*k*k*k);
+						if s*h in T and s*k in T then
+						
+							x1:=Position(T,s*h);
+							x2:=Position(T,s*h*h);
+							x3:=Position(T,s*k);
+							x4:=Position(T,s*k*k);
+							x5:=Position(T,s*k*k*k);
+							x6:=Position(T,s*k*k*k*k);
 
-								if (GramMatrix[x1][y] <> false) and
-								   (GramMatrix[x2][y] <> false) then
+							if (GramMatrix[pairorbitlist[x1][y]] <> false) and
+							   (GramMatrix[pairorbitlist[x2][y]] <> false) then
 
-									GramMatrix[x][y]:= 64*( -5*GramMatrix[x1][y] + GramMatrix[x2][y])/135 - 7*(GramMatrix[x1][x3] - GramMatrix[x1][x4] - GramMatrix[x1][x5] + GramMatrix[x1][x6])/270;
-									
-									l:=t+1;
-								else
-									l:=l+1;
-								fi;
+								GramMatrix[j]:= 64*( -5*GramMatrix[pairorbitlist[x1][y]]
+													+ GramMatrix[pairorbitlist[x2][y]])/135 
+													- 7*(GramMatrix[pairorbitlist[x1][x3]]
+													- GramMatrix[pairorbitlist[x1][x4]]
+													- GramMatrix[pairorbitlist[x1][x5]]
+													+ GramMatrix[pairorbitlist[x1][x6]])/270;
+								
+								l:=t+1;
 							else
 								l:=l+1;
 							fi;
-						od;
+						else
+							l:=l+1;
+						fi;
 					od;
 					
 				# (4,4) values
@@ -2154,63 +2075,9 @@ function(G,T)
 						
 						AlgebraProducts[j][x] := 1;
 						
-					else
-						for m in [1..Size(Orbitals[j])] do
-									
-							h := Orbitals[j][m][1];
-							k := Orbitals[j][m][2];
+						GramMatrix[j] := 2;
 						
-							x := positionlist[t + 2*u + Position(long4Aaxes,h)];
-							y := positionlist[t + 2*u + Position(long4Aaxes,k)];
-
-							while l < t+1 do
-							
-								s:=T[l];
-								
-								if s*h in T and s*k in T then
-								
-									x1:=Position(T,s*h);
-									x2:=Position(T,s*h*h);
-									x3:=Position(T,s*h*h*h);
-									x4:=Position(T,s*k);
-									x5:=Position(T,s*k*k);
-									x6:=Position(T,s*k*k*k);
-
-									if (GramMatrix[x1][y] <> false) and
-									   (GramMatrix[x2][y] <> false) and
-									   (GramMatrix[x3][y] <> false) then
-
-										l:=t+1;
-
-										GramMatrix[x][y]:= ( -9*GramMatrix[x1][y] + GramMatrix[x2][y] + GramMatrix[x3][y] + 8*GramMatrix[x1][x4] +4*GramMatrix[x1][x5] +8*GramMatrix[x1][x6])/3 + 1/6;
-										
-
-										l:=t+1;
-									else
-										l:=l+1;
-									fi;
-								else
-									l:=l+1;
-								fi;
-							od;
-						od;
-					fi;
-					
-				# (4,5) values
-				
-				elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 5 then
-                
-					h := coordinates[x];
-					k := coordinates[y];
-					
-					for m in [1..Size(Orbitals[j])] do
-									
-						h := Orbitals[j][m][1];
-						k := Orbitals[j][m][2];
-					
-						x := positionlist[t + 2*u + Position(long4Aaxes,h)];
-						y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,k)];
-
+					else
 						while l < t+1 do
 						
 							s:=T[l];
@@ -2223,15 +2090,18 @@ function(G,T)
 								x4:=Position(T,s*k);
 								x5:=Position(T,s*k*k);
 								x6:=Position(T,s*k*k*k);
-								x7:=Position(T,s*k*k*k*k);
 
-								if (GramMatrix[x1][y] <> false) and
-								   (GramMatrix[x2][y] <> false) and
-								   (GramMatrix[x3][y] <> false) then
-									l:=t+1;
+								if (GramMatrix[pairorbitlist[x1][y]] <> false) and
+								   (GramMatrix[pairorbitlist[x2][y]] <> false) and
+								   (GramMatrix[pairorbitlist[x3][y]] <> false) then
 
-									GramMatrix[x][y]:= ( -11*GramMatrix[x1][y] + GramMatrix[x2][y] + GramMatrix[x3][y])/3+ 7*(GramMatrix[x1][x4] - GramMatrix[x1][x5] - GramMatrix[x1][x6]+ GramMatrix[x1][x6])/192;
-                                
+									GramMatrix[j]:= ( -	9*GramMatrix[pairorbitlist[x1][y]]
+													+ GramMatrix[pairorbitlist[x2][y]]
+													+ GramMatrix[pairorbitlist[x3][y]]
+													+ 8*GramMatrix[pairorbitlist[x1][x4]]
+													+ 4*GramMatrix[pairorbitlist[x1][x5]]
+													+ 8*GramMatrix[pairorbitlist[x1][x6]])/3 + 1/6;
+
 									l:=t+1;
 								else
 									l:=l+1;
@@ -2240,6 +2110,48 @@ function(G,T)
 								l:=l+1;
 							fi;
 						od;
+					fi;
+					
+				# (4,5) values
+				
+				elif Order(coordinates[x]) = 4 and Order(coordinates[y]) = 5 then
+                
+					h := coordinates[x];
+					k := coordinates[y];
+					
+					while l < t+1 do
+					
+						s:=T[l];
+						
+						if s*h in T and s*k in T then
+						
+							x1:=Position(T,s*h);
+							x2:=Position(T,s*h*h);
+							x3:=Position(T,s*h*h*h);
+							x4:=Position(T,s*k);
+							x5:=Position(T,s*k*k);
+							x6:=Position(T,s*k*k*k);
+							x7:=Position(T,s*k*k*k*k);
+
+							if (GramMatrix[pairorbitlist[x1][y]] <> false) and
+							   (GramMatrix[pairorbitlist[x2][y]] <> false) and
+							   (GramMatrix[pairorbitlist[x3][y]] <> false) then
+
+								GramMatrix[j]:= ( 	-11*GramMatrix[pairorbitlist[x1][y]]
+													+ GramMatrix[pairorbitlist[x2][y]]
+													+ GramMatrix[pairorbitlist[x3][y]])/3
+													+ 7*(GramMatrix[pairorbitlist[x1][x4]]
+													- GramMatrix[pairorbitlist[x1][x5]]
+													- GramMatrix[pairorbitlist[x1][x6]]
+													+ GramMatrix[pairorbitlist[x1][x7]])/192;
+							
+								l:=t+1;
+							else
+								l:=l+1;
+							fi;
+						else
+							l:=l+1;
+						fi;
 					od;
 				
 				# (5,5) values
@@ -2273,14 +2185,10 @@ function(G,T)
 							fi;
 						od;
 						
+						GramMatrix[j] := 875/2^(19);
+						
 					else
 						for m in [1..Size(Orbitals[j])] do
-									
-							h := Orbitals[j][m][1];
-							k := Orbitals[j][m][2];
-						
-							x := positionlist[t + 2*u + 2*v + Position(long5Aaxes,h)];
-							y := positionlist[t + 2*u + 2*v + Position(long5Aaxes,k)];
 
 							while l < t+1 do
 							
@@ -2297,12 +2205,19 @@ function(G,T)
 									x7:=Position(T,s*k*k*k);
 									x8:=Position(T,s*k*k*k*k);
 
-									if (GramMatrix[x1][y] <> false) and
-									   (GramMatrix[x2][y] <> false) and
-									   (GramMatrix[x3][y] <> false) and
-									   (GramMatrix[x4][y] <> false) then
+									if (GramMatrix[pairorbitlist[x1][y]] <> false) and
+									   (GramMatrix[pairorbitlist[x2][y]] <> false) and
+									   (GramMatrix[pairorbitlist[x3][y]] <> false) and
+									   (GramMatrix[pairorbitlist[x4][y]] <> false) then
 
-										GramMatrix[x][y]:= ( 25*GramMatrix[x1][y] + GramMatrix[x2][y] + GramMatrix[x3][y] + GramMatrix[x4][y])/128+ 7*(GramMatrix[x1][x5] - GramMatrix[x1][x6] - GramMatrix[x1][x7]+ GramMatrix[x1][x8])/4096;
+										GramMatrix[j]:= ( 25*GramMatrix[pairorbitlist[x1][y]]
+															+ GramMatrix[pairorbitlist[x2][y]]
+															+ GramMatrix[pairorbitlist[x3][y]]
+															+ GramMatrix[pairorbitlist[x4][y]])/128
+															+ 7*(GramMatrix[pairorbitlist[x1][x5]] 
+															- GramMatrix[pairorbitlist[x1][x6]]
+															- GramMatrix[pairorbitlist[x1][x7]]
+															+ GramMatrix[pairorbitlist[x1][x8]])/4096;
 
 										l:=t+1;
 									else
@@ -2320,13 +2235,13 @@ function(G,T)
 
             LI:=1;
 
-            GramMatrixT:=[];
+#            GramMatrixT:=[];
 
-            for j in [1..t] do
-                GramMatrixT[j]:=GramMatrix[j]{[1..t]};
-            od;
+#            for j in [1..t] do
+#                GramMatrixT[j]:=GramMatrix[j]{[1..t]};
+#            od;
 
-            x:=MAJORANA_PositiveDefinite(GramMatrixT);
+ #           x:=MAJORANA_PositiveDefinite(GramMatrixT);
 
             if x = -1 then
                 Output[i]:=[StructuralCopy(Shape),"Error","Inner product not positive definite on A", StructuralCopy(GramMatrixT)];
