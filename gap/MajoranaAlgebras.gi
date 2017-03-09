@@ -1083,17 +1083,17 @@ function(G,T)
             for j in [1..SizeOrbitalsT] do
                 if Shape[j]=['3','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
-                        Add(3Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
+                        Add(3Aaxes,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
                     od;
                 fi;
                 if Shape[j]=['4','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
-                        Add(4Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
+                        Add(4Aaxes,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
                     od;
                 fi;
                 if Shape[j]=['5','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
-                        Add(5Aaxes,Group(OrbitalsT[j][k][1]*OrbitalsT[j][k][2]));
+                        Add(5Aaxes,OrbitalsT[j][k][1]*OrbitalsT[j][k][2]);
                     od;
                 fi;
             od;
@@ -1101,18 +1101,6 @@ function(G,T)
             3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
-
-            for j in [1..u] do
-                3Aaxes[j] := 3Aaxes[j].1;
-            od;
-
-            for j in [1..v] do
-                4Aaxes[j] := 4Aaxes[j].1;
-            od;
-
-            for j in [1..w] do
-                5Aaxes[j] := 5Aaxes[j].1;
-            od;
 
             dim:=t+u+v+w;
 
@@ -1126,6 +1114,7 @@ function(G,T)
             long3Aaxes:=[];
             long4Aaxes:=[];
             long5Aaxes:=[];
+            
             positionlist:=[];
 
 			for j in [1..t] do
@@ -2432,6 +2421,7 @@ function(G,T)
                         Append(NewEigenVectors[j][3], fres[2]);
                     else
                         Output[i] := fres[2];
+                        Error("0, 1/32 fusion");
                         break;
                     fi;
 
