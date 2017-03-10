@@ -2856,175 +2856,182 @@ function(G,T)
 
 
             # Use eigenvectors to find more products
-            
-            UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
-            
-            mat := [];
-			vec := [];
-			record := [];
-            
-            if Size(UnknownAlgebraProducts) > 0 then
-
-				for j in [1..t] do
-                
-					if ForAny(UnknownAlgebraProducts, x -> x in pairorbitlist[j]) then 
-
-						for k in [1..Size(EigenVectors[j][1])] do
-
-							sum:=[];
-							
-							Add(mat,[1..dim]*0);
-
-							for l in [1..dim] do
-								if EigenVectors[j][1][k][l] <> 0 then
-								
-									a := [1..dim]*0; a[j] := 1;
-									b := [1..dim]*0; b[l] := 1;
-									
-									m := pairorbitlist[j][l];
-									
-									x := AlgebraProducts[m];
-									
-									if x <> false then
-										Add(sum, EigenVectors[j][1][k][l]*x);
-									else
-										mat[Size(mat)][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][1][k][l];
-									fi;
-								fi;
-							od;
-
-							x:=Sum(sum);
-
-							if x <> 0 then
-								if ForAll(mat[Size(mat)], x -> x = 0) then 
-									if ForAny( x , y -> y <> 0) then 
-										Error("Step 7 system");
-									else
-										Remove(mat);
-									fi;
-								else
-									Add(vec,x);
-									Add(record,[1,j,k]);
-								fi;
-							fi;
-							
-						od;
-
-						for k in [1..Size(EigenVectors[j][2])] do
-
-							sum:=[];
-							
-							Add(mat,[1..dim]*0);
-
-							for l in [1..dim] do
-								if EigenVectors[j][2][k][l] <> 0 then
-									
-									a := [1..dim]*0; a[j] := 1;
-									b := [1..dim]*0; b[l] := 1;
-								
-									m := pairorbitlist[j][l];
-									
-									x := AlgebraProducts[m];
-								
-									if x <> false then
-										Add(sum, EigenVectors[j][2][k][l]*x);
-									else
-										mat[Size(mat)][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][2][k][l];
-									fi;
-								fi;
-							od;
-							
-							x := (-1)*Sum(sum) + EigenVectors[j][2][k]/4;
-							
-							if ForAll(mat[Size(mat)], x -> x = 0) then 
-								if ForAny( x , y -> y <> 0) then 
-									Error("Step 7 system");
-								else
-									Remove(mat);
-								fi;
-							else
-								Add(vec,x);
-								Add(record,[2,j,k]);
-							fi;
-
-						od;
-
-						for k in [1..Size(EigenVectors[j][3])] do
-
-							sum:=[];
-							
-							Add(mat,[1..dim]*0);
-
-							for l in [1..dim] do
-								if EigenVectors[j][3][k][l] <> 0 then
-								
-									a := [1..dim]*0; a[j] := 1;
-									b := [1..dim]*0; b[l] := 1;
-								
-									m := pairorbitlist[j][l];
-									
-									x := AlgebraProducts[m];
-								
-									if x <> false then
-										Add(sum, EigenVectors[j][3][k][l]*x);
-									else
-										mat[Size(mat)][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][3][k][l];
-									fi;
-								fi;
-							od;
-
-							x := (-1)*Sum(sum) + EigenVectors[j][3][k]/32;
-							
-							if ForAll(mat[Size(mat)], x -> x = 0) then 
-								if ForAny( x , y -> y <> 0) then 
-									Error("Step 7 system");
-								else
-									Remove(mat);
-								fi;
-							else
-								Add(vec,x);
-								Add(record,[3,j,k]);
-							fi;
-
-						od;
+            			
+			for j in [1..t] do
+			
+				a := [1..dim]*0; a[j]:=1;
+			
+				UnknownAlgebraProducts := [];
+			
+				for k in [1..SizeOrbitals] do
+				
+					if AlgebraProducts[k] = false and pairrepresentatives[k][1] = j then 
+						Add(UnknownAlgebraProducts,k);
 					fi;
+						
+				od;
+				
+				if UnknownAlgebraProducts <> [] then 
+					
+					mat := [];
+					vec := [];
+					record := [];
+					
+					for l in [1..Size(EigenVectors[j][1])] do
+					
+						Add(mat,[1..Size(UnknownAlgebraProducts)]*0);
+						sum := [];
+						
+						for m in [1..dim] do 
+							if EigenVectors[j][1][l][m] <> 0 then
+								
+								x := pairorbitlist[j][m];
+								
+								if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
+									Remove(mat); 
+									break;
+								elif AlgebraProducts[x] = false then 
+									mat[Size(mat)][Position(UnknownAlgebraProducts,x)] := EigenVectors[j][1][l][m];
+								else 
+									b := [1..dim]*0; b[m] := 1;
+									sum := sum + EigenVectors[j][1][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+								fi;
+							fi;
+						od;
+						
+						x := -sum;
+						
+						if sum <> [] then
+							if ForAll(mat[Size(mat)], x -> x = 0) then 
+								if ForAny( x , y -> y <> 0) then 
+									Error("Step 7 system 1");
+								else
+									Remove(mat);
+								fi;
+							else
+								Add(vec,x);
+								Add(record,[1,j,l]);
+							fi;
+						else
+							Remove(mat);
+						fi;
+						
+					od;
+					
+					for l in [1..Size(EigenVectors[j][2])] do
+					
+						Add(mat,[1..Size(UnknownAlgebraProducts)]*0);
+						sum := [];
+						
+						for m in [1..dim] do 
+							if EigenVectors[j][2][l][m] <> 0 then
+								
+								x := pairorbitlist[j][m];
+								
+								if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
+									Remove(mat); 
+									break;
+								elif AlgebraProducts[x] = false then 
+									mat[Size(mat)][Position(UnknownAlgebraProducts,x)] := EigenVectors[j][2][l][m];
+								else 
+									b := [1..dim]*0; b[m] := 1;
+									sum := sum + EigenVectors[j][2][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+								fi;
+							fi;
+						od;
+						
+						x := -sum + EigenVectors[j][2][l]/4;
 
+						if sum <> [] then
+							if ForAll(mat[Size(mat)], x -> x = 0) then 
+								if ForAny( x , y -> y <> 0) then 
+									Error("Step 7 system 1");
+								else
+									Remove(mat);
+								fi;
+							else
+								Add(vec,x);
+								Add(record,[2,j,l]);
+							fi;
+						else
+							Remove(mat);
+						fi;
+						
+					od;
+					
+					for l in [1..Size(EigenVectors[j][3])] do
+					
+						Add(mat,[1..Size(UnknownAlgebraProducts)]*0);
+						sum := [];
+						
+						for m in [1..dim] do 
+							if EigenVectors[j][3][l][m] <> 0 then
+								
+								x := pairorbitlist[j][m];
+								
+								if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
+									Remove(mat); 
+									break;
+								elif AlgebraProducts[x] = false then 
+									mat[Size(mat)][Position(UnknownAlgebraProducts,x)] := EigenVectors[j][3][l][m];
+								else 
+									b := [1..dim]*0; b[m] := 1;
+									sum := sum + EigenVectors[j][3][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+								fi;
+							fi;
+						od;
+						
+						x := -sum + EigenVectors[j][3][l]/32;
 
-                Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+						if sum <> [] then
+							if ForAll(mat[Size(mat)], x -> x = 0) then 
+								if ForAny( x , y -> y <> 0) then 
+									Error("Step 7 system 1");
+								else
+									Remove(mat);
+								fi;
+							else
+								Add(vec,x);
+								Add(record,[3,j,l]);
+							fi;
+						fi;
+						
+					od;
+				
+					Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
-                    if Size(Solution) = 2 then
-                            for k in [1..Size(Solution[1])] do
-                                if not k in Solution[2] then
+					if Size(Solution) = 2 then
+							for k in [1..Size(Solution[1])] do
+								if not k in Solution[2] then
 
-                                    x:=UnknownAlgebraProducts[k]; 
+									x:=UnknownAlgebraProducts[k]; 
 
-                                    AlgebraProducts[x]:=Solution[1][k];
-                                fi;
-                            od;
-                    else
-                        Output[i] := [ StructuralCopy(Shape)
-                                     , "Error"
-                                     , "Inconsistent system of unknown algebra products step 7"
-                                     , StructuralCopy(GramMatrix)
-                                     , [] # StructuralCopy(KnownAlgebraProducts)
-                                     , StructuralCopy(AlgebraProducts)
-                                     , StructuralCopy(EigenVectors)
-                                     , StructuralCopy(mat)
-                                     , StructuralCopy(vec)
-                                     , StructuralCopy(Solution)
-                                     , StructuralCopy(UnknownAlgebraProducts)];
-                        Error("Step 7");
-                        break;
-                    fi;
-                        
-                od;
-            fi;
+									AlgebraProducts[x]:=Solution[1][k];
+								fi;
+							od;
+					else
+						Output[i] := [ StructuralCopy(Shape)
+									 , "Error"
+									 , "Inconsistent system of unknown algebra products step 7"
+									 , StructuralCopy(GramMatrix)
+									 , [] # StructuralCopy(KnownAlgebraProducts)
+									 , StructuralCopy(AlgebraProducts)
+									 , StructuralCopy(EigenVectors)
+									 , StructuralCopy(mat)
+									 , StructuralCopy(vec)
+									 , StructuralCopy(Solution)
+									 , StructuralCopy(UnknownAlgebraProducts)];
+						Error("Step 7");
+						break;
+					fi;
+				fi;                        
+         	od;
 
             if Size(Output[i])>0 then
                 break;
             fi;
-
-                                        ## STEP 8: RESURRECTION PRINCIPLE I ##
+            
+                                               ## STEP 8: RESURRECTION PRINCIPLE I ##
 
             # Check fusion and M1
 
