@@ -55,7 +55,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
                 if x <> false then
-                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[5]);
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3]);
                     if y <> false then
                         z := x - y*u;
 
@@ -544,7 +544,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
 InstallGlobalFunction(  MAJORANA_InnerProduct,
 
-    function(u,v,GramMatrix, positionlist) # If all the relevant products are known, returns the algebra product of u and v. If not, returns [0]
+    function(u,v,GramMatrix, pairorbitlist) # If all the relevant products are known, returns the algebra product of u and v. If not, returns [0]
 
         local i, j, sum;
 
@@ -554,8 +554,8 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
             if u[i] <> 0 then
                 for j in [1..Size(v)] do
                     if v[j] <> 0 then
-                        if GramMatrix[positionlist[i][j]] <> false then
-                            Append(sum,[u[i]*v[j]*GramMatrix[positionlist[i][j]]]);
+                        if GramMatrix[pairorbitlist[i][j]] <> false then
+                            Append(sum,[u[i]*v[j]*GramMatrix[pairorbitlist[i][j]]]);
                         else
 
                             # cannot calculate product
@@ -596,42 +596,39 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
 InstallGlobalFunction(MAJORANA_AxiomM1,
 
-        function(GramMatrix,AlgebraProducts) # Checks if bilinear and algebra products obey axiom M1, outputs a list which is empty if they do obey the axiom
+        function(GramMatrix,AlgebraProducts,Orbitals,positionlist,pairorbitlist,pairrepresentatives,coordinates) # Checks if bilinear and algebra products obey axiom M1, outputs a list which is empty if they do obey the axiom
 
-        local sum1, sum2, ErrorM1, j, k, l, m, dim;
+        local sum1, sum2, ErrorM1, j, k, l, dim, x, y, u, w;
 
-        dim:=Size(AlgebraProducts);
+        dim:=Size(AlgebraProducts[1]);
 
         ErrorM1:=[];
-
-        for j in [1..dim] do
-            for k in [1..dim] do
-                for l in [1..dim] do
-
-                    sum1:=[];
-                    sum2:=[];
-
-                    if AlgebraProducts[k][l] <> false and AlgebraProducts[j][k] <> false then
-                        for m in [1..dim] do
-
-                            if AlgebraProducts[k][l][m] <> false then
-                                Append(sum1,[AlgebraProducts[k][l][m]*GramMatrix[j][m]]);
-                            fi;
-
-                            if AlgebraProducts[j][k][m] <> false then
-                                Append(sum2,[AlgebraProducts[j][k][m]*GramMatrix[m][l]]);
-                            fi;
-                        od;
-                    fi;
-
-                    if Sum(sum1) <> Sum(sum2) then
-                        Add(ErrorM1,[j,k,l]);
-                    fi;
-
-                od;
-            od;
-        od;
-
+        
+        for j in [1..Size(AlgebraProducts)] do
+			if AlgebraProducts[j] <> false then
+				for k in [1..dim] do 
+				
+					l := pairorbitlist[pairrepresentatives[j][2]][k]; 
+					
+					u := NullMat(1,dim)[1];
+					u[pairrepresentatives[j][1]] := 1;
+					
+					w := NullMat(1,dim)[1];
+					w[j] := 1;
+					
+					if AlgebraProducts[l] <> false and AlgebraProducts[j] <> false then
+						x := MAJORANA_InnerProduct(u,AlgebraProducts[l],GramMatrix, pairorbitlist);
+						y := MAJORANA_InnerProduct(AlgebraProducts[j],w,GramMatrix, pairorbitlist);
+						
+						if x <> y then 
+							Append(ErrorM1,[j,k]);
+						fi;
+						
+					fi;
+				od;
+			fi;
+		od;
+					
         return ErrorM1;
 
         end
@@ -655,7 +652,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
         for j in [1..t] do
 
-            a:=NullMat(1,Size(AlgebraProducts))[1]; a[j]:=1;
+            a:=NullMat(1,Size(AlgebraProducts[1]))[1]; a[j]:=1;
 
             # 0,0 fusion
 
@@ -763,7 +760,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
 InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
-        function(T,GramMatrix,AlgebraProducts,EigenVectors,positionlist) # Tests that eigenspaces are orthogonal with respect to the inner product
+        function(T,GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist) # Tests that eigenspaces are orthogonal with respect to the inner product
 
         local a, b, t, errorortho01, errorortho02, errorortho04, errorortho12, errorortho14, errorortho24, j, k, l;
 
@@ -782,14 +779,14 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
             errorortho24:=[];
 
             for k in [1..Size(EigenVectors[j][1])] do
-                if MAJORANA_InnerProduct(EigenVectors[j][1][k],a,GramMatrix, positionlist) <> false then
+                if MAJORANA_InnerProduct(EigenVectors[j][1][k],a,GramMatrix, pairorbitlist) <> false then
                     Append(errorortho01,[[j,k]]);
                 fi;
             od;
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][2])] do
-                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],GramMatrix, positionlist) <> false then
+                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][2][l],GramMatrix, pairorbitlist) <> false then
                         Append(errorortho02,[[j,k,l]]);
                     fi;
                 od;
@@ -797,27 +794,27 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
             for k in [1..Size(EigenVectors[j][1])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],GramMatrix, positionlist) <> false then
+                    if MAJORANA_InnerProduct(EigenVectors[j][1][k],EigenVectors[j][3][l],GramMatrix, pairorbitlist) <> false then
                         Append(errorortho02,[[j,k,l]]);
                     fi;
                 od;
             od;
 
             for k in [1..Size(EigenVectors[j][2])] do
-                if MAJORANA_InnerProduct(EigenVectors[j][2][k],a,GramMatrix, positionlist) <> false then
+                if MAJORANA_InnerProduct(EigenVectors[j][2][k],a,GramMatrix, pairorbitlist) <> false then
                     Append(errorortho12,[[j,k]]);
                 fi;
             od;
 
             for k in [1..Size(EigenVectors[j][3])] do
-                if MAJORANA_InnerProduct(EigenVectors[j][3][k],a,GramMatrix, positionlist) <> false then
+                if MAJORANA_InnerProduct(EigenVectors[j][3][k],a,GramMatrix, pairorbitlist) <> false then
                     Append(errorortho14,[[j,k]]);
                 fi;
             od;
 
             for k in [1..Size(EigenVectors[j][2])] do
                 for l in [1..Size(EigenVectors[j][3])] do
-                    if MAJORANA_InnerProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],GramMatrix, positionlist) <> false then
+                    if MAJORANA_InnerProduct(EigenVectors[j][2][k],EigenVectors[j][3][l],GramMatrix, pairorbitlist) <> false then
                         Append(errorortho24,[[j,k,l]]);
                     fi;
                 od;
@@ -832,7 +829,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
 InstallGlobalFunction(MAJORANA_AxiomM2,
 
-        function(GramMatrix,AlgebraProducts,positionlist) # Tests that the algebra obeys axiom M2
+        function(GramMatrix,AlgebraProducts,pairorbitlist) # Tests that the algebra obeys axiom M2
 
         local B, dim, L, i, j , k , l, m, Diagonals;
 
@@ -845,8 +842,8 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
                 for l in [1..dim] do
                     for m in [1..dim] do
                         B[dim*(j-1) + k][dim*(l-1) +m]:=
-                              MAJORANA_InnerProduct(AlgebraProducts[j][l],AlgebraProducts[k][m],GramMatrix, positionlist)
-                            - MAJORANA_InnerProduct(AlgebraProducts[k][l],AlgebraProducts[m][j],GramMatrix, positionlist);
+                              MAJORANA_InnerProduct(AlgebraProducts[j][l],AlgebraProducts[k][m],GramMatrix, pairorbitlist)
+                            - MAJORANA_InnerProduct(AlgebraProducts[k][l],AlgebraProducts[m][j],GramMatrix, pairorbitlist);
                     od;
                 od;
             od;
@@ -1318,8 +1315,6 @@ function(G,T)
 
             Orbitals := Concatenation(OrbitalsT,Orbitals);
             
-            Display([Orbitals[6][6][2] in coordinates,1]);
-            
             j := SizeOrbitalsT + 1;
             
             while j < Size(Orbitals) + 1 do 
@@ -1348,8 +1343,6 @@ function(G,T)
 				j := j + 1;
 				
 			od;
-			
-			Display([Orbitals[6][6][2] in coordinates,2]);
 
             SizeOrbitals:=Size(Orbitals);
 
@@ -2730,8 +2723,6 @@ function(G,T)
 
             # Check that GramMatrix matrix is pd
             
-            Display([Orbitals[6][6][2] in coordinates,3]);
-            
             GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim);
 
             L:=MAJORANA_LDLTDecomposition(GramMatrixFull);
@@ -2753,7 +2744,7 @@ function(G,T)
                              , StructuralCopy(GramMatrix) ];
                 break;
             elif ForAny(Diagonals, x->x=0) then
-                NullSp:=MAJORANA_NullSpace(GramMatrix);
+                NullSp:=MAJORANA_NullSpace(GramMatrixFull);
                 LI:=0;
             else
                 LI:=1;
@@ -2817,7 +2808,7 @@ function(G,T)
 
             # Check fusion and M1
 
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
+            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,positionlist,pairorbitlist,pairrepresentatives,coordinates);
 
             if Size(ErrorM1)>0 then
                 Output[i] := [ StructuralCopy(Shape)
@@ -2826,6 +2817,7 @@ function(G,T)
                              , StructuralCopy(GramMatrix)
                              , StructuralCopy(AlgebraProducts)
                              , StructuralCopy(ErrorM1)];
+                break;
             fi;
 
             ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts, EigenVectors,ProductList);
@@ -2945,7 +2937,7 @@ function(G,T)
 
             # Check fusion and M1
 
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
+            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,positionlist,pairorbitlist,pairrepresentatives,coordinates);
 
             if Size(ErrorM1)>0 then
                 Output[i] := [ StructuralCopy(Shape)
@@ -3109,7 +3101,7 @@ function(G,T)
                                     fi;
                                 od;
 
-                                x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, positionlist);
+                                x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
 
                                 if x<> false then
                                     Append(mat,[row]);
@@ -3327,7 +3319,7 @@ function(G,T)
 
                                 Append(sum,[MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)]/4);
 
-                                x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, positionlist);
+                                x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
 
                                 Append(sum,-[a*x/4]);
 
@@ -3375,7 +3367,7 @@ function(G,T)
 
             # Check that all triples obey axiom M1
 
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts);
+            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,positionlist,pairorbitlist,pairrepresentatives);
 
             if Size(ErrorM1)>0 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M1",GramMatrix,AlgebraProducts,ErrorM1];
@@ -3394,7 +3386,7 @@ function(G,T)
 
             # Check that the eigenspaces are orthogonal
 
-            ErrorOrthogonality:=MAJORANA_TestOrthogonality(T,GramMatrix,AlgebraProducts,EigenVectors,positionlist);
+            ErrorOrthogonality:=MAJORANA_TestOrthogonality(T,GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist);
 
             if ForAny(ErrorOrthogonality,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Eigenspaces are not orthogonal with respect to the inner product",GramMatrix,AlgebraProducts,EigenVector,ErrorOrthogonality];
@@ -3404,7 +3396,7 @@ function(G,T)
 
             # Check M2
 
-            ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,positionlist);
+            ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,pairorbitlist);
 
             if ErrorM2 = -1 then
                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M2",GramMatrix,AlgebraProducts,ErrorM2];
