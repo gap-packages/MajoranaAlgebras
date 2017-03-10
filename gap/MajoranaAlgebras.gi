@@ -501,7 +501,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
         function(u,v,AlgebraProducts,list) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
-        # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist]
+        # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
 
         local i, j, k, s, sum, dim, vec, x;
 
@@ -538,7 +538,17 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 				od;
 			fi;
         od;
+        
+        if Size(list[6]) > 0 then 
+			for i in [1..Size(list[6])] do
+				if sum[i] <> 0 then 
+					sum := sum - sum[dim - i + 1]*list[6][i];
+				fi;
+			od;
+        fi; 
+                
         return sum;
+        
         end
 
         );
@@ -1392,7 +1402,7 @@ function(G,T)
                 od;
             od;
 
-            ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist];
+            ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,[]];
 
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
@@ -2761,65 +2771,52 @@ function(G,T)
                              , StructuralCopy(GramMatrix) ];
                 break;
             elif ForAny(Diagonals, x->x=0) then
+            
                 NullSp:=MAJORANA_NullSpace(GramMatrixFull);
+                
+                ProductList[6] := NullSp;
+                
                 LI:=0;
             else
                 LI:=1;
             fi;
 
- #           if LI=0 then
+            if LI=0 then
 
-  #              dim:=t+u+v+w-Size(NullSp);
+                dim:=t+u+v+w;
 
-   #             for j in [1..Size(NullSp)] do
-    #                NullSp[j]:=NullSp[j]/NullSp[j][dim+Size(NullSp)-j+1];
+                for j in [1..Size(NullSp)] do
+                    NullSp[j]:=NullSp[j]/NullSp[j][dim-j+1];
 
-     #               for k in [1..j-1] do
-    #                    NullSp[j]:=NullSp[j] - NullSp[j][n-k+1]*NullSp[k];
-    #                od;
-    #            od;
+                    for k in [1..j-1] do
+                        NullSp[j]:=NullSp[j] - NullSp[j][n-k+1]*NullSp[k];
+                    od;
+                od;
 
                 # Change alg products to get rid of any axes not in the basis
 
-     #           AlgebraProducts:=AlgebraProducts{[1..dim]};
-
-      #          for j in [1..dim] do
-      #              AlgebraProducts[j]:=AlgebraProducts[j]{[1..dim]};
-      #          od;
-
-       #         for j in [1..Size(NullSp)] do
-      #              for k in [1..dim] do
-       #                 for l in [1..dim] do
-       #                     if AlgebraProducts[k][l] <> false then
-       #                         AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSp[j]*AlgebraProducts[k][l][dim+Size(NullSp)-j+1];
-       #                     fi;
-       #                 od;
-       #             od;
-       #         od;
-
-        #        for j in [1..dim] do
-         ##           for k in [1..dim] do
-         #               if AlgebraProducts[j][k] <> false then
-         #                   AlgebraProducts[j][k]:=AlgebraProducts[j][k]{[1..dim]};
-         #               fi;
-         #           od;
-        #        od;
+                for j in [1..Size(NullSp)] do
+                    for k in [1..SizeOrbitals] do
+						if AlgebraProducts[k] <> false then
+							AlgebraProducts[k]:=AlgebraProducts[k] - NullSp[j]*AlgebraProducts[k][dim-j+1];
+						fi;
+                    od;
+                od;
 
                 # Change evecs to get rid of any axes not in the basis
 
-#                for j in [1..t] do
-#                    for k in [1..3] do
-#                        for l in [1..Size(EigenVectors[j][k])] do
-#                            for m in [1..Size(NullSp)] do
-#                                EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim+ Size(NullSp) - m+1];
-#                            od;
-#                            EigenVectors[j][k][l]:=EigenVectors[j][k][l]{[1..dim]};
-#                        od;
-#                    od;
-#                od;
-#            else
-#                dim:=t+u+v+w;
-#            fi;
+                for j in [1..t] do
+                    for k in [1..3] do
+                        for l in [1..Size(EigenVectors[j][k])] do
+                            for m in [1..Size(NullSp)] do
+                                EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim - m + 1];
+                            od;
+                        od;
+                    od;
+                od;
+            else
+                dim:=t+u+v+w;
+            fi;
 
                                         ## STEP 7: MORE PRODUCTS II ##
                                         
@@ -2859,96 +2856,141 @@ function(G,T)
 
 
             # Use eigenvectors to find more products
+            
+            UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
+            
+            mat := [];
+			vec := [];
+			record := [];
+            
+            if Size(UnknownAlgebraProducts) > 0 then
 
-            for j in [1..t] do
-                UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
-                if Size(UnknownAlgebraProducts) > 0 then
+				for j in [1..t] do
+                
+					if ForAny(UnknownAlgebraProducts, x -> x in pairorbitlist[j]) then 
 
-                    mat:=NullMat(Size(Union(EigenVectors[j][1],EigenVectors[j][2],EigenVectors[j][3])),Size(UnknownAlgebraProducts));
-                    vec:=NullMat(Size(mat),dim);
+						for k in [1..Size(EigenVectors[j][1])] do
 
-                    for k in [1..Size(EigenVectors[j][1])] do
+							sum:=[];
+							
+							Add(mat,[1..dim]*0);
 
-                        sum:=[];
-
-                        for l in [1..dim] do
-                            if EigenVectors[j][1][k][l] <> 0 then
-                            
-								a := [1..dim]*0; a[j] := 1;
-								b := [1..dim]*0; b[l] := 1;
-                            
-								x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+							for l in [1..dim] do
+								if EigenVectors[j][1][k][l] <> 0 then
 								
-								m := pairorbitlist[j][l];
+									a := [1..dim]*0; a[j] := 1;
+									b := [1..dim]*0; b[l] := 1;
+									
+									m := pairorbitlist[j][l];
+									
+									x := AlgebraProducts[m];
+									
+									if x <> false then
+										Add(sum, EigenVectors[j][1][k][l]*x);
+									else
+										mat[Size(mat)][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][1][k][l];
+									fi;
+								fi;
+							od;
+
+							x:=Sum(sum);
+
+							if x <> 0 then
+								if ForAll(mat[Size(mat)], x -> x = 0) then 
+									if ForAny( x , y -> y <> 0) then 
+										Error("Step 7 system");
+									else
+										Remove(mat);
+									fi;
+								else
+									Add(vec,x);
+									Add(record,[1,j,k]);
+								fi;
+							fi;
+							
+						od;
+
+						for k in [1..Size(EigenVectors[j][2])] do
+
+							sum:=[];
+							
+							Add(mat,[1..dim]*0);
+
+							for l in [1..dim] do
+								if EigenVectors[j][2][k][l] <> 0 then
+									
+									a := [1..dim]*0; a[j] := 1;
+									b := [1..dim]*0; b[l] := 1;
 								
-                                if x <> false then
-                                    Add(sum, EigenVectors[j][1][k][l]*x);
-                                else
-                                    mat[k][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][1][k][l];
-                                fi;
-                            fi;
-                        od;
-
-                        x:=Sum(sum);
-
-                        if x <> 0 then
-                            vec[k]:= -x;
-                        fi;
-                    od;
-
-                    for k in [1..Size(EigenVectors[j][2])] do
-
-                        sum:=[];
-
-                        for l in [1..dim] do
-                            if EigenVectors[j][2][k][l] <> 0 then
+									m := pairorbitlist[j][l];
+									
+									x := AlgebraProducts[m];
 								
-								a := [1..dim]*0; a[j] := 1;
-								b := [1..dim]*0; b[l] := 1;
-                            
-								x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+									if x <> false then
+										Add(sum, EigenVectors[j][2][k][l]*x);
+									else
+										mat[Size(mat)][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][2][k][l];
+									fi;
+								fi;
+							od;
+							
+							x := (-1)*Sum(sum) + EigenVectors[j][2][k]/4;
+							
+							if ForAll(mat[Size(mat)], x -> x = 0) then 
+								if ForAny( x , y -> y <> 0) then 
+									Error("Step 7 system");
+								else
+									Remove(mat);
+								fi;
+							else
+								Add(vec,x);
+								Add(record,[2,j,k]);
+							fi;
+
+						od;
+
+						for k in [1..Size(EigenVectors[j][3])] do
+
+							sum:=[];
+							
+							Add(mat,[1..dim]*0);
+
+							for l in [1..dim] do
+								if EigenVectors[j][3][k][l] <> 0 then
 								
-								m := pairorbitlist[j][l];
-                            
-                                if x <> false then
-                                    Add(sum, EigenVectors[j][2][k][l]*x);
-                                else
-                                    mat[k+Size(EigenVectors[j][1])][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][2][k][l];
-                                fi;
-                            fi;
-                        od;
-
-                        vec[k+Size(EigenVectors[j][1])]:= (-1)*Sum(sum) + EigenVectors[j][2][k]/4;
-
-                    od;
-
-                    for k in [1..Size(EigenVectors[j][3])] do
-
-                        sum:=[];
-
-                        for l in [1..dim] do
-                            if EigenVectors[j][3][k][l] <> 0 then
-                            
-								a := [1..dim]*0; a[j] := 1;
-								b := [1..dim]*0; b[l] := 1;
-                            
-								x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+									a := [1..dim]*0; a[j] := 1;
+									b := [1..dim]*0; b[l] := 1;
 								
-								m := pairorbitlist[j][l];
-                            
-                                if x <> false then
-                                    Add(sum, EigenVectors[j][3][k][l]*x);
-                                else
-                                    mat[k+Size(EigenVectors[j][1])+Size(EigenVectors[j][2])][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][3][k][l];
-                                fi;
-                            fi;
-                        od;
+									m := pairorbitlist[j][l];
+									
+									x := AlgebraProducts[m];
+								
+									if x <> false then
+										Add(sum, EigenVectors[j][3][k][l]*x);
+									else
+										mat[Size(mat)][Position(UnknownAlgebraProducts,m)] := EigenVectors[j][3][k][l];
+									fi;
+								fi;
+							od;
 
-                        vec[k+Size(EigenVectors[j][1])+Size(EigenVectors[j][2])]:= (-1)*Sum(sum) + EigenVectors[j][3][k]/32;
-                    od;
+							x := (-1)*Sum(sum) + EigenVectors[j][3][k]/32;
+							
+							if ForAll(mat[Size(mat)], x -> x = 0) then 
+								if ForAny( x , y -> y <> 0) then 
+									Error("Step 7 system");
+								else
+									Remove(mat);
+								fi;
+							else
+								Add(vec,x);
+								Add(record,[3,j,k]);
+							fi;
+
+						od;
+					fi;
 
 
-                    Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+                Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                     if Size(Solution) = 2 then
                             for k in [1..Size(Solution[1])] do
@@ -2971,10 +3013,12 @@ function(G,T)
                                      , StructuralCopy(vec)
                                      , StructuralCopy(Solution)
                                      , StructuralCopy(UnknownAlgebraProducts)];
+                        Error("Step 7");
                         break;
                     fi;
-                fi;
-            od;
+                        
+                od;
+            fi;
 
             if Size(Output[i])>0 then
                 break;
