@@ -3087,10 +3087,22 @@ function(G,T)
                                 if x <> false then
                                     for n in [1..dim] do
                                         if x[n] <> 0 then
-                                            if AlgebraProducts[j][n] <> false then
-                                                Append(sum,-[AlgebraProducts[j][n]*x[n]]);
+                                        
+                                            y := pairorbitlist[j][n];
+                                        
+                                            if AlgebraProducts[y] <> false then
+                                            
+                                                a := [1..dim]*0; a[j] := 1;
+                                                b := [1..dim]*0; b[n] := 1;
+                                                
+                                                Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
                                             else
-                                                row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
+                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives = [n,j] then
+                                                    row[Position(UnknownAlgebraProducts,y)]:=x[n];
+                                                else
+                                                    row := [];
+                                                    break; ##### need to move on to next alpha2
+                                                fi;
                                             fi;
                                         fi;
                                     od;
@@ -3098,20 +3110,36 @@ function(G,T)
 
                                 # calculate rhs
 
-                                for n in [1..t] do
-                                    if EigenVectors[j][1][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> false then
-                                            Append(sum,[-EigenVectors[j][1][l][n]*AlgebraProducts[n][c]/4]);
-                                        else
-                                            row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][1][l][n]/4;
+                                if row <> [] then 
+                                    for n in [1..t] do
+                                        if EigenVectors[j][1][l][n] <> 0 then
+                                        
+                                            y := pairorbitlist[n][c];
+                                            
+                                            if AlgebraProducts[y] <> false then
+                                                
+                                                a := [1..dim]*0; a[c] := 1;
+                                                b := [1..dim]*0; b[n] := 1;
+                                                
+                                                Add(sum,-EigenVectors[j][1][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4);
+                                            else
+                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives = [n,c] then
+                                                    row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + EigenVectors[j][1][l][n]/4;
+                                                else
+                                                    row := [];
+                                                    break; ##### need to move on to next alpha2
+                                                fi;
+                                            fi;
                                         fi;
-                                    fi;
-                                od;
+                                    od;
+                                fi;
+                                
+                                if row <> [] then
 
-                                Append(mat,[row]);
-                                Append(vec,[Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4]);
-                                Append(record,[[1,j,k,l,m]]);
-
+                                    Append(mat,[row]);
+                                    Append(vec,[Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4]);
+                                    Append(record,[[1,j,k,l,m]]);
+                                fi;
                             od;
 
                             ## Second part
@@ -3128,10 +3156,22 @@ function(G,T)
                                 if x <> false then
                                     for n in [1..dim] do
                                         if x[n] <> 0 then
-                                            if AlgebraProducts[j][n] <> false then
-                                                Append(sum,-[AlgebraProducts[j][n]*x[n]]);
+                                            
+                                            y := pairorbitlist[j][n];
+                                        
+                                            if AlgebraProducts[y] <> false then
+                                            
+                                                a := [1..dim]*0; a[j] := 1;
+                                                b := [1..dim]*0; b[n] := 1;
+                                            
+                                                Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
                                             else
-                                                row[Position(UnknownAlgebraProducts,[j,n])]:=x[n];
+                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives = [n,j] then
+                                                    row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + x[n];
+                                                else
+                                                    row := [];
+                                                    break; # need to move on to next beta2
+                                                fi;
                                             fi;
                                         fi;
                                     od;
@@ -3139,19 +3179,34 @@ function(G,T)
 
                                 # calculate rhs
 
-                                for n in [1..t] do
-                                    if EigenVectors[j][2][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> false then
-                                            Append(sum,[EigenVectors[j][2][l][n]*AlgebraProducts[n][c]/4]);
-                                        else
-                                            row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][2][l][n]/4;
+                                if row <> [] then 
+
+                                    for n in [1..t] do
+                                        if EigenVectors[j][2][l][n] <> 0 then
+                                        
+                                            y := pairorbitlist[n][c];
+                                        
+                                            if AlgebraProducts[y] <> false then
+                                            
+                                                a := [1..dim]*0; a[c] := 1;
+                                                b := [1..dim]*0; b[n] := 1;
+                                            
+                                                Add(sum,[EigenVectors[j][2][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4]);
+                                            else
+                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives = [n,c] then
+                                                    row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][2][l][n]/4;
+                                                else 
+                                                    row := [];
+                                                    break; # need to move on to next beta2
+                                                fi;
+                                            fi;
                                         fi;
-                                    fi;
-                                od;
+                                    od;
+                                fi;
 
                                 x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
 
-                                if x<> false then
+                                if x<> false and row <> [] then
                                     Append(mat,[row]);
                                     Append(vec,[Sum(sum)+MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)/4 - x*a/4]);
                                     Append(record,[[2,j,k,l,m]]);
@@ -3172,6 +3227,7 @@ function(G,T)
                         od;
                     else
                         Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
+                        Error("Missing algebra product values");
                         Output[i] := StructuralCopy(Output[i]);
                         break;
                     fi;
