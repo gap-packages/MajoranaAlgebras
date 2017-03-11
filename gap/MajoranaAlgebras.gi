@@ -2947,6 +2947,60 @@ function(G,T)
 						Add(mat,x[1]);
 						Add(vec,x[2]);
 					fi;
+                    
+                    # use fact that if v in null space then a \cdot v = 0
+                    
+                    for k in [1..Size(NullSp)] do
+                        
+                        row := [1..Size(UnknownAlgebraProducts)]*0;
+                        sum := [];
+                        
+                        for l in [1..dim] do
+                            if NullSp[k][l] <> 0 then
+                            
+                                y := pairorbitlist[j][l]; 
+                                
+                                if AlgebraProducts[y] <> false then 
+                                
+                                    a := [1..dim]*0; a[j] := 1;
+                                    b := [1..dim]*0; b[l] := 1;
+                                    
+                                    sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                                    
+                                else
+                                    
+                                    if pairrepresentatives[y] = [j,l] or pairrepresentatives = [l,j] then
+                                        row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
+                                    else
+                                        row := [];
+                                        break; ##### need to move on to next null space vector
+                                    fi;
+                                fi;
+                            fi;
+                        od;
+                        
+                        x := Sum(sum);
+                        
+                        if sum <> [] and row <> [] then
+                            if ForAll(row, x -> x = 0) then 
+                                if ForAny( x , y -> y <> 0) then 
+                                    Error("Step 7 system 1");
+                                else
+                                    return 0; 
+                                fi;
+                            else
+                                Add(mat,row);
+                                Add(vec,x);
+                            fi;
+                        fi;
+                    
+                    od;
+                                
+                                    
+                                    
+                            
+                            
+                            
 				
 					Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
