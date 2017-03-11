@@ -1003,6 +1003,57 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
     end
 
     );
+    
+InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
+
+function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList)
+
+	local row, sum, table, l, m, x, a, b, dim;
+	
+	table := [0, 1/4, 1/32];
+	
+	dim := Size(AlgebraProducts[1]);
+	
+	a := [1..dim]*0; a[1] := 1;
+	
+	for l in [1..Size(EigenVectors[j][ev])] do
+					
+		row := [1..Size(UnknownAlgebraProducts)];
+		sum := [];
+		
+		for m in [1..dim] do 
+			if EigenVectors[j][ev][l][m] <> 0 then
+				
+				x := pairorbitlist[j][m];
+				
+				if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
+					break;
+				elif AlgebraProducts[x] = false then 
+					row[Position(UnknownAlgebraProducts,x)] := EigenVectors[j][ev][l][m];
+				else 
+					b := [1..dim]*0; b[m] := 1;
+					sum := sum + EigenVectors[j][ev][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+				fi;
+			fi;
+		od;
+		
+		x := -sum + EigenVectors[j][ev][l]*table[ev];
+
+		if sum <> [] then
+			if ForAll(row, x -> x = 0) then 
+				if ForAny( x , y -> y <> 0) then 
+					Error("Step 7 system 1");
+				else
+					return 0; 
+				fi;
+			else
+				return [row,x];
+			fi;
+		fi;
+		
+	od;
+	
+	end);
 
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -2871,132 +2922,31 @@ function(G,T)
 						
 				od;
 				
-				if UnknownAlgebraProducts <> [] then 
-					
+				if UnknownAlgebraProducts <> [] then
+				
 					mat := [];
 					vec := [];
-					record := [];
 					
-					for l in [1..Size(EigenVectors[j][1])] do
+					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
 					
-						Add(mat,[1..Size(UnknownAlgebraProducts)]*0);
-						sum := [];
-						
-						for m in [1..dim] do 
-							if EigenVectors[j][1][l][m] <> 0 then
-								
-								x := pairorbitlist[j][m];
-								
-								if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
-									Remove(mat); 
-									break;
-								elif AlgebraProducts[x] = false then 
-									mat[Size(mat)][Position(UnknownAlgebraProducts,x)] := EigenVectors[j][1][l][m];
-								else 
-									b := [1..dim]*0; b[m] := 1;
-									sum := sum + EigenVectors[j][1][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-								fi;
-							fi;
-						od;
-						
-						x := -sum;
-						
-						if sum <> [] then
-							if ForAll(mat[Size(mat)], x -> x = 0) then 
-								if ForAny( x , y -> y <> 0) then 
-									Error("Step 7 system 1");
-								else
-									Remove(mat);
-								fi;
-							else
-								Add(vec,x);
-								Add(record,[1,j,l]);
-							fi;
-						else
-							Remove(mat);
-						fi;
-						
-					od;
+					if x <> 0 then 
+						Add(mat,x[1]);
+						Add(vec,x[2]);
+					fi;
 					
-					for l in [1..Size(EigenVectors[j][2])] do
+					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
 					
-						Add(mat,[1..Size(UnknownAlgebraProducts)]*0);
-						sum := [];
-						
-						for m in [1..dim] do 
-							if EigenVectors[j][2][l][m] <> 0 then
-								
-								x := pairorbitlist[j][m];
-								
-								if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
-									Remove(mat); 
-									break;
-								elif AlgebraProducts[x] = false then 
-									mat[Size(mat)][Position(UnknownAlgebraProducts,x)] := EigenVectors[j][2][l][m];
-								else 
-									b := [1..dim]*0; b[m] := 1;
-									sum := sum + EigenVectors[j][2][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-								fi;
-							fi;
-						od;
-						
-						x := -sum + EigenVectors[j][2][l]/4;
-
-						if sum <> [] then
-							if ForAll(mat[Size(mat)], x -> x = 0) then 
-								if ForAny( x , y -> y <> 0) then 
-									Error("Step 7 system 1");
-								else
-									Remove(mat);
-								fi;
-							else
-								Add(vec,x);
-								Add(record,[2,j,l]);
-							fi;
-						else
-							Remove(mat);
-						fi;
-						
-					od;
+					if x <> 0 then 
+						Add(mat,x[1]);
+						Add(vec,x[2]);
+					fi;
 					
-					for l in [1..Size(EigenVectors[j][3])] do
+					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
 					
-						Add(mat,[1..Size(UnknownAlgebraProducts)]*0);
-						sum := [];
-						
-						for m in [1..dim] do 
-							if EigenVectors[j][3][l][m] <> 0 then
-								
-								x := pairorbitlist[j][m];
-								
-								if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
-									Remove(mat); 
-									break;
-								elif AlgebraProducts[x] = false then 
-									mat[Size(mat)][Position(UnknownAlgebraProducts,x)] := EigenVectors[j][3][l][m];
-								else 
-									b := [1..dim]*0; b[m] := 1;
-									sum := sum + EigenVectors[j][3][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-								fi;
-							fi;
-						od;
-						
-						x := -sum + EigenVectors[j][3][l]/32;
-
-						if sum <> [] then
-							if ForAll(mat[Size(mat)], x -> x = 0) then 
-								if ForAny( x , y -> y <> 0) then 
-									Error("Step 7 system 1");
-								else
-									Remove(mat);
-								fi;
-							else
-								Add(vec,x);
-								Add(record,[3,j,l]);
-							fi;
-						fi;
-						
-					od;
+					if x <> 0 then 
+						Add(mat,x[1]);
+						Add(vec,x[2]);
+					fi;
 				
 					Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 

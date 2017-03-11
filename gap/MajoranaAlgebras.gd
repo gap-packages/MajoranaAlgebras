@@ -35,3 +35,5 @@ DeclareGlobalFunction( "MAJORANA_TestFusion" );
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
 
 DeclareGlobalFunction( "MAJORANA_Orthogonality" );
+
+DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
