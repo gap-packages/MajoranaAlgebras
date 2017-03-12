@@ -37,3 +37,5 @@ DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
 DeclareGlobalFunction( "MAJORANA_Orthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
+
+DeclareGlobalFunction( "MAJORANA_RemoveNullSpace" );

@@ -459,6 +459,16 @@ InstallGlobalFunction(MAJORANA_NullSpace,
                 basis[j]:=basis[j] - basis[j][m-k]*basis[k+1];
             od;
         od;
+        
+        j := 1;
+        
+        while j < Size(basis) + 1 do 
+            if ForAll(basis[j], x -> x = 0) then 
+                Remove(basis,j);
+            else
+                j := j + 1;
+            fi;
+        od;
 
         return basis;
 
@@ -541,13 +551,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 			fi;
         od;
         
-        if Size(list[6]) > 0 then 
-			for i in [1..Size(list[6])] do
-				if sum[dim - i + 1] <> 0 then 
-					sum := sum - sum[dim - i + 1]*list[6][i];
-				fi;
-			od;
-        fi; 
+        sum := MAJORANA_RemoveNullSpace(sum, list[6]);
                 
         return sum;
         
@@ -1059,6 +1063,28 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbit
     return [mat,vec];
 	
 	end);
+    
+InstallGlobalFunction(MAJORANA_RemoveNullSpace,
+
+function(v,NullSp) 
+
+    local i, dim;
+    
+    dim := Size(v);
+
+    if Size(NullSp) > 0 then 
+        for i in [1..Size(NullSp)] do
+            if v[dim - i + 1] <> 0 then 
+                v := v - v[dim - i + 1]*NullSp[i];
+            fi;
+        od;
+    fi;
+    
+    return v;
+    
+    end
+    
+    );
 
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -3336,13 +3362,18 @@ function(G,T)
 
                     if mat <> [] then 
 
-                        mat:=TransposedMat(mat);
-
-                        EigenVectors[j][1]:=TriangulizedNullspaceMat(mat);
-                        EigenVectors[j][2]:=TriangulizedNullspaceMat(mat - IdentityMat(dim)/4);
-                        EigenVectors[j][3]:=TriangulizedNullspaceMat(mat - IdentityMat(dim)/32);
-                        EigenVectors[j][4]:=TriangulizedNullspaceMat(mat - IdentityMat(dim) );
-
+                        EigenVectors[j][1]:=NullspaceMat(mat);
+                        EigenVectors[j][2]:=NullspaceMat(mat - IdentityMat(dim)/4);
+                        EigenVectors[j][3]:=NullspaceMat(mat - IdentityMat(dim)/32);
+                        EigenVectors[j][4]:=NullspaceMat(mat - IdentityMat(dim) );
+                        
+                        for k in [1..4] do 
+                            for l in [1..Size(EigenVectors[j][k])] do
+                                MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                            od;
+                        od;                        
+                                               
+                        
                         if Size(EigenVectors[j][4]) <> 1 then
                             Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
                             Output[i]:=StructuralCopy(Output[i]);
