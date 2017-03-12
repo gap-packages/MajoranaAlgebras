@@ -3000,7 +3000,7 @@ function(G,T)
                                     
                                 else
                                     
-                                    if pairrepresentatives[y] = [j,l] or pairrepresentatives = [l,j] then
+                                    if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
                                         row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
                                     else
                                         row := [];
@@ -3176,7 +3176,7 @@ function(G,T)
                                                 
                                                 Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
                                             else
-                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives = [n,j] then
+                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives[y] = [n,j] then
                                                     row[Position(UnknownAlgebraProducts,y)]:=x[n];
                                                 else
                                                     row := [];
@@ -3202,7 +3202,7 @@ function(G,T)
                                                 
                                                 Add(sum,-EigenVectors[j][1][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4);
                                             else
-                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives = [n,c] then
+                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
                                                     row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + EigenVectors[j][1][l][n]/4;
                                                 else
                                                     row := [];
@@ -3252,7 +3252,7 @@ function(G,T)
                                             
                                                 Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
                                             else
-                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives = [n,j] then
+                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives[y] = [n,j] then
                                                     row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + x[n];
                                                 else
                                                     row := [];
@@ -3279,7 +3279,7 @@ function(G,T)
                                             
                                                 Add(sum,[EigenVectors[j][2][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4]);
                                             else
-                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives = [n,c] then
+                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
                                                     row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][2][l][n]/4;
                                                 else 
                                                     row := [];
@@ -3317,9 +3317,8 @@ function(G,T)
                 if Size(Solution)  = 2 then
                     if Size(Solution[2]) = 0 then
                         for k in [1..Size(UnknownAlgebraProducts)] do
-                            x:=UnknownAlgebraProducts[k][1]; y:=UnknownAlgebraProducts[k][2];
-                            AlgebraProducts[x][y]:=Solution[1][k];
-                            AlgebraProducts[y][x]:=Solution[1][k];
+                            x:=UnknownAlgebraProducts[k]; 
+                            AlgebraProducts[x]:=Solution[1][k];
                         od;
                     else
                         Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
@@ -3374,7 +3373,6 @@ function(G,T)
                             od;
                         od;                        
                                                
-                        
                         if Size(EigenVectors[j][4]) <> 1 then
                             Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
                             Output[i]:=StructuralCopy(Output[i]);
@@ -3473,35 +3471,48 @@ function(G,T)
 
                                 # calculate unknowns
 
-                                for n in [1..c] do
+                                for n in [1..dim] do
                                     if EigenVectors[j][1][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> false then
-                                            Append(sum,-[AlgebraProducts[c][n]*EigenVectors[j][1][l][n]/4]);
+                                    
+                                        y := pairorbitlist[c][n];
+                                        
+                                        if AlgebraProducts[y] <> false then
+                                            
+                                            a := [1..dim]*0; a[c] := 1;
+                                            b := [1..dim]*0; b[n] := 1;
+                                    
+                                            Add(sum, -MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*EigenVectors[j][1][l][n]/4);
                                         else
-                                            row[Position(UnknownAlgebraProducts,[n,c])]:=EigenVectors[j][1][l][n]/4;
+                                            if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
+                                                row[Position(UnknownAlgebraProducts,y)]:=EigenVectors[j][1][l][n]/4;
+                                            else
+                                                row := [];
+                                                break; ##### need to move on to next alpha2
+                                            fi;
                                         fi;
                                     fi;
                                 od;
+                                
+                                if row <> [] then 
+                                    # calculate knowns
+                                    
+                                    a := [1..dim]*0; a[j] := 1;
 
-                                for n in [c+1..dim] do
-                                    if EigenVectors[j][1][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> false then
-                                            Append(sum,-[AlgebraProducts[c][n]*EigenVectors[j][1][l][n]/4]);
-                                        else
-                                            row[Position(UnknownAlgebraProducts,[c,n])]:=EigenVectors[j][1][l][n]/4;
+                                    Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,ProductList),AlgebraProducts,ProductList)]);
+
+                                    Append(sum,-[MAJORANA_AlgebraProduct(EigenVectors[j][1][l],wbeta,AlgebraProducts,ProductList)]/4);
+                                    
+                                    x := Sum(sum);
+                                    
+                                    if ForAll(row, x -> x = 0) then 
+                                        if ForAny( x , y -> y <> 0) then 
+                                            Error("Step 10 system 1"); 
                                         fi;
+                                    else
+                                        Add(mat,row);
+                                        Add(vec,x);
                                     fi;
-                                od;
-
-                                # calculate knowns
-
-                                Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,ProductList),AlgebraProducts,ProductList)]);
-
-                                Append(sum,-[MAJORANA_AlgebraProduct(EigenVectors[j][1][l],wbeta,AlgebraProducts,ProductList)]/4);
-
-                                Append(mat,[row]);
-                                Append(vec,[Sum(sum)]);
-                                Append(record,[[1,j,k,l,m]]);
+                                fi; 
 
                             od;
 
@@ -3514,40 +3525,52 @@ function(G,T)
 
                                 # calculate unknowns
 
-                                for n in [1..c] do
+                                for n in [1..dim] do
                                     if EigenVectors[j][2][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> false then
-                                            Append(sum,[AlgebraProducts[c][n]*EigenVectors[j][2][l][n]/4]);
+                                    
+                                        y := pairorbitlist[c][n];
+                                    
+                                        if AlgebraProducts[y] <> false then
+                                        
+                                            a := [1..dim]*0; a[c] := 1;
+                                            b := [1..dim]*0; b[n] := 1;
+                                        
+                                            Add(sum,MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*EigenVectors[j][2][l][n]/4);
                                         else
-                                            row[Position(UnknownAlgebraProducts,[n,c])]:=-EigenVectors[j][2][l][n]/4;
+                                            if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
+                                                row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] - EigenVectors[j][2][l][n]/4;;
+                                            else
+                                                row := [];
+                                                break; # need to move on to next beta2
+                                            fi;
                                         fi;
                                     fi;
                                 od;
+                                
+                                if row <> [] then 
 
-                                for n in [c+1..dim] do
-                                    if EigenVectors[j][2][l][n] <> 0 then
-                                        if AlgebraProducts[n][c] <> false then
-                                            Append(sum,[AlgebraProducts[c][n]*EigenVectors[j][2][l][n]/4]);
-                                        else
-                                            row[Position(UnknownAlgebraProducts,[c,n])]:=-EigenVectors[j][2][l][n]/4;
+                                    # calculate knowns
+                                    
+                                    a := [1..dim]*0; a[j] := 1;
+
+                                    Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,ProductList),AlgebraProducts,ProductList)]);
+
+                                    Append(sum,[MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)]/4);
+
+                                    x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
+
+                                    Append(sum,-[a*x/4]);
+
+                                    x := Sum(sum);
+                                    
+                                    if ForAll(row, x -> x = 0) then 
+                                        if ForAny( x , y -> y <> 0) then 
+                                            Error("Step 10 system 2"); 
                                         fi;
+                                    else
+                                        Add(mat,row);
+                                        Add(vec,x);
                                     fi;
-                                od;
-
-                                # calculate knowns
-
-                                Append(sum,-[MAJORANA_AlgebraProduct(a,MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,ProductList),AlgebraProducts,ProductList)]);
-
-                                Append(sum,[MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)]/4);
-
-                                x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
-
-                                Append(sum,-[a*x/4]);
-
-                                if x<> false then
-                                    Append(mat,[row]);
-                                    Append(vec,[Sum(sum)]);
-                                    Append(record,[[2,j,k,l,m]]);
                                 fi;
                             od;
                         od;
@@ -3560,10 +3583,9 @@ function(G,T)
                     if Size(Solution[2]) = 0 then
                         for k in [1..Size(UnknownAlgebraProducts)] do
 
-                            x:=UnknownAlgebraProducts[k][1]; y:=UnknownAlgebraProducts[k][2];
+                            x:=UnknownAlgebraProducts[k]; 
 
-                            AlgebraProducts[x][y]:=Solution[1][k];
-                            AlgebraProducts[y][x]:=Solution[1][k];
+                            AlgebraProducts[x]:=Solution[1][k];
                         od;
                     else
                         Output[i]:=[Shape,"Fail","Missing algebra products",GramMatrix,[],AlgebraProducts,EigenVectors];
@@ -3581,7 +3603,7 @@ function(G,T)
 
             # Check bilinear form is positive definite
 
-            if MAJORANA_PositiveDefinite(GramMatrix) <0 then
+            if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
                 Output[i]:=[Shape,"Error","Gram Matrix is not positive definite",GramMatrix, AlgebraProducts, EigenVectors];
                 Output[i]:=StructuralCopy(Output[i]);
             fi;
