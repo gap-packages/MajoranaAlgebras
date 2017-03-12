@@ -438,8 +438,10 @@ InstallGlobalFunction(MAJORANA_NullSpace,
                     od;
                 fi;
             od;
-
-            Append(basis,[vec]);
+            
+            if ForAny(vec, x -> x <> 0) then 
+                Add(basis,vec);
+            fi;
         od;
 
         for j in [1..Size(basis)] do
@@ -3064,7 +3066,8 @@ function(G,T)
             # Use resurrection principle (Step 7 Seress)
 
             UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
-            if Size(UnknownAlgebraProducts) > 0 then
+            
+            if ForAny(UnknownAlgebraProducts, x -> pairrepresentatives[x][1] < t+1) then
 
                 mat:=[];
                 vec:=[];
@@ -3184,12 +3187,19 @@ function(G,T)
                                     od;
                                 fi;
                                 
-                                if row <> [] then
-
-                                    Append(mat,[row]);
-                                    Append(vec,[Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4]);
-                                    Append(record,[[1,j,k,l,m]]);
-                                fi;
+                                x := Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4;
+                                
+                                if sum <> [] and row <> [] then
+                                    if ForAll(row, x -> x = 0) then 
+                                        if ForAny( x , y -> y <> 0) then 
+                                            Error("Step 8 system 1");
+                                        fi;
+                                    else
+                                        Add(mat,row);
+                                        Add(vec,x);
+                                    fi;
+                                fi;       
+                                
                             od;
 
                             ## Second part
@@ -3254,12 +3264,22 @@ function(G,T)
                                     od;
                                 fi;
 
-                                x:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
-
-                                if x<> false and row <> [] then
-                                    Append(mat,[row]);
-                                    Append(vec,[Sum(sum)+MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)/4 - x*a/4]);
-                                    Append(record,[[2,j,k,l,m]]);
+                                y:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
+                                
+                                if y <> false then 
+                                
+                                    x := Sum(sum) + MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)/4 - y*a/4;
+                                    
+                                    if sum <> [] and row <> [] then
+                                        if ForAll(row, x -> x = 0) then 
+                                            if ForAny( x , y -> y <> 0) then 
+                                                Error("Step 8 system 2"); 
+                                            fi;
+                                        else
+                                            Add(mat,row);
+                                            Add(vec,x);
+                                        fi;
+                                    fi;
                                 fi;
                             od;
                         od;
@@ -3296,28 +3316,43 @@ function(G,T)
             # Step 8 - check if we have full espace decomp, if not find it
 
             for j in [1..t] do
+                
+                a := [1..dim]*0; a[j] := 1;
+            
                 if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then
                     mat:=[];
 
                     for k in [1..dim] do
-                        Append(mat,[AlgebraProducts[j][k]]);
+                        b := [1..dim]*0; b[k] := 1;
+                        x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                        if x <> false then
+                            Add(mat,x);
+                        else
+                            Error("missing eigenvectors");
+                            mat := [];
+                            break;
+                        fi;
                     od;
 
-                    mat:=TransposedMat(mat);
+                    if mat <> [] then 
 
-                    EigenVectors[j][1]:=MAJORANA_NullSpace(mat);
-                    EigenVectors[j][2]:=MAJORANA_NullSpace(mat - IdentityMat(dim)/4);
-                    EigenVectors[j][3]:=MAJORANA_NullSpace(mat - IdentityMat(dim)/32);
-                    EigenVectors[j][4]:=MAJORANA_NullSpace(mat - IdentityMat(dim) );
+                        mat:=TransposedMat(mat);
 
-                    if Size(EigenVectors[j][4]) <> 1 then
-                        Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
-                        Output[i]:=StructuralCopy(Output[i]);
-                        break;
-                    elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) <> dim then
-                        Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
-                        Output[i]:=StructuralCopy(Output[i]);
-                        break;
+                        EigenVectors[j][1]:=TriangulizedNullspaceMat(mat);
+                        EigenVectors[j][2]:=TriangulizedNullspaceMat(mat - IdentityMat(dim)/4);
+                        EigenVectors[j][3]:=TriangulizedNullspaceMat(mat - IdentityMat(dim)/32);
+                        EigenVectors[j][4]:=TriangulizedNullspaceMat(mat - IdentityMat(dim) );
+
+                        if Size(EigenVectors[j][4]) <> 1 then
+                            Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
+                            Output[i]:=StructuralCopy(Output[i]);
+                            break;
+                        elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) <> dim then
+                            Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
+                            Error("M4");
+                            Output[i]:=StructuralCopy(Output[i]);
+                            break;
+                        fi;
                     fi;
                 fi;
             od;
