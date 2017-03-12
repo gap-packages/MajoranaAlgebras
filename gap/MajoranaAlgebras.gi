@@ -1008,7 +1008,9 @@ InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
 function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList)
 
-	local row, sum, table, l, m, x, a, b, dim;
+	local mat, vec, row, sum, table, l, m, x, a, b, dim;
+    
+    mat := []; vec :=[];
 	
 	table := [0, 1/4, 1/32];
 	
@@ -1018,7 +1020,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbit
 	
 	for l in [1..Size(EigenVectors[j][ev])] do
 					
-		row := [1..Size(UnknownAlgebraProducts)];
+		row := [1..Size(UnknownAlgebraProducts)]*0;
 		sum := [];
 		
 		for m in [1..dim] do 
@@ -1043,15 +1045,16 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbit
 			if ForAll(row, x -> x = 0) then 
 				if ForAny( x , y -> y <> 0) then 
 					Error("Step 7 system 1");
-				else
-					return 0; 
 				fi;
 			else
-				return [row,x];
+				Add(mat,row);
+                Add(vec,x);
 			fi;
 		fi;
 		
 	od;
+    
+    return [mat,vec];
 	
 	end);
 
@@ -2930,22 +2933,22 @@ function(G,T)
 					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
 					
 					if x <> 0 then 
-						Add(mat,x[1]);
-						Add(vec,x[2]);
+						Append(mat,x[1]);
+						Append(vec,x[2]);
 					fi;
 					
 					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
 					
 					if x <> 0 then 
-						Add(mat,x[1]);
-						Add(vec,x[2]);
+						Append(mat,x[1]);
+						Append(vec,x[2]);
 					fi;
 					
 					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
 					
 					if x <> 0 then 
-						Add(mat,x[1]);
-						Add(vec,x[2]);
+						Append(mat,x[1]);
+						Append(vec,x[2]);
 					fi;
                     
                     # use fact that if v in null space then a \cdot v = 0
@@ -2979,8 +2982,6 @@ function(G,T)
                             fi;
                         od;
                         
-                        x := Sum(sum);
-                        
                         if sum <> [] and row <> [] then
                             if ForAll(row, x -> x = 0) then 
                                 if ForAny( x , y -> y <> 0) then 
@@ -2990,17 +2991,12 @@ function(G,T)
                                 fi;
                             else
                                 Add(mat,row);
-                                Add(vec,x);
+                                Add(vec,sum);
                             fi;
                         fi;
                     
                     od;
-                                
-                                    
-                                    
-                            
-                            
-                            
+                                 
 				
 					Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
