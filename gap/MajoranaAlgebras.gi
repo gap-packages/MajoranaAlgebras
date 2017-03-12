@@ -541,7 +541,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         
         if Size(list[6]) > 0 then 
 			for i in [1..Size(list[6])] do
-				if sum[i] <> 0 then 
+				if sum[dim - i + 1] <> 0 then 
 					sum := sum - sum[dim - i + 1]*list[6][i];
 				fi;
 			od;
@@ -3284,7 +3284,7 @@ function(G,T)
                 else
                     Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
                     Output[i] := StructuralCopy(Output[i]);
-                    # Error("Inconsistent system of unknown algebra products");
+                    Error("Inconsistent system of unknown algebra products");
                     break;
                 fi;
             fi;
