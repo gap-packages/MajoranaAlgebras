@@ -3361,11 +3361,12 @@ function(G,T)
                     od;
 
                     if mat <> [] then 
+                    
 
-                        EigenVectors[j][1]:=NullspaceMat(mat);
-                        EigenVectors[j][2]:=NullspaceMat(mat - IdentityMat(dim)/4);
-                        EigenVectors[j][3]:=NullspaceMat(mat - IdentityMat(dim)/32);
-                        EigenVectors[j][4]:=NullspaceMat(mat - IdentityMat(dim) );
+                        EigenVectors[j][1]:=ShallowCopy(NullspaceMat(mat));
+                        EigenVectors[j][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
+                        EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
+                        EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
                         
                         for k in [1..4] do 
                             for l in [1..Size(EigenVectors[j][k])] do
