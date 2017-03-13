@@ -1252,9 +1252,9 @@ function(G,T)
             for j in [1..Size(Unknowns3X)] do
                 k:=Unknowns3X[j];
                 if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3A";
-                else
                     Shape[k]:="3C";
+                else
+                    Shape[k]:="3A";
                 fi;
             od;
 
@@ -1442,8 +1442,6 @@ function(G,T)
 
             pairconjelements:=NullMat(dim,dim);
             pairorbitlist := NullMat(dim,dim);
-            
-            Display(Size(pairorbitlist[1]));
 
             for j in [1..dim] do
                 for k in [1..dim] do
@@ -1508,8 +1506,6 @@ function(G,T)
             # Start filling in values and products!
 
             l:=1;
-
-			Display(Size(pairorbitlist[1]));
 
             # (2,2) products and eigenvectors from IPSS10
 
@@ -2431,6 +2427,11 @@ function(G,T)
 														- GramMatrix[pairorbitlist[x1][x6]]
 														- GramMatrix[pairorbitlist[x1][x7]]
 														+ GramMatrix[pairorbitlist[x1][x8]])/4096;
+                                                        
+                                    if j = 32 then
+                                        Display(GramMatrix[j]);
+                                    fi;
+                                    
 
 									l:=t+1;
 								else
@@ -2538,8 +2539,6 @@ function(G,T)
 
                                         ## STEP 5: MORE EVECS ##
                                         
-            Display(Size(pairorbitlist[1]));
-
             # Find linearly independent subsets of eigenvectors
 
             Dimensions:=[];
@@ -2655,98 +2654,114 @@ function(G,T)
             fi;
 
                                         ## STEP 6: MORE INNER PRODUCTS ##
-
-			Display(Size(pairorbitlist[1]));
-
-            UnknownInnerProducts:=[];
-
-            for j in [1..SizeOrbitals] do
-                if GramMatrix[j] = false then
-                    Add(UnknownInnerProducts,j);
-                fi;
-            od;
-
             # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
 
-            if Size(UnknownInnerProducts) > 0 then
+            switch := 0;
 
-                mat:=[];
-                vec:=[];
+            while switch = 0 do 
+            
+                UnknownInnerProducts:=[];
 
-                for j in [1..t] do
-
-                    # 1- eigenvectors and 0-eigenvectors
-
-                    x := MAJORANA_Orthogonality(0,1,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-
-                    # 1- eigenvectors and 1/4-eigenvectors
-
-                    x := MAJORANA_Orthogonality(0,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-
-                    # 1- eigenvectors and 1/32-eigenvectors
-
-                    x := MAJORANA_Orthogonality(0,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-
-                    # 0-eigenvectors and 1/4-eigenvectors
-
-                    x := MAJORANA_Orthogonality(1,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-
-                    # 0-eigenvectors and 1/32-eigenvectors
-
-                    x := MAJORANA_Orthogonality(1,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-
-                    # 1/4-eigenvectors and 1/32-eigenvectors
-
-                    x := MAJORANA_Orthogonality(2,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-                od;
-
-                Solution:=MAJORANA_SolutionMatVecs(mat,vec);
-
-                if Size(Solution) = 2 then
-                    if Size(Solution[2])>0 then
-                        Output[i] := [ StructuralCopy(Shape)
-                                     , "Fail"
-                                     , "Missing inner product values"
-                                     , StructuralCopy(GramMatrix)];
-						Error("Missing inner products");
-                    else
-                        for k in [1..Size(Solution[1])] do
-                            x:=UnknownInnerProducts[k];
-                            GramMatrix[x]:=Solution[1][k];
-                        od;
+                for j in [1..SizeOrbitals] do
+                    if GramMatrix[j] = false then
+                        Add(UnknownInnerProducts,j);
                     fi;
+                od;
+            
+                if Size(UnknownInnerProducts) = 0 then
+                    
+                    break;
+                    
                 else
-                    Output[i] := [ Shape
-                                 , "Error"
-                                 , "Inconsistent system of unknown inner products"
-                                 , mat
-                                 , vec
-                                 , EigenVectors
-                                 , AlgebraProducts
-                                 , GramMatrix
-                                 , UnknownInnerProducts ];
-                    Output[i]:=StructuralCopy(Output[i]);
-                fi;
-            fi;
 
+                    mat:=[];
+                    vec:=[];
+
+                    for j in [1..t] do
+
+                        # 1- eigenvectors and 0-eigenvectors
+
+                        x := MAJORANA_Orthogonality(0,1,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+
+                        # 1- eigenvectors and 1/4-eigenvectors
+
+                        x := MAJORANA_Orthogonality(0,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+
+                        # 1- eigenvectors and 1/32-eigenvectors
+
+                        x := MAJORANA_Orthogonality(0,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+
+                        # 0-eigenvectors and 1/4-eigenvectors
+
+                        x := MAJORANA_Orthogonality(1,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+
+                        # 0-eigenvectors and 1/32-eigenvectors
+
+                        x := MAJORANA_Orthogonality(1,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+
+                        # 1/4-eigenvectors and 1/32-eigenvectors
+
+                        x := MAJORANA_Orthogonality(2,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+                    od;
+
+                    Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+
+                    if Size(Solution) = 2 then                    
+                        
+                            for k in [1..Size(Solution[1])] do
+								if not k in Solution[2] then
+
+									x:=UnknownInnerProducts[k]; 
+
+									GramMatrix[x]:=Solution[1][k][1];
+								fi;
+							od;
+                            
+                            if Size(Solution[2]) = Size(Solution[1]) then 
+                                Output[i] := [ StructuralCopy(Shape)
+                                         , "Fail"
+                                         , "Missing inner product values"
+                                         , StructuralCopy(GramMatrix)];
+                                Error("Missing inner products");
+                            
+                                break;
+                            fi;
+                            
+                    else
+                        Output[i] := [ Shape
+                                     , "Error"
+                                     , "Inconsistent system of unknown inner products"
+                                     , mat
+                                     , vec
+                                     , EigenVectors
+                                     , AlgebraProducts
+                                     , GramMatrix
+                                     , UnknownInnerProducts ];
+                        Output[i]:=StructuralCopy(Output[i]);
+                        
+                        break;
+                    fi;
+                fi;
+            od;
+            
             if Size(Output[i]) > 0 then
                 break;
             fi;
@@ -2822,8 +2837,6 @@ function(G,T)
             fi;
 
                                         ## STEP 7: MORE PRODUCTS II ##
-                                        
-            Display(Size(pairorbitlist[1]));
 
             # Check fusion and M1
 
@@ -2839,8 +2852,6 @@ function(G,T)
                 Error("axiom M1");
                 break;
             fi;
-            
-            Display(Size(pairorbitlist[1])); 
 
             ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
