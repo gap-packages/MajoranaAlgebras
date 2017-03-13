@@ -106,51 +106,153 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
     return [true, NewEigenVectors];
 end);
 
-InstallGlobalFunction(MAJORANA_LDLTDecomposition,
+InstallGlobalFunction(MAJORANA_NullSpace,
 
-function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
+        function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
 
-        local B, n, L, D, i, j, k, temp;
+        local A, C, n, m, d, absd, i, j, k, x, imax, temp, tempi, basis, basic, free, vec;
 
-        B:=ShallowCopy(A); n:=Size(B); L:=NullMat(n,n); D:=NullMat(n,n);
+        A:=ShallowCopy(mat);
 
-        for i in [1..n] do
-            temp:=[];
-            for j in [1..i-1] do
-                Append(temp,[L[i][j]*L[i][j]*D[j][j]]);
+        n:=Size(A);
+        m:=Size(A[1]);
+
+        d:=NullMat(1,n)[1];
+
+        C:=IdentityMat(n);
+
+        # Put matrix in row echelon form
+
+        i:=1;
+
+        while i <= n do
+
+            for j in [i..n] do
+                d[j]:=A[j][i];
             od;
 
-            D[i][i] := B[i][i] - Sum(temp);
+            absd:=List(d,x->AbsoluteValue(x));
 
-            if D[i][i] =0 then
-                    for j in [i+1..n] do
-                        temp:=[];
-                        for k in [1..i-1] do
-                            Append(temp,[L[j][k]*L[i][k]*D[k][k]]);
-                        od;
-                        if B[j][i] - Sum(temp)= 0 then
-                            L[j][i]:=0;
-                        else
-                            return D;
-                        fi;
-                    od;
-                    L[i][i]:=1;
-            else
-                for j in [i+1..n] do
-                    temp:=[];
-                    for k in [1..i-1] do
-                        Append(temp,[L[j][k]*L[i][k]*D[k][k]]);
-                    od;
-                    L[j][i]:=(B[j][i] - Sum(temp))/D[i][i];
+            imax:=Position(absd,Maximum(absd));
+
+            if d[imax] = 0 then
+
+                k:=i+1;
+
+                while k <= m do
+                    if A[i][k] <> 0 then
+
+                        # Turn leading coefficient of row i (at pos k) into 1
+
+                        C[i] := C[i]/A[i][k];
+                        A[i] := A[i]/A[i][k];
+
+                        k:=m+1;
+                    else
+                        k:=k+1;
+                    fi;
                 od;
-                L[i][i]:=1;
+
+                i:=i+1;
+
+            else
+
+                # Swap rows i and imax
+
+                temp:=ShallowCopy(A[imax]); tempi:=ShallowCopy(C[imax]);
+                A[imax]:=ShallowCopy(A[i]); A[i]:=ShallowCopy(temp);
+                C[imax]:=ShallowCopy(C[i]); C[i]:=ShallowCopy(tempi);
+
+                for k in [i+1..n] do
+
+                    x:=A[k][i]/A[i][i];
+
+                    C[k]:=C[k] - x*C[i];
+                    A[k]:=A[k] - x*A[i];
+
+                od;
+
+                C[i]:=C[i]/A[i][i];
+                A[i]:=A[i]/A[i][i];
+
+
+                d[i]:=0;
+
+                i:=i+1;
+
+            fi;
+
+        od;
+
+        # Compute null space
+
+        basis:=[];
+
+        basic:=[];
+        free:=[];
+
+
+        for i in [1..n] do
+            Append(basic,[Position(A[i],1)]);
+        od;
+
+        for i in [0..m-1] do
+            if not m-i in basic then
+                Append(free,[m-i]);
             fi;
         od;
 
-        return Concatenation([L],[D]);
-        end
-    );
+        for i in free do
 
+            vec:=NullMat(1,m)[1];
+
+            for j in [0..m-1] do
+                if i = m-j then
+                    vec[m-j] :=1;
+                elif m-j in basic then
+                    for k in [m-j+1..m] do
+                        vec[m-j] := vec[m-j] - A[m-j][k]*vec[k];
+                    od;
+                fi;
+            od;
+            
+            if ForAny(vec, x -> x <> 0) then 
+                Add(basis,vec);
+            fi;
+        od;
+
+        for j in [1..Size(basis)] do
+            if basis[j][m-j+1] <> 0 then
+                basis[j]:=basis[j]/basis[j][m-j+1];
+            fi;
+
+            for k in [1..j-1] do
+                basis[j]:=basis[j] - basis[j][m-k+1]*basis[k];
+            od;
+        od;
+
+        for j in [1..Size(basis)] do
+            for k in [1..(Size(basis)-j)] do
+                basis[j]:=basis[j] - basis[j][m-k]*basis[k+1];
+            od;
+        od;
+        
+        j := 1;
+        
+        while j < Size(basis) + 1 do 
+            if ForAll(basis[j], x -> x = 0) then 
+                Remove(basis,j);
+            else
+                j := j + 1;
+            fi;
+        od;
+
+        return basis;
+
+        end
+
+        );
+        
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
 function(mat,vecs) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
@@ -329,185 +431,51 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
 
         );
 
-InstallGlobalFunction(MAJORANA_NullSpace,
+InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
-        function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
+function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
 
-        local A, C, n, m, d, absd, i, j, k, x, imax, temp, tempi, basis, basic, free, vec;
+        local B, n, L, D, i, j, k, temp;
 
-        A:=ShallowCopy(mat);
-
-        n:=Size(A);
-        m:=Size(A[1]);
-
-        d:=NullMat(1,n)[1];
-
-        C:=IdentityMat(n);
-
-        # Put matrix in row echelon form
-
-        i:=1;
-
-        while i <= n do
-
-            for j in [i..n] do
-                d[j]:=A[j][i];
-            od;
-
-            absd:=List(d,x->AbsoluteValue(x));
-
-            imax:=Position(absd,Maximum(absd));
-
-            if d[imax] = 0 then
-
-                k:=i+1;
-
-                while k <= m do
-                    if A[i][k] <> 0 then
-
-                        # Turn leading coefficient of row i (at pos k) into 1
-
-                        C[i] := C[i]/A[i][k];
-                        A[i] := A[i]/A[i][k];
-
-                        k:=m+1;
-                    else
-                        k:=k+1;
-                    fi;
-                od;
-
-                i:=i+1;
-
-            else
-
-                # Swap rows i and imax
-
-                temp:=ShallowCopy(A[imax]); tempi:=ShallowCopy(C[imax]);
-                A[imax]:=ShallowCopy(A[i]); A[i]:=ShallowCopy(temp);
-                C[imax]:=ShallowCopy(C[i]); C[i]:=ShallowCopy(tempi);
-
-                for k in [i+1..n] do
-
-                    x:=A[k][i]/A[i][i];
-
-                    C[k]:=C[k] - x*C[i];
-                    A[k]:=A[k] - x*A[i];
-
-                od;
-
-                C[i]:=C[i]/A[i][i];
-                A[i]:=A[i]/A[i][i];
-
-
-                d[i]:=0;
-
-                i:=i+1;
-
-            fi;
-
-        od;
-
-        # Compute null space
-
-        basis:=[];
-
-        basic:=[];
-        free:=[];
-
+        B:=ShallowCopy(A); n:=Size(B); L:=NullMat(n,n); D:=NullMat(n,n);
 
         for i in [1..n] do
-            Append(basic,[Position(A[i],1)]);
-        od;
+            temp:=[];
+            for j in [1..i-1] do
+                Append(temp,[L[i][j]*L[i][j]*D[j][j]]);
+            od;
 
-        for i in [0..m-1] do
-            if not m-i in basic then
-                Append(free,[m-i]);
-            fi;
-        od;
+            D[i][i] := B[i][i] - Sum(temp);
 
-        for i in free do
-
-            vec:=NullMat(1,m)[1];
-
-            for j in [0..m-1] do
-                if i = m-j then
-                    vec[m-j] :=1;
-                elif m-j in basic then
-                    for k in [m-j+1..m] do
-                        vec[m-j] := vec[m-j] - A[m-j][k]*vec[k];
+            if D[i][i] =0 then
+                    for j in [i+1..n] do
+                        temp:=[];
+                        for k in [1..i-1] do
+                            Append(temp,[L[j][k]*L[i][k]*D[k][k]]);
+                        od;
+                        if B[j][i] - Sum(temp)= 0 then
+                            L[j][i]:=0;
+                        else
+                            return D;
+                        fi;
                     od;
-                fi;
-            od;
-            
-            if ForAny(vec, x -> x <> 0) then 
-                Add(basis,vec);
-            fi;
-        od;
-
-        for j in [1..Size(basis)] do
-            if basis[j][m-j+1] <> 0 then
-                basis[j]:=basis[j]/basis[j][m-j+1];
-            fi;
-
-            for k in [1..j-1] do
-                basis[j]:=basis[j] - basis[j][m-k+1]*basis[k];
-            od;
-        od;
-
-        for j in [1..Size(basis)] do
-            for k in [1..(Size(basis)-j)] do
-                basis[j]:=basis[j] - basis[j][m-k]*basis[k+1];
-            od;
-        od;
-        
-        j := 1;
-        
-        while j < Size(basis) + 1 do 
-            if ForAll(basis[j], x -> x = 0) then 
-                Remove(basis,j);
+                    L[i][i]:=1;
             else
-                j := j + 1;
+                for j in [i+1..n] do
+                    temp:=[];
+                    for k in [1..i-1] do
+                        Append(temp,[L[j][k]*L[i][k]*D[k][k]]);
+                    od;
+                    L[j][i]:=(B[j][i] - Sum(temp))/D[i][i];
+                od;
+                L[i][i]:=1;
             fi;
         od;
 
-        return basis;
-
+        return Concatenation([L],[D]);
         end
+    );
 
-        );
-
-#InstallGlobalFunction(  MAJORANA_AlgebraProduct,
-#
-### Old version
-#
-#       function(u,v,basis) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
-#
-#        local i, j, sum;
-#
-#        sum:=[];
-#
-#        if ForAll(u,x-> x= 0 ) or ForAll(v,x->x=0) then
-#            return u*0;
-#        fi;
-#
-#        for i in [1..Size(u)] do
-#            if u[i] <> 0 then
-#                for j in [1..Size(v)] do
-#                    if v[j] <> 0 then
-#                        if basis[i][j] <> false then
-#                            Append(sum,[u[i]*v[j]*basis[i][j]]);
-#                        else
-#                            # cannot calculate product
-#                            return false;
-#                        fi;
-#                    fi;
-#                od;
-#            fi;
-#        od;
-#        return Sum(sum);
-#        end
-#
-#        );
 
 InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
@@ -577,7 +545,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
                             # cannot calculate product
 
-                            return fail;
+                            return false;
                         fi;
                     fi;
                 od;
@@ -730,7 +698,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
                 for l in [1..Size(EigenVectors[j][2])] do
                     x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][k],EigenVectors[j][2][l],AlgebraProducts,ProductList);
                     if x<> false then
-                        if MAJORANA_InnerProduct(a,x,GramMatrix, ProductList[3]) <> fail then
+                        if MAJORANA_InnerProduct(a,x,GramMatrix, ProductList[3]) <> false then
 
                             y:= x - MAJORANA_InnerProduct(a,x,GramMatrix, ProductList[3])*a;
                             z:=MAJORANA_AlgebraProduct(a,y,AlgebraProducts,ProductList);
@@ -1937,7 +1905,7 @@ function(G,T)
                         AlgebraProducts[j][xm2]:=-1/64;
                         AlgebraProducts[j][x3] := -1/64;
                         AlgebraProducts[j][x2A] := 1/64;
-                        AlgebraProducts[j][t+x3A] := 45/2048;
+                        AlgebraProducts[j][x3A] := 45/2048;
 
                         GramMatrix[j]:=5/256;
                     fi;
@@ -2490,70 +2458,6 @@ function(G,T)
                 NullSpT:=MAJORANA_NullSpace(GramMatrixT);
                 LI:=0;
             fi;
-
-#            if LI=0 then
-
- #               n:=Size(NullSpT);
-
-  #              Display(n);
-
-   #             T:=T{[1..t-n]};
-
-                # Change Gram matrix to get rid of any axes not in basis
-
-    #            GramMatrix:=GramMatrix{Concatenation([1..t-n],[t+1..dim])};
-
-#               for j in [1..dim-n] do
-#                    GramMatrix[j]:=GramMatrix[j]{Concatenation([1..t-n],[t+1..dim])};
-#                od;
-
-                # Change alg products to get rid of any axes not in the basis
-
-#                AlgebraProducts:=AlgebraProducts{Concatenation([1..t-n],[t+1..dim])};
-
- #               for j in [1..dim-n] do
-#                    AlgebraProducts[j]:=AlgebraProducts[j]{Concatenation([1..t-n],[t+1..dim])};
-#                od;
-
-#                for j in [1..n] do
-#                    for k in [1..dim-n] do
-#                        for l in [1..dim-n] do
-#                            if AlgebraProducts[k][l] <> false then
-#                                AlgebraProducts[k][l]:=AlgebraProducts[k][l] - NullSpT[j]*AlgebraProducts[k][l][dim-j+1];
-#                            fi;
-#                        od;
-#                    od;
-#                od;
-
- #               for j in [1..dim] do
-#                    for k in [1..dim] do
-#                        if AlgebraProducts[j][k] <> false then
-#                            AlgebraProducts[j][k]:=AlgebraProducts[j][k]{Concatenation([1..t-n],[t+1..dim])};
-#                        fi;
-#                    od;
-#                od;
-
-                # Change evecs to get rid of any axes not in the basis
-
-#                for j in [1..t] do
-#                    for k in [1..3] do
-#                        for l in [1..Size(EigenVectors[j][k])] do
-#                            for m in [1..Size(NullSpT)] do
-#                                EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSpT[m]*EigenVectors[j][k][l][dim - m+1];
-#                            od;
-#                            EigenVectors[j][k][l]:=EigenVectors[j][k][l]{Concatenation([1..t-n],[t+1..dim])};
-#                        od;
-#                    od;
-#                od;
-
-#                t:=t-n;
-
-#                dim:=dim-n;
-#            else
-#                dim:=t+u+v+w;
-#            fi;
-
-
 
                                         ## STEP 4: MORE PRODUCTS ##
 
