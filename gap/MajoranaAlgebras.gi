@@ -84,7 +84,6 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 if x <> false then
                     if MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList ) <> false and
                        MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList ) <> ev * x then
-                         Error("fusion error: ");
 
                         return [false, StructuralCopy([ Shape
                                        , "Error"
@@ -94,7 +93,8 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                                        , j
                                        , ev_a[k]
                                        , ev_b[l]
-                                       , AlgebraProducts ])];
+                                       , AlgebraProducts
+                                       , ProductList ])];
                     else
                         Add(NewEigenVectors, x);
                     fi;
