@@ -1763,6 +1763,79 @@ function(G,T)
 
                     fi;
                 od;
+                
+                # 1/32 eigenvectors from conjugation
+                
+                for k in [1..u] do 
+                
+                    h := 3Aaxes[k];
+                    
+                    if not h^T[j] in [h,h^2] then 
+                    
+                        l := positionlist[Position(longcoordinates,h^T[j])];
+                        
+                        EigenVector := [1..dim]*0;
+                        
+                        EigenVector[t+k] := 1;
+                        EigenVector[l] := -1;
+                        
+                        Add(EigenVectors[j][3],EigenVector);
+                    fi;
+                od;
+                
+                for k in [1..v] do 
+                
+                    h := 4Aaxes[k];
+                    
+                    if not h^T[j] in [h,h^3] then 
+                    
+                        l := positionlist[Position(longcoordinates,h^T[j])];
+                        
+                        EigenVector := [1..dim]*0;
+                        
+                        EigenVector[t+u+k] := 1;
+                        EigenVector[l] := -1;
+                        
+                        Add(EigenVectors[j][3],EigenVector);
+                    fi;
+                od;
+                
+                for k in [1..w] do 
+                
+                    h := 5Aaxes[k];
+                    
+                    if h^T[j] in [h^2,h^3] then 
+                    
+                        Display("Warning - a 5A axis is conj to its square or cube");
+                        
+                        EigenVector := [1..dim];
+                        
+                        EigenVector[t+u+v+k] := 2;
+                        
+                        Add(EigenVectors[j][3],EigenVector);
+                    
+                    elif not h^T[j] in [h,h^4] then 
+                    
+                        l := positionlist[Position(longcoordinates,h^T[j])];
+                        
+                        EigenVector := [1..dim]*0;
+                        
+                        EigenVector[t+u+v+k] := 1;
+                        
+                        if l > 0 then 
+                            EigenVector[l] := -1;
+                        else
+                            EigenVector[-l] := 1;
+                        fi;
+                        
+                        Add(EigenVectors[j][3],EigenVector);
+                    fi;
+                od;
+                
+                
+                
+                
+                
             od;
 
             # Products from IPSS10
@@ -2162,6 +2235,7 @@ function(G,T)
 
                     else
 
+                        l := 1;
 
                         while l < t+1 do
 
@@ -2426,12 +2500,7 @@ function(G,T)
 														+ 7*(GramMatrix[pairorbitlist[x1][x5]]
 														- GramMatrix[pairorbitlist[x1][x6]]
 														- GramMatrix[pairorbitlist[x1][x7]]
-														+ GramMatrix[pairorbitlist[x1][x8]])/4096;
-                                                        
-                                    if j = 32 then
-                                        Display(GramMatrix[j]);
-                                    fi;
-                                    
+														+ GramMatrix[pairorbitlist[x1][x8]])/4096;                                    
 
 									l:=t+1;
 								else
