@@ -997,7 +997,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList)
+function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList)
 
 	local mat, vec, row, sum, table, l, m, x, a, b, dim;
     
@@ -1007,7 +1007,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbit
 	
 	dim := Size(AlgebraProducts[1]);
 	
-	a := [1..dim]*0; a[1] := 1;
+	a := [1..dim]*0; a[j] := 1;
 	
 	for l in [1..Size(EigenVectors[j][ev])] do
 					
@@ -1017,31 +1017,37 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbit
 		for m in [1..dim] do 
 			if EigenVectors[j][ev][l][m] <> 0 then
 				
-				x := pairorbitlist[j][m];
-				
-				if AlgebraProducts[x] = false and not x in UnknownAlgebraProducts then
-					break;
-				elif AlgebraProducts[x] = false then 
-					row[Position(UnknownAlgebraProducts,x)] := EigenVectors[j][ev][l][m];
-				else 
-					b := [1..dim]*0; b[m] := 1;
-					sum := sum + EigenVectors[j][ev][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-				fi;
+				x := ProductList[3][j][m];
+                				
+                if AlgebraProducts[x] = false then 
+                    if pairrepresentatives[x] = [j,m] then 
+                        row[Position(UnknownAlgebraProducts,x)] := EigenVectors[j][ev][l][m];
+                    else
+                        row := [];
+                        break;
+                    fi;
+                else 
+                    b := [1..dim]*0; b[m] := 1;
+                    sum := sum + EigenVectors[j][ev][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                fi;
 			fi;
 		od;
+        
+        if row <> [] then 
 		
-		x := -sum + EigenVectors[j][ev][l]*table[ev];
+            x := -sum + EigenVectors[j][ev][l]*table[ev];
 
-		if sum <> [] then
-			if ForAll(row, x -> x = 0) then 
-				if ForAny( x , y -> y <> 0) then 
-					Error("Step 7 system 1");
-				fi;
-			else
-				Add(mat,row);
-                Add(vec,x);
-			fi;
-		fi;
+            if sum <> [] then
+                if ForAll(row, x -> x = 0) then 
+                    if ForAny( x , y -> y <> 0) then 
+                        Error("Step 7 system 1");
+                    fi;
+                else
+                    Add(mat,row);
+                    Add(vec,x);
+                fi;
+            fi;
+        fi;
 		
 	od;
     
@@ -2999,21 +3005,21 @@ function(G,T)
                         mat := [];
                         vec := [];
                         
-                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
+                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
                         
                         if x <> 0 then 
                             Append(mat,x[1]);
                             Append(vec,x[2]);
                         fi;
                         
-                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
+                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
                         
                         if x <> 0 then 
                             Append(mat,x[1]);
                             Append(vec,x[2]);
                         fi;
                         
-                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
+                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
                         
                         if x <> 0 then 
                             Append(mat,x[1]);
