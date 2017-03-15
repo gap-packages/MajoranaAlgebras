@@ -1112,9 +1112,13 @@ function(G,T)
 
             # Step 7 - More algebra products
             Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, zeros,  UnknownAlgebraProducts, record,
-            fres;
+            
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, fres; 
 
             # str1, str2, str3, str4, str5,
+            
+            
+            
  
 
                                             ## STEP 0: SETUP ##
@@ -2604,13 +2608,10 @@ function(G,T)
 #                   fi;
 #               od;
 #           od;
-
-
-                                        ## STEP 5: MORE EVECS ##
-                                        
-            # Find linearly independent subsets of eigenvectors
-
-            Dimensions:=[];
+            
+            maindimensions := [];
+            
+            maindimensions:=[];
 
             for j in [1..t] do
                 for k in [1..3] do
@@ -2618,777 +2619,855 @@ function(G,T)
                         EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
                     fi;
                 od;
-                Append(Dimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
+                Add(maindimensions,Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])+1);
             od;
-
-            # Use these eigenvectors and the fusion rules to find more
-
-            switch:=0;
-
-            if ForAll(Dimensions,x->x=dim-1) then
-                switch:=1;
+            
+            falsecount := [0,0];
+            
+            if false in GramMatrix then
+                falsecount[1] := Size(Positions(GramMatrix,false));
             fi;
+            
+            if false in AlgebraProducts then
+                falsecount[2] := Size(Positions(AlgebraProducts,false));
+            fi;
+            
+            if ForAll(maindimensions, x -> x = dim) and falsecount = [0,0] then 
+                switchmain := 1;
+            else
+                switchmain := 0;
+            fi;
+            
+            count := 1;
+            
+            while switchmain = 0 do 
+            
+                Display(count);
+                
+                count := count + 1;
 
-            NewEigenVectors:=NullMat(t,3);
 
-            for j in [1..t] do
-                for k in [1..3] do
-                    NewEigenVectors[j][k]:=[];
-                od;
-            od;
+                                            ## STEP 5: MORE EVECS ##
+                                            
+                # Find linearly independent subsets of eigenvectors
 
-            while switch=0 do
+                # Use these eigenvectors and the fusion rules to find more
+
+                switch:=0;
+
+                Dimensions := StructuralCopy(maindimensions);
+
+                if ForAll(Dimensions,x->x=dim) then
+                    switch:=1;
+                fi;
+
+                NewEigenVectors:=NullMat(t,3);
+
                 for j in [1..t] do
-                    # 1, x fusion is a waste of time because a_0 obviously just preserves the evectors!
-                    Output[i] := [];
+                    for k in [1..3] do
+                        NewEigenVectors[j][k]:=[];
+                    od;
+                od;
 
-                    # 0,0 fusion
-                    fres := MAJORANA_TestFusion(1,1,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                    if fres[1] then
-                        Append(NewEigenVectors[j][1], fres[2]);
-                    else
-                        Output[i] := fres[2];
+                while switch = 0 do
+                    for j in [1..t] do
+                        # 1, x fusion is a waste of time because a_0 obviously just preserves the evectors!
+                        Output[i] := [];
+
+                        # 0,0 fusion
+                        fres := MAJORANA_TestFusion(1,1,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if fres[1] then
+                            Append(NewEigenVectors[j][1], fres[2]);
+                        else
+                            Output[i] := fres[2];
+                            break;
+                        fi;
+
+                        # 0,1/4 fusion
+                        fres := MAJORANA_TestFusion(1,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if fres[1] then
+                            Append(NewEigenVectors[j][2], fres[2]);
+                        else
+                            Output[i] := fres[2];
+                            break;
+                        fi;
+
+                        # 0,1/32 fusion
+                        fres := MAJORANA_TestFusion(1,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if fres[1] then
+                            Append(NewEigenVectors[j][3], fres[2]);
+                        else
+                            Output[i] := fres[2];
+                            Error("0, 1/32 fusion");
+                            break;
+                        fi;
+
+                        # 1/4,1/32 fusion
+                        fres := MAJORANA_TestFusion(2,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if fres[1] then
+                            Append(NewEigenVectors[j][3], fres[2]);
+                        else
+                            Output[i] := fres[2];
+                            break;
+                        fi;
+
+                        # 1/4,1/4 Fusion
+                        fres := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if fres[1] then
+                            Append(NewEigenVectors[j][1], fres[2]);
+                        else
+                            Output[i] := fres[2];
+                            break;
+                        fi;
+
+                        Append(EigenVectors[j][1],NewEigenVectors[j][1]);
+                        Append(EigenVectors[j][2],NewEigenVectors[j][2]);
+                        Append(EigenVectors[j][3],NewEigenVectors[j][3]);
+                    od;
+
+                    if Output[i] <> [] then
                         break;
                     fi;
 
-                    # 0,1/4 fusion
-                    fres := MAJORANA_TestFusion(1,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                    if fres[1] then
-                        Append(NewEigenVectors[j][2], fres[2]);
+                    NewDimensions:=[];
+
+                    for j in [1..t] do
+                        for k in [1..3] do
+                            if Size(EigenVectors[j][k]) > 0 then
+                                EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
+                            fi;
+                        od;
+                        Append(NewDimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
+                    od;
+
+                    if NewDimensions = Dimensions then
+                        switch := 1;
+                    elif ForAll(NewDimensions,x->x=dim-1) then
+                        switch := 1;
                     else
-                        Output[i] := fres[2];
-                        break;
+                        Dimensions:=StructuralCopy(NewDimensions);
                     fi;
 
-                    # 0,1/32 fusion
-                    fres := MAJORANA_TestFusion(1,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                    if fres[1] then
-                        Append(NewEigenVectors[j][3], fres[2]);
-                    else
-                        Output[i] := fres[2];
-                        Error("0, 1/32 fusion");
-                        break;
-                    fi;
-
-                    # 1/4,1/32 fusion
-                    fres := MAJORANA_TestFusion(2,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                    if fres[1] then
-                        Append(NewEigenVectors[j][3], fres[2]);
-                    else
-                        Output[i] := fres[2];
-                        break;
-                    fi;
-
-                    # 1/4,1/4 Fusion
-                    fres := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                    if fres[1] then
-                        Append(NewEigenVectors[j][1], fres[2]);
-                    else
-                        Output[i] := fres[2];
-                        break;
-                    fi;
-
-                    Append(EigenVectors[j][1],NewEigenVectors[j][1]);
-                    Append(EigenVectors[j][2],NewEigenVectors[j][2]);
-                    Append(EigenVectors[j][3],NewEigenVectors[j][3]);
                 od;
 
                 if Output[i] <> [] then
                     break;
                 fi;
 
-                NewDimensions:=[];
+                                            ## STEP 6: MORE INNER PRODUCTS ##
+                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
 
-                for j in [1..t] do
-					for k in [1..3] do
-                        if Size(EigenVectors[j][k]) > 0 then
-                            EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
+                switch := 0;
+
+                while switch = 0 do 
+                
+                    UnknownInnerProducts:=[];
+
+                    for j in [1..SizeOrbitals] do
+                        if GramMatrix[j] = false then
+                            Add(UnknownInnerProducts,j);
                         fi;
                     od;
-                    Append(NewDimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
-                od;
+                
+                    if Size(UnknownInnerProducts) = 0 then
+                        
+                        break;
+                        
+                    else
 
-                if NewDimensions = Dimensions then
-                    switch := 1;
-                elif ForAll(NewDimensions,x->x=dim-1) then
-                    switch := 1;
-                else
-                    Dimensions:=StructuralCopy(NewDimensions);
-                fi;
+                        mat:=[];
+                        vec:=[];
 
-            od;
+                        for j in [1..t] do
 
-            if Output[i] <> [] then
-                break;
-            fi;
+                            # 1- eigenvectors and 0-eigenvectors
 
-                                        ## STEP 6: MORE INNER PRODUCTS ##
-            # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
+                            x := MAJORANA_Orthogonality(0,1,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
 
-            switch := 0;
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
 
-            while switch = 0 do 
-            
-                UnknownInnerProducts:=[];
+                            # 1- eigenvectors and 1/4-eigenvectors
 
-                for j in [1..SizeOrbitals] do
-                    if GramMatrix[j] = false then
-                        Add(UnknownInnerProducts,j);
+                            x := MAJORANA_Orthogonality(0,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+
+                            # 1- eigenvectors and 1/32-eigenvectors
+
+                            x := MAJORANA_Orthogonality(0,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+
+                            # 0-eigenvectors and 1/4-eigenvectors
+
+                            x := MAJORANA_Orthogonality(1,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+
+                            # 0-eigenvectors and 1/32-eigenvectors
+
+                            x := MAJORANA_Orthogonality(1,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+
+                            # 1/4-eigenvectors and 1/32-eigenvectors
+
+                            x := MAJORANA_Orthogonality(2,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+                        od;
+
+                        Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+
+                        if Size(Solution) = 2 then                    
+                            
+                                for k in [1..Size(Solution[1])] do
+                                    if not k in Solution[2] then
+
+                                        x:=UnknownInnerProducts[k]; 
+
+                                        GramMatrix[x]:=Solution[1][k][1];
+                                    fi;
+                                od;
+                                
+                                if Size(Solution[2]) = Size(Solution[1]) then
+                                    break;
+                                fi;
+                                
+                             #   if Size(Solution[2]) = Size(Solution[1]) then 
+                             #       Output[i] := [ StructuralCopy(Shape)
+                             #                , "Fail"
+                             #                , "Missing inner product values"
+                             #                , StructuralCopy(GramMatrix)];
+                             #       Error("Missing inner products");
+                             #   
+                             #       break;
+                             #   fi;
+                                
+                        else
+                            Output[i] := [ Shape
+                                         , "Error"
+                                         , "Inconsistent system of unknown inner products"
+                                         , mat
+                                         , vec
+                                         , EigenVectors
+                                         , AlgebraProducts
+                                         , GramMatrix
+                                         , UnknownInnerProducts ];
+                            Output[i]:=StructuralCopy(Output[i]);
+                            
+                            break;
+                        fi;
                     fi;
                 od;
-            
-                if Size(UnknownInnerProducts) = 0 then
-                    
+                
+                if Size(Output[i]) > 0 then
                     break;
+                fi;
+
+                # Check that GramMatrix matrix is pd
+                
+                if ForAll(GramMatrix, x -> x <> false) then 
+                    GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim);
+
+                    L:=MAJORANA_LDLTDecomposition(GramMatrixFull);
+
+                    Diagonals:=[];
+
+                    for j in [1..Size(GramMatrixFull)] do
+                        Append(Diagonals,[L[2][j][j]]);
+                    od;
+
+                    if ForAny(Diagonals, x->x<0) then
+                        Output[i] := [ StructuralCopy(Shape)
+                                     , "Error"
+                                     , "The inner product is not positive definite"
+                                     , StructuralCopy(3Aaxes)
+                                     , StructuralCopy(4Aaxes)
+                                     , StructuralCopy(5Aaxes)
+                                     , StructuralCopy(5AaxesFixed)
+                                     , StructuralCopy(GramMatrix) ];
+                        break;
+                    elif ForAny(Diagonals, x->x=0) then
                     
+                        NullSp:=MAJORANA_NullSpace(GramMatrixFull);
+                        
+                        ProductList[6] := NullSp;
+                        
+                        LI:=0;
+                    else
+                        LI:=1;
+                    fi;
                 else
+                    LI := 1;
+                fi;
+
+                if LI=0 then
+
+                    dim:=t+u+v+w;
+
+                    for j in [1..Size(NullSp)] do
+                        NullSp[j]:=NullSp[j]/NullSp[j][dim-j+1];
+
+                        for k in [1..j-1] do
+                            NullSp[j]:=NullSp[j] - NullSp[j][n-k+1]*NullSp[k];
+                        od;
+                    od;
+
+                    # Change alg products to get rid of any axes not in the basis
+
+                    for j in [1..Size(NullSp)] do
+                        for k in [1..SizeOrbitals] do
+                            if AlgebraProducts[k] <> false then
+                                AlgebraProducts[k]:=AlgebraProducts[k] - NullSp[j]*AlgebraProducts[k][dim-j+1];
+                            fi;
+                        od;
+                    od;
+
+                    # Change evecs to get rid of any axes not in the basis
+
+                    for j in [1..t] do
+                        for k in [1..3] do
+                            for l in [1..Size(EigenVectors[j][k])] do
+                                for m in [1..Size(NullSp)] do
+                                    EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim - m + 1];
+                                od;
+                            od;
+                        od;
+                    od;
+                else
+                    dim:=t+u+v+w;
+                fi;
+
+                                            ## STEP 7: MORE PRODUCTS II ##
+
+                # Check fusion and M1
+
+                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
+
+                if Size(ErrorM1)>0 then
+                    Output[i] := [ StructuralCopy(Shape)
+                                 , "Error"
+                                 , "Algebra does not obey axiom M1 step 7"
+                                 , StructuralCopy(GramMatrix)
+                                 , StructuralCopy(AlgebraProducts)
+                                 , StructuralCopy(ErrorM1)];
+                    Error("axiom M1");
+                    break;
+                fi;
+
+                ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts, EigenVectors,ProductList);
+
+                if ForAny(ErrorFusion, x->Size(x) > 0) then
+                
+                    Output[i] := [ StructuralCopy(Shape)
+                                 , "Error"
+                                 , "Algebra does not obey fusion rules step 7"
+                                 , StructuralCopy(GramMatrix)
+                                 , StructuralCopy(AlgebraProducts)
+                                 , StructuralCopy(EigenVectors)
+                                 , StructuralCopy(ErrorFusion)];
+                    Error("fusion");
+                    break;
+                fi;
+
+
+                # Use eigenvectors to find more products
+                            
+                for j in [1..t] do
+                
+                    a := [1..dim]*0; a[j]:=1;
+                
+                    UnknownAlgebraProducts := [];
+                
+                    for k in [1..SizeOrbitals] do
+                    
+                        if AlgebraProducts[k] = false and pairrepresentatives[k][1] = j then 
+                            Add(UnknownAlgebraProducts,k);
+                        fi;
+                            
+                    od;
+                    
+                    if UnknownAlgebraProducts <> [] then
+                    
+                        mat := [];
+                        vec := [];
+                        
+                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
+                        
+                        if x <> 0 then 
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+                        fi;
+                        
+                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
+                        
+                        if x <> 0 then 
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+                        fi;
+                        
+                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
+                        
+                        if x <> 0 then 
+                            Append(mat,x[1]);
+                            Append(vec,x[2]);
+                        fi;
+                        
+                        # use fact that if v in null space then a \cdot v = 0
+                        
+                        for k in [1..Size(NullSp)] do
+                            
+                            row := [1..Size(UnknownAlgebraProducts)]*0;
+                            sum := [];
+                            
+                            for l in [1..dim] do
+                                if NullSp[k][l] <> 0 then
+                                
+                                    y := pairorbitlist[j][l]; 
+                                    
+                                    if AlgebraProducts[y] <> false then 
+                                    
+                                        a := [1..dim]*0; a[j] := 1;
+                                        b := [1..dim]*0; b[l] := 1;
+                                        
+                                        sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                                        
+                                    else
+                                        
+                                        if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
+                                            row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
+                                        else
+                                            row := [];
+                                            break; ##### need to move on to next null space vector
+                                        fi;
+                                    fi;
+                                fi;
+                            od;
+                            
+                            if sum <> [] and row <> [] then
+                                if ForAll(row, x -> x = 0) then 
+                                    if ForAny( x , y -> y <> 0) then 
+                                        Error("Step 7 system 1");
+                                    else
+                                        return 0; 
+                                    fi;
+                                else
+                                    Add(mat,row);
+                                    Add(vec,sum);
+                                fi;
+                            fi;
+                        
+                        od;
+                                     
+                    
+                        Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+
+                        if Size(Solution) = 2 then
+                                for k in [1..Size(Solution[1])] do
+                                    if not k in Solution[2] then
+
+                                        x:=UnknownAlgebraProducts[k]; 
+
+                                        AlgebraProducts[x]:=Solution[1][k];
+                                    fi;
+                                od;
+                        else
+                            Output[i] := [ StructuralCopy(Shape)
+                                         , "Error"
+                                         , "Inconsistent system of unknown algebra products step 7"
+                                         , StructuralCopy(GramMatrix)
+                                         , [] # StructuralCopy(KnownAlgebraProducts)
+                                         , StructuralCopy(AlgebraProducts)
+                                         , StructuralCopy(EigenVectors)
+                                         , StructuralCopy(mat)
+                                         , StructuralCopy(vec)
+                                         , StructuralCopy(Solution)
+                                         , StructuralCopy(UnknownAlgebraProducts)];
+                            Error("Step 7");
+                            break;
+                        fi;
+                    fi;                        
+                od;
+
+                if Size(Output[i])>0 then
+                    break;
+                fi;
+                
+                                                   ## STEP 8: RESURRECTION PRINCIPLE I ##
+
+                # Check fusion and M1
+
+                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
+
+                if Size(ErrorM1)>0 then
+                    Output[i] := [ StructuralCopy(Shape)
+                                 , "Error"
+                                 , "Algebra does not obey axiom M1 step 8"
+                                 , StructuralCopy(GramMatrix)
+                                 , [] # StructuralCopy(KnownAlgebraProducts)
+                                 , StructuralCopy(AlgebraProducts)
+                                 , StructuralCopy(ErrorM1)];
+                fi;
+
+                ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+
+                if ForAny(ErrorFusion, x->Size(x) > 0) then
+                    Output[i] := [ StructuralCopy(Shape)
+                                 , "Error"
+                                 , "Algebra does not obey fusion rules step 8"
+                                 , StructuralCopy(GramMatrix)
+                                 , []
+                                 , StructuralCopy(AlgebraProducts)
+                                 , StructuralCopy(EigenVectors)
+                                 , StructuralCopy(ErrorFusion)];
+                    break;
+                fi;
+
+                # Use resurrection principle (Step 7 Seress)
+
+                UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
+                
+                if ForAny(UnknownAlgebraProducts, x -> pairrepresentatives[x][1] < t+1) then
 
                     mat:=[];
                     vec:=[];
+                    record:=[];
 
                     for j in [1..t] do
 
-                        # 1- eigenvectors and 0-eigenvectors
+                        a:=NullMat(1,dim)[1];
+                        a[j]:=1;
 
-                        x := MAJORANA_Orthogonality(0,1,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
+                        Alpha:=[];
+                        Alpha2:=[];
+                        Beta2:=[];
 
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-
-                        # 1- eigenvectors and 1/4-eigenvectors
-
-                        x := MAJORANA_Orthogonality(0,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-
-                        # 1- eigenvectors and 1/32-eigenvectors
-
-                        x := MAJORANA_Orthogonality(0,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-
-                        # 0-eigenvectors and 1/4-eigenvectors
-
-                        x := MAJORANA_Orthogonality(1,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-
-                        # 0-eigenvectors and 1/32-eigenvectors
-
-                        x := MAJORANA_Orthogonality(1,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-
-                        # 1/4-eigenvectors and 1/32-eigenvectors
-
-                        x := MAJORANA_Orthogonality(2,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-                    od;
-
-                    Solution:=MAJORANA_SolutionMatVecs(mat,vec);
-
-                    if Size(Solution) = 2 then                    
-                        
-                            for k in [1..Size(Solution[1])] do
-								if not k in Solution[2] then
-
-									x:=UnknownInnerProducts[k]; 
-
-									GramMatrix[x]:=Solution[1][k][1];
-								fi;
-							od;
-                            
-                            if Size(Solution[2]) = Size(Solution[1]) then 
-                                Output[i] := [ StructuralCopy(Shape)
-                                         , "Fail"
-                                         , "Missing inner product values"
-                                         , StructuralCopy(GramMatrix)];
-                                Error("Missing inner products");
-                            
-                                break;
+                        for k in [1..Size(EigenVectors[j][1])] do
+                            if Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t-1 then
+                                Append(Alpha,[k]);
+                            elif Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t then
+                                Append(Alpha2,[k]);
                             fi;
-                            
-                    else
-                        Output[i] := [ Shape
-                                     , "Error"
-                                     , "Inconsistent system of unknown inner products"
-                                     , mat
-                                     , vec
-                                     , EigenVectors
-                                     , AlgebraProducts
-                                     , GramMatrix
-                                     , UnknownInnerProducts ];
-                        Output[i]:=StructuralCopy(Output[i]);
-                        
-                        break;
-                    fi;
-                fi;
-            od;
-            
-            if Size(Output[i]) > 0 then
-                break;
-            fi;
-
-            # Check that GramMatrix matrix is pd
-            
-            GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim);
-
-            L:=MAJORANA_LDLTDecomposition(GramMatrixFull);
-
-            Diagonals:=[];
-
-            for j in [1..Size(GramMatrixFull)] do
-                Append(Diagonals,[L[2][j][j]]);
-            od;
-
-            if ForAny(Diagonals, x->x<0) then
-                Output[i] := [ StructuralCopy(Shape)
-                             , "Error"
-                             , "The inner product is not positive definite"
-                             , StructuralCopy(3Aaxes)
-                             , StructuralCopy(4Aaxes)
-                             , StructuralCopy(5Aaxes)
-                             , StructuralCopy(5AaxesFixed)
-                             , StructuralCopy(GramMatrix) ];
-                break;
-            elif ForAny(Diagonals, x->x=0) then
-            
-                NullSp:=MAJORANA_NullSpace(GramMatrixFull);
-                
-                ProductList[6] := NullSp;
-                
-                LI:=0;
-            else
-                LI:=1;
-            fi;
-
-            if LI=0 then
-
-                dim:=t+u+v+w;
-
-                for j in [1..Size(NullSp)] do
-                    NullSp[j]:=NullSp[j]/NullSp[j][dim-j+1];
-
-                    for k in [1..j-1] do
-                        NullSp[j]:=NullSp[j] - NullSp[j][n-k+1]*NullSp[k];
-                    od;
-                od;
-
-                # Change alg products to get rid of any axes not in the basis
-
-                for j in [1..Size(NullSp)] do
-                    for k in [1..SizeOrbitals] do
-						if AlgebraProducts[k] <> false then
-							AlgebraProducts[k]:=AlgebraProducts[k] - NullSp[j]*AlgebraProducts[k][dim-j+1];
-						fi;
-                    od;
-                od;
-
-                # Change evecs to get rid of any axes not in the basis
-
-                for j in [1..t] do
-                    for k in [1..3] do
-                        for l in [1..Size(EigenVectors[j][k])] do
-                            for m in [1..Size(NullSp)] do
-                                EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim - m + 1];
-                            od;
                         od;
-                    od;
-                od;
-            else
-                dim:=t+u+v+w;
-            fi;
 
-                                        ## STEP 7: MORE PRODUCTS II ##
+                        for k in [1..Size(EigenVectors[j][2])] do
+                            if Size(Positions(EigenVectors[j][2][k]{[t+1..dim]},0)) = dim-t then
+                                Append(Beta2,[k]);
+                            fi;
+                        od;
 
-            # Check fusion and M1
+                        for k in Alpha do
 
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
+                            Beta:=[];
 
-            if Size(ErrorM1)>0 then
-                Output[i] := [ StructuralCopy(Shape)
-                             , "Error"
-                             , "Algebra does not obey axiom M1 step 7"
-                             , StructuralCopy(GramMatrix)
-                             , StructuralCopy(AlgebraProducts)
-                             , StructuralCopy(ErrorM1)];
-                Error("axiom M1");
-                break;
-            fi;
+                            l:=t+1;
 
-            ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts, EigenVectors,ProductList);
-
-            if ForAny(ErrorFusion, x->Size(x) > 0) then
-            
-                Output[i] := [ StructuralCopy(Shape)
-                             , "Error"
-                             , "Algebra does not obey fusion rules step 7"
-                             , StructuralCopy(GramMatrix)
-                             , StructuralCopy(AlgebraProducts)
-                             , StructuralCopy(EigenVectors)
-                             , StructuralCopy(ErrorFusion)];
-                Error("fusion");
-                break;
-            fi;
-
-
-            # Use eigenvectors to find more products
-            			
-			for j in [1..t] do
-			
-				a := [1..dim]*0; a[j]:=1;
-			
-				UnknownAlgebraProducts := [];
-			
-				for k in [1..SizeOrbitals] do
-				
-					if AlgebraProducts[k] = false and pairrepresentatives[k][1] = j then 
-						Add(UnknownAlgebraProducts,k);
-					fi;
-						
-				od;
-				
-				if UnknownAlgebraProducts <> [] then
-				
-					mat := [];
-					vec := [];
-					
-					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
-					
-					if x <> 0 then 
-						Append(mat,x[1]);
-						Append(vec,x[2]);
-					fi;
-					
-					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
-					
-					if x <> 0 then 
-						Append(mat,x[1]);
-						Append(vec,x[2]);
-					fi;
-					
-					x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairorbitlist, ProductList);
-					
-					if x <> 0 then 
-						Append(mat,x[1]);
-						Append(vec,x[2]);
-					fi;
-                    
-                    # use fact that if v in null space then a \cdot v = 0
-                    
-                    for k in [1..Size(NullSp)] do
-                        
-                        row := [1..Size(UnknownAlgebraProducts)]*0;
-                        sum := [];
-                        
-                        for l in [1..dim] do
-                            if NullSp[k][l] <> 0 then
-                            
-                                y := pairorbitlist[j][l]; 
-                                
-                                if AlgebraProducts[y] <> false then 
-                                
-                                    a := [1..dim]*0; a[j] := 1;
-                                    b := [1..dim]*0; b[l] := 1;
-                                    
-                                    sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-                                    
+                            while l <= dim do
+                                if EigenVectors[j][1][k][l] <> 0 then
+                                    c:=l;
+                                    l:=dim+1;
                                 else
-                                    
-                                    if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
-                                        row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
-                                    else
-                                        row := [];
-                                        break; ##### need to move on to next null space vector
-                                    fi;
+                                    l:=l+1;
                                 fi;
-                            fi;
-                        od;
-                        
-                        if sum <> [] and row <> [] then
-                            if ForAll(row, x -> x = 0) then 
-                                if ForAny( x , y -> y <> 0) then 
-                                    Error("Step 7 system 1");
-                                else
-                                    return 0; 
-                                fi;
-                            else
-                                Add(mat,row);
-                                Add(vec,sum);
-                            fi;
-                        fi;
-                    
-                    od;
-                                 
-				
-					Solution:=MAJORANA_SolutionMatVecs(mat,vec);
-
-					if Size(Solution) = 2 then
-							for k in [1..Size(Solution[1])] do
-								if not k in Solution[2] then
-
-									x:=UnknownAlgebraProducts[k]; 
-
-									AlgebraProducts[x]:=Solution[1][k];
-								fi;
-							od;
-					else
-						Output[i] := [ StructuralCopy(Shape)
-									 , "Error"
-									 , "Inconsistent system of unknown algebra products step 7"
-									 , StructuralCopy(GramMatrix)
-									 , [] # StructuralCopy(KnownAlgebraProducts)
-									 , StructuralCopy(AlgebraProducts)
-									 , StructuralCopy(EigenVectors)
-									 , StructuralCopy(mat)
-									 , StructuralCopy(vec)
-									 , StructuralCopy(Solution)
-									 , StructuralCopy(UnknownAlgebraProducts)];
-						Error("Step 7");
-						break;
-					fi;
-				fi;                        
-         	od;
-
-            if Size(Output[i])>0 then
-                break;
-            fi;
-            
-                                               ## STEP 8: RESURRECTION PRINCIPLE I ##
-
-            # Check fusion and M1
-
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
-
-            if Size(ErrorM1)>0 then
-                Output[i] := [ StructuralCopy(Shape)
-                             , "Error"
-                             , "Algebra does not obey axiom M1 step 8"
-                             , StructuralCopy(GramMatrix)
-                             , [] # StructuralCopy(KnownAlgebraProducts)
-                             , StructuralCopy(AlgebraProducts)
-                             , StructuralCopy(ErrorM1)];
-            fi;
-
-            ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts,EigenVectors,ProductList);
-
-            if ForAny(ErrorFusion, x->Size(x) > 0) then
-                Output[i] := [ StructuralCopy(Shape)
-                             , "Error"
-                             , "Algebra does not obey fusion rules step 8"
-                             , StructuralCopy(GramMatrix)
-                             , []
-                             , StructuralCopy(AlgebraProducts)
-                             , StructuralCopy(EigenVectors)
-                             , StructuralCopy(ErrorFusion)];
-                break;
-            fi;
-
-            # Use resurrection principle (Step 7 Seress)
-
-            UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
-            
-            if ForAny(UnknownAlgebraProducts, x -> pairrepresentatives[x][1] < t+1) then
-
-                mat:=[];
-                vec:=[];
-                record:=[];
-
-                for j in [1..t] do
-
-                    a:=NullMat(1,dim)[1];
-                    a[j]:=1;
-
-                    Alpha:=[];
-                    Alpha2:=[];
-                    Beta2:=[];
-
-                    for k in [1..Size(EigenVectors[j][1])] do
-                        if Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t-1 then
-                            Append(Alpha,[k]);
-                        elif Size(Positions(EigenVectors[j][1][k]{[t+1..dim]},0)) = dim-t then
-                            Append(Alpha2,[k]);
-                        fi;
-                    od;
-
-                    for k in [1..Size(EigenVectors[j][2])] do
-                        if Size(Positions(EigenVectors[j][2][k]{[t+1..dim]},0)) = dim-t then
-                            Append(Beta2,[k]);
-                        fi;
-                    od;
-
-                    for k in Alpha do
-
-                        Beta:=[];
-
-                        l:=t+1;
-
-                        while l <= dim do
-                            if EigenVectors[j][1][k][l] <> 0 then
-                                c:=l;
-                                l:=dim+1;
-                            else
-                                l:=l+1;
-                            fi;
-                        od;
-
-                        for l in [1..Size(EigenVectors[j][2])] do
-                            if Size(Positions(EigenVectors[j][2][l]{[t+1..dim]},0)) = dim-t-1 and EigenVectors[j][2][l][c] <>0 then
-                                Append(Beta,[l]);
-                            fi;
-                        od;
-
-                        EigenVectors[j][1][k]:=EigenVectors[j][1][k]/EigenVectors[j][1][k][c];
-
-                        for m in Beta do
-
-                            EigenVectors[j][2][m]:=EigenVectors[j][2][m]/EigenVectors[j][2][m][c];
-
-                            walpha:=Concatenation(EigenVectors[j][1][k]{[1..t]},NullMat(1,dim-t)[1]);
-                            wbeta:=Concatenation(EigenVectors[j][2][m]{[1..t]},NullMat(1,dim-t)[1]);
-
-                            ## first part
-
-                            for l in Alpha2 do
-
-                                sum:=[];
-                                row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
-
-                                # calculate lhs
-
-                                x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,ProductList);
-
-                                if x <> false then
-                                    for n in [1..dim] do
-                                        if x[n] <> 0 then
-                                        
-                                            y := pairorbitlist[j][n];
-                                        
-                                            if AlgebraProducts[y] <> false then
-                                            
-                                                a := [1..dim]*0; a[j] := 1;
-                                                b := [1..dim]*0; b[n] := 1;
-                                                
-                                                Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
-                                            else
-                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives[y] = [n,j] then
-                                                    row[Position(UnknownAlgebraProducts,y)]:=x[n];
-                                                else
-                                                    row := [];
-                                                    break; ##### need to move on to next alpha2
-                                                fi;
-                                            fi;
-                                        fi;
-                                    od;
-                                fi;
-
-                                # calculate rhs
-
-                                if row <> [] then 
-                                    for n in [1..t] do
-                                        if EigenVectors[j][1][l][n] <> 0 then
-                                        
-                                            y := pairorbitlist[n][c];
-                                            
-                                            if AlgebraProducts[y] <> false then
-                                                
-                                                a := [1..dim]*0; a[c] := 1;
-                                                b := [1..dim]*0; b[n] := 1;
-                                                
-                                                Add(sum,-EigenVectors[j][1][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4);
-                                            else
-                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
-                                                    row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + EigenVectors[j][1][l][n]/4;
-                                                else
-                                                    row := [];
-                                                    break; ##### need to move on to next alpha2
-                                                fi;
-                                            fi;
-                                        fi;
-                                    od;
-                                fi;
-                                
-                                x := Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4;
-                                
-                                if sum <> [] and row <> [] then
-                                    if ForAll(row, x -> x = 0) then 
-                                        if ForAny( x , y -> y <> 0) then 
-                                            Error("Step 8 system 1");
-                                        fi;
-                                    else
-                                        Add(mat,row);
-                                        Add(vec,x);
-                                    fi;
-                                fi;       
-                                
                             od;
 
-                            ## Second part
+                            for l in [1..Size(EigenVectors[j][2])] do
+                                if Size(Positions(EigenVectors[j][2][l]{[t+1..dim]},0)) = dim-t-1 and EigenVectors[j][2][l][c] <>0 then
+                                    Append(Beta,[l]);
+                                fi;
+                            od;
 
-                            for l in Beta2 do
+                            EigenVectors[j][1][k]:=EigenVectors[j][1][k]/EigenVectors[j][1][k][c];
 
-                                sum:=[];
-                                row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
+                            for m in Beta do
 
-                                # calculate lhs
+                                EigenVectors[j][2][m]:=EigenVectors[j][2][m]/EigenVectors[j][2][m][c];
 
-                                x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,ProductList);
+                                walpha:=Concatenation(EigenVectors[j][1][k]{[1..t]},NullMat(1,dim-t)[1]);
+                                wbeta:=Concatenation(EigenVectors[j][2][m]{[1..t]},NullMat(1,dim-t)[1]);
 
-                                if x <> false then
-                                    for n in [1..dim] do
-                                        if x[n] <> 0 then
+                                ## first part
+
+                                for l in Alpha2 do
+
+                                    sum:=[];
+                                    row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
+
+                                    # calculate lhs
+
+                                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][1][l],(walpha - wbeta),AlgebraProducts,ProductList);
+
+                                    if x <> false then
+                                        for n in [1..dim] do
+                                            if x[n] <> 0 then
                                             
-                                            y := pairorbitlist[j][n];
-                                        
-                                            if AlgebraProducts[y] <> false then
+                                                y := pairorbitlist[j][n];
                                             
-                                                a := [1..dim]*0; a[j] := 1;
-                                                b := [1..dim]*0; b[n] := 1;
-                                            
-                                                Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
-                                            else
-                                                if pairrepresentatives[y] = [j,n] or pairrepresentatives[y] = [n,j] then
-                                                    row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + x[n];
+                                                if AlgebraProducts[y] <> false then
+                                                
+                                                    a := [1..dim]*0; a[j] := 1;
+                                                    b := [1..dim]*0; b[n] := 1;
+                                                    
+                                                    Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
                                                 else
-                                                    row := [];
-                                                    break; # need to move on to next beta2
+                                                    if pairrepresentatives[y] = [j,n] or pairrepresentatives[y] = [n,j] then
+                                                        row[Position(UnknownAlgebraProducts,y)]:=x[n];
+                                                    else
+                                                        row := [];
+                                                        break; ##### need to move on to next alpha2
+                                                    fi;
                                                 fi;
                                             fi;
-                                        fi;
-                                    od;
-                                fi;
+                                        od;
+                                    fi;
 
-                                # calculate rhs
+                                    # calculate rhs
 
-                                if row <> [] then 
-
-                                    for n in [1..t] do
-                                        if EigenVectors[j][2][l][n] <> 0 then
-                                        
-                                            y := pairorbitlist[n][c];
-                                        
-                                            if AlgebraProducts[y] <> false then
+                                    if row <> [] then 
+                                        for n in [1..t] do
+                                            if EigenVectors[j][1][l][n] <> 0 then
                                             
-                                                a := [1..dim]*0; a[c] := 1;
-                                                b := [1..dim]*0; b[n] := 1;
-                                            
-                                                Add(sum,[EigenVectors[j][2][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4]);
-                                            else
-                                                if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
-                                                    row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][2][l][n]/4;
-                                                else 
-                                                    row := [];
-                                                    break; # need to move on to next beta2
+                                                y := pairorbitlist[n][c];
+                                                
+                                                if AlgebraProducts[y] <> false then
+                                                    
+                                                    a := [1..dim]*0; a[c] := 1;
+                                                    b := [1..dim]*0; b[n] := 1;
+                                                    
+                                                    Add(sum,-EigenVectors[j][1][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4);
+                                                else
+                                                    if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
+                                                        row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + EigenVectors[j][1][l][n]/4;
+                                                    else
+                                                        row := [];
+                                                        break; ##### need to move on to next alpha2
+                                                    fi;
                                                 fi;
                                             fi;
-                                        fi;
-                                    od;
-                                fi;
-
-                                y:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
-                                
-                                if y <> false then 
-                                
-                                    x := Sum(sum) + MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)/4 - y*a/4;
+                                        od;
+                                    fi;
+                                    
+                                    x := Sum(sum) - MAJORANA_AlgebraProduct(wbeta,EigenVectors[j][1][l],AlgebraProducts,ProductList)/4;
                                     
                                     if sum <> [] and row <> [] then
                                         if ForAll(row, x -> x = 0) then 
                                             if ForAny( x , y -> y <> 0) then 
-                                                Error("Step 8 system 2"); 
+                                                Error("Step 8 system 1");
                                             fi;
                                         else
                                             Add(mat,row);
                                             Add(vec,x);
                                         fi;
+                                    fi;       
+                                    
+                                od;
+
+                                ## Second part
+
+                                for l in Beta2 do
+
+                                    sum:=[];
+                                    row:=NullMat(1,Size(UnknownAlgebraProducts))[1];
+
+                                    # calculate lhs
+
+                                    x:=MAJORANA_AlgebraProduct(EigenVectors[j][2][l],(walpha - wbeta),AlgebraProducts,ProductList);
+
+                                    if x <> false then
+                                        for n in [1..dim] do
+                                            if x[n] <> 0 then
+                                                
+                                                y := pairorbitlist[j][n];
+                                            
+                                                if AlgebraProducts[y] <> false then
+                                                
+                                                    a := [1..dim]*0; a[j] := 1;
+                                                    b := [1..dim]*0; b[n] := 1;
+                                                
+                                                    Add(sum,-MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)*x[n]);
+                                                else
+                                                    if pairrepresentatives[y] = [j,n] or pairrepresentatives[y] = [n,j] then
+                                                        row[Position(UnknownAlgebraProducts,y)]:=row[Position(UnknownAlgebraProducts,y)] + x[n];
+                                                    else
+                                                        row := [];
+                                                        break; # need to move on to next beta2
+                                                    fi;
+                                                fi;
+                                            fi;
+                                        od;
                                     fi;
-                                fi;
+
+                                    # calculate rhs
+
+                                    if row <> [] then 
+
+                                        for n in [1..t] do
+                                            if EigenVectors[j][2][l][n] <> 0 then
+                                            
+                                                y := pairorbitlist[n][c];
+                                            
+                                                if AlgebraProducts[y] <> false then
+                                                
+                                                    a := [1..dim]*0; a[c] := 1;
+                                                    b := [1..dim]*0; b[n] := 1;
+                                                
+                                                    Add(sum,[EigenVectors[j][2][l][n]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList)/4]);
+                                                else
+                                                    if pairrepresentatives[y] = [c,n] or pairrepresentatives[y] = [n,c] then
+                                                        row[Position(UnknownAlgebraProducts,[n,c])]:=row[Position(UnknownAlgebraProducts,[n,c])] + EigenVectors[j][2][l][n]/4;
+                                                    else 
+                                                        row := [];
+                                                        break; # need to move on to next beta2
+                                                    fi;
+                                                fi;
+                                            fi;
+                                        od;
+                                    fi;
+
+                                    y:= MAJORANA_InnerProduct(EigenVectors[j][2][m],EigenVectors[j][2][l],GramMatrix, pairorbitlist);
+                                    
+                                    if y <> false then 
+                                    
+                                        x := Sum(sum) + MAJORANA_AlgebraProduct(EigenVectors[j][2][l],walpha,AlgebraProducts,ProductList)/4 - y*a/4;
+                                        
+                                        if sum <> [] and row <> [] then
+                                            if ForAll(row, x -> x = 0) then 
+                                                if ForAny( x , y -> y <> 0) then 
+                                                    Error("Step 8 system 2"); 
+                                                fi;
+                                            else
+                                                Add(mat,row);
+                                                Add(vec,x);
+                                            fi;
+                                        fi;
+                                    fi;
+                                od;
                             od;
                         od;
                     od;
-                od;
 
-                Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+                    Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
-                if Size(Solution)  = 2 then
-                    if Size(Solution[2]) = 0 then
-                        for k in [1..Size(UnknownAlgebraProducts)] do
-                            x:=UnknownAlgebraProducts[k]; 
-                            AlgebraProducts[x]:=Solution[1][k];
-                        od;
+                    if Size(Solution)  = 2 then
+                        if Size(Solution[2]) = 0 then
+                            for k in [1..Size(UnknownAlgebraProducts)] do
+                                x:=UnknownAlgebraProducts[k]; 
+                                AlgebraProducts[x]:=Solution[1][k];
+                            od;
+                    #    else
+                    #        Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
+                    #        Error("Missing algebra product values");
+                    #        Output[i] := StructuralCopy(Output[i]);
+                    #        break;
+                        fi;
                     else
-                        Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
-                        Error("Missing algebra product values");
+                        Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
                         Output[i] := StructuralCopy(Output[i]);
+                        Error("Inconsistent system of unknown algebra products");
                         break;
                     fi;
-                else
-                    Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
-                    Output[i] := StructuralCopy(Output[i]);
-                    Error("Inconsistent system of unknown algebra products");
-                    break;
                 fi;
-            fi;
 
 
 
-                                        ## STEP 9: MORE EVECS II ##
+                                            ## STEP 9: MORE EVECS II ##
 
-            # Step 8 - check if we have full espace decomp, if not find it
+                # Step 8 - check if we have full espace decomp, if not find it
 
-            for j in [1..t] do
-                
-                a := [1..dim]*0; a[j] := 1;
-            
-                if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then
-                    mat:=[];
-
-                    for k in [1..dim] do
-                        b := [1..dim]*0; b[k] := 1;
-                        x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-                        if x <> false then
-                            Add(mat,x);
-                        else
-                            Error("missing eigenvectors");
-                            mat := [];
-                            break;
-                        fi;
-                    od;
-
-                    if mat <> [] then 
+                for j in [1..t] do
                     
+                    a := [1..dim]*0; a[j] := 1;
+                
+                    if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then
+                        mat:=[];
 
-                        EigenVectors[j][1]:=ShallowCopy(NullspaceMat(mat));
-                        EigenVectors[j][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
-                        EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
-                        EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
+                        for k in [1..dim] do
+                            b := [1..dim]*0; b[k] := 1;
+                            x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                            if x <> false then
+                                Add(mat,x);
+                        #    else
+                        #        Error("missing eigenvectors");
+                        #        mat := [];
+                        #        break;
+                            fi;
+                        od;
+
+                        if mat <> [] then 
                         
-                        for k in [1..4] do 
-                            for l in [1..Size(EigenVectors[j][k])] do
-                                MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
-                            od;
-                        od;                        
-                                               
-                        if Size(EigenVectors[j][4]) <> 1 then
-                            Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
-                            Output[i]:=StructuralCopy(Output[i]);
-                            break;
-                        elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) <> dim then
-                            Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
-                            Error("M4");
-                            Output[i]:=StructuralCopy(Output[i]);
-                            break;
+
+                            EigenVectors[j][1]:=ShallowCopy(NullspaceMat(mat));
+                            EigenVectors[j][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
+                            EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
+                            EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
+                            
+                            for k in [1..4] do 
+                                for l in [1..Size(EigenVectors[j][k])] do
+                                    MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                                od;
+                            od;                        
+                                                   
+                            if Size(EigenVectors[j][4]) <> 1 then
+                                Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
+                                Output[i]:=StructuralCopy(Output[i]);
+                                break;
+                            elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) <> dim then
+                                Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
+                                Error("M4");
+                                Output[i]:=StructuralCopy(Output[i]);
+                                break;
+                            fi;
                         fi;
                     fi;
-                fi;
-            od;
+                od;
 
-            if Size(Output[i]) > 0 then
+                if Size(Output[i]) > 0 then
+                    break;
+                fi;
+                
+                newdimensions := [];
+                
+                for j in [1..t] do 
+                    Add(newdimensions, Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + 1);
+                od;
+                
+                newfalsecount := [0,0];
+                
+                if false in GramMatrix then
+                    newfalsecount[1] := Size(Positions(GramMatrix,false));
+                fi;
+                
+                if false in AlgebraProducts then
+                    newfalsecount[2] := Size(Positions(AlgebraProducts,false));
+                fi;
+                
+                if ForAll(newdimensions, x -> x = dim) and newfalsecount = [0,0] then
+                    break;
+                elif newdimensions = maindimensions and newfalsecount = falsecount then 
+
+                    Output[i] := [Shape,"Fail","Missing values",GramMatrix, [], AlgebraProducts,EigenVectors];
+                    Error("Missing values");
+                    Output[i] := StructuralCopy(Output[i]);
+                    break;
+                else
+                    maindimensions := StructuralCopy(newdimensions);
+                    falsecount := StructuralCopy(newfalsecount);
+                fi;
+                
+                if count > 7 then 
+                    switchmain := 1;
+                fi;
+                
+            od;
+            
+            if Output[i] <> [] then 
                 break;
             fi;
 
