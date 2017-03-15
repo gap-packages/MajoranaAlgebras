@@ -80,10 +80,16 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
             for l in [1..Size(ev_b)] do
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
+                
+                if x <> false then 
+                
+                    if Size(x) < 31 then 
+                        Error("less than dim");
+                    fi;
+                
+                    y := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
 
-                if x <> false then
-                    if MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList ) <> false and
-                       MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList ) <> ev * x then
+                    if y <> false and y <> ev * x then
 
                         return [false, StructuralCopy([ Shape
                                        , "Error"
@@ -1818,7 +1824,7 @@ function(G,T)
                     
                         Display("Warning - a 5A axis is conj to its square or cube");
                         
-                        EigenVector := [1..dim];
+                        EigenVector := [1..dim]*0;
                         
                         EigenVector[t+u+v+k] := 2;
                         
@@ -1841,9 +1847,6 @@ function(G,T)
                         Add(EigenVectors[j][3],EigenVector);
                     fi;
                 od;
-                
-                
-                
                 
                 
             od;
@@ -2647,8 +2650,6 @@ function(G,T)
             count := 1;
             
             while switchmain = 0 do 
-            
-                Display(count);
                 
                 count := count + 1;
 
@@ -2759,7 +2760,7 @@ function(G,T)
                 if Output[i] <> [] then
                     break;
                 fi;
-
+               
                                             ## STEP 6: MORE INNER PRODUCTS ##
                 # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
 
@@ -3075,32 +3076,33 @@ function(G,T)
                             od;
                         fi;
                                      
-                    
-                        Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+                        if mat <> [] then 
+                            Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
-                        if Size(Solution) = 2 then
-                                for k in [1..Size(Solution[1])] do
-                                    if not k in Solution[2] then
+                            if Size(Solution) = 2 then
+                                    for k in [1..Size(Solution[1])] do
+                                        if not k in Solution[2] then
 
-                                        x:=UnknownAlgebraProducts[k]; 
+                                            x:=UnknownAlgebraProducts[k]; 
 
-                                        AlgebraProducts[x]:=Solution[1][k];
-                                    fi;
-                                od;
-                        else
-                            Output[i] := [ StructuralCopy(Shape)
-                                         , "Error"
-                                         , "Inconsistent system of unknown algebra products step 7"
-                                         , StructuralCopy(GramMatrix)
-                                         , [] # StructuralCopy(KnownAlgebraProducts)
-                                         , StructuralCopy(AlgebraProducts)
-                                         , StructuralCopy(EigenVectors)
-                                         , StructuralCopy(mat)
-                                         , StructuralCopy(vec)
-                                         , StructuralCopy(Solution)
-                                         , StructuralCopy(UnknownAlgebraProducts)];
-                            Error("Step 7");
-                            break;
+                                            AlgebraProducts[x]:=Solution[1][k];
+                                        fi;
+                                    od;
+                            else
+                                Output[i] := [ StructuralCopy(Shape)
+                                             , "Error"
+                                             , "Inconsistent system of unknown algebra products step 7"
+                                             , StructuralCopy(GramMatrix)
+                                             , [] # StructuralCopy(KnownAlgebraProducts)
+                                             , StructuralCopy(AlgebraProducts)
+                                             , StructuralCopy(EigenVectors)
+                                             , StructuralCopy(mat)
+                                             , StructuralCopy(vec)
+                                             , StructuralCopy(Solution)
+                                             , StructuralCopy(UnknownAlgebraProducts)];
+                                Error("Step 7");
+                                break;
+                            fi;
                         fi;
                     fi;                        
                 od;
@@ -3362,29 +3364,29 @@ function(G,T)
                         od;
                     od;
 
-                    Solution:=MAJORANA_SolutionMatVecs(mat,vec);
+                    if mat <> [] then 
+                        Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
-                    if Size(Solution)  = 2 then
-                        if Size(Solution[2]) = 0 then
-                            for k in [1..Size(UnknownAlgebraProducts)] do
-                                x:=UnknownAlgebraProducts[k]; 
-                                AlgebraProducts[x]:=Solution[1][k];
-                            od;
-                    #    else
-                    #        Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
-                    #        Error("Missing algebra product values");
-                    #        Output[i] := StructuralCopy(Output[i]);
-                    #        break;
+                        if Size(Solution)  = 2 then
+                            if Size(Solution[2]) = 0 then
+                                for k in [1..Size(UnknownAlgebraProducts)] do
+                                    x:=UnknownAlgebraProducts[k]; 
+                                    AlgebraProducts[x]:=Solution[1][k];
+                                od;
+                        #    else
+                        #        Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
+                        #        Error("Missing algebra product values");
+                        #        Output[i] := StructuralCopy(Output[i]);
+                        #        break;
+                            fi;
+                        else
+                            Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
+                            Output[i] := StructuralCopy(Output[i]);
+                            Error("Inconsistent system of unknown algebra products");
+                            break;
                         fi;
-                    else
-                        Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
-                        Output[i] := StructuralCopy(Output[i]);
-                        Error("Inconsistent system of unknown algebra products");
-                        break;
                     fi;
                 fi;
-
-
 
                                             ## STEP 9: MORE EVECS II ##
 
@@ -3402,32 +3404,33 @@ function(G,T)
                             x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
                             if x <> false then
                                 Add(mat,x);
-                        #    else
-                        #        Error("missing eigenvectors");
-                        #        mat := [];
-                        #        break;
+                            else
+                                mat := [];
+                                break;
                             fi;
                         od;
 
                         if mat <> [] then 
-                        
 
                             EigenVectors[j][1]:=ShallowCopy(NullspaceMat(mat));
                             EigenVectors[j][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
                             EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
                             EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
+
                             
-                            for k in [1..4] do 
-                                for l in [1..Size(EigenVectors[j][k])] do
-                                    MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                            if LI = 0 then 
+                                for k in [1..4] do 
+                                    for l in [1..Size(EigenVectors[j][k])] do
+                                        MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                                    od;
                                 od;
-                            od;                        
+                            fi;
                                                    
                             if Size(EigenVectors[j][4]) <> 1 then
                                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
                                 Output[i]:=StructuralCopy(Output[i]);
                                 break;
-                            elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) <> dim then
+                            elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim then
                                 Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
                                 Error("M4");
                                 Output[i]:=StructuralCopy(Output[i]);
@@ -3435,6 +3438,7 @@ function(G,T)
                             fi;
                         fi;
                     fi;
+                    
                 od;
 
                 if Size(Output[i]) > 0 then
@@ -3479,6 +3483,8 @@ function(G,T)
             if Output[i] <> [] then 
                 break;
             fi;
+            
+             
 
                                         ## STEP 10: RESURRECTION PRINCIPLE II ##
 
