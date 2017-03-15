@@ -3028,49 +3028,52 @@ function(G,T)
                         
                         # use fact that if v in null space then a \cdot v = 0
                         
-                        for k in [1..Size(NullSp)] do
-                            
-                            row := [1..Size(UnknownAlgebraProducts)]*0;
-                            sum := [];
-                            
-                            for l in [1..dim] do
-                                if NullSp[k][l] <> 0 then
+                        if LI = 0 then 
+                        
+                            for k in [1..Size(NullSp)] do
                                 
-                                    y := pairorbitlist[j][l]; 
+                                row := [1..Size(UnknownAlgebraProducts)]*0;
+                                sum := [];
+                                
+                                for l in [1..dim] do
+                                    if NullSp[k][l] <> 0 then
                                     
-                                    if AlgebraProducts[y] <> false then 
-                                    
-                                        a := [1..dim]*0; a[j] := 1;
-                                        b := [1..dim]*0; b[l] := 1;
+                                        y := pairorbitlist[j][l]; 
                                         
-                                        sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                                        if AlgebraProducts[y] <> false then 
                                         
-                                    else
-                                        
-                                        if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
-                                            row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
+                                            a := [1..dim]*0; a[j] := 1;
+                                            b := [1..dim]*0; b[l] := 1;
+                                            
+                                            sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                                            
                                         else
-                                            row := [];
-                                            break; ##### need to move on to next null space vector
+                                            
+                                            if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
+                                                row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
+                                            else
+                                                row := [];
+                                                break; ##### need to move on to next null space vector
+                                            fi;
                                         fi;
                                     fi;
-                                fi;
-                            od;
-                            
-                            if sum <> [] and row <> [] then
-                                if ForAll(row, x -> x = 0) then 
-                                    if ForAny( x , y -> y <> 0) then 
-                                        Error("Step 7 system 1");
+                                od;
+                                
+                                if sum <> [] and row <> [] then
+                                    if ForAll(row, x -> x = 0) then 
+                                        if ForAny( x , y -> y <> 0) then 
+                                            Error("Step 7 system 1");
+                                        else
+                                            return 0; 
+                                        fi;
                                     else
-                                        return 0; 
+                                        Add(mat,row);
+                                        Add(vec,sum);
                                     fi;
-                                else
-                                    Add(mat,row);
-                                    Add(vec,sum);
                                 fi;
-                            fi;
-                        
-                        od;
+                            
+                            od;
+                        fi;
                                      
                     
                         Solution:=MAJORANA_SolutionMatVecs(mat,vec);
