@@ -83,10 +83,6 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 
                 if x <> false then 
                 
-                    if Size(x) < 31 then 
-                        Error("less than dim");
-                    fi;
-                
                     y := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
 
                     if y <> false and y <> ev * x then
