@@ -1564,7 +1564,107 @@ InstallGlobalFunction(MAJORANA_55InnerProducts,
     return res;
 
     end );
+    
+InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
+    
+    function(k,l, GramMatrix, AlgebraProducts, pairrepresentatives, pairorbitlist, ProductList)
+    
+    local j,dim,res,x,y,z,u,v,w;
 
+    j := 1;
+    
+    dim := Size(AlgebraProducts[1]);
+    
+    res := false;
+    
+    while j < Size(AlgebraProducts) + 1 do 
+    
+        if AlgebraProducts[j] <> false and AlgebraProducts[j][k] <> 0 then 
+        
+            u := [1..dim]*0; u[l] := 1;
+            v := [1..dim]*0; v[pairrepresentatives[j][1]] := 1;
+        
+            x := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+        
+            if x <> false then
+                
+                u := [1..dim]*0; u[pairrepresentatives[j][2]] := 1;
+            
+                y := MAJORANA_InnerProduct(u, x, GramMatrix, pairorbitlist);
+                
+                if y <> false then 
+                    
+                    v := StructuralCopy(AlgebraProducts[j]); v[k] := 0;
+                    
+                    w := [1..dim]*0; w[l] := 1;
+                    
+                    z := MAJORANA_InnerProduct(w,v,GramMatrix, pairorbitlist);
+                    
+                    if z <> false then 
+                                           
+                        res := (y - z)/AlgebraProducts[j][k]; 
+                        
+                        Error("hi"); 
+                                          
+                    fi;
+                fi;
+                
+            fi;
+            
+            if res <> false then 
+                
+                j := Size(AlgebraProducts) +  1;
+            
+            else
+            
+                u := [1..dim]*0; u[l] := 1;
+                v := [1..dim]*0; v[pairrepresentatives[j][2]] := 1;
+            
+                x := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+        
+                if x <> false then
+                    
+                    u := [1..dim]*0; u[pairrepresentatives[j][1]] := 1;
+                
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, pairorbitlist);
+                    
+                    if y <> false then 
+                        
+                        v := StructuralCopy(AlgebraProducts[j]); v[k] := 0;
+                        
+                        w := [1..dim]*0; w[l] := 1;
+                        
+                        z := MAJORANA_InnerProduct(w,v,GramMatrix, pairorbitlist);
+                        
+                        if z <> false then 
+                                               
+                            res := (y - z)/AlgebraProducts[j][k];  
+                            
+                            Error("hi 2");
+                                              
+                        fi;
+                    fi;
+                    
+                fi;
+            fi;
+            
+            if res <> false then 
+                j := Size(AlgebraProducts) + 1;
+            else
+                j := j + 1;
+            fi;
+            
+        else
+        
+            j := j + 1;
+            
+        fi;
+    od;
+    
+    return res;
+    
+    end );
+        
 InstallGlobalFunction(MajoranaRepresentation,
 
 function(G,T)
