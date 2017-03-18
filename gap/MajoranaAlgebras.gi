@@ -1185,13 +1185,11 @@ function(G,T)
             Shape, RepsSquares6A, Unknowns3X,
 
             # Step 2 - Possible shapes
-            Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, 5AaxesFixed, u, v, w,
+            Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, u, v, w,
 
             # Step 3 - Products and evecs I
             GramMatrix, GramMatrixT, GramMatrixFull, LI, NullSpT, AlgebraProducts, EigenVectors,
-            # KnownInnerProducts,
-            # KnownAlgebraProducts,
-            EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x6, x7, x8, x2A, x3A,
+            EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x2A, x3A,
 
             # Step 4 - More products and evecs
             h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a,
@@ -1203,11 +1201,10 @@ function(G,T)
             UnknownInnerProducts, mat, vec, sum, row, Solution,
 
             # Step 7 - More algebra products
-            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c, Form, zeros,  UnknownAlgebraProducts, record,
+            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c,
             
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, fres; 
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts; 
 
-            # str1, str2, str3, str4, str5,
             
             
             
@@ -2424,48 +2421,48 @@ function(G,T)
                         Output[i] := [];
 
                         # 0,0 fusion
-                        fres := MAJORANA_TestFusion(1,1,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if fres[1] then
-                            Append(NewEigenVectors[j][1], fres[2]);
+                        x := MAJORANA_TestFusion(1,1,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if x[1] then
+                            Append(NewEigenVectors[j][1], x[2]);
                         else
-                            Output[i] := fres[2];
+                            Output[i] := x[2];
                             break;
                         fi;
 
                         # 0,1/4 fusion
-                        fres := MAJORANA_TestFusion(1,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if fres[1] then
-                            Append(NewEigenVectors[j][2], fres[2]);
+                        x := MAJORANA_TestFusion(1,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if x[1] then
+                            Append(NewEigenVectors[j][2], x[2]);
                         else
-                            Output[i] := fres[2];
+                            Output[i] := x[2];
                             break;
                         fi;
 
                         # 0,1/32 fusion
-                        fres := MAJORANA_TestFusion(1,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if fres[1] then
-                            Append(NewEigenVectors[j][3], fres[2]);
+                        x := MAJORANA_TestFusion(1,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if x[1] then
+                            Append(NewEigenVectors[j][3], x[2]);
                         else
-                            Output[i] := fres[2];
+                            Output[i] := x[2];
                             Error("0, 1/32 fusion");
                             break;
                         fi;
 
                         # 1/4,1/32 fusion
-                        fres := MAJORANA_TestFusion(2,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if fres[1] then
-                            Append(NewEigenVectors[j][3], fres[2]);
+                        x := MAJORANA_TestFusion(2,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if x[1] then
+                            Append(NewEigenVectors[j][3], x[2]);
                         else
-                            Output[i] := fres[2];
+                            Output[i] := x[2];
                             break;
                         fi;
 
                         # 1/4,1/4 Fusion
-                        fres := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if fres[1] then
-                            Append(NewEigenVectors[j][1], fres[2]);
+                        x := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if x[1] then
+                            Append(NewEigenVectors[j][1], x[2]);
                         else
-                            Output[i] := fres[2];
+                            Output[i] := x[2];
                             break;
                         fi;
 
@@ -2640,7 +2637,6 @@ function(G,T)
                                      , StructuralCopy(3Aaxes)
                                      , StructuralCopy(4Aaxes)
                                      , StructuralCopy(5Aaxes)
-                                     , StructuralCopy(5AaxesFixed)
                                      , StructuralCopy(GramMatrix) ];
                         break;
                     elif ForAny(Diagonals, x->x=0) then
@@ -2883,7 +2879,6 @@ function(G,T)
 
                     mat:=[];
                     vec:=[];
-                    record:=[];
 
                     for j in [1..t] do
 
@@ -3114,7 +3109,7 @@ function(G,T)
                         #        break;
                             fi;
                         else
-                            Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,record,AlgebraProducts,EigenVectors];
+                            Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products",mat,vec,AlgebraProducts,EigenVectors];
                             Output[i] := StructuralCopy(Output[i]);
                             Error("Inconsistent system of unknown algebra products");
                             break;
@@ -3239,7 +3234,6 @@ function(G,T)
             if Size(UnknownAlgebraProducts) > 0 then
                 mat:=[];
                 vec:=[];
-                record:=[];
 
                 for j in [1..t] do
 
