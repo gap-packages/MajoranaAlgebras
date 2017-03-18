@@ -2385,6 +2385,26 @@ function(G,T)
 
                 fi;
             od;
+            
+            while 1 = 1 do
+                
+                count := 0;
+            
+                for j in [1..SizeOrbitals] do
+                    if GramMatrix[j] = false then 
+                        x := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        
+                        if x <> false then 
+                            count := count + 1;
+                            GramMatrix[j] := x;
+                        fi;
+                    fi;
+                od;
+                
+                if count <> 0 then 
+                    break;
+                fi;
+            od;            
 
             LI:=1;
 
@@ -2403,78 +2423,7 @@ function(G,T)
                                         ## STEP 4: MORE PRODUCTS ##
 
 
-            # Redo 2,3 vals
 
-            ### Not really sure what this is, need to work out the theory again
-
-#           for j in [1..t] do
-#               for k in [1..u] do
-#                   if not [j,t+k] in KnownInnerProducts then
-#                       x:=T[j]; h:=3Aaxes[k].1;
-#                       l:=1;
-#                       while l < t+1 do
-#                           s:=T[l];
-#                           if s*h in T then
-#                               if s*x in T then
-#
-#                                   x1:=Position(T,s*x);;
-#
-#                                   if [x1,k] in KnownInnerProducts then
-#
-#                                       x2:=Position(T,s*h);
-#                                       x3:=Position(T,s*h^2);
-#
-#                                       GramMatrix[j][k]:=2/45 + 32*(GramMatrix[j][x2] + GramMatrix[j][x3] + GramMatrix[x1][x2] + GramMatrix[x1][x3])/45 - GramMatrix[x1][k];
-#                                       GramMatrix[k][j]:=GramMatrix[j][k];
-#
-#                                       Append(KnownInnerProducts,[[j,k],[k,j]]);
-#
-#                                       l:=t+1;
-#                                   else
-#                                       l:=l+1;
-#                                   fi;
-#                               elif Order(s*x) = 2 and not s*x in T then
-#
-#                                   x2:=Position(T,s*h);
-#                                   x3:=Position(T,s*h^2);
-#
-#                                   GramMatrix[j][k]:= 32*(GramMatrix[x2][j] + GramMatrix[x3][j])/45;
-#                                   GramMatrix[k][j]:=GramMatrix[j][k];
-#
-#                                   Append(KnownInnerProducts,[[j,k],[k,j]]);
-#
-#                                   l:=t+1;
-#                               elif Order(s*x) = 3 then
-#                                   if GramMatrix[UnknownInnerProducts[j][1]][l] = 13/256 then
-#
-#                                       x1:=Position(3Aaxes,Group(x*s));
-#                                       x2:=Position(T,s*h);
-#                                       x3:=Position(T,s*h^2);
-#
-#                                       if [x1,k] in KnownInnerProducts and [x2,k] in KnownInnerProducts and  [x3,k] in KnownInnerProducts then
-#
-#                                           GramMatrix[j][k]:=1/36 - 27*GramMatrix[x1][k]/64 +3*(GramMatrix[x1][x2]+GramMatrix[x1][x2])/10 +32*(GramMatrix[j][x2]+GramMatrix[j][x3])/45;
-#                                           GramMatrix[k][j]:=GramMatrix[j][k];
-#
-#                                           Append(KnownInnerProducts,[[j,k],[k,j]]);
-#
-#                                           l:=t+1;
-#                                       else
-#                                           l:=l+1;
-#                                       fi;
-#                                   else
-#                                       l:=l+1;
-#                                   fi;
-#                               else
-#                                   l:=l+1;
-#                               fi;
-#                           else
-#                               l:=l+1;
-#                           fi;
-#                       od;
-#                   fi;
-#               od;
-#           od;
             
             maindimensions := [];
             
