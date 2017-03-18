@@ -2660,18 +2660,12 @@ function(G,T)
                 if LI=0 then
 
                     dim:=t+u+v+w;
-
-                    for j in [1..Size(NullSp)] do
-                        NullSp[j]:=NullSp[j]/NullSp[j][dim-j+1];
-
-                        for k in [1..j-1] do
-                            NullSp[j]:=NullSp[j] - NullSp[j][n-k+1]*NullSp[k];
-                        od;
-                    od;
+                    
+                    n := Size(NullSp);
 
                     # Change alg products to get rid of any axes not in the basis
 
-                    for j in [1..Size(NullSp)] do
+                    for j in [1..n] do
                         for k in [1..SizeOrbitals] do
                             if AlgebraProducts[k] <> false then
                                 AlgebraProducts[k]:=AlgebraProducts[k] - NullSp[j]*AlgebraProducts[k][dim-j+1];
@@ -2684,7 +2678,7 @@ function(G,T)
                     for j in [1..t] do
                         for k in [1..3] do
                             for l in [1..Size(EigenVectors[j][k])] do
-                                for m in [1..Size(NullSp)] do
+                                for m in [1..n] do
                                     EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim - m + 1];
                                 od;
                             od;
@@ -2804,10 +2798,8 @@ function(G,T)
                                 
                                 if sum <> [] and row <> [] then
                                     if ForAll(row, x -> x = 0) then 
-                                        if ForAny( x , y -> y <> 0) then 
-                                            Error("Step 7 system 1");
-                                        else
-                                            return 0; 
+                                        if ForAny( sum , y -> y <> 0) then 
+                                            Error("Step 7 nullspace"); 
                                         fi;
                                     else
                                         Add(mat,row);
