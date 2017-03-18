@@ -1227,6 +1227,65 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
     return res;
     
     end );
+    
+InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
+    function(mat)
+    
+    local i, j, k, l, m, n, list, temp;   
+     
+    n := Size(mat);
+    m := Size(mat[1]);
+    
+    i := 1;
+    j := 1;
+    
+    while i < n + 1 do
+        while j < m do
+        
+            list := [1..n]*0;
+        
+            for k in [i..n] do 
+                if mat[k][m - j + 1] <> 0 then
+                    mat[k] := mat[k]/mat[k][m - j + 1];
+                    list[k] := 1;
+                fi;
+            od;
+            
+            if ForAll(list, x -> x = 0) then 
+                j := j + 1;
+            else
+            
+                l := Position(list,1);
+                list[l] := 0;
+            
+                # swap rows
+            
+                temp := ShallowCopy(mat[i]);
+                mat[i] := ShallowCopy(mat[l]);
+                mat[l] := ShallowCopy(temp);
+                
+                for k in Positions(list,1) do
+                    mat[k] := mat[k] - mat[l];
+                od;
+                
+                j := j + 1;
+                
+                break;
+                
+            fi;
+        od;
+        
+        i := i + 1;
+        
+    od;
+    
+    for i in [1..n] do
+        for j in [i..n-1] do 
+            mat[i] := mat[i] - mat[j+1]*mat[i][m-j];
+        od;
+    od;
+            
+    end );
         
 InstallGlobalFunction(MajoranaRepresentation,
 
