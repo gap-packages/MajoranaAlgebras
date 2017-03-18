@@ -2401,7 +2401,7 @@ function(G,T)
                     fi;
                 od;
                 
-                if count <> 0 then 
+                if count = 0 then 
                     break;
                 fi;
             od;            
