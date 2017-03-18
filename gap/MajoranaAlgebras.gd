@@ -60,4 +60,6 @@ DeclareGlobalFunction( "MAJORANA_55InnerProducts" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
+DeclareGlobalFunction( "MAJORANA_UnknownOrbital" );
+
 

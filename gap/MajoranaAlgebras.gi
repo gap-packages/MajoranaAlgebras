@@ -632,7 +632,7 @@ InstallGlobalFunction(MAJORANA_Fusion,
 
         function(T,GramMatrix,AlgebraProducts,EigenVectors,ProductList) # Checks if algebra obeys the fusion rules, outputs list of six lists which are empty if it does obey fusion rules
 		
-		# list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist]
+		# list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
 		
         local errorfusion00, errorfusion02, errorfusion04, errorfusion22, errorfusion24, errorfusion44, a, t, j, k, l, x, y, z, x0;
 
@@ -1567,7 +1567,7 @@ InstallGlobalFunction(MAJORANA_55InnerProducts,
     
 InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
-    function(k,l, GramMatrix, AlgebraProducts, pairrepresentatives, pairorbitlist, ProductList)
+    function(k,l, GramMatrix, AlgebraProducts, ProductList, pairrepresentatives)
     
     local j,dim,res,x,y,z,u,v,w;
 
@@ -1590,7 +1590,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                 
                 u := [1..dim]*0; u[pairrepresentatives[j][2]] := 1;
             
-                y := MAJORANA_InnerProduct(u, x, GramMatrix, pairorbitlist);
+                y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3]);
                 
                 if y <> false then 
                     
@@ -1598,13 +1598,11 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                     
                     w := [1..dim]*0; w[l] := 1;
                     
-                    z := MAJORANA_InnerProduct(w,v,GramMatrix, pairorbitlist);
+                    z := MAJORANA_InnerProduct(w,v,GramMatrix, ProductList[3]);
                     
                     if z <> false then 
                                            
                         res := (y - z)/AlgebraProducts[j][k]; 
-                        
-                        Error("hi"); 
                                           
                     fi;
                 fi;
@@ -1626,7 +1624,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                     
                     u := [1..dim]*0; u[pairrepresentatives[j][1]] := 1;
                 
-                    y := MAJORANA_InnerProduct(u, x, GramMatrix, pairorbitlist);
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3]);
                     
                     if y <> false then 
                         
@@ -1634,13 +1632,11 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                         
                         w := [1..dim]*0; w[l] := 1;
                         
-                        z := MAJORANA_InnerProduct(w,v,GramMatrix, pairorbitlist);
+                        z := MAJORANA_InnerProduct(w,v,GramMatrix, ProductList[3]);
                         
                         if z <> false then 
                                                
                             res := (y - z)/AlgebraProducts[j][k];  
-                            
-                            Error("hi 2");
                                               
                         fi;
                     fi;
@@ -1662,6 +1658,56 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     od;
     
     return res;
+    
+    end );
+    
+InstallGlobalFunction(MAJORANA_UnknownOrbital,
+
+function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
+
+    local j, k, l, x, res;
+    
+    res := false;
+    
+    j := 1;
+    
+    while j < Size(Orbitals[i]) + 1 do 
+        
+        k := ProductList[5][Position(ProductList[2],Orbitals[i][j][1])];
+        l := ProductList[5][Position(ProductList[2],Orbitals[i][j][2])];
+        
+        if k > 0 and l > 0 then 
+
+            res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+        
+        elif k > 0 and l < 0 then 
+        
+            x := MAJORANA_UnknownsAxiomM1(k,-l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+        
+            if x <> false then 
+                res := - x;
+            fi;
+            
+        elif k < 0 and l > 0 then 
+        
+            x := MAJORANA_UnknownsAxiomM1(-k,l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+        
+            if x <> false then 
+                res := - x;
+            fi; 
+            
+        else
+        
+            res := MAJORANA_UnknownsAxiomM1(-k,-l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+        fi;
+        
+        if res = false then 
+            j := j + 1;
+        else
+            return res;
+        fi;
+        
+    od;
     
     end );
         
