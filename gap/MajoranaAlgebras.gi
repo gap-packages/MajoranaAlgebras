@@ -112,144 +112,20 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
         function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
 
-        local A, C, n, m, d, absd, i, j, k, x, imax, temp, tempi, basis, basic, free, vec;
+        local A,B;
 
-        A:=ShallowCopy(mat);
-
-        n:=Size(A);
-        m:=Size(A[1]);
-
-        d:=NullMat(1,n)[1];
-
-        C:=IdentityMat(n);
-
-        # Put matrix in row echelon form
-
-        i:=1;
-
-        while i <= n do
-
-            for j in [i..n] do
-                d[j]:=A[j][i];
-            od;
-
-            absd:=List(d,x->AbsoluteValue(x));
-
-            imax:=Position(absd,Maximum(absd));
-
-            if d[imax] = 0 then
-
-                k:=i+1;
-
-                while k <= m do
-                    if A[i][k] <> 0 then
-
-                        # Turn leading coefficient of row i (at pos k) into 1
-
-                        C[i] := C[i]/A[i][k];
-                        A[i] := A[i]/A[i][k];
-
-                        k:=m+1;
-                    else
-                        k:=k+1;
-                    fi;
-                od;
-
-                i:=i+1;
-
-            else
-
-                # Swap rows i and imax
-
-                temp:=ShallowCopy(A[imax]); tempi:=ShallowCopy(C[imax]);
-                A[imax]:=ShallowCopy(A[i]); A[i]:=ShallowCopy(temp);
-                C[imax]:=ShallowCopy(C[i]); C[i]:=ShallowCopy(tempi);
-
-                for k in [i+1..n] do
-
-                    x:=A[k][i]/A[i][i];
-
-                    C[k]:=C[k] - x*C[i];
-                    A[k]:=A[k] - x*A[i];
-
-                od;
-
-                C[i]:=C[i]/A[i][i];
-                A[i]:=A[i]/A[i][i];
-
-
-                d[i]:=0;
-
-                i:=i+1;
-
-            fi;
-
-        od;
-
-        # Compute null space
-
-        basis:=[];
-
-        basic:=[];
-        free:=[];
-
-
-        for i in [1..n] do
-            Append(basic,[Position(A[i],1)]);
-        od;
-
-        for i in [0..m-1] do
-            if not m-i in basic then
-                Append(free,[m-i]);
-            fi;
-        od;
-
-        for i in free do
-
-            vec:=NullMat(1,m)[1];
-
-            for j in [0..m-1] do
-                if i = m-j then
-                    vec[m-j] :=1;
-                elif m-j in basic then
-                    for k in [m-j+1..m] do
-                        vec[m-j] := vec[m-j] - A[m-j][k]*vec[k];
-                    od;
-                fi;
-            od;
-            
-            if ForAny(vec, x -> x <> 0) then 
-                Add(basis,vec);
-            fi;
-        od;
-
-        for j in [1..Size(basis)] do
-            if basis[j][m-j+1] <> 0 then
-                basis[j]:=basis[j]/basis[j][m-j+1];
-            fi;
-
-            for k in [1..j-1] do
-                basis[j]:=basis[j] - basis[j][m-k+1]*basis[k];
-            od;
-        od;
-
-        for j in [1..Size(basis)] do
-            for k in [1..(Size(basis)-j)] do
-                basis[j]:=basis[j] - basis[j][m-k]*basis[k+1];
-            od;
-        od;
+        A := ShallowCopy(mat);
         
-        j := 1;
+        A := NullspaceMat(TransposedMat(A));
         
-        while j < Size(basis) + 1 do 
-            if ForAll(basis[j], x -> x = 0) then 
-                Remove(basis,j);
-            else
-                j := j + 1;
-            fi;
-        od;
-
-        return basis;
+        if A <> [] then 
+        
+            B := List( A, ShallowCopy );
+        
+            MAJORANA_ReversedEchelonForm(B);
+        fi;
+        
+        return B;
 
         end
 
