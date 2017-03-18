@@ -1078,493 +1078,8 @@ function(v,NullSp)
     end
     
     );
-    
-InstallGlobalFunction(MAJORANA_23InnerProducts,
 
-function(x,y,T,GramMatrix,pairorbitlist,coordinates)
 
-    local x2A, x2, s, z, h, res, t, l;
-
-    t := Size(T);
-    
-    l:=1;
-    
-    res := false;
-    
-    s := coordinates[x];
-    h := coordinates[y];
-
-    while l<t+1 do
-    
-        if T[l]*h in T and Order(s*T[l]*h) = 2 then
-
-            z := coordinates[l];
-
-            if s*z*h in T then
-
-                x2A := Position( T, s*z*h);
-                x2 := Position( T, z*h*h);
-
-                # Use values to work out inner product
-
-                res := (64/135)*(-2*GramMatrix[pairorbitlist[x][l]] + 4*GramMatrix[pairorbitlist[l][x2A]] + GramMatrix[pairorbitlist[x][x2]]) + 1/45;
-
-            else
-
-                x2 := Position( T, z*h*h);
-
-                res := (64/135)*(2*GramMatrix[pairorbitlist[x][l]] + GramMatrix[pairorbitlist[x][x2]]);
-
-            fi;
-            
-            l := t+1;
-
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-
-    end
-    
-    );
-    
-InstallGlobalFunction(MAJORANA_24InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-
-    local x2A, x2, x3, s, z, h, res, t, l;
-
-    t := Size(T);
-
-    l:=1;
-    
-    res := false;
-    
-    s := coordinates[x];
-    h := coordinates[y];
-
-    while l<t+1 do
-        
-        if T[l]*h in T and Order(s*T[l]*h) = 2 then
-        
-            z := coordinates[l];
-        
-            if s*z*h in T then
-
-                x2A := Position( T, s*z*h);
-                x2 := Position( T, z*h*h);
-                x3 := Position( T, z*h^3);
-
-                res := (  - 5*GramMatrix[pairorbitlist[x][l]]
-                                    + GramMatrix[pairorbitlist[x][x2]]
-                                    + GramMatrix[pairorbitlist[x][x3]]
-                                    + 8*GramMatrix[pairorbitlist[l][x2A]])/3 +1/24;
-
-            else
-
-                x2 := Position( T, z*h*h);
-                x3 := Position( T, z*h^3);
-
-                res := (3*GramMatrix[pairorbitlist[x][l]]
-                            + GramMatrix[pairorbitlist[x][x2]]
-                            + 2*GramMatrix[pairorbitlist[x][x3]])/3;
-
-            fi;
-                
-            l := t+1;
-
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-    
-    end
-    
-    );
-    
-InstallGlobalFunction(MAJORANA_25InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-
-    local x2A, x1, x2, x3, x4, s, z, h, res, t, l;
-    
-    t := Size(T);
-    
-    l := 1;
-    
-    res := false;
-    
-    s := coordinates[x];
-    h := coordinates[y];
-    
-    while l<t+1 do
-        
-        if T[l]*h in T and Order(s*T[l]*h) = 2 then
-    
-            z := coordinates[l];
-
-            if s*z*h in T then
-
-                x2A := Position( T, s*z*h);
-                x1 := Position( T, z*h);
-                x2 := Position( T, z*h*h);
-                x3 := Position( T, z*h^3);
-                x4 := Position( T, z*h^4);
-
-                # Use values to work out inner product
-
-                res :=  - GramMatrix[pairorbitlist[l][x2A]]/8
-                        + (13*GramMatrix[pairorbitlist[x][l]]
-                        + GramMatrix[pairorbitlist[x][x2]]
-                        + GramMatrix[pairorbitlist[x][x3]]
-                        + GramMatrix[pairorbitlist[x][x4]])/128;
-
-            else
-
-                x2 := Position( T, z*h*h);
-                x3 := Position( T, z*h^3);
-                x4 := Position( T, z*h^4);
-
-                res :=  (-3*GramMatrix[pairorbitlist[x][l]]
-                        + GramMatrix[pairorbitlist[x][x2]]
-                        + GramMatrix[pairorbitlist[x][x3]]
-                        + GramMatrix[pairorbitlist[x][x4]])/128;
-
-            fi;
-            
-            l := t+1;
-
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-    
-    end
-    
-    );
-    
-InstallGlobalFunction(MAJORANA_33InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-    
-    local t, h, k, s, x1, x2, x3, x4, res, l;
-    
-    l := 1;
-    
-    res := false;
-    
-    t := Size(T);
-    
-    h := coordinates[x];
-    k := coordinates[y];
-
-    while l < t+1 do
-
-        if T[l]*h in T and T[l]*k in T then
-        
-            s := T[l];
-
-            x1:=Position(T,s*h);
-            x2:=Position(T,s*h*h);
-            x3:=Position(T,s*k);
-            x4:=Position(T,s*k*k);
-
-            if  (GramMatrix[pairorbitlist[x1][y]] <> false) and
-                (GramMatrix[pairorbitlist[x2][y]] <> false) then
-
-                res := 64*( - 3*GramMatrix[pairorbitlist[x1][y]]
-                            + GramMatrix[pairorbitlist[x2][y]])/135
-                            + 2048*(GramMatrix[pairorbitlist[x1][x3]]
-                            + GramMatrix[pairorbitlist[x1][x4]])/1215 + 16/243;
-
-                l:=t+1;
-            else
-                l:=l+1;
-            fi;
-        else
-            l:=l+1;
-        fi;
-        
-    od;
-    
-    return res;
-    
-    end 
-    
-    );
-    
-InstallGlobalFunction(MAJORANA_34InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-    
-    local t, h, k, s, x1, x2, x3, x4, x5, res, l;
-    
-    l := 1;
-    
-    res := false;
-    
-    h := coordinates[x];
-    k := coordinates[y];
-    
-    t := Size(T);
-
-    while l < t+1 do
-
-        s:=T[l];
-
-        if s*h in T and s*k in T then
-
-            x1:=Position(T,s*h);
-            x2:=Position(T,s*h*h);
-            x3:=Position(T,s*k);
-            x4:=Position(T,s*k*k);
-            x5:=Position(T,s*k*k*k);
-
-            if (GramMatrix[pairorbitlist[x1][y]] <> false) and
-               (GramMatrix[pairorbitlist[x2][y]] <> false) and
-               (GramMatrix[pairorbitlist[x3][y]] <> false) then
-
-                res:= 64*(  -4*GramMatrix[pairorbitlist[x1][y]]
-                            + GramMatrix[pairorbitlist[x2][y]]
-                            + 4*GramMatrix[pairorbitlist[x1][x3]]
-                            + 2*GramMatrix[pairorbitlist[x1][x4]]
-                            + 4*GramMatrix[pairorbitlist[x1][x5]])/135 + 127/270;
-
-                l:=t+1;
-            else
-                l:=l+1;
-            fi;
-        else
-            l:=l+1;
-        fi;
-    od;
-
-    return res;
-    
-    end 
-    
-    );
-    
-InstallGlobalFunction(MAJORANA_35InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-    
-    local t, h, k, s, x1, x2, x3, x4, x5, x6, res, l;
-    
-    l := 1;
-    
-    res := false;
-    
-    t := Size(T);
-
-    h := coordinates[x];
-    k := coordinates[y];
-
-    while l < t+1 do
-
-        s:=T[l];
-
-        if s*h in T and s*k in T then
-
-            x1:=Position(T,s*h);
-            x2:=Position(T,s*h*h);
-            x3:=Position(T,s*k);
-            x4:=Position(T,s*k*k);
-            x5:=Position(T,s*k*k*k);
-            x6:=Position(T,s*k*k*k*k);
-
-            if (GramMatrix[pairorbitlist[x1][y]] <> false) and
-               (GramMatrix[pairorbitlist[x2][y]] <> false) then
-
-                res := 64*( -5*GramMatrix[pairorbitlist[x1][y]]
-                            + GramMatrix[pairorbitlist[x2][y]])/135
-                            - 7*(GramMatrix[pairorbitlist[x1][x3]]
-                            - GramMatrix[pairorbitlist[x1][x4]]
-                            - GramMatrix[pairorbitlist[x1][x5]]
-                            + GramMatrix[pairorbitlist[x1][x6]])/270;
-
-                l:=t+1;
-            else
-                l:=l+1;
-            fi;
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-    
-    end );
-    
-InstallGlobalFunction(MAJORANA_44InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-    
-    local t, h, k, s, x1, x2, x3, x4, x5, x6, res, l;
-    
-    l := 1;
-    
-    res := false;
-
-    h := coordinates[x];
-    k := coordinates[y];
-    
-    t := Size(T);
-    
-    while l < t+1 do
-
-        s:=T[l];
-
-        if s*h in T and s*k in T then
-
-            x1:=Position(T,s*h);
-            x2:=Position(T,s*h*h);
-            x3:=Position(T,s*h*h*h);
-            x4:=Position(T,s*k);
-            x5:=Position(T,s*k*k);
-            x6:=Position(T,s*k*k*k);
-
-            if (GramMatrix[pairorbitlist[x1][y]] <> false) and
-               (GramMatrix[pairorbitlist[x2][y]] <> false) and
-               (GramMatrix[pairorbitlist[x3][y]] <> false) then
-
-                res := ( - 9*GramMatrix[pairorbitlist[x1][y]]
-                        + GramMatrix[pairorbitlist[x2][y]]
-                        + GramMatrix[pairorbitlist[x3][y]]
-                        + 8*GramMatrix[pairorbitlist[x1][x4]]
-                        + 4*GramMatrix[pairorbitlist[x1][x5]]
-                        + 8*GramMatrix[pairorbitlist[x1][x6]])/3 + 1/6;
-
-                l:=t+1;
-            else
-                l:=l+1;
-            fi;
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-    
-    end );
-    
-InstallGlobalFunction(MAJORANA_45InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-    
-    local h, k, s, t, x1, x2, x3, x4, x5, x6, x7, res, l;
-    
-    l := 1;
-    
-    res := false;
-
-    h := coordinates[x];
-    k := coordinates[y];
-    
-    t := Size(T);
-
-    while l < t+1 do
-
-        s:=T[l];
-
-        if s*h in T and s*k in T then
-
-            x1:=Position(T,s*h);
-            x2:=Position(T,s*h*h);
-            x3:=Position(T,s*h*h*h);
-            x4:=Position(T,s*k);
-            x5:=Position(T,s*k*k);
-            x6:=Position(T,s*k*k*k);
-            x7:=Position(T,s*k*k*k*k);
-
-            if (GramMatrix[pairorbitlist[x1][y]] <> false) and
-               (GramMatrix[pairorbitlist[x2][y]] <> false) and
-               (GramMatrix[pairorbitlist[x3][y]] <> false) then
-
-                res := (-11*GramMatrix[pairorbitlist[x1][y]]
-                        + GramMatrix[pairorbitlist[x2][y]]
-                        + GramMatrix[pairorbitlist[x3][y]])/3
-                        + 7*(GramMatrix[pairorbitlist[x1][x4]]
-                        - GramMatrix[pairorbitlist[x1][x5]]
-                        - GramMatrix[pairorbitlist[x1][x6]]
-                        + GramMatrix[pairorbitlist[x1][x7]])/192;
-
-                l:=t+1;
-            else
-                l:=l+1;
-            fi;
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-    
-    end );
-    
-InstallGlobalFunction(MAJORANA_55InnerProducts,
-
-    function(x,y,T,GramMatrix,pairorbitlist,coordinates)
-    
-    local h, k, s, t, x1, x2, x3, x4, x5, x6, x7, x8, res, l;
-    
-    l := 1;
-    
-    res := false;    
-
-    h := coordinates[x];
-    k := coordinates[y];
-    
-    t := Size(T);
-                    
-    while l < t+1 do
-
-        s:=T[l];
-
-        if s*h in T and s*k in T then
-
-            x1:=Position(T,s*h);
-            x2:=Position(T,s*h*h);
-            x3:=Position(T,s*h*h*h);
-            x4:=Position(T,s*h*h*h*h);
-            x5:=Position(T,s*k);
-            x6:=Position(T,s*k*k);
-            x7:=Position(T,s*k*k*k);
-            x8:=Position(T,s*k*k*k*k);
-
-            if (GramMatrix[pairorbitlist[x1][y]] <> false) and
-               (GramMatrix[pairorbitlist[x2][y]] <> false) and
-               (GramMatrix[pairorbitlist[x3][y]] <> false) and
-               (GramMatrix[pairorbitlist[x4][y]] <> false) then
-
-                res := ( 25*GramMatrix[pairorbitlist[x1][y]]
-                                    + GramMatrix[pairorbitlist[x2][y]]
-                                    + GramMatrix[pairorbitlist[x3][y]]
-                                    + GramMatrix[pairorbitlist[x4][y]])/128
-                                    + 7*(GramMatrix[pairorbitlist[x1][x5]]
-                                    - GramMatrix[pairorbitlist[x1][x6]]
-                                    - GramMatrix[pairorbitlist[x1][x7]]
-                                    + GramMatrix[pairorbitlist[x1][x8]])/4096;                                    
-
-                l:=t+1;
-            else
-                l:=l+1;
-            fi;
-        else
-            l:=l+1;
-        fi;
-    od;
-    
-    return res;
-
-    end );
-    
 InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
     function(k,l, GramMatrix, AlgebraProducts, ProductList, pairrepresentatives)
@@ -1704,10 +1219,12 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
         if res = false then 
             j := j + 1;
         else
-            return res;
+            j := Size(Orbitals[i]) + 1;
         fi;
         
     od;
+    
+    return res;
     
     end );
         
@@ -2707,7 +2224,7 @@ function(G,T)
 
                     else
  
-                        GramMatrix[j] := MAJORANA_23InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                     fi;
 
@@ -2737,7 +2254,7 @@ function(G,T)
                         GramMatrix[j]:=3/8;
 
                     else
-                        GramMatrix[j] := MAJORANA_24InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 # (2,5) values
@@ -2767,7 +2284,7 @@ function(G,T)
                         GramMatrix[j]:=0;
                     else
 
-                        GramMatrix[j] := MAJORANA_25InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                     fi;
 
@@ -2788,20 +2305,20 @@ function(G,T)
 
                     else
 
-                        GramMatrix[j] := MAJORANA_33InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 # (3,4) values
 
                 elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 4 then
                 
-                    GramMatrix[j] := MAJORANA_34InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                    GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                 # (3,5) values
 
                 elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 5 then
 
-                    GramMatrix[j] := MAJORANA_35InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                    GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     
                 # (4,4) values
 
@@ -2817,7 +2334,7 @@ function(G,T)
 
                 else
                 
-                    GramMatrix[j] := MAJORANA_44InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                    GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                 
                 fi;
 
@@ -2826,7 +2343,7 @@ function(G,T)
 
                 elif Order(coordinates[x]) = 4 and Order(coordinates[y]) = 5 then
                 
-                GramMatrix[j] := MAJORANA_45InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+                GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                 # (5,5) values
 
@@ -2863,7 +2380,7 @@ function(G,T)
 
                     else
                     
-						GramMatrix[j] := MAJORANA_55InnerProducts(x,y,T,GramMatrix,pairorbitlist,coordinates);
+						GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 fi;

@@ -40,24 +40,6 @@ DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_RemoveNullSpace" );
 
-DeclareGlobalFunction( "MAJORANA_23InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_24InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_25InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_33InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_34InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_35InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_44InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_45InnerProducts" );
-
-DeclareGlobalFunction( "MAJORANA_55InnerProducts" );
-
 DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownOrbital" );
