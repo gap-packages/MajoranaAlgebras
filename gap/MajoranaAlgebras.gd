@@ -46,4 +46,6 @@ DeclareGlobalFunction( "MAJORANA_UnknownOrbital" );
 
 DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
 
+DeclareGlobalFunction( "MAJORANA_Resurrection" );
+
 

@@ -1162,6 +1162,125 @@ InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
     od;
             
     end );
+    
+InstallGlobalFunction(MAJORANA_Resurrection,
+
+    function(i,a,b,ev_a,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList)
+    
+    local sum, row, alpha, beta, gamma, mat, vec, bad, badk, j, k, l, dim, u, v, x, y;
+    
+    dim := Size(AlgebraProducts[1]);
+    
+    row := [1..Size(UnknownAlgebraProducts)]*0;
+    sum := [];
+    
+    beta := EigenVectors[i][1][b];
+    gamma := EigenVectors[i][ev_a][a];
+    
+    mat := [];
+    vec := [];
+    bad := [];
+    badk := [];
+    
+    for j in [1..dim] do 
+        if gamma[j] <> 0 then
+            for k in [1..dim] do
+                if beta[k] <> 0 then 
+                
+                    l := ProductList[3][j][k];
+                
+                    if AlgebraProducts[l] <> false then 
+                    
+                        u := [1..dim]*0; u[j] := 1;
+                        v := [1..dim]*0; v[k] := 1;
+                
+                        sum := sum - gamma[j]*beta[k]*MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+                        
+                    else
+                    
+                        vec[j] := gamma[j];
+                        
+                        Add(bad,j);
+                        Add(badk,k); 
+                        
+                        row[Position(UnknownAlgebraProducts,l)] := row[Position(UnknownAlgebraProducts,l)] 
+                                                                    + beta[k]*gamma[j]*MAJORANA_FusionTable[1][ev_a + 1];
+                        
+                    fi;
+                fi;
+            od;
+        fi;
+    od;
+           
+    for j in [1..dim] do
+        for k in badk do 
+            if AlgebraProducts[ProductList[3][j][k]] = false then 
+                Append(bad,j);
+            fi;
+        od;
+    od;
+    
+    Sort(DuplicateFreeList(bad));
+
+    for j in [1..Size(EigenVectors[i][1])] do 
+        Add(mat, EigenVectors[i][1]{bad});
+        vec := vec{bad};
+    od;
+
+    if ev_a = 1 then 
+        mat[a] := [1..Size(bad)]*0;
+    fi;
+    
+    x := SolutionMat(mat,vec);
+    
+    if x <> fail then 
+        
+        alpha := [];
+        
+        for j in [1..Size(x)] do
+            alpha := alpha + x[j]*mat[j];
+        od;
+    
+        y := MAJORANA_AlgebraProduct((alpha - beta),gamma,AlgebraProducts,ProductList);
+        
+        # LHS
+        
+        for j in [1..dim] do 
+            
+            k := ProductList[3][i][j];
+            
+            if AlgebraProducts[k] = false then 
+            
+                row[Position(UnknownAlgebraProducts,k)] := row[Position(UnknownAlgebraProducts,k)]
+                                                            + y[j];
+            else
+                
+                u := [1..dim]*0; u[i] := 1; 
+                v := [1..dim]*0; v[j] := 1;
+                
+                sum := sum - y[j]*MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+                
+            fi;
+        od;
+        
+        if ForAll(row, x -> x = 0) then 
+            if ForAny( sum, x -> x <> 0) then
+                Error("Resurrection error");
+            else
+                return 0;
+            fi;
+        else
+            return [row,sum];
+        fi;
+        
+    else
+    
+        return 0;
+    
+    fi;
+        
+    end );
+
         
 InstallGlobalFunction(MajoranaRepresentation,
 
