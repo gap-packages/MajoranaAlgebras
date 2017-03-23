@@ -3430,8 +3430,6 @@ function(G,T)
             master:=0;
         od;
         
-        Error("Success");
-        
     od;    
 
     return Output;
