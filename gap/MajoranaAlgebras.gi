@@ -1670,9 +1670,9 @@ function(G,T)
             for j in [1..Size(Unknowns3X)] do
                 k:=Unknowns3X[j];
                 if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3A";
-                else
                     Shape[k]:="3C";
+                else
+                    Shape[k]:="3A";
                 fi;
             od;
 
@@ -3207,7 +3207,9 @@ function(G,T)
                 fi;
                 
                 for j in [1..t] do 
-                    Append(EigenVectors[j][1],NullSp);
+                    for k in [1..3] do
+                        Append(EigenVectors[j][1],NullSp);
+                    od;
                 od;
                 
                 # put eigenvectors into reversed echelon form 
@@ -3244,18 +3246,17 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                    fi;
-                 
-                    if LI = 0 then 
-                            
-                        x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
-                        
-                        Append(mat,x[1]);
-                        Append(vec,x[2]);
-                    
-                    fi;
-                    
+                    fi;                    
                 od;
+                
+                if LI = 0 then 
+                            
+                    x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
+                    
+                    Append(mat,x[1]);
+                    Append(vec,x[2]);
+                
+                fi;
                 
                 if mat <> [] then 
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
