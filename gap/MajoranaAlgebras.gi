@@ -1419,57 +1419,65 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
     function(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives)
     
-    local i, j, k, l, row, sum, dim, y, mat, vec, a, b;
+    local i, j, k, l, row, sum, dim, y, mat, vec, a, b, x;
     
     dim := Size(NullSp[1]);
     
     mat := [];
     vec := [];
     
+    
     for i in [1..Size(UnknownAlgebraProducts)] do
     
-        j := pairrepresentatives[i][1];
-    
-        a := [1..dim]*0; a[j] := 1;        
-    
-        for k in [1..Size(NullSp)] do
+        for x in [1,2] do 
         
-            row := [1..Size(UnknownAlgebraProducts)]*0;
-            sum := [];
+            j := pairrepresentatives[UnknownAlgebraProducts[i]][x];
+        
+            a := [1..dim]*0; a[j] := 1;        
+        
+            for k in [1..Size(NullSp)] do
             
-            for l in [1..dim] do
-                if NullSp[k][l] <> 0 then
+                row := [1..Size(UnknownAlgebraProducts)]*0;
+                sum := [];
                 
-                    y := ProductList[3][j][l]; 
+                for l in [1..dim] do
+                    if NullSp[k][l] <> 0 then
                     
-                    if AlgebraProducts[y] <> false then 
-                    
-                        b := [1..dim]*0; b[l] := 1;
+                        y := ProductList[3][j][l]; 
                         
-                        sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                        if AlgebraProducts[y] <> false then 
                         
-                    else
-                        
-                        if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
-                            row[Position(UnknownAlgebraProducts,y)] := NullSp[k][l];
+                            b := [1..dim]*0; b[l] := 1;
+                            
+                            sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                            
+                        elif y in UnknownAlgebraProducts then 
+                            
+                            if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
+                                row[Position(UnknownAlgebraProducts,y)] := NullSp[k][l];
+                            else
+                                row := [];
+                                break; ##### need to move on to next null space vector
+                            fi;
+                            
                         else
                             row := [];
-                            break; ##### need to move on to next null space vector
+                            break; ##### need to move on to next null space vector                        
                         fi;
+                    fi;
+                od;
+                
+                if sum <> [] and row <> [] then
+                    if ForAll(row, x -> x = 0) then 
+                        if ForAny( sum , y -> y <> 0) then 
+                            Error("Nullspace"); 
+                        fi;
+                    else
+                        Add(mat,row);
+                        Add(vec,sum);
                     fi;
                 fi;
             od;
-            
-            if sum <> [] and row <> [] then
-                if ForAll(row, x -> x = 0) then 
-                    if ForAny( sum , y -> y <> 0) then 
-                        Error("Nullspace"); 
-                    fi;
-                else
-                    Add(mat,row);
-                    Add(vec,sum);
-                fi;
-            fi;
         od;
     od;
     
@@ -3198,6 +3206,10 @@ function(G,T)
                     break;
                 fi;
                 
+                for j in [1..t] do 
+                    Append(EigenVectors[j][1],NullSp);
+                od;
+                
                 # put eigenvectors into reversed echelon form 
                 
                 for j in [1..t] do 
@@ -3417,7 +3429,10 @@ function(G,T)
 
             master:=0;
         od;
-    od;
+        
+        Error("Success");
+        
+    od;    
 
     return Output;
 
