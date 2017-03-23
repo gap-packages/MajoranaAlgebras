@@ -1128,8 +1128,6 @@ function( mat )
     i := 1;
 
     while i <= nrows do
-        
-        Display(i);
     
         if not i in nzheads then 
             row := mat[i];
@@ -3171,6 +3169,8 @@ function(G,T)
                     break;
                 fi;
                 
+                # put eigenvectors into reversed echelon form 
+                
                 UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
                 
                 mat := [];
@@ -3200,8 +3200,6 @@ function(G,T)
                     fi;
                     
                 od;
-                
-                Display(Size(mat));
                 
                 if mat <> [] then 
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
