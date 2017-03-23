@@ -1417,55 +1417,60 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
-    function(j,NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives)
+    function(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives)
     
-    local k, l, row, sum, dim, y, mat, vec, a, b;
+    local i, j, k, l, row, sum, dim, y, mat, vec, a, b;
     
     dim := Size(NullSp[1]);
     
     mat := [];
     vec := [];
-
-    for k in [1..Size(NullSp)] do
+    
+    for i in [1..Size(UnknownAlgebraProducts)] do
+    
+        j := pairrepresentatives[i][1];
+    
+        a := [1..dim]*0; a[j] := 1;        
+    
+        for k in [1..Size(NullSp)] do
         
-        row := [1..Size(UnknownAlgebraProducts)]*0;
-        sum := [];
-        
-        for l in [1..dim] do
-            if NullSp[k][l] <> 0 then
+            row := [1..Size(UnknownAlgebraProducts)]*0;
+            sum := [];
             
-                y := ProductList[3][j][l]; 
+            for l in [1..dim] do
+                if NullSp[k][l] <> 0 then
                 
-                if AlgebraProducts[y] <> false then 
-                
-                    a := [1..dim]*0; a[j] := 1;
-                    b := [1..dim]*0; b[l] := 1;
+                    y := ProductList[3][j][l]; 
                     
-                    sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                    if AlgebraProducts[y] <> false then 
                     
-                else
-                    
-                    if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
-                        row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
+                        b := [1..dim]*0; b[l] := 1;
+                        
+                        sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                        
                     else
-                        row := [];
-                        break; ##### need to move on to next null space vector
+                        
+                        if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
+                            row[Position(UnknownAlgebraProducts,y)] := NullSp[k][l];
+                        else
+                            row := [];
+                            break; ##### need to move on to next null space vector
+                        fi;
                     fi;
+                fi;
+            od;
+            
+            if sum <> [] and row <> [] then
+                if ForAll(row, x -> x = 0) then 
+                    if ForAny( sum , y -> y <> 0) then 
+                        Error("Nullspace"); 
+                    fi;
+                else
+                    Add(mat,row);
+                    Add(vec,sum);
                 fi;
             fi;
         od;
-        
-        if sum <> [] and row <> [] then
-            if ForAll(row, x -> x = 0) then 
-                if ForAny( sum , y -> y <> 0) then 
-                    Error("Step 7 nullspace"); 
-                fi;
-            else
-                Add(mat,row);
-                Add(vec,sum);
-            fi;
-        fi;
-    
     od;
     
     return([mat,vec]);
@@ -3067,7 +3072,7 @@ function(G,T)
                         
                         if LI = 0 then 
                             
-                            x := MAJORANA_NullSpaceAlgebraProducts(j,NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
+                            x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
                             
                             Append(mat,x[1]);
                             Append(vec,x[2]);
@@ -3227,6 +3232,15 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
+                    fi;
+                 
+                    if LI = 0 then 
+                            
+                        x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
+                        
+                        Append(mat,x[1]);
+                        Append(vec,x[2]);
+                    
                     fi;
                     
                 od;
