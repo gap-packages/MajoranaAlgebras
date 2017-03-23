@@ -50,4 +50,6 @@ DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
 DeclareGlobalFunction( "MAJORANA_EchelonMat" );
 
+DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
+
 

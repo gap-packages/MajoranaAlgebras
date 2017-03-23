@@ -1414,6 +1414,64 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     return([mat,vec]);
         
     end );
+    
+InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
+
+    function(j,NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives)
+    
+    local k, l, row, sum, dim, y, mat, vec, a, b;
+    
+    dim := Size(NullSp[1]);
+    
+    mat := [];
+    vec := [];
+
+    for k in [1..Size(NullSp)] do
+        
+        row := [1..Size(UnknownAlgebraProducts)]*0;
+        sum := [];
+        
+        for l in [1..dim] do
+            if NullSp[k][l] <> 0 then
+            
+                y := ProductList[3][j][l]; 
+                
+                if AlgebraProducts[y] <> false then 
+                
+                    a := [1..dim]*0; a[j] := 1;
+                    b := [1..dim]*0; b[l] := 1;
+                    
+                    sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                    
+                else
+                    
+                    if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
+                        row[Position(UnknownAlgebraProducts,y)]:=NullSp[k][l];
+                    else
+                        row := [];
+                        break; ##### need to move on to next null space vector
+                    fi;
+                fi;
+            fi;
+        od;
+        
+        if sum <> [] and row <> [] then
+            if ForAll(row, x -> x = 0) then 
+                if ForAny( sum , y -> y <> 0) then 
+                    Error("Step 7 nullspace"); 
+                fi;
+            else
+                Add(mat,row);
+                Add(vec,sum);
+            fi;
+        fi;
+    
+    od;
+    
+    return([mat,vec]);
+    
+    end );
+    
 
         
 InstallGlobalFunction(MajoranaRepresentation,
@@ -2188,9 +2246,7 @@ function(G,T)
                         
                         Add(EigenVectors[j][3],EigenVector);
                     fi;
-                od;
-                
-                
+                od; 
             od;
 
             # Products from IPSS10
@@ -2644,8 +2700,6 @@ function(G,T)
 
 
                                             ## STEP 5: MORE EVECS ##
-                                            
-                # Find linearly independent subsets of eigenvectors
 
                 # Use these eigenvectors and the fusion rules to find more
 
@@ -3176,6 +3230,12 @@ function(G,T)
                 fi;
                 
                 # put eigenvectors into reversed echelon form 
+                
+                for j in [1..t] do 
+                    for k in [1..3] do 
+                        MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
+                    od;
+                od;
                 
                 UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
                 
