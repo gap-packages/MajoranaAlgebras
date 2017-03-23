@@ -1202,30 +1202,35 @@ function( mat )
     nrows:= Length( mat );
     ncols:= Length( mat[1] );
     nzheads := [];
+    vectors := [];
     
     i := 1;
 
     while i <= nrows do
     
         if not i in nzheads then 
-            row := mat[i];
             # Reduce the row with the known basis vectors.
             for j in [ 1 .. Length(nzheads) ] do
-                x := row[ncols + 1 - nzheads[j]];
+                x := mat[i][ncols + 1 - nzheads[j]];
                 if x <> 0 then
-                  row := row - mat[ nzheads[j] ]*x;
+                  mat[i] := mat[i] - mat[ nzheads[j] ]*x;
                 fi;
             od;
 
-            j := PositionNot( Reversed(row), 0 );
-            if j <= ncols then
+            j := PositionNot( Reversed(mat[i]), 0 );
+            
+            if j <= nrows then
 
                 # We found a new basis vector.
-                inv:= Inverse( row[ncols + 1 - j] );
-                MultRowVector( row, inv );
+
+                mat[i] := mat[i]/mat[i][ncols + 1 - j] ;
                 
                 if j = i then 
+                    
+                    temp := ShallowCopy(mat[i]);
+                    
                     i := i + 1;
+                    
                 elif j > i then 
                 
                     # Swap rows i and j 
@@ -1246,6 +1251,7 @@ function( mat )
                 fi;
 
                 Add( nzheads, j );
+                Add( vectors, temp );
             else;
                 i := i + 1;
             fi;
