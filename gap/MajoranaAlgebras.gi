@@ -1104,63 +1104,164 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
     
     end );
     
-InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
-    function(mat)
+InstallGlobalFunction(MAJORANA_EchelonMat,
+function( mat )
+    local nrows,     # number of rows in <mat>
+          ncols,     # number of columns in <mat>
+          vectors,   # list of basis vectors
+          heads,     # list of pivot positions in `vectors'
+          i,         # loop over rows
+          j,         # loop over columns
+          x,         # a current element
+          nzheads,   # list of non-zero heads
+          row,       # the row of current interest
+          inv,       # inverse of a matrix entry
+          temp;
+
+    nrows:= Length( mat );
+    ncols:= Length( mat[1] );
     
-    local i, j, k, l, m, n, list, temp;   
-     
-    n := Size(mat);
-    m := Size(mat[1]);
+    heads:= ListWithIdenticalEntries( ncols, 0 );
+    nzheads := [];
+    vectors := [];
     
     i := 1;
-    j := 1;
+
+    while i <= nrows do
+        
+        Display(i);
     
-    while i < n + 1 do
-        while j < m do
-        
-            list := [1..n]*0;
-        
-            for k in [i..n] do 
-                if mat[k][m - j + 1] <> 0 then
-                    mat[k] := mat[k]/mat[k][m - j + 1];
-                    list[k] := 1;
+        if not i in nzheads then 
+            row := mat[i];
+            # Reduce the row with the known basis vectors.
+            for j in [ 1 .. Length(nzheads) ] do
+                x := row[nzheads[j]];
+                if x <> 0 then
+                  AddRowVector( row, vectors[ j ], - x );
                 fi;
             od;
-            
-            if ForAll(list, x -> x = 0) then 
-                j := j + 1;
-            else
-            
-                l := Position(list,1);
-                list[l] := 0;
-            
-                # swap rows
-            
-                temp := ShallowCopy(mat[i]);
-                mat[i] := ShallowCopy(mat[l]);
-                mat[l] := ShallowCopy(temp);
+
+            j := PositionNot( row, 0 );
+            if j <= ncols then
+
+                # We found a new basis vector.
+                inv:= Inverse( row[j] );
+                MultRowVector( row, inv );
                 
-                for k in Positions(list,1) do
-                    mat[k] := mat[k] - mat[l];
-                od;
+                if j = i then 
+                    i := i + 1;
+                elif j > i then 
                 
-                j := j + 1;
+                    # Swap rows i and j 
                 
-                break;
+                    temp := ShallowCopy(mat[i]);
+                    mat[i] := ShallowCopy(mat[j]);
+                    mat[j] := ShallowCopy(temp);
+                    
+                elif j < i then 
                 
+                    # Swap rows i and j 
+                    
+                    temp := ShallowCopy(mat[i]);
+                    mat[i] := ShallowCopy(mat[j]);
+                    mat[j] := ShallowCopy(temp);
+                    
+                    i := i + 1;
+                fi;
+                
+                Add( vectors, row );
+                Add( nzheads, j );
+                heads[j]:= Length( vectors );
+            else;
+                i := i + 1;
             fi;
-        od;
-        
-        i := i + 1;
-        
+        else
+            i := i + 1;
+        fi;
     od;
     
-    for i in [1..n] do
-        for j in [i..n-1] do 
-            mat[i] := mat[i] - mat[j+1]*mat[i][m-j];
-        od;
+    for i in [1..nrows] do 
+        for j in [i + 1..nrows] do
+            mat[i] := mat[i] - mat[j]*mat[i][j];
+        od; 
     od;
-            
+    
+    end );
+    
+InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
+function( mat )
+    local nrows,     # number of rows in <mat>
+          ncols,     # number of columns in <mat>
+          vectors,   # list of basis vectors
+          i,         # loop over rows
+          j,         # loop over columns
+          x,         # a current element
+          nzheads,   # list of non-zero heads
+          row,       # the row of current interest
+          inv,       # inverse of a matrix entry
+          temp;
+
+    nrows:= Length( mat );
+    ncols:= Length( mat[1] );
+    nzheads := [];
+    
+    i := 1;
+
+    while i <= nrows do
+    
+        if not i in nzheads then 
+            row := mat[i];
+            # Reduce the row with the known basis vectors.
+            for j in [ 1 .. Length(nzheads) ] do
+                x := row[ncols + 1 - nzheads[j]];
+                if x <> 0 then
+                  row := row - mat[ nzheads[j] ]*x;
+                fi;
+            od;
+
+            j := PositionNot( Reversed(row), 0 );
+            if j <= ncols then
+
+                # We found a new basis vector.
+                inv:= Inverse( row[ncols + 1 - j] );
+                MultRowVector( row, inv );
+                
+                if j = i then 
+                    i := i + 1;
+                elif j > i then 
+                
+                    # Swap rows i and j 
+                
+                    temp := ShallowCopy(mat[i]);
+                    mat[i] := ShallowCopy(mat[j]);
+                    mat[j] := ShallowCopy(temp);
+                    
+                elif j < i then 
+                
+                    # Swap rows i and n - j 
+                    
+                    temp := ShallowCopy(mat[i]);
+                    mat[i] := ShallowCopy(mat[j]);
+                    mat[j] := ShallowCopy(temp);
+                    
+                    i := i + 1;
+                fi;
+
+                Add( nzheads, j );
+            else;
+                i := i + 1;
+            fi;
+        else
+            i := i + 1;
+        fi;
+    od;
+    
+    for i in [1..nrows] do 
+        for j in [i + 1..nrows] do
+            mat[i] := mat[i] - mat[j]*mat[i][ncols + 1 - j];
+        od; 
+    od;
+    
     end );
     
 InstallGlobalFunction(MAJORANA_Resurrection,

@@ -48,4 +48,6 @@ DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
+DeclareGlobalFunction( "MAJORANA_EchelonMat" );
+
 
