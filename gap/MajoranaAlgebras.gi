@@ -2462,7 +2462,7 @@ function(G,T)
                 # 2,3 products
 
                 elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 3 then
-                    if Order(coordinates[x]*coordinates[y]) in T then ## NEED TO FIX
+                    if coordinates[x]*coordinates[y] in T then 
 
                         s := coordinates[x]; h := coordinates[y];
 
