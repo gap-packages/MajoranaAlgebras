@@ -1473,7 +1473,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
     function(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives)
     
-    local i, j, k, l, row, sum, dim, y, mat, vec, a, b, x, record;
+    local i, m, j, k, l, row, sum, dim, y, mat, vec, a, b, x, z, record, g, sign;
     
     dim := Size(NullSp[1]);
     
@@ -1481,12 +1481,11 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     vec := [];
     record := [];
     
-    
-    for i in [1..Size(UnknownAlgebraProducts)] do
+    for m in [1..Size(UnknownAlgebraProducts)] do
     
         for x in [1,2] do 
         
-            j := pairrepresentatives[UnknownAlgebraProducts[i]][x];
+            j := pairrepresentatives[UnknownAlgebraProducts[m]][x];
         
             a := [1..dim]*0; a[j] := 1;        
         
@@ -1494,6 +1493,8 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
             
                 row := [1..Size(UnknownAlgebraProducts)]*0;
                 sum := [];
+                
+                g := 0;
                 
                 for l in [1..dim] do
                     if NullSp[k][l] <> 0 then
@@ -1507,12 +1508,39 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
                             sum := sum - NullSp[k][l]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
                             
                         elif y in UnknownAlgebraProducts then 
+                        
+                            if g = 0 then 
+                                
+                                g := ProductList[4][j][l];
                             
-                            if pairrepresentatives[y] = [j,l] or pairrepresentatives[y] = [l,j] then
                                 row[Position(UnknownAlgebraProducts,y)] := NullSp[k][l];
+                                
                             else
-                                row := [];
-                                break; ##### need to move on to next null space vector
+                               
+                                z := [0,0];
+                               
+                                z[1] := ProductList[5][Position(ProductList[2],ProductList[1][j]^g)];
+                                z[2] := ProductList[5][Position(ProductList[2],ProductList[1][l]^g)];
+                               
+                                sign := 1;
+                        
+                                if z[1]*z[2] < 0 then 
+                                    sign := -1;
+                                fi;
+                               
+                                z[1] := AbsInt(z[1]);
+                                z[2] := AbsInt(z[2]);
+                                
+                                if pairrepresentatives[y] = z or pairrepresentatives[y] = [z[2],z[1]] then
+                                 
+                                    row[Position(UnknownAlgebraProducts,y)] := sign*NullSp[k][l];
+                                    
+                                else
+                                
+                                    row := [];
+                                    break;
+                                fi;
+ 
                             fi;
                             
                         else
@@ -1521,15 +1549,44 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
                         fi;
                     fi;
                 od;
+
+                if row <> [] then 
+                    z := [1..dim]*0;
+            
+                    if g <> 0 then 
+                        
+                        for i in [1..dim] do
+                            if sum[i] <> 0 then 
+                            
+                                k := ProductList[5][Position(ProductList[2],ProductList[1][i]^g)];
+                                
+                                if k < 0 then 
+                                
+                                   z[-k] := - sum[i];
+                                
+                                else   
+                                    
+                                    z[k] := sum[i];
+                                    
+                                fi;
+                            fi;
+                        od;
+                        
+                    else
+                        
+                        z := sum;
+                        
+                    fi;
+                fi;
                 
-                if sum <> [] and row <> [] then
+                if z <> [] and row <> [] then
                     if ForAll(row, x -> x = 0) then 
-                        if ForAny( sum , y -> y <> 0) then 
+                        if ForAny( z , y -> y <> 0) then 
                             Error("Nullspace"); 
                         fi;
                     else
                         Add(mat,row);
-                        Add(vec,sum);
+                        Add(vec,z);
                         Add(record,[i,k,"n"]);
                     fi;
                 fi;
@@ -2478,7 +2535,7 @@ function(G,T)
                         AlgebraProducts[j][xm1]:=-1/9;
                         AlgebraProducts[j][y]:=5/32;
 
-                        GramMatrix[x][y]:=1/4;
+                        GramMatrix[j]:=1/4;
 
                     elif Order(coordinates[x]*coordinates[y]) = 3 then
 
