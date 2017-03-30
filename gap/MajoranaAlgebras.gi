@@ -1326,7 +1326,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(i,ev,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives)
     
-    local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, k, l, dim, u, v, x, y;
+    local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, k, l, dim, u, v, x, y, z, g, sign;
     
     dim := Size(AlgebraProducts[1]);
     
@@ -1347,6 +1347,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 list := [];
                 bad := [];
                 
+                g := 0;
+                
                 for j in [1..dim] do 
                     if gamma[j] <> 0 then
                         for k in [1..dim] do
@@ -1361,19 +1363,41 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             
                                     sum := sum - gamma[j]*beta[k]*MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList)*MAJORANA_FusionTable[1][ev + 1];
                                     
-                                elif pairrepresentatives[l] = [j,k] or pairrepresentatives[l] = [k,j] then 
-                                    
-                                    Add(bad,j); 
+                                elif g = 0 then 
+                                
+                                    g := ProductList[4][j][k];
                                     
                                     row[Position(UnknownAlgebraProducts,l)] := row[Position(UnknownAlgebraProducts,l)] 
                                                                                 + beta[k]*gamma[j]*MAJORANA_FusionTable[1][ev + 1];
                                                                                 
-                                else # need to move on to next evec
+                                    Add(bad,j);       
+                                                                                
+                                else 
                                 
-                                    row := [];
+                                    y := [0,0];
                                     
-                                    break;
+                                    y[1] := ProductList[5][Position(ProductList[2],ProductList[1][j]^g)];
+                                    y[2] := ProductList[5][Position(ProductList[2],ProductList[1][k]^g)];
                                     
+                                    sign := 1;
+                                    
+                                    if y[1]*y[2] < 0 then 
+                                        sign := -1; 
+                                    fi;
+                                    
+                                    y[1] := AbsInt(y[1]);
+                                    y[2] := AbsInt(y[2]);
+                                    
+                                    if pairrepresentatives[l] = y or pairrepresentatives[l] = [y[2],y[1]] then 
+                                        
+                                        row[Position(UnknownAlgebraProducts,l)] := row[Position(UnknownAlgebraProducts,l)] 
+                                                                                + sign*beta[k]*gamma[j]*MAJORANA_FusionTable[1][ev + 1];
+                                    
+                                    else
+                                    
+                                        row := [];
+                                        break; 
+                                    fi;
                                 fi;
                             fi;
                         od;
@@ -1383,7 +1407,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                         break;
                     fi;
                 od;
-                
+                               
                 if row <> [] then 
                        
                     for j in [1..dim] do
@@ -1426,17 +1450,36 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             
                             k := ProductList[3][i][j];
                             
-                            if AlgebraProducts[k] = false then 
+                            if AlgebraProducts[k] = false and g = 0 then 
                             
-                                if pairrepresentatives[k] = [i,j] or pairrepresentatives[k] = [j,i] then 
+                                g := ProductList[4][i][j];
+                                row[Position(UnknownAlgebraProducts,k)] := row[Position(UnknownAlgebraProducts,k)]
+                                                                                + y[j];
+                                                                                
+                            elif AlgebraProducts[k] = false then 
                             
+                                z := [0,0];
+                                
+                                z[1] := Position(ProductList[1],ProductList[1][i]^g);
+                                z[2] := ProductList[5][Position(ProductList[2],ProductList[1][j]^g)];
+                                
+                                sign := 1;
+                        
+                                if z[2] < 0 then 
+                                    sign := -1;
+                                    z[2] := -z[2];
+                                fi;
+                                
+                                if pairrepresentatives[k] = z or pairrepresentatives[k] = [z[2],z[1]] then
+                                    
                                     row[Position(UnknownAlgebraProducts,k)] := row[Position(UnknownAlgebraProducts,k)]
                                                                                 + y[j];
-                                else # need to move on
-                                    
+                            
+                                else
+                                
                                     row := [];
                                     break;
-                                    
+                            
                                 fi;
                             else
                                 
@@ -1448,15 +1491,45 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             fi;
                         od;
                         
+                        if row <> [] then
+                
+                            z := [1..dim]*0;
+                    
+                            if g <> 0 then 
+                                
+                                for i in [1..dim] do
+                                    if sum[i] <> 0 then 
+                                    
+                                        k := ProductList[5][Position(ProductList[2],ProductList[1][i]^g)];
+                                        
+                                        if k < 0 then 
+                                        
+                                           z[-k] := - sum[i];
+                                        
+                                        else   
+                                            
+                                            z[k] := sum[i];
+                                            
+                                        fi;
+                                    fi;
+                                od;
+                                
+                            else
+                                
+                                z := sum;
+                                
+                            fi;
+                        fi;
+                        
                         if row <> [] then 
                             if ForAll(row, x -> x = 0) then 
-                                if ForAny( sum, x -> x <> 0) then
+                                if ForAny( z, x -> x <> 0) then
                                     Error("Resurrection error");
                                 fi;
                             else
                                  
                                 Add(mat,row);
-                                Add(vec,sum);
+                                Add(vec,z);
                             fi;  
                         fi;
                     fi;
@@ -2824,6 +2897,8 @@ function(G,T)
             count := 1;
             
             while switchmain = 0 do 
+            
+                Display(count);
                 
                 count := count + 1;
 
