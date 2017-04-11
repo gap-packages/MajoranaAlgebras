@@ -1486,7 +1486,7 @@ InstallGlobalFunction(MAJORANA_OriginalResurrection,
                                 if row <> [] then
                                 
                                     Add(mat,row);
-                                    Add(vec,sum - 4*wbeta);
+                                    Add(vec,sum - wbeta);
                                     Add(record, [i,j,alpha[1][k],alpha[2][l],beta[m]]);
                                 
                                 fi;
