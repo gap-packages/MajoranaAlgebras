@@ -75,6 +75,46 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 fi;
             od;
         od;
+    # the 1/32, 1/32 case is even more special    
+    elif (a=3) and (b=3) then
+        for k in [1..Size(ev_a)] do
+            for l in [1..Size(ev_b)] do
+                
+                x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
+
+                if x <> false then
+                    
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3]);
+                    
+                    if y <> false then
+                        
+                        z := MAJORANA_AlgebraProduct( a, x, AlgebraProducts, ProductList );
+                        
+                        if z <> false then 
+                            z := z - y*u;
+                        
+                            if MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList) <> false and
+                               MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList ) <> z/4 then
+                                return [false, StructuralCopy([ Shape
+                                               , "Error"
+                                               , STRINGIFY( "Fusion of ",
+                                                            table[a], ",", table[b],
+                                                            " eigenvectors does not hold" )
+                                               , j
+                                               , ev_a[k]
+                                               , ev_b[l]
+                                               , AlgebraProducts
+                                               , GramMatrix ])];
+                            else
+                                Add(NewEigenVectors, z);
+                            fi;
+                        fi;
+                    fi;
+                    
+                fi;
+                
+            od;
+        od;
     else
         for k in [1..Size(ev_a)] do
             for l in [1..Size(ev_b)] do
@@ -1379,7 +1419,7 @@ InstallGlobalFunction(MAJORANA_OriginalResurrection,
 
     function(UnknownAlgebraProducts,EigenVectors, AlgebraProducts, ProductList, pairrepresentatives)
     
-    local x, alpha, beta, i,j, k, l, m, n, p, q, t, walpha, wbeta, a, v, dim, y, mat, vec, row, sum, record;
+    local x, alpha, beta, i,j, k, l, m, n, p, q, t, walpha, wbeta, a, v, dim, y, mat, vec, row, sum, record, ev, table;
     
     dim := Size(AlgebraProducts[1]);
     
@@ -1389,121 +1429,124 @@ InstallGlobalFunction(MAJORANA_OriginalResurrection,
     vec := [];
     record := [];
     
-    for i in UnknownAlgebraProducts do
+    table := [1,1/4,1/32];
     
-        x := pairrepresentatives[i];
-        
-        for j in [1..t] do
-        
-            alpha := [[],[]];
-            beta := [];
-        
-            # find possible values of alpha
-        
-            for k in [1..Size(EigenVectors[j][1])] do
-                if EigenVectors[j][1][k][x[1]] <> 0 then
-                    Add(alpha[1],k); 
-                fi;
-                if EigenVectors[j][1][k][x[2]] <> 0 then
-                   Add(alpha[2],k);
-                fi;
-            od;
-            
-            # find possible values of beta
-            
-            for k in [1..Size(EigenVectors[j][2])] do
-                if EigenVectors[j][2][k][x[1]] <> 0 then
-                    Add(beta,k); 
-                fi;
-            od;
-            
-            k := 1; 
-            
-            while k < Size(alpha[1]) + 1 do 
-            
-                l := 1;
-            
-                while l < Size(alpha[2]) + 1 do
+    for i in UnknownAlgebraProducts do
+        for ev in [2,3] do
+            for x in [pairrepresentatives[i],Reversed(pairrepresentatives[i])] do     
+                for j in [1..t] do
                 
-                    # calculate w_alpha
+                    alpha := [[],[]];
+                    beta := [];
+                
+                    # find possible values of alpha
+                
+                    for k in [1..Size(EigenVectors[j][1])] do
+                        if EigenVectors[j][1][k][x[1]] <> 0 then
+                            Add(alpha[1],k); 
+                        fi;
+                        if EigenVectors[j][1][k][x[2]] <> 0 then
+                           Add(alpha[2],k);
+                        fi;
+                    od;
                     
-                    walpha := MAJORANA_CalculateW(  EigenVectors[j][1][alpha[1][k]],
-                                                    EigenVectors[j][1][alpha[2][l]],
-                                                    x,
-                                                    AlgebraProducts,
-                                                    ProductList);
-                    if walpha = [] then
-                        l := l + 1;
-                    else 
-                        m := 1;        
+                    # find possible values of beta
                     
-                        while m < Size(beta) + 1 do
+                    for k in [1..Size(EigenVectors[j][ev])] do
+                        if EigenVectors[j][ev][k][x[1]] <> 0 then
+                            Add(beta,k); 
+                        fi;
+                    od;
+                    
+                    k := 1; 
+                    
+                    while k < Size(alpha[1]) + 1 do 
+                    
+                        l := 1;
+                    
+                        while l < Size(alpha[2]) + 1 do
                         
-                            # calculate wbeta
+                            # calculate w_alpha
                             
-                            wbeta := MAJORANA_CalculateW(  EigenVectors[j][2][beta[m]],
-                                                    EigenVectors[j][1][alpha[2][l]],
-                                                    x,
-                                                    AlgebraProducts,
-                                                    ProductList);
-                        
-                            if wbeta = [] then 
-                                m := m + 1;
-                            else
+                            walpha := MAJORANA_CalculateW(  EigenVectors[j][1][alpha[1][k]],
+                                                            EigenVectors[j][1][alpha[2][l]],
+                                                            x,
+                                                            AlgebraProducts,
+                                                            ProductList);
+                            if walpha = [] then
+                                l := l + 1;
+                            else 
+                                m := 1;        
                             
-                                row := NullMat(1,Size(UnknownAlgebraProducts))[1];
-                                sum := NullMat(1,dim)[1];
+                                while m < Size(beta) + 1 do
                                 
-                                row[Position(UnknownAlgebraProducts,i)] := 1;
+                                    # calculate wbeta
+                                    
+                                    wbeta := MAJORANA_CalculateW(  EigenVectors[j][ev][beta[m]],
+                                                            EigenVectors[j][1][alpha[2][l]],
+                                                            x,
+                                                            AlgebraProducts,
+                                                            ProductList);
                                 
-                                a := [1..dim]*0; a[j] := 1;
-                                
-                                for p in [1..dim] do 
-                                    if walpha[p] - wbeta[p] <> 0 then
-                                        if (AlgebraProducts[ProductList[3][j][p]] = false) then
+                                    if wbeta = [] then 
+                                        m := m + 1;
+                                    else
+                                    
+                                        row := NullMat(1,Size(UnknownAlgebraProducts))[1];
+                                        sum := NullMat(1,dim)[1];
                                         
-                                            if pairrepresentatives[ProductList[3][j][p]] in [[j,p],[p,j]] then 
-                                            
-                                                q := Position(UnknownAlgebraProducts,ProductList[3][j][p]);
+                                        row[Position(UnknownAlgebraProducts,i)] := 1;
+                                        
+                                        a := [1..dim]*0; a[j] := 1;
+                                        
+                                        for p in [1..dim] do 
+                                            if walpha[p] - wbeta[p] <> 0 then
+                                                if (AlgebraProducts[ProductList[3][j][p]] = false) then
                                                 
-                                                row[q] := row[q] + 4*(walpha[p] - wbeta[p]);
-                                            else
-                                                # no good, move on to next wbeta
-                                                
-                                                row := [];
-                                                break;
-                                                
+                                                    if pairrepresentatives[ProductList[3][j][p]] in [[j,p],[p,j]] then 
+                                                    
+                                                        q := Position(UnknownAlgebraProducts,ProductList[3][j][p]);
+                                                        
+                                                        row[q] := row[q] + (walpha[p] - wbeta[p])/table[ev];
+                                                    else
+                                                        # no good, move on to next wbeta
+                                                        
+                                                        row := [];
+                                                        break;
+                                                        
+                                                    fi;
+                                                    
+                                                else
+                                                    v := [1..dim]*0; v[p] := (walpha[p] - wbeta[p]);
+                                                    
+                                                    sum := sum - MAJORANA_AlgebraProduct(a,v,AlgebraProducts,ProductList)/table[ev];
+                                                fi;
                                             fi;
-                                            
-                                        else
-                                            v := [1..dim]*0; v[p] := (walpha[p] - wbeta[p]);
-                                            
-                                            sum := sum - 4*MAJORANA_AlgebraProduct(a,v,AlgebraProducts,ProductList);
+                                        od;
+                                        
+                                        if row <> [] then
+                                        
+                                            Add(mat,row);
+                                            Add(vec,sum - wbeta);
+                                            Add(record, [i,j,alpha[1][k],alpha[2][l],beta[m]]);
+                                        
                                         fi;
+                                
+                                        m := m + 1;
+                                        
                                     fi;
                                 od;
                                 
-                                if row <> [] then
-                                
-                                    Add(mat,row);
-                                    Add(vec,sum - wbeta);
-                                    Add(record, [i,j,alpha[1][k],alpha[2][l],beta[m]]);
-                                
-                                fi;
-                        
-                                m := m + 1;
+                                l := l + 1;
                                 
                             fi;
                         od;
                         
-                        l := l + 1;
+                        k := k + 1;
                         
-                    fi;
+                    od; 
                 od;
-                
-                k := k + 1;
-                
-            od; 
+            od;
         od;
     od;
     
