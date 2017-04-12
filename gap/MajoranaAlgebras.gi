@@ -88,7 +88,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                     
                     if y <> false then
                         
-                        z := MAJORANA_AlgebraProduct( a, x, AlgebraProducts, ProductList );
+                        z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
                         
                         if z <> false then 
                             z := z - y*u;
@@ -3203,6 +3203,15 @@ function(G,T)
                         x := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
                         if x[1] then
                             Append(NewEigenVectors[j][1], x[2]);
+                        else
+                            Output[i] := x[2];
+                            break;
+                        fi;
+                        
+                        # 1/32,1/32 Fusion
+                        x := MAJORANA_TestFusion(3,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                        if x[1] then
+                            Append(NewEigenVectors[j][2], x[2]);
                         else
                             Output[i] := x[2];
                             break;
