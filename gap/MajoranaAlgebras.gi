@@ -24,7 +24,7 @@ end);
 BindGlobal("MAJORANA_FusionTable",
            [ [    1,    0,   1/4, 1/32]
             ,[    0,    0,   1/4, 1/32]
-            ,[  1/4,  1/4, [1,0], 1/32]
+            ,[  1/4,  1/4,     0, 1/32]
             ,[ 1/32, 1/32,  1/32, []] ]);
 
 # This is the test function for fusion
@@ -1556,7 +1556,7 @@ InstallGlobalFunction(MAJORANA_OriginalResurrection,
     
 InstallGlobalFunction(MAJORANA_Resurrection,
 
-    function(i,ev,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives)
+    function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives)
     
     local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, m, k, l, dim, u, v, x, y, z, g, sign;
     
@@ -1565,16 +1565,16 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     mat := [];
     vec := [];
     
-    for a in [1..Size(EigenVectors[i][ev])] do 
-        for b in [1..Size(EigenVectors[i][1])] do 
+    for a in [1..Size(EigenVectors[i][ev_a])] do 
+        for b in [1..Size(EigenVectors[i][ev_b])] do 
         
-            if MAJORANA_AlgebraProduct(EigenVectors[i][ev][a],EigenVectors[i][1][b],AlgebraProducts,ProductList) = false then 
+            if MAJORANA_AlgebraProduct(EigenVectors[i][ev_a][a],EigenVectors[i][ev_b][b],AlgebraProducts,ProductList) = false then 
         
                 row := [1..Size(UnknownAlgebraProducts)]*0;
                 sum := [];
                 
-                beta := EigenVectors[i][ev][a];
-                gamma := EigenVectors[i][1][b];
+                beta := EigenVectors[i][ev_a][a];
+                gamma := EigenVectors[i][ev_b][b];
                 
                 list := [];
                 bad := [];
@@ -1593,14 +1593,14 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                     u := [1..dim]*0; u[m] := 1;
                                     v := [1..dim]*0; v[k] := 1;
                             
-                                    sum := sum - gamma[m]*beta[k]*MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList)*MAJORANA_FusionTable[1][ev + 1];
+                                    sum := sum - gamma[m]*beta[k]*MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList)*MAJORANA_FusionTable[ev_b + 1][ev_a + 1];
                                     
                                 elif g = 0 then 
                                 
                                     g := ProductList[4][m][k];
                                     
                                     row[Position(UnknownAlgebraProducts,l)] := row[Position(UnknownAlgebraProducts,l)] 
-                                                                                + beta[k]*gamma[m]*MAJORANA_FusionTable[1][ev + 1];
+                                                                                + beta[k]*gamma[m]*MAJORANA_FusionTable[ev_b + 1][ev_a + 1];
                                                                                 
                                     Add(bad,m);       
                                                                                 
@@ -1623,7 +1623,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                     if pairrepresentatives[l] = y or pairrepresentatives[l] = [y[2],y[1]] then 
                                         
                                         row[Position(UnknownAlgebraProducts,l)] := row[Position(UnknownAlgebraProducts,l)] 
-                                                                                + sign*beta[k]*gamma[m]*MAJORANA_FusionTable[1][ev + 1];
+                                                                                + sign*beta[k]*gamma[m]*MAJORANA_FusionTable[ev_b + 1][ev_a + 1];
                                     
                                     else
                                     
@@ -1654,11 +1654,11 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                     
                     Sort(bad);
 
-                    for m in [1..Size(EigenVectors[i][1])] do 
-                        Add(list, StructuralCopy(EigenVectors[i][1][m]{bad}));
+                    for m in [1..Size(EigenVectors[i][ev_a])] do 
+                        Add(list, StructuralCopy(EigenVectors[i][ev_a][m]{bad}));
                     od;
 
-                    if ev = 1 then 
+                    if ev_a = 1 then 
                         list[a] := [1..Size(bad)]*0;
                     fi;
                     
@@ -1669,8 +1669,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                         alpha := [];
                         
                         for m in [1..Size(x)] do
-                            if ev <> 1 or m <> a then
-                                alpha := alpha + x[m]*EigenVectors[i][1][m];
+                            if ev_a <> 1 or m <> a then
+                                alpha := alpha + x[m]*EigenVectors[i][ev_a][m];
                             fi;
                         od;
                     
@@ -1723,6 +1723,19 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             fi;
                         od;
                         
+                        if ev_a = 2 then 
+                        
+                            u := [1..dim]*0; u[i] := 1; 
+                            x := MAJORANA_InnerProduct(alpha,beta,GramMatrix,ProductList[3]);
+                        
+                            if x <> false then 
+                                sum := sum - u*x/4;
+                            else
+                                row := [];
+                            fi;
+                        
+                        fi;
+                        
                         if row <> [] then
                 
                             z := [1..dim]*0;
@@ -1772,7 +1785,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     
     return([mat,vec]);
         
-    end );
+end );
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
@@ -3168,6 +3181,7 @@ function(G,T)
                             Append(NewEigenVectors[j][1], x[2]);
                         else
                             Output[i] := x[2];
+                            Error("0,0 fusion");
                             break;
                         fi;
 
@@ -3664,27 +3678,27 @@ function(G,T)
                 od;
                 
                 UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
-                
+                        
                 mat := [];
                 vec := [];
                 
                 for j in [1..t] do 
                         
-                    x := MAJORANA_Resurrection(j,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,1,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
                     fi;
                     
-                    x := MAJORANA_Resurrection(j,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,1,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
                     fi;
                     
-                    x := MAJORANA_Resurrection(j,3,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,1,3,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -3870,7 +3884,7 @@ function(G,T)
                 break;
             fi;
 
-            Output[i]:=[Shape,"Success",GramMatrix,AlgebraProducts,EigenVectors];
+            Output[i]:=[Shape,"Success",3Aaxes,4Aaxes,5Aaxes,Orbitals,GramMatrix,AlgebraProducts,EigenVectors,NullSp,ProductList,pairrepresentatives];
             Output[i]:=StructuralCopy(Output[i]);
 
             master:=0;
