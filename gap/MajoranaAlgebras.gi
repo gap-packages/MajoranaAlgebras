@@ -3741,17 +3741,12 @@ function(G,T)
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                     if Size(Solution)  = 2 then
-                        if Size(Solution[2]) = 0 then
-                            for k in [1..Size(UnknownAlgebraProducts)] do
+                        for k in [1..Size(UnknownAlgebraProducts)] do
+                            if not k in Solution[2] then 
                                 x:=UnknownAlgebraProducts[k]; 
                                 AlgebraProducts[x]:=Solution[1][k];
-                            od;
-                    #    else
-                    #        Output[i] := [Shape,"Fail","Missing algebra product values",GramMatrix, [], AlgebraProducts,EigenVectors];
-                    #        Error("Missing algebra product values");
-                    #        Output[i] := StructuralCopy(Output[i]);
-                    #        break
-                        fi;
+                            fi;
+                        od;
                     else
                         Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products 2",mat,vec,AlgebraProducts,EigenVectors];
                         Output[i] := StructuralCopy(Output[i]);
