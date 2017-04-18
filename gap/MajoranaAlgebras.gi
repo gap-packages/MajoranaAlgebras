@@ -1558,12 +1558,13 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives)
     
-    local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, m, k, l, dim, u, v, x, y, z, g, sign;
+    local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, m, k, l, dim, u, v, x, y, z, g, sign, record;
     
     dim := Size(AlgebraProducts[1]);
     
     mat := [];
     vec := [];
+    record := [];
     
     for a in [1..Size(EigenVectors[i][ev_a])] do 
         for b in [1..Size(EigenVectors[i][ev_b])] do 
@@ -1654,11 +1655,11 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                     
                     Sort(bad);
 
-                    for m in [1..Size(EigenVectors[i][ev_a])] do 
-                        Add(list, StructuralCopy(EigenVectors[i][ev_a][m]{bad}));
+                    for m in [1..Size(EigenVectors[i][ev_b])] do 
+                        Add(list, StructuralCopy(EigenVectors[i][ev_b][m]{bad}));
                     od;
 
-                    if ev_a = 1 then 
+                    if ev_a = ev_b then 
                         list[a] := [1..Size(bad)]*0;
                     fi;
                     
@@ -1669,8 +1670,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                         alpha := [];
                         
                         for m in [1..Size(x)] do
-                            if ev_a <> 1 or m <> a then
-                                alpha := alpha + x[m]*EigenVectors[i][ev_a][m];
+                            if ev_a <> ev_b or m <> a then
+                                alpha := alpha + x[m]*EigenVectors[i][ev_b][m];
                             fi;
                         od;
                     
@@ -1723,13 +1724,13 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             fi;
                         od;
                         
-                        if ev_a = 2 then 
+                        if ev_b = 2 then 
                         
                             u := [1..dim]*0; u[i] := 1; 
-                            x := MAJORANA_InnerProduct(alpha,beta,GramMatrix,ProductList[3]);
+                            x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList[3]);
                         
                             if x <> false then 
-                                sum := sum - u*x/4;
+                                sum := sum + u*x/4;
                             else
                                 row := [];
                             fi;
@@ -1775,6 +1776,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                  
                                 Add(mat,row);
                                 Add(vec,z);
+                                Add(record,[alpha,beta,gamma]);
                             fi;  
                         fi;
                     fi;
@@ -1783,7 +1785,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
         od;
     od;
     
-    return([mat,vec]);
+    return([mat,vec,record]);
         
 end );
     
@@ -3144,11 +3146,8 @@ function(G,T)
             count := 1;
             
             while switchmain = 0 do 
-            
-                Display(count);
                 
                 count := count + 1;
-
 
                                             ## STEP 5: MORE EVECS ##
 
@@ -3628,7 +3627,7 @@ function(G,T)
 #                        od;
 #                    fi;
 #                od;
-
+                
                                                    ## STEP 8: RESURRECTION PRINCIPLE I ##
 
                 # Check fusion and M1
@@ -3681,6 +3680,7 @@ function(G,T)
                         
                 mat := [];
                 vec := [];
+                record := [];
                 
                 for j in [1..t] do 
                         
@@ -3689,21 +3689,40 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
+                        Add(record, [j,1,1,x[3]]);
                     fi;
+                    
+                    x := MAJORANA_Resurrection(j,2,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    
+                    if x[1] <> [] then 
+                        Append(mat, x[1]);
+                        Append(vec, x[2]);
+                        Add(record, [j,2,1,x[3]]);
+                    fi;
+                    
+                    x := MAJORANA_Resurrection(j,3,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    
+                    if x[1] <> [] then 
+                        Append(mat, x[1]);
+                        Append(vec, x[2]);
+                        Add(record, [j,3,1,x[3]]);
+                    fi; 
                     
                     x := MAJORANA_Resurrection(j,1,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                    fi;
+                        Add(record, [j,1,2,x[3]]);
+                    fi;                   
                     
-                    x := MAJORANA_Resurrection(j,1,3,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                    fi;                    
+                        Add(record, [j,3,2,x[3]]);
+                    fi; 
                 od;
                 
                 if LI = 0 then 
@@ -3714,6 +3733,9 @@ function(G,T)
                     Append(vec,x[2]);
                 
                 fi;
+                
+                                
+                if Size(UnknownAlgebraProducts) = 3 then Error("pause"); fi;
                 
                 if mat <> [] then 
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
