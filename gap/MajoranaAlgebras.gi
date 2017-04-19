@@ -3734,9 +3734,6 @@ function(G,T)
                 
                 fi;
                 
-                                
-                if Size(UnknownAlgebraProducts) = 3 then Error("pause"); fi;
-                
                 if mat <> [] then 
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
