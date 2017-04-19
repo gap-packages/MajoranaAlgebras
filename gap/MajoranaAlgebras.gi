@@ -1385,7 +1385,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 beta := EigenVectors[i][ev_a][a];
                 gamma := EigenVectors[i][ev_b][b];
                 
-                list := [];
+                 list := [];
                 bad := [];
                 
                 g := 0;
@@ -3381,60 +3381,6 @@ function(G,T)
                 if Size(Output[i])>0 then
                     break;
                 fi;
-                
-                                                    ## STEP 7a ##
-                                                    
-#                for j in [1..t] do
-#                
-#                    a := [1..dim]*0; a[j]:=1;
-#                
-#                    UnknownAlgebraProducts := [];
-#                
-#                    for k in [1..SizeOrbitals] do
-#                    
-#                        if  (AlgebraProducts[k] = false) and 
-#                            (pairrepresentatives[k][1] = j) then 
-#                            
-#                            Add(UnknownAlgebraProducts,k);
-#                        fi;
-#                            
-#                    od;
-#                    
-#                    if UnknownAlgebraProducts <> [] then 
-#                    
-#                        mat := [[1..dim]*0]; mat[1][j] := 1;
-#                        
-#                        Append(mat,EigenVectors[j][2]); 
-#                        Append(mat,EigenVectors[j][3]);
-#                        Append(mat,EigenVectors[j][1]); 
-#                        Append(mat,NullSp);
-#                        
-#                        for k in [1..Size(UnknownAlgebraProducts)] do 
-#                        
-#                            h := [1..dim]; h[pairrepresentatives[k][1]] := 1;
-#                            
-#                            vec := SolutionMat(mat,h);
-#                            
-#                            if vec <> fail then 
-#                            
-#                                sum := vec[1]*mat[1];
-#                                
-#                                x := Size(EigenVectors[j][2]);
-#                                
-#                                for l in [1..x] do 
-#                                    sum := sum + vec[1 + l]*mat[1 + l]/4;
-#                                od;
-#                                
-#                                for l in [1..Size(EigenVectors[j][3])] do
-#                                    sum := sum + vec[1 + x + l]*mat[1 + l + x]/32;
-#                                od;
-#                                
-#                                AlgebraProducts[k] := sum;
-#                            fi;
-#                            
-#                        od;
-#                    fi;
-#                od;
                 
                                                    ## STEP 8: RESURRECTION PRINCIPLE I ##
 
