@@ -1397,7 +1397,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             
                                 l := ProductList[3][m][k];
                             
-                                if AlgebraProducts[l] <> false then 
+                                if not l in UnknownAlgebraProducts then 
                                 
                                     u := [1..dim]*0; u[m] := 1;
                                     v := [1..dim]*0; v[k] := 1;
@@ -1453,7 +1453,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                        
                     for m in [1..dim] do
                         for k in [1..dim] do 
-                            if gamma[k] <> 0 and AlgebraProducts[ProductList[3][m][k]] = false then 
+                            if gamma[k] <> 0 and ProductList[3][m][k] in UnknownAlgebraProducts then 
                                 Add(bad,m);
                             fi;
                         od;
@@ -1491,13 +1491,13 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             
                             k := ProductList[3][i][m];
                             
-                            if AlgebraProducts[k] = false and g = 0 then 
+                            if k in UnknownAlgebraProducts and g = 0 then 
                             
                                 g := ProductList[4][i][m];
                                 row[Position(UnknownAlgebraProducts,k)] := row[Position(UnknownAlgebraProducts,k)]
                                                                                 + y[m];
                                                                                 
-                            elif AlgebraProducts[k] = false then 
+                            elif k in UnknownAlgebraProducts then 
                             
                                 z := [0,0];
                                 
