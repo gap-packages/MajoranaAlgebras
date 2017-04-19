@@ -52,7 +52,3 @@ DeclareGlobalFunction( "MAJORANA_EchelonMat" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
 
-DeclareGlobalFunction( "MAJORANA_CalculateW" );
-
-DeclareGlobalFunction( "MAJORANA_OriginalResurrection" );
-
