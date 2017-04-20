@@ -1385,7 +1385,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 beta := EigenVectors[i][ev_a][a];
                 gamma := EigenVectors[i][ev_b][b];
                 
-                 list := [];
+                list := [];
                 bad := [];
                 
                 g := 0;
@@ -1541,6 +1541,17 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                 sum := sum + u*x/4;
                             else
                                 row := [];
+                            fi;
+                            
+                            if ev_a = 2 then
+                                
+                                y := MAJORANA_InnerProduct(beta,gamma,GramMatrix,ProductList[3]);
+                                
+                                if y <> false then
+                                    sum := sum - u*x/4;
+                                else
+                                    row := [];
+                                fi;
                             fi;
                         
                         fi;
