@@ -1364,7 +1364,7 @@ function( mat )
     
 InstallGlobalFunction(MAJORANA_Resurrection,
 
-    function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives)
+    function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp)
     
     local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, m, k, l, dim, u, v, x, y, z, g, sign, record;
     
@@ -1594,7 +1594,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             else
                                  
                                 Add(mat,row);
-                                Add(vec,z);
+                                Add(vec,MAJORANA_RemoveNullSpace(z,NullSp));
                                 Add(record,[i,ev_a,ev_b,alpha,beta,gamma]);
                             fi;  
                         fi;
@@ -1924,9 +1924,9 @@ function(G,T)
             for j in [1..Size(Unknowns3X)] do
                 k:=Unknowns3X[j];
                 if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3C";
-                else
                     Shape[k]:="3A";
+                else
+                    Shape[k]:="3C";
                 fi;
             od;
 
@@ -3448,7 +3448,7 @@ function(G,T)
                 
                 for j in [1..t] do 
                         
-                    x := MAJORANA_Resurrection(j,1,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,1,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -3456,7 +3456,7 @@ function(G,T)
                         Add(record, [j,1,1,x[3]]);
                     fi;
                     
-                    x := MAJORANA_Resurrection(j,2,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,2,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -3464,7 +3464,7 @@ function(G,T)
                         Append(record, x[3]);
                     fi;
                     
-                    x := MAJORANA_Resurrection(j,3,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,3,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -3472,7 +3472,7 @@ function(G,T)
                         Append(record, x[3]);
                     fi; 
                     
-                    x := MAJORANA_Resurrection(j,1,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,1,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -3480,7 +3480,7 @@ function(G,T)
                         Append(record, x[3]);
                     fi;                   
                     
-                    x := MAJORANA_Resurrection(j,2,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,2,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -3488,7 +3488,7 @@ function(G,T)
                         Append(record, x[3]);
                     fi; 
                     
-                    x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
