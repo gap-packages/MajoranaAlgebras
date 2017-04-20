@@ -2988,7 +2988,6 @@ function(G,T)
                             Append(NewEigenVectors[j][1], x[2]);
                         else
                             Output[i] := x[2];
-                            Error("0,0 fusion");
                             break;
                         fi;
 
