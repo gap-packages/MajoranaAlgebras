@@ -3480,13 +3480,22 @@ function(G,T)
                         Append(record, x[3]);
                     fi;                   
                     
-                    x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    x := MAJORANA_Resurrection(j,2,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
                         Append(record, x[3]);
                     fi; 
+                    
+                    x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
+                    
+                    if x[1] <> [] then 
+                        Append(mat, x[1]);
+                        Append(vec, x[2]);
+                        Append(record, x[3]);
+                    fi;
+                    
                 od;
                 
                 if LI = 0 then 
