@@ -1417,8 +1417,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                 
                                     y := [0,0];
                                     
-                                    y[1] := ProductList[5][Position(ProductList[2],ProductList[1][m]^g)];
-                                    y[2] := ProductList[5][Position(ProductList[2],ProductList[1][k]^g)];
+                                    y[1] := ProductList[5][Position(ProductList[2],ProductList[1][m]^(Inverse(g)))];
+                                    y[2] := ProductList[5][Position(ProductList[2],ProductList[1][k]^(Inverse(g)))];
                                     
                                     sign := 1;
                                     
@@ -1501,8 +1501,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             
                                 z := [0,0];
                                 
-                                z[1] := Position(ProductList[1],ProductList[1][i]^g);
-                                z[2] := ProductList[5][Position(ProductList[2],ProductList[1][m]^g)];
+                                z[1] := Position(ProductList[1],ProductList[1][i]^(Inverse(g)));
+                                z[2] := ProductList[5][Position(ProductList[2],ProductList[1][m]^(Inverse(g)))];
                                 
                                 sign := 1;
                         
@@ -1554,7 +1554,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                 for j in [1..dim] do
                                     if sum[j] <> 0 then 
                                     
-                                        k := ProductList[5][Position(ProductList[2],ProductList[1][j]^g)];
+                                        k := ProductList[5][Position(ProductList[2],ProductList[1][j]^(Inverse(g)))];
                                         
                                         if k < 0 then 
                                         
@@ -1647,8 +1647,8 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
                                
                                 z := [0,0];
                                
-                                z[1] := ProductList[5][Position(ProductList[2],ProductList[1][j]^g)];
-                                z[2] := ProductList[5][Position(ProductList[2],ProductList[1][l]^g)];
+                                z[1] := ProductList[5][Position(ProductList[2],ProductList[1][j]^(Inverse(g)))];
+                                z[2] := ProductList[5][Position(ProductList[2],ProductList[1][l]^(Inverse(g)))];
                                
                                 sign := 1;
                         
@@ -1686,7 +1686,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
                         for i in [1..dim] do
                             if sum[i] <> 0 then 
                             
-                                k := ProductList[5][Position(ProductList[2],ProductList[1][i]^g)];
+                                k := ProductList[5][Position(ProductList[2],ProductList[1][i]^(Inverse(g)))];
                                 
                                 if k < 0 then 
                                 
