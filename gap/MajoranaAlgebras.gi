@@ -1584,7 +1584,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                  
                                 Add(mat,row);
                                 Add(vec,z);
-                                Add(record,[alpha,beta,gamma]);
+                                Add(record,[i,ev_a,ev_b,alpha,beta,gamma]);
                             fi;  
                         fi;
                     fi;
@@ -3451,7 +3451,7 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                        Add(record, [j,2,1,x[3]]);
+                        Append(record, x[3]);
                     fi;
                     
                     x := MAJORANA_Resurrection(j,3,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
@@ -3459,7 +3459,7 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                        Add(record, [j,3,1,x[3]]);
+                        Append(record, x[3]);
                     fi; 
                     
                     x := MAJORANA_Resurrection(j,1,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
@@ -3467,7 +3467,7 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                        Add(record, [j,1,2,x[3]]);
+                        Append(record, x[3]);
                     fi;                   
                     
                     x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives);
@@ -3475,7 +3475,7 @@ function(G,T)
                     if x[1] <> [] then 
                         Append(mat, x[1]);
                         Append(vec, x[2]);
-                        Add(record, [j,3,2,x[3]]);
+                        Append(record, x[3]);
                     fi; 
                 od;
                 
