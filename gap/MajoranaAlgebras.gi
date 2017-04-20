@@ -680,7 +680,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
         for j in [1..t] do
 
-            a:=NullMat(1,Size(AlgebraProducts))[1];
+            a:=[1..Size(AlgebraProducts[1])]*0;
             a[j]:=1;
 
             errorortho01:=[];
