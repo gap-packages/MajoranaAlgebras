@@ -1607,6 +1607,39 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     return([mat,vec,record]);
         
 end );
+
+InstallGlobalFunction(MAJORANA_FullResurrection,
+
+    function(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp)
+    
+    local mat, vec, record, j, k, l, x, t;
+    
+    t := Size(EigenVectors);
+    
+    mat := [];
+    vec := [];
+    record := [];
+    
+    for j in [1..t] do 
+    
+        for k in [1..3] do
+        
+            for l in [1..2] do 
+            
+                x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
+                
+                if x[1] <> [] then 
+                    Append(mat, x[1]);
+                    Append(vec, x[2]);
+                    Add(record, [j,1,1,x[3]]);
+                fi;
+            od;
+        od;
+    od;
+    
+    return([mat,vec,record]);
+    
+    end);
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
@@ -3442,61 +3475,11 @@ function(G,T)
                 
                 UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts);
                         
-                mat := [];
-                vec := [];
-                record := [];
+                x := MAJORANA_FullResurrection(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
                 
-                for j in [1..t] do 
-                        
-                    x := MAJORANA_Resurrection(j,1,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                    
-                    if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
-                        Add(record, [j,1,1,x[3]]);
-                    fi;
-                    
-                    x := MAJORANA_Resurrection(j,2,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                    
-                    if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
-                        Append(record, x[3]);
-                    fi;
-                    
-                    x := MAJORANA_Resurrection(j,3,1,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                    
-                    if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
-                        Append(record, x[3]);
-                    fi; 
-                    
-                    x := MAJORANA_Resurrection(j,1,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                    
-                    if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
-                        Append(record, x[3]);
-                    fi;                   
-                    
-                    x := MAJORANA_Resurrection(j,2,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                    
-                    if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
-                        Append(record, x[3]);
-                    fi; 
-                    
-                    x := MAJORANA_Resurrection(j,3,2,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                    
-                    if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
-                        Append(record, x[3]);
-                    fi;
-                    
-                od;
+                mat := x[1];
+                vec := x[2];
+                record := x[3];
                 
                 if LI = 0 then 
                             
