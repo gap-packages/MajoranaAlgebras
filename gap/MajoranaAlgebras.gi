@@ -3431,7 +3431,7 @@ function(G,T)
                     for j in [1..n] do
                         for k in [1..SizeOrbitals] do
                             if AlgebraProducts[k] <> false then
-                                AlgebraProducts[k]:=AlgebraProducts[k] - NullSp[j]*AlgebraProducts[k][dim-j+1];
+                                AlgebraProducts[k]:= MAJORANA_RemoveNullSpace(AlgebraProducts[k], NullSp);
                             fi;
                         od;
                     od;
@@ -3441,7 +3441,7 @@ function(G,T)
                     for j in [1..t] do
                         for k in [1..3] do
                             for l in [1..Size(EigenVectors[j][k])] do
-                                MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                                EigenVectors[j][k][l] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
                             od;
                         od;
                     od;
@@ -3487,7 +3487,7 @@ function(G,T)
 
 
                 # Use eigenvectors to find more products
-                            
+                
                 for j in [1..t] do
                 
                     a := [1..dim]*0; a[j]:=1;
