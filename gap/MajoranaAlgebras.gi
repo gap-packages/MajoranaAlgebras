@@ -554,7 +554,6 @@ InstallGlobalFunction(MAJORANA_Fusion,
                         if y <> false then
                             if ForAny(y, z-> z <> 0) then
                                 Add(errorfusion00,[j,k,l]);
-                                Error("0,0 fusion");
                             fi;
                         fi;
                     fi;
@@ -799,11 +798,13 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
 
 function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim)
 
-    local mat, vec, record, sum, i, j, k, l, m, p;
+    local mat, vec, record, sum, i, j, k, l, m, p, OrthogonalityError;
 
     mat := [];
     vec := [];
     record := [];
+
+    OrthogonalityError := [];
 
     if a = 0 then
 
@@ -831,8 +832,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
 
             if ForAll(mat[Size(mat)], x -> x = 0) then
                 if vec[Size(vec)] <> [0] then
-
-                    Error("Orthogonality error");
+                    Add(OrthogonalityError,i);
                 else
 					Remove(vec);
 					Remove(mat);
@@ -873,8 +873,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
 
                 if ForAll(mat[Size(mat)], x -> x = 0) then
                     if vec[Size(vec)] <> [0] then
-
-                        Error("Orthogonality error");
+                        Add(OrthogonalityError,[i,j]);
 					else
 						Remove(vec);
 						Remove(mat);
@@ -885,9 +884,13 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
         od;
 
     fi;
-
-    return [mat,vec];
-
+    
+    if Size(OrthogonalityError) > 0 then 
+        return [false, OrthogonalityError];
+    else
+        return [true,[mat,vec]];
+    fi;
+    
     end
 
     );
@@ -3193,45 +3196,144 @@ function(G,T)
                             # 1- eigenvectors and 0-eigenvectors
 
                             x := MAJORANA_Orthogonality(0,1,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
-
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            if x[1] then 
+                                Append(mat,x[2][1]);
+                                Append(vec,x[2][2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Orthogonality of 1,0 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
+                                break;
+                            fi;
 
                             # 1- eigenvectors and 1/4-eigenvectors
 
                             x := MAJORANA_Orthogonality(0,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            if x[1] then 
+                                Append(mat,x[2][1]);
+                                Append(vec,x[2][2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Orthogonality of 1,1/4 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
+                                break;
+                            fi;
 
                             # 1- eigenvectors and 1/32-eigenvectors
 
                             x := MAJORANA_Orthogonality(0,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            if x[1] then 
+                                Append(mat,x[2][1]);
+                                Append(vec,x[2][2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Orthogonality of 1,1/32 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
+                                break;
+                            fi;
 
                             # 0-eigenvectors and 1/4-eigenvectors
 
                             x := MAJORANA_Orthogonality(1,2,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            if x[1] then 
+                                Append(mat,x[2][1]);
+                                Append(vec,x[2][2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Orthogonality of 0,1/4 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
+                                break;
+                            fi;
 
                             # 0-eigenvectors and 1/32-eigenvectors
 
                             x := MAJORANA_Orthogonality(1,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            if x[1] then 
+                                Append(mat,x[2][1]);
+                                Append(vec,x[2][2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Orthogonality of 0,1/32 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
+                                break;
+                            fi;;
 
                             # 1/4-eigenvectors and 1/32-eigenvectors
 
                             x := MAJORANA_Orthogonality(2,3,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim);
 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            if x[1] then 
+                                Append(mat,x[2][1]);
+                                Append(vec,x[2][2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Orthogonality of 1/4,1/32 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
+                                break;
+                            fi;
                         od;
+                        
+                        if Size(Output[i]) > 0 then 
+                            break;
+                        fi;
 
                         Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
@@ -3369,14 +3471,18 @@ function(G,T)
 
                 if ForAny(ErrorFusion, x->Size(x) > 0) then
                 
-                    Output[i] := [ StructuralCopy(Shape)
+                    Output[i] := StructuralCopy([ Shape
                                  , "Error"
                                  , "Algebra does not obey fusion rules step 7"
-                                 , StructuralCopy(GramMatrix)
-                                 , StructuralCopy(AlgebraProducts)
-                                 , StructuralCopy(EigenVectors)
-                                 , StructuralCopy(ErrorFusion)];
-                    Error("fusion");
+                                 , ErrorFusion
+                                 , 
+                                 , Orbitals,
+                                 , GramMatrix
+                                 , AlgebraProducts
+                                 , EigenVectors
+                                 , NullSp
+                                 , ProductList
+                                 , pairrepresentatives]);
                     break;
                 fi;
 
