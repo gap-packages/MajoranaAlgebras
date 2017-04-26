@@ -3441,9 +3441,7 @@ function(G,T)
                     for j in [1..t] do
                         for k in [1..3] do
                             for l in [1..Size(EigenVectors[j][k])] do
-                                for m in [1..n] do
-                                    EigenVectors[j][k][l]:=EigenVectors[j][k][l] - NullSp[m]*EigenVectors[j][k][l][dim - m + 1];
-                                od;
+                                MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
                             od;
                         od;
                     od;
