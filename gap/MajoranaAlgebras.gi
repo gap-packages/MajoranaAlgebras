@@ -1,3 +1,4 @@
+
 #
 # MajoranaAlgebras: A package for constructing Majorana algebras and representations.
 #
@@ -31,10 +32,12 @@ BindGlobal("MAJORANA_FusionTable",
 
 InstallGlobalFunction( MAJORANA_TestFusion,
 function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList, dim)
-    local u, zeros, x, y, z, k, l, NewEigenVectors, ev_a, ev_b, ev, table;
+    local u, zeros, x, y, z, k, l, NewEigenVectors, ev_a, ev_b, ev, table, FusionError;
 
     table := [0, 1/4, 1/32];
     ev := MAJORANA_FusionTable[a+1][b+1];
+    
+    FusionError := [];
 
     zeros := [1..dim] * 0;
     u := ShallowCopy(zeros);
@@ -58,16 +61,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
 
                         if MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList) <> false and
                            MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList ) <> zeros then
-                            return [false, StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of ",
-                                                        table[a], ",", table[b],
-                                                        " eigenvectors does not hold" )
-                                           , j
-                                           , ev_a[k]
-                                           , ev_b[l]
-                                           , AlgebraProducts
-                                           , GramMatrix ])];
+                            Add(FusionError,[k,l]);
                         else
                             Add(NewEigenVectors, z);
                         fi;
@@ -95,16 +89,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                         
                             if MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList) <> false and
                                MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList ) <> z/4 then
-                                return [false, StructuralCopy([ Shape
-                                               , "Error"
-                                               , STRINGIFY( "Fusion of ",
-                                                            table[a], ",", table[b],
-                                                            " eigenvectors does not hold" )
-                                               , j
-                                               , ev_a[k]
-                                               , ev_b[l]
-                                               , AlgebraProducts
-                                               , GramMatrix ])];
+                                Add(FusionError,[k,l]);
                             else
                                 Add(NewEigenVectors, z);
                             fi;
@@ -126,17 +111,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                     y := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
 
                     if y <> false and y <> ev * x then
-
-                        return [false, StructuralCopy([ Shape
-                                       , "Error"
-                                       , STRINGIFY( "Fusion of ",
-                                                    table[a], ",", table[b],
-                                                    " eigenvectors does not hold" )
-                                       , j
-                                       , ev_a[k]
-                                       , ev_b[l]
-                                       , AlgebraProducts
-                                       , ProductList ])];
+                        Add(FusionError,[k,l]);
                     else
                         Add(NewEigenVectors, x);
                     fi;
@@ -145,7 +120,11 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
         od;
     fi;
 
-    return [true, NewEigenVectors];
+    if Size(FusionError) > 0 then
+        return [false, FusionError];
+    else
+        return [true, NewEigenVectors];
+    fi;
 end);
 
 InstallGlobalFunction(MAJORANA_NullSpace,
@@ -3036,7 +3015,18 @@ function(G,T)
                         if x[1] then
                             Append(NewEigenVectors[j][1], x[2]);
                         else
-                            Output[i] := x[2];
+                            Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of 0,0 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
                             break;
                         fi;
 
@@ -3045,7 +3035,18 @@ function(G,T)
                         if x[1] then
                             Append(NewEigenVectors[j][2], x[2]);
                         else
-                            Output[i] := x[2];
+                            Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of 0,1/4 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
                             break;
                         fi;
 
@@ -3054,8 +3055,18 @@ function(G,T)
                         if x[1] then
                             Append(NewEigenVectors[j][3], x[2]);
                         else
-                            Output[i] := x[2];
-                            Error("0, 1/32 fusion");
+                            Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of 0,1/32 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
                             break;
                         fi;
 
@@ -3064,7 +3075,18 @@ function(G,T)
                         if x[1] then
                             Append(NewEigenVectors[j][3], x[2]);
                         else
-                            Output[i] := x[2];
+                            Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of 1/4,1/32 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
                             break;
                         fi;
 
@@ -3073,7 +3095,18 @@ function(G,T)
                         if x[1] then
                             Append(NewEigenVectors[j][1], x[2]);
                         else
-                            Output[i] := x[2];
+                            Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of 1/4,1/4 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
                             break;
                         fi;
                         
@@ -3082,7 +3115,18 @@ function(G,T)
                         if x[1] then
                             Append(NewEigenVectors[j][2], x[2]);
                         else
-                            Output[i] := x[2];
+                            Output[i] := StructuralCopy([ Shape
+                                           , "Error"
+                                           , STRINGIFY( "Fusion of 1/32,1/32 eigenvectors does not hold" )
+                                           , j
+                                           , x[2]
+                                           , Orbitals
+                                           , GramMatrix
+                                           , AlgebraProducts
+                                           , EigenVectors
+                                           , NullSp
+                                           , ProductList
+                                           , pairrepresentatives ]);
                             break;
                         fi;
 
