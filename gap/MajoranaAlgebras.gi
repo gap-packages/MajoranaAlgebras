@@ -2438,6 +2438,11 @@ function(G,T)
                         x3 := Position(T, T[x1]*T[x0]*T[x1]*T[x0]*T[x1]);
                         x2A := Position(T, (T[x0]*T[x1])^3);
                         x3A := positionlist[t + Position(long3Aaxes,(T[x0]*T[x1])^2)];
+                        
+                        # put in products of 2A and 3A axes
+                        
+                        AlgebraProducts[pairorbitlist[x2A][x3A]] := [1..dim]*0;
+                        GramMatrix[pairorbitlist[x2A][x3A]] := 0;
 
                         EigenVector:=NullMat(1,dim)[1];
 
