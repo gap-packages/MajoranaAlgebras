@@ -1013,14 +1013,15 @@ InstallGlobalFunction(MAJORANA_RemoveNullSpace,
 
 function(v,NullSp) 
 
-    local i, dim;
+    local i, j, dim;
     
     dim := Size(v);
 
     if Size(NullSp) > 0 then 
         for i in [1..Size(NullSp)] do
-            if v[dim - i + 1] <> 0 then 
-                v := v - v[dim - i + 1]*NullSp[i];
+            j := Position(Reversed(NullSp[i]),1);
+            if v[dim - j + 1] <> 0 then 
+                v := v - v[dim - j + 1]*NullSp[i];
             fi;
         od;
     fi;
@@ -3476,7 +3477,7 @@ function(G,T)
                                  , "Algebra does not obey fusion rules step 7"
                                  , ErrorFusion
                                  , 
-                                 , Orbitals,
+                                 , Orbitals
                                  , GramMatrix
                                  , AlgebraProducts
                                  , EigenVectors
