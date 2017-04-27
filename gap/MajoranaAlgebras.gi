@@ -1345,6 +1345,89 @@ function( mat )
     
     end );
     
+InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
+
+    function(u,v,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives)
+    
+    local   row,        # record values of unknowns
+            sum,        # record values of knowns
+            bad,        # record the indices which are unknown
+            i,          # index for dim of u
+            j,          # index for dim of v
+            l,          # orbit of [i,j]
+            x,          # vector with 1 in the ith position
+            y,          # vector with 1 in the jth position
+            pos,        # position of unknown product 
+            pos_i,      # position of image of basis vec i under g^-1
+            pos_j,      # position of image of basis vec j under g^-1
+            sign,       # corrects sign in the case of 5A axes
+            dim;        # dimension
+    
+    row := [1..Size(UnknownAlgebraProducts)]*0;
+    sum := [];
+    bad := [];
+    
+    dim := Size(AlgebraProducts[1]);
+    
+    for i in [1..dim] do
+        for j in [1..dim] do
+        
+            l := ProductList[3][i][j];
+            
+            if not l in UnknownAlgebraProducts then 
+                
+                x := [1..dim]*0; x[i] := 1;
+                y := [1..dim]*0; y[j] := 1;
+                
+                sum := sum - u[i]*v[j]*MAJORANA_AlgebraProduct(x,y,AlgebraProducts,ProductList);
+                
+            elif g = 0 then 
+            
+                g := ProductList[4][i][j]; 
+                
+                pos := Position(UnknownAlgebraProducts,l);
+                
+                row[pos] := row[pos] + u[i]*v[j]; 
+                
+                Add(bad,[i,j]);
+                
+            else
+            
+                y := [0,0];
+                                    
+                pos_i := Position(ProductList[2],ProductList[1][i]^(Inverse(g)));
+                pos_j := Position(ProductList[2],ProductList[1][j]^(Inverse(g)));
+                                    
+                y[1] := ProductList[5][pos_i];
+                y[2] := ProductList[5][pos_j];
+                
+                sign := 1;
+                
+                if y[1]*y[2] < 0 then 
+                    sign := -1; 
+                fi;
+                
+                y[1] := AbsInt(y[1]);
+                y[2] := AbsInt(y[2]);
+                
+                if pairrepresentatives[l] = y or pairrepresentatives[l] = [y[2],y[1]] then 
+                    
+                    pos := Position(UnknownAlgebraProducts,l);
+                    
+                    row[pos] := row[pos] + sign*u[i]*v[j];
+                
+                else
+                    return [false];
+                fi;
+            fi;
+        od;
+    od;
+       
+    return [true,row,sum,bad];
+    
+    end);
+
+    
 InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp)
