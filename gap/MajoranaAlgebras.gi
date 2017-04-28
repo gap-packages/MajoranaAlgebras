@@ -3019,126 +3019,34 @@ function(G,T)
                     for j in [1..t] do
                         # 1, x fusion is a waste of time because a_0 obviously just preserves the evectors!
                         Output[i] := [];
-
-                        # 0,0 fusion
-                        x := MAJORANA_TestFusion(1,1,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if x[1] then
-                            Append(NewEigenVectors[j][1], x[2]);
-                        else
-                            Output[i] := StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of 0,0 eigenvectors does not hold" )
-                                           , j
-                                           , x[2]
-                                           , Orbitals
-                                           , GramMatrix
-                                           , AlgebraProducts
-                                           , EigenVectors
-                                           , NullSp
-                                           , ProductList
-                                           , pairrepresentatives ]);
-                            break;
-                        fi;
-
-                        # 0,1/4 fusion
-                        x := MAJORANA_TestFusion(1,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if x[1] then
-                            Append(NewEigenVectors[j][2], x[2]);
-                        else
-                            Output[i] := StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of 0,1/4 eigenvectors does not hold" )
-                                           , j
-                                           , x[2]
-                                           , Orbitals
-                                           , GramMatrix
-                                           , AlgebraProducts
-                                           , EigenVectors
-                                           , NullSp
-                                           , ProductList
-                                           , pairrepresentatives ]);
-                            break;
-                        fi;
-
-                        # 0,1/32 fusion
-                        x := MAJORANA_TestFusion(1,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if x[1] then
-                            Append(NewEigenVectors[j][3], x[2]);
-                        else
-                            Output[i] := StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of 0,1/32 eigenvectors does not hold" )
-                                           , j
-                                           , x[2]
-                                           , Orbitals
-                                           , GramMatrix
-                                           , AlgebraProducts
-                                           , EigenVectors
-                                           , NullSp
-                                           , ProductList
-                                           , pairrepresentatives ]);
-                            break;
-                        fi;
-
-                        # 1/4,1/32 fusion
-                        x := MAJORANA_TestFusion(2,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if x[1] then
-                            Append(NewEigenVectors[j][3], x[2]);
-                        else
-                            Output[i] := StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of 1/4,1/32 eigenvectors does not hold" )
-                                           , j
-                                           , x[2]
-                                           , Orbitals
-                                           , GramMatrix
-                                           , AlgebraProducts
-                                           , EigenVectors
-                                           , NullSp
-                                           , ProductList
-                                           , pairrepresentatives ]);
-                            break;
-                        fi;
-
-                        # 1/4,1/4 Fusion
-                        x := MAJORANA_TestFusion(2,2,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if x[1] then
-                            Append(NewEigenVectors[j][1], x[2]);
-                        else
-                            Output[i] := StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of 1/4,1/4 eigenvectors does not hold" )
-                                           , j
-                                           , x[2]
-                                           , Orbitals
-                                           , GramMatrix
-                                           , AlgebraProducts
-                                           , EigenVectors
-                                           , NullSp
-                                           , ProductList
-                                           , pairrepresentatives ]);
-                            break;
-                        fi;
                         
-                        # 1/32,1/32 Fusion
-                        x := MAJORANA_TestFusion(3,3,j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                        if x[1] then
-                            Append(NewEigenVectors[j][2], x[2]);
-                        else
-                            Output[i] := StructuralCopy([ Shape
-                                           , "Error"
-                                           , STRINGIFY( "Fusion of 1/32,1/32 eigenvectors does not hold" )
-                                           , j
-                                           , x[2]
-                                           , Orbitals
-                                           , GramMatrix
-                                           , AlgebraProducts
-                                           , EigenVectors
-                                           , NullSp
-                                           , ProductList
-                                           , pairrepresentatives ]);
-                            break;
-                        fi;
+                        table := [0,1/4,1/32
+                        
+                        for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
+                        
+                            ev_a := table[k[1]];
+                            ev_b := table[k[2]];
+
+                            x := MAJORANA_TestFusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                            
+                            if x[1] then
+                                Append(NewEigenVectors[j][1], x[2]);
+                            else
+                                Output[i] := StructuralCopy([ Shape
+                                               , "Error"
+                                               , STRINGIFY( "Fusion of", ev_a, ",", ev_b, "eigenvectors does not hold" )
+                                               , j
+                                               , x[2]
+                                               , Orbitals
+                                               , GramMatrix
+                                               , AlgebraProducts
+                                               , EigenVectors
+                                               , NullSp
+                                               , ProductList
+                                               , pairrepresentatives ]);
+                                break;
+                            fi;
+                        od;
 
                         Append(EigenVectors[j][1],NewEigenVectors[j][1]);
                         Append(EigenVectors[j][2],NewEigenVectors[j][2]);
