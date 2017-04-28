@@ -1461,7 +1461,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 
                 g := 0;
                 
-                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_FusionTable[ev_a][ev_b]*beta,gamma,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_FusionTable[ev_a + 1][ev_b + 1]*beta,gamma,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
                 
                 if x[1] then 
                 
