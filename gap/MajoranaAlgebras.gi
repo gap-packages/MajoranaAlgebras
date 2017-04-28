@@ -26,7 +26,7 @@ BindGlobal("MAJORANA_FusionTable",
            [ [    1,    0,   1/4, 1/32]
             ,[    0,    0,   1/4, 1/32]
             ,[  1/4,  1/4,     0, 1/32]
-            ,[ 1/32, 1/32,  1/32, []] ]);
+            ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
 
 # This is the test function for fusion
 
@@ -124,7 +124,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
     if Size(FusionError) > 0 then
         return [false, FusionError];
     else
-        return [true, NewEigenVectors];
+        return [true, NewEigenVectors, Position(table,ev)];
     fi;
 end);
 
@@ -2958,10 +2958,12 @@ function(G,T)
                 NullSpT:=MAJORANA_NullSpace(GramMatrixT);
                 LI:=0;
             fi;
+            
+            if [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ] in EigenVectors[15][1] then 
+                Display("Line 2963");
+            fi;
 
                                         ## STEP 4: MORE PRODUCTS ##
-     
-            maindimensions := [];
             
             maindimensions:=[];
 
@@ -3031,11 +3033,11 @@ function(G,T)
                             x := MAJORANA_TestFusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
                             
                             if x[1] then
-                                Append(NewEigenVectors[j][1], x[2]);
+                                Append(NewEigenVectors[j][x[3]], x[2]);
                             else
                                 Output[i] := StructuralCopy([ Shape
                                                , "Error"
-                                               , STRINGIFY( "Fusion of", ev_a, ",", ev_b, "eigenvectors does not hold" )
+                                               , STRINGIFY( "Fusion of ", ev_a, ",", ev_b, "eigenvectors does not hold" )
                                                , j
                                                , x[2]
                                                , Orbitals
@@ -3069,6 +3071,7 @@ function(G,T)
                         Append(NewDimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
                     od;
 
+
                     if NewDimensions = Dimensions then
                         switch := 1;
                     elif ForAll(NewDimensions,x->x=dim-1) then
@@ -3078,7 +3081,7 @@ function(G,T)
                     fi;
 
                 od;
-
+                
                 if Output[i] <> [] then
                     break;
                 fi;
