@@ -32,6 +32,7 @@ BindGlobal("MAJORANA_FusionTable",
 
 InstallGlobalFunction( MAJORANA_TestFusion,
 function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList, dim)
+
     local u, zeros, x, y, z, k, l, NewEigenVectors, ev_a, ev_b, ev, table, FusionError;
 
     table := [0, 1/4, 1/32];
@@ -1460,7 +1461,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 
                 g := 0;
                 
-                x := MAJORANA_SeparateAlgebraProduct(beta,gamma,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_FusionTable[ev_a][ev_b]*beta,gamma,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
                 
                 if x[1] then 
                 
@@ -1793,7 +1794,7 @@ function(G,T)
             h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a,
 
             # Step 5 - More evecs
-            switch, Dimensions, NewDimensions, NewEigenVectors,
+            switch, Dimensions, NewDimensions, NewEigenVectors, table, ev_a, ev_b,
 
             # Step 6 - More inner products
             UnknownInnerProducts, mat, vec, sum, row, Solution, record,
@@ -3020,7 +3021,7 @@ function(G,T)
                         # 1, x fusion is a waste of time because a_0 obviously just preserves the evectors!
                         Output[i] := [];
                         
-                        table := [0,1/4,1/32
+                        table := [0,1/4,1/32];
                         
                         for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
                         
