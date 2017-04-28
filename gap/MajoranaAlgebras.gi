@@ -1528,19 +1528,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                     sum := sum + u*x/4;
                                 else
                                     row := [];
-                                fi;
-                                
-                                if ev_a = 2 then
-                                    
-                                    y := MAJORANA_InnerProduct(beta,gamma,GramMatrix,ProductList[3]);
-                                    
-                                    if y <> false then
-                                        sum := sum - u*x/4;
-                                    else
-                                        row := [];
-                                    fi;
-                                fi;
-                            
+                                fi;                            
                             fi;
                         
                             if row <> [] then
@@ -1616,12 +1604,15 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
         
             for l in [1..2] do 
             
-                x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
-                
-                if x[1] <> [] then 
-                    Append(mat, x[1]);
-                    Append(vec, x[2]);
-                    Append(record, x[3]);
+                if [k,l] <> [2,2] then 
+            
+                    x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
+                    
+                    if x[1] <> [] then 
+                        Append(mat, x[1]);
+                        Append(vec, x[2]);
+                        Append(record, x[3]);
+                    fi;
                 fi;
             od;
         od;
