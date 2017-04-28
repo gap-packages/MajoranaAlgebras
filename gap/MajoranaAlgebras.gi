@@ -3462,7 +3462,7 @@ function(G,T)
 
                                             x:=UnknownAlgebraProducts[k]; 
 
-                                            AlgebraProducts[x]:=Solution[1][k];
+                                            AlgebraProducts[x]:=MAJORANA_RemoveNullSpace(Solution[1][k],NullSp);
                                         fi;
                                     od;
                             else
@@ -3560,7 +3560,7 @@ function(G,T)
                         for k in [1..Size(UnknownAlgebraProducts)] do
                             if not k in Solution[2] then 
                                 x:=UnknownAlgebraProducts[k]; 
-                                AlgebraProducts[x]:=Solution[1][k];
+                                AlgebraProducts[x]:=MAJORANA_RemoveNullSpace(Solution[1][k],NullSp);
                             fi;
                         od;
                     else
