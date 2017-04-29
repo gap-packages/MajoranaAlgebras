@@ -22,7 +22,7 @@ function(AlgebraProducts)
 end);
 
 
-BindGlobal("MAJORANA_FusionTable",
+BindGlobal("MAJORANA_TestFusionTable",
            [ [    1,    0,   1/4, 1/32]
             ,[    0,    0,   1/4, 1/32]
             ,[  1/4,  1/4,     0, 1/32]
@@ -30,13 +30,13 @@ BindGlobal("MAJORANA_FusionTable",
 
 # This is the test function for fusion
 
-InstallGlobalFunction( MAJORANA_TestFusion,
+InstallGlobalFunction( MAJORANA_Fusion,
 function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList, dim)
 
     local u, zeros, x, y, z, k, l, NewEigenVectors, ev_a, ev_b, ev, table, FusionError;
 
     table := [0, 1/4, 1/32];
-    ev := MAJORANA_FusionTable[a+1][b+1];
+    ev := MAJORANA_TestFusionTable[a+1][b+1];
     
     FusionError := [];
 
@@ -524,7 +524,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
         );
 
-InstallGlobalFunction(MAJORANA_Fusion,
+InstallGlobalFunction(MAJORANA_TestFusion,
 
         function(T,GramMatrix,AlgebraProducts,EigenVectors,ProductList) # Checks if algebra obeys the fusion rules, outputs list of six lists which are empty if it does obey fusion rules
 		
@@ -1130,7 +1130,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
     end );
     
-InstallGlobalFunction(MAJORANA_UnknownOrbital,
+InstallGlobalFunction(MAJORANA_FullUnknownsAxiomM1,
 
 function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
 
@@ -1461,7 +1461,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 
                 g := 0;
                 
-                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_FusionTable[ev_a + 1][ev_b + 1]*beta,gamma,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_TestFusionTable[ev_a + 1][ev_b + 1]*beta,gamma,g,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
                 
                 if x[1] then 
                 
@@ -2751,7 +2751,7 @@ function(G,T)
 
                     else
  
-                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                     fi;
 
@@ -2781,7 +2781,7 @@ function(G,T)
                         GramMatrix[j]:=3/8;
 
                     else
-                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 # (2,5) values
@@ -2811,7 +2811,7 @@ function(G,T)
                         GramMatrix[j]:=0;
                     else
 
-                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                     fi;
 
@@ -2832,20 +2832,20 @@ function(G,T)
 
                     else
 
-                        GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 # (3,4) values
 
                 elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 4 then
                 
-                    GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                    GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                 # (3,5) values
 
                 elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 5 then
 
-                    GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                    GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     
                 # (4,4) values
 
@@ -2861,7 +2861,7 @@ function(G,T)
 
                 else
                 
-                    GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                    GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                 
                 fi;
 
@@ -2870,7 +2870,7 @@ function(G,T)
 
                 elif Order(coordinates[x]) = 4 and Order(coordinates[y]) = 5 then
                 
-                GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
 
                 # (5,5) values
 
@@ -2907,7 +2907,7 @@ function(G,T)
 
                     else
                     
-						GramMatrix[j] := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+						GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 fi;
@@ -2921,7 +2921,7 @@ function(G,T)
             
                 for j in [1..SizeOrbitals] do
                     if GramMatrix[j] = false then 
-                        x := MAJORANA_UnknownOrbital(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        x := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                         
                         if x <> false then 
                             count := count + 1;
@@ -3021,7 +3021,7 @@ function(G,T)
                             ev_a := table[k[1]];
                             ev_b := table[k[2]];
 
-                            x := MAJORANA_TestFusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
+                            x := MAJORANA_Fusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
                             
                             if x[1] then
                                 Append(NewEigenVectors[j][x[3]], x[2]);
@@ -3375,7 +3375,7 @@ function(G,T)
                     break;
                 fi;
 
-                ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts, EigenVectors,ProductList);
+                ErrorFusion:=MAJORANA_TestFusion(T, GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
                 if ForAny(ErrorFusion, x->Size(x) > 0) then
                 
@@ -3504,7 +3504,7 @@ function(G,T)
                                  , StructuralCopy(ErrorM1)];
                 fi;
 
-                ErrorFusion:=MAJORANA_Fusion(T, GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+                ErrorFusion:=MAJORANA_TestFusion(T, GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
                 if ForAny(ErrorFusion, x->Size(x) > 0) then
                     Output[i] := [ StructuralCopy(Shape)
@@ -3689,7 +3689,7 @@ function(G,T)
 
             # Check that eigenvectors obey the fusion rules
 
-            ErrorFusion:=MAJORANA_Fusion(T,GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+            ErrorFusion:=MAJORANA_TestFusion(T,GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if ForAny(ErrorFusion,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];

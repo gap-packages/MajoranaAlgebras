@@ -42,7 +42,7 @@ DeclareGlobalFunction( "MAJORANA_RemoveNullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
-DeclareGlobalFunction( "MAJORANA_UnknownOrbital" );
+DeclareGlobalFunction( "MAJORANA_FullUnknownsAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
 
