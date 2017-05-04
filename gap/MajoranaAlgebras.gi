@@ -1609,8 +1609,6 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     return([mat,vec,record]);
     
     end );
-    
-
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -1626,7 +1624,7 @@ function(G,T)
             i, j, k, l, m, n, x, y, z, b,
 
             # Step 0 - Set Up
-            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT, orbits, SizeOrbits, OrbitsT, SizeOrbitsT,
+            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT, orbits, OrbitsT, 
 
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
@@ -1648,10 +1646,7 @@ function(G,T)
             UnknownInnerProducts, mat, vec, sum, row, Solution, record,
 
             
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts; 
-
-            
-            
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts;     
             
  
 
@@ -1873,20 +1868,16 @@ function(G,T)
 
             orbits:=Orbits(G,coordinates);
 
-            SizeOrbits:=Size(orbits);
-
             OrbitsT:=Filtered(orbits,x->Order(Representative(x)) = 2);
-
-            SizeOrbitsT := Size(OrbitsT);
 
             representatives:=[];
 
-            for j in [1..SizeOrbitsT] do
+            for j in [1..Size(OrbitsT)] do
                 x := Representative(OrbitsT[j]);
                 Add(representatives,Position(coordinates,x));
             od;
 
-            for j in [1..SizeOrbits] do
+            for j in [1..Size(Orbits)] do
                 x := Representative(orbits[j]);
                 if Order(x) <> 2 then
                     Add(representatives,Position(coordinates,x));
@@ -1898,11 +1889,11 @@ function(G,T)
 
             for j in [1..dim] do
                 k:=1;
-                while k < SizeOrbits + 1 do
+                while k < Size(Orbits) + 1 do
                     if coordinates[j] in orbits[k] then
                         Add(orbitlist,k);
                         Add(conjelements,RepresentativeAction(G,representatives[k],coordinates[j]));
-                        k := SizeOrbits + 1;
+                        k := Size(Orbits) + 1;
                     else
                         k := k + 1;
                     fi;
