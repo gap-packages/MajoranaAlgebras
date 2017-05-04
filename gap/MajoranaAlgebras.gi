@@ -1619,8 +1619,6 @@ function(G,T)
     local   # Seress
             coordinates, representatives, conjelements, orbitlist, pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist, ProductList,
 
-            long3Aaxes, long4Aaxes, long5Aaxes,
-
             # error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
 
@@ -1831,6 +1829,12 @@ function(G,T)
             3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
+            
+            longcoordinates:=StructuralCopy(T);
+
+            Append(longcoordinates,StructuralCopy(3Aaxes));
+            Append(longcoordinates,StructuralCopy(4Aaxes));
+            Append(longcoordinates,StructuralCopy(5Aaxes));
 
 			for j in [1..u] do
 				3Aaxes[j] := 3Aaxes[j][1];
@@ -1844,18 +1848,14 @@ function(G,T)
 				5Aaxes[j] := 5Aaxes[j][1];
 			od;
 
-            dim:=t+u+v+w;
-
             coordinates:=[];
 
             Append(coordinates,T);
             Append(coordinates,3Aaxes);
             Append(coordinates,4Aaxes);
             Append(coordinates,5Aaxes);
-
-            long3Aaxes:=[];
-            long4Aaxes:=[];
-            long5Aaxes:=[];
+            
+            dim:=Size(coordinates);
 
             positionlist:=[];
 
@@ -1863,26 +1863,13 @@ function(G,T)
                 Append(positionlist,[j]);
             od;
 
-            for j in [t+1..t+u] do
-                Append(long3Aaxes, [coordinates[j], coordinates[j]^2]);
-                Append(positionlist,[j,j]);
-            od;
-
-            for j in [t+u+1..t+u+v] do
-                Append(long4Aaxes, [coordinates[j], coordinates[j]^3]);
+            for j in [t+1..t+u+v] do
                 Append(positionlist,[j,j]);
             od;
 
             for j in [t+u+v+1..dim] do
-                Append(long5Aaxes, [coordinates[j], coordinates[j]^2, coordinates[j]^3, coordinates[j]^4]);
                 Append(positionlist,[j,-j,-j,j]);
             od;
-
-            longcoordinates:=StructuralCopy(T);
-
-            Append(longcoordinates,long3Aaxes);
-            Append(longcoordinates,long4Aaxes);
-            Append(longcoordinates,long5Aaxes);
 
             orbits:=Orbits(G,coordinates);
 
@@ -1905,7 +1892,6 @@ function(G,T)
                     Add(representatives,Position(coordinates,x));
                 fi;
             od;
-
 
             conjelements:=[];
             orbitlist:=[];
@@ -2106,7 +2092,7 @@ function(G,T)
                     elif Shape[k] = ['3','A'] then
 
                         xm1 := Position(T, T[x0]*T[x1]*T[x0]);
-                        x3 := positionlist[t + Position(long3Aaxes,T[x0]*T[x1])];
+                        x3 := positionlist[Position(longcoordinates,T[x0]*T[x1])];
 
                         EigenVector := [1..dim]*0;;
 
@@ -2156,7 +2142,7 @@ function(G,T)
 
                         xm1 := Position(T, T[x0]*T[x1]*T[x0]);
                         x2 := Position(T, T[x1]*T[x0]*T[x1]);
-                        x4 := positionlist[t + 2*u + Position(long4Aaxes,T[x0]*T[x1])];
+                        x4 := positionlist[Position(longcoordinates,T[x0]*T[x1])];
 
                         EigenVector:=NullMat(1,dim)[1];
 
@@ -2213,7 +2199,7 @@ function(G,T)
                         xm1 := Position(T, T[x0]*T[x1]*T[x0]);
                         x2 := Position(T, T[x1]*T[x0]*T[x1]);
                         xm2 := Position(T, T[x0]*T[x1]*T[x0]*T[x1]*T[x0]);
-                        x5 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,T[x0]*T[x1])];
+                        x5 := positionlist[Position(longcoordinates,T[x0]*T[x1])];
 
                         if x5 < 0 then
                             x5 := -x5;
@@ -2275,7 +2261,7 @@ function(G,T)
                         xm2 := Position(T, T[x0]*T[x1]*T[x0]*T[x1]*T[x0]);
                         x3 := Position(T, T[x1]*T[x0]*T[x1]*T[x0]*T[x1]);
                         x2A := Position(T, (T[x0]*T[x1])^3);
-                        x3A := positionlist[t + Position(long3Aaxes,(T[x0]*T[x1])^2)];
+                        x3A := positionlist[Position(longcoordinates,(T[x0]*T[x1])^2)];
                         
                         # put in products of 2A and 3A axes
                         
@@ -2430,7 +2416,7 @@ function(G,T)
                     elif Shape[j] = ['3','A'] then
 
                         xm1 := Position(T,T[x]*T[y]*T[x]);
-                        x3 := positionlist[t + Position(long3Aaxes,T[x]*T[y])];
+                        x3 := positionlist[Position(longcoordinates,T[x]*T[y])];
 
                         AlgebraProducts[j]:=NullMat(1,dim)[1];
 
@@ -2457,7 +2443,7 @@ function(G,T)
 
                         xm1 := Position(T,T[x]*T[y]*T[x]);
                         x2 := Position(T,T[y]*T[x]*T[y]);
-                        x4 := positionlist[t + 2*u + Position(long4Aaxes,T[x]*T[y])];
+                        x4 := positionlist[Position(longcoordinates,T[x]*T[y])];
 
                         AlgebraProducts[j]:=NullMat(1,dim)[1];
 
@@ -2490,7 +2476,7 @@ function(G,T)
                         xm1 := Position(T,T[x]*T[y]*T[x]);
                         x2 := Position(T,T[y]*T[x]*T[y]);
                         xm2 := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
-                        x5 := positionlist[t + 2*u + 2*v + Position(long5Aaxes,T[x]*T[y])];
+                        x5 := positionlist[Position(longcoordinates,T[x]*T[y])];
 
                         if x5 < 0 then
                             x5 := -x5;
@@ -2517,7 +2503,7 @@ function(G,T)
                         xm2 := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
                         x3 := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
                         x2A := Position(T,(T[x]*T[y])^3);
-                        x3A := positionlist[t + Position(long3Aaxes,(T[x]*T[y])^2)];
+                        x3A := positionlist[Position(longcoordinates,(T[x]*T[y])^2)];
 
                         AlgebraProducts[j]:=NullMat(1,dim)[1];
 
@@ -2560,9 +2546,9 @@ function(G,T)
 
                         # Case (2A,3A) in IPSS10
 
-                        xj := positionlist[t + Position(long3Aaxes,s*h*s)];
-                        xk := positionlist[t + Position(long3Aaxes,h*s*h*h*s*h*h)];
-                        xl := positionlist[t + Position(long3Aaxes,h*h*s*h*s*h)];
+                        xj := positionlist[Position(longcoordinates,s*h*s)];
+                        xk := positionlist[Position(longcoordinates,h*s*h*h*s*h*h)];
+                        xl := positionlist[Position(longcoordinates,h*h*s*h*s*h)];
 
                         AlgebraProducts[j]:=NullMat(1,dim)[1];
 
@@ -2586,9 +2572,9 @@ function(G,T)
                         xjl:=Position(T,s*h*s*h*h*s);
                         xkl:=Position(T,h*s*h*s*h*h*s*h*h);
                         xx:=Position(T,h*h*s*h*s*h*h);
-                        xj := positionlist[t + Position(long3Aaxes,s*h*s)];
-                        xk := positionlist[t + Position(long3Aaxes,h*s*h*h*s*h*h)];
-                        xl := positionlist[t + Position(long3Aaxes,h*h*s*h*s*h)];
+                        xj := positionlist[Position(longcoordinates,s*h*s)];
+                        xk := positionlist[Position(longcoordinates,h*s*h*h*s*h*h)];
+                        xl := positionlist[Position(longcoordinates,h*h*s*h*s*h)];
 
                         AlgebraProducts[j]:=NullMat(1,dim)[1];
 
