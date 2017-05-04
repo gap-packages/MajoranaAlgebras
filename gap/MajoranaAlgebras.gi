@@ -3287,29 +3287,17 @@ function(G,T)
                         vec := [];
                         record := [];
                         
-                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 1, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
+                        for k in [1..3] do 
                         
-                        if x <> 0 then 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
-                            Append(record,x[3]);
-                        fi;
+                            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
+                            
+                            if x <> 0 then 
+                                Append(mat,x[1]);
+                                Append(vec,x[2]);
+                                Append(record,x[3]);
+                            fi;
                         
-                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 2, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
-                        
-                        if x <> 0 then 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
-                            Append(record,x[3]);
-                        fi;
-                        
-                        x := MAJORANA_EigenvectorsAlgebraUnknowns(j, 3, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
-                        
-                        if x <> 0 then 
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
-                            Append(record,x[3]);
-                        fi;
+                        od;
                         
                         # use fact that if v in null space then a \cdot v = 0
                         
