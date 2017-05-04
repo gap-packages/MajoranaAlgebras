@@ -16,6 +16,8 @@ DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpace" );
 
+DeclareGlobalFunction( "MAJORANA_ConjugateVector" );
+
 DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_InnerProduct" );
