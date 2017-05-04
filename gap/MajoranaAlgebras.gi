@@ -1428,7 +1428,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
         fi;
     od;
        
-    return [true,row,sum,bad,g];
+    return [true,row,sum,g];
     
     end);
 
@@ -1468,9 +1468,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                     row := row + x[2];
                     sum := sum + x[3];
                     
-                    Append(bad,x[4]);
-                    
-                    g := x[5];
+                    g := x[4];
                        
                     # find a suitable alpha   
                        
@@ -1517,7 +1515,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             row := row + z[2];
                             sum := sum + z[3];
                             
-                            g := z[5];
+                            g := z[4];
                         
                             if ev_b = 2 then 
                             
@@ -2949,10 +2947,6 @@ function(G,T)
                 NullSpT:=MAJORANA_NullSpace(GramMatrixT);
                 LI:=0;
             fi;
-            
-            if [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ] in EigenVectors[15][1] then 
-                Display("Line 2963");
-            fi;
 
                                         ## STEP 4: MORE PRODUCTS ##
             
@@ -3028,7 +3022,7 @@ function(G,T)
                             else
                                 Output[i] := StructuralCopy([ Shape
                                                , "Error"
-                                               , STRINGIFY( "Fusion of ", ev_a, ",", ev_b, "eigenvectors does not hold" )
+                                               , STRINGIFY( "Fusion of ", ev_a, ",", ev_b, " eigenvectors does not hold" )
                                                , j
                                                , x[2]
                                                , Orbitals
@@ -3557,9 +3551,10 @@ function(G,T)
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                     if Size(Solution)  = 2 then
+                        
                         for k in [1..Size(UnknownAlgebraProducts)] do
                             if not k in Solution[2] then 
-                                x:=UnknownAlgebraProducts[k]; 
+                                x:=UnknownAlgebraProducts[k];                                 
                                 AlgebraProducts[x]:=MAJORANA_RemoveNullSpace(Solution[1][k],NullSp);
                             fi;
                         od;
