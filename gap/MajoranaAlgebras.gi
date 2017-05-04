@@ -765,7 +765,7 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
 
         function(GramMatrix,AlgebraProducts,ProductList,pairorbitlist) # Tests that the algebra obeys axiom M2
 
-        local B, dim, L, i, j , k , l, m, Diagonals, a,b,c,d,x0,x1,x2,x3;
+        local B, dim, i, j , k , l, m, Diagonals, a,b,c,d,x0,x1,x2,x3;
 
         dim:=Size(AlgebraProducts[1]);
 
@@ -793,20 +793,8 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
                 od;
             od;
         od;
-
-        L:=MAJORANA_LDLTDecomposition(B);
-
-        Diagonals:=[];
-
-        for i in [1..Size(B)] do
-            Append(Diagonals,[L[2][i][i]]);
-        od;
-
-        if ForAny(Diagonals, x->x<0) then
-            return -1;
-        else
-            return 1;
-        fi;
+        
+        return MAJORANA_PositiveDefinite(B);
 
         end
 
@@ -1649,11 +1637,11 @@ function(G,T)
             Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, u, v, w,
 
             # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixT, GramMatrixFull, LI, NullSpT, AlgebraProducts, EigenVectors,
+            GramMatrix, GramMatrixT, GramMatrixFull, LI, AlgebraProducts, EigenVectors,
             EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x2A, x3A,
 
             # Step 4 - More products and evecs
-            h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, L, Diagonals, NullSp, dim, a, g,
+            h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, NullSp, dim, a, g,
 
             # Step 5 - More evecs
             switch, Dimensions, NewDimensions, NewEigenVectors, table, ev_a, ev_b,
@@ -1661,8 +1649,6 @@ function(G,T)
             # Step 6 - More inner products
             UnknownInnerProducts, mat, vec, sum, row, Solution, record,
 
-            # Step 7 - More algebra products
-            Alpha, Alpha2, Beta, Beta2, walpha, wbeta, c,
             
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts; 
 
@@ -2816,9 +2802,6 @@ function(G,T)
             if x = -1 then
                 Output[i]:=[StructuralCopy(Shape),"Error","Inner product not positive definite on A", StructuralCopy(GramMatrixT)];
                 break;
-            elif x = 0 then
-                NullSpT:=MAJORANA_NullSpace(GramMatrixT);
-                LI:=0;
             fi;
 
                                         ## STEP 4: MORE PRODUCTS ##
@@ -3168,15 +3151,9 @@ function(G,T)
                 if ForAll(GramMatrix, x -> x <> false) then 
                     GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim);
 
-                    L:=MAJORANA_LDLTDecomposition(GramMatrixFull);
+                    x := MAJORANA_PositiveDefinite(GramMatrixFull);
 
-                    Diagonals:=[];
-
-                    for j in [1..Size(GramMatrixFull)] do
-                        Append(Diagonals,[L[2][j][j]]);
-                    od;
-
-                    if ForAny(Diagonals, x->x<0) then
+                    if x < 0 then
                         Output[i] := [ StructuralCopy(Shape)
                                      , "Error"
                                      , "The inner product is not positive definite"
@@ -3185,7 +3162,7 @@ function(G,T)
                                      , StructuralCopy(5Aaxes)
                                      , StructuralCopy(GramMatrix) ];
                         break;
-                    elif ForAny(Diagonals, x->x=0) then
+                    elif x = 0 then
                     
                         NullSp:=MAJORANA_NullSpace(GramMatrixFull);
                         
