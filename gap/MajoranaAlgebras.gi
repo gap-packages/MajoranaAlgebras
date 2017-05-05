@@ -1099,7 +1099,9 @@ InstallGlobalFunction(MAJORANA_RemoveNullSpace,
 
 function(v,NullSp) 
 
-    local i, j, dim;
+    local   i,      # loop over nullspace
+            j,      # leading coefficient (from rhs)
+            dim;    # size of coefficients
     
     dim := Size(v);
 
