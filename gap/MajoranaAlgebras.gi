@@ -845,7 +845,9 @@ InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
 function(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim)
 
-    local i, j, x, y, GramMatrixFull;
+    local   i,                  # loop over coordinates
+            j,                  # loop over coordinates
+            GramMatrixFull;     # output matrix
 
     GramMatrixFull := NullMat(dim,dim);
     
@@ -865,7 +867,17 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
 
 function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, dim)
 
-    local mat, vec, record, sum, i, j, k, l, m, p, OrthogonalityError;
+    local   mat,                    # matrix of unknowns 
+            vec,                    # vector of knowns
+            row,                    # row of matrix
+            sum,                    # element of vec
+            j,                      # loop over coordinates
+            v,                      # a - eigenvector
+            w,                      # b - eigenvector
+            k,                      # loop over v
+            l,                      # loop over w 
+            pos,                    # position of unknown product
+            OrthogonalityError;     # list of vectors which do not obey orthogonality
 
     mat := [];
     vec := [];
@@ -874,82 +886,76 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
     OrthogonalityError := [];
 
     if a = 0 then
+    
+        ev_b := EigenVectors[n][b];
 
-        for i in [1..Size(EigenVectors[n][b])] do
+        for v in ev_b do
 
-            sum:=[];
-
-            Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
+            sum := 0;
+            row := [1..Size(UnknownInnerProducts)]*0;
 
             for j in [1..dim] do
-				if EigenVectors[n][b][i][j] <> 0 then 
+				if v[j] <> 0 then 
 
 					m := pairorbitlist[j][n];
 
 					if GramMatrix[m] <> false then
-						Add(sum,-EigenVectors[n][b][i][j]*GramMatrix[m]);
+						sum := sum - v[j]*GramMatrix[m];
 					else
-						p := Position(UnknownInnerProducts,m);
-						mat[Size(mat)][p]:=mat[Size(mat)][p] + EigenVectors[n][b][i][j];
+						pos := Position(UnknownInnerProducts,m);
+                        row[pos] := row[pos] + v[j];
 					fi;
 				fi;
             od;
 
-            Add(vec, [Sum(sum)]);
-
-            if ForAll(mat[Size(mat)], x -> x = 0) then
-                if vec[Size(vec)] <> [0] then
-                    Add(OrthogonalityError,i);
-                else
-					Remove(vec);
-					Remove(mat);
+            if ForAll(row, x -> x = 0) then
+                if sum <> 0 then
+                    Add(OrthogonalityError,v);
                 fi;
+            else
+                Add(mat,row);
+                Add(vec,sum);
             fi;
-
         od;
-
     else
+    
+        ev_a := EigenVectors[n][a];
+        ev_b := EigenVectors[n][b];
+        
+        for v in ev_a do
+            for w in ev_b do
 
-        for i in [1..Size(EigenVectors[n][a])] do
-            for j in [1..Size(EigenVectors[n][b])] do
-
-                sum:=[];
-
-                Add(mat,NullMat(1,Size(UnknownInnerProducts))[1]);
+                sum := 0;
+                row := [1..Size(UnknownInnerProducts)]*0;
 
                 for k in [1..dim] do
-					if EigenVectors[n][a][i][k] <> 0 then
+					if v[k] <> 0 then
 						for l in [1..dim] do
-							if EigenVectors[n][b][j][l] <> 0 then 
+							if w[l] <> 0 then 
 							
 								m := pairorbitlist[k][l];
 
 								if GramMatrix[m] <> false then
-									Add(sum,-EigenVectors[n][a][i][k]*EigenVectors[n][b][j][l]*GramMatrix[m]);
+									sum := sum - v[k]*w[l]*GramMatrix[m]);
 								else
-									p := Position(UnknownInnerProducts,m);
-									mat[Size(mat)][p]:=mat[Size(mat)][p] + EigenVectors[n][a][i][k]*EigenVectors[n][b][j][l];
+									pos := Position(UnknownInnerProducts,m);
+									row[pos] := row[pos] + v[k]*w[l];
 								fi;
 							fi;
 						od;
 					fi;
 				od;
 
-
-                Add(vec,[Sum(sum)]);
-
-                if ForAll(mat[Size(mat)], x -> x = 0) then
-                    if vec[Size(vec)] <> [0] then
-                        Add(OrthogonalityError,[i,j]);
-					else
-						Remove(vec);
-						Remove(mat);
+                if ForAll(row, x -> x = 0) then
+                    if sum <> 0 then
+                        Add(OrthogonalityError,[v,w]);
                     fi;
+                else
+                    Add(mat,row);
+                    Add(vec,sum);
                 fi;
-
             od;
         od;
-
     fi;
     
     if Size(OrthogonalityError) > 0 then 
