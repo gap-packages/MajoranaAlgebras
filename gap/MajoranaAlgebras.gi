@@ -438,6 +438,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
         local   i,      # loop over u 
                 j,      # loop over v
+                x,      # algebra product
                 g,      # conjugating element
                 vec,    # output vec
                 dim;    # size of vectors 
@@ -455,13 +456,12 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 				for j in [1..dim] do
 					if v[j] <> 0 then 
                     
-						x:=AlgebraProducts[list[3][i][j]];
+						x := AlgebraProducts[list[3][i][j]];
                         
 						if x <> false then
                         
                             g := list[4][i][j];
-                            vec := vec + MAJORANA_ConjugateVector(x,g,list);
-							
+                            vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
 						else
 							if u[i] <> 0 and v[j] <> 0 then
 								# cannot calculate product
@@ -489,7 +489,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 j,      # loop over v
                 sum;    # output value
 
-        sum:=[];
+        sum := 0;
 
         for i in [1..Size(u)] do
             if u[i] <> 0 then
@@ -506,7 +506,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
             fi;
         od;
         
-        return Sum(sum);
+        return sum;
         
         end 
         
@@ -606,12 +606,21 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 	# list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
 		
         local   errorfusion,    # list of indices which do not obey fusion rules
+                dim,            # size of coordinates
+                a,              # first eigenvalue
+                b,              # second eigenvalue
+                ev_a,           # a - eigenvectors
+                ev_b,           # b - eigenvectors
+                ev,             # new eigenvalue
                 u,              # vector with 1 in i th position
                 t,              # size of T
                 j,              # loop over T 
+                v,              # a - eigenvector
+                w,              # b - eigenvector
                 x,              # product of eigenvectors
                 y,              # product of x with u
-                z;              # inner product where needed
+                z,              # inner product where needed
+                x0;             # further product in 1/32 case
 
         errorfusion:=[];
 
@@ -624,7 +633,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
             
             for a in [1..3] do 
                 for b in [a..3] do 
-                    if not [a,b] in [[2,2],[3,3]] do 
+                    if not [a,b] in [[2,2],[3,3]] then 
                         
                         ev_a := EigenVectors[j][a];
                         ev_b := EigenVectors[j][b];
@@ -707,7 +716,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                             
                                             z := MAJORANA_AlgebraProduct(u,x0,AlgebraProducts,ProductList);
                                             
-                                            if (z <> false) then and (z <> x0/4) then  
+                                            if (z <> false) and (z <> x0/4) then  
                                             
                                                 Add(errorfusion,[j,a,b,v,w]);
                                             
@@ -732,14 +741,16 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
     function(GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist) # Tests that eigenspaces are orthogonal with respect to the inner product
 
-        local   errorortho; # list of indices which do not obey orthogonality of eigenvectors
+        local   errorortho, # list of indices which do not obey orthogonality of eigenvectors
                 u,          # vector with 1 in j th position
                 a,          # first eigenvalue
                 b,          # second eigenvalue
-                ev_a        # list of a - eigenvectors
-                ev_b        # list of b - eigenvectors
+                ev_a,       # list of a - eigenvectors
+                ev_b,       # list of b - eigenvectors
                 t,          # size of T
                 j,          # loop over T
+                v,          # a - eigenvector
+                w,          # b - eigenvector
                 x;          # inner product
 
         t:=Size(GramMatrix);
@@ -748,7 +759,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
         for j in [1..t] do
 
-            u:=[1..Size(AlgebraProducts[1])]*0; u[j]:=1;
+            u := [1..Size(AlgebraProducts[1])]*0; u[j]:=1;
             
             for a in [1..3] do 
             
@@ -768,11 +779,11 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                 
                 for b in [a+1..3] do 
                 
-                    ev _b := EigenVectors[j][b];
+                    ev_b := EigenVectors[j][b];
                     
                     for v in ev_a do
                         for w in ev_b do
-                            x := MAJORANA_InnerProduct(v,w,GramMatrix,
+                            x := MAJORANA_InnerProduct(v,w,GramMatrix,pairorbitlist);
                             
                             if (x <> false) and (x <> 0) then 
                                 Add(errorortho, [j,a,b,u,v]);
@@ -872,16 +883,18 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
             row,                    # row of matrix
             sum,                    # element of vec
             j,                      # loop over coordinates
+            ev_a,                   # a - eigenvectors
+            ev_b,                   # b - eigenvectors
             v,                      # a - eigenvector
             w,                      # b - eigenvector
             k,                      # loop over v
             l,                      # loop over w 
+            m,                      # orbit of pair 
             pos,                    # position of unknown product
             OrthogonalityError;     # list of vectors which do not obey orthogonality
 
     mat := [];
     vec := [];
-    record := [];
 
     OrthogonalityError := [];
 
@@ -936,7 +949,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
 								m := pairorbitlist[k][l];
 
 								if GramMatrix[m] <> false then
-									sum := sum - v[k]*w[l]*GramMatrix[m]);
+									sum := sum - v[k]*w[l]*GramMatrix[m];
 								else
 									pos := Position(UnknownInnerProducts,m);
 									row[pos] := row[pos] + v[k]*w[l];
