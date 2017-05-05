@@ -1788,9 +1788,9 @@ function(G,T)
             for j in [1..Size(Unknowns3X)] do
                 k:=Unknowns3X[j];
                 if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3A";
-                else
                     Shape[k]:="3C";
+                else
+                    Shape[k]:="3A";
                 fi;
             od;
 
@@ -1824,12 +1824,6 @@ function(G,T)
             3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
-            
-            longcoordinates:=StructuralCopy(T);
-
-            Append(longcoordinates,StructuralCopy(3Aaxes));
-            Append(longcoordinates,StructuralCopy(4Aaxes));
-            Append(longcoordinates,StructuralCopy(5Aaxes));
 
 			for j in [1..u] do
 				3Aaxes[j] := 3Aaxes[j][1];
@@ -1849,22 +1843,34 @@ function(G,T)
             Append(coordinates,3Aaxes);
             Append(coordinates,4Aaxes);
             Append(coordinates,5Aaxes);
-            
+
             dim:=Size(coordinates);
+            
+            longcoordinates:=StructuralCopy(T);
+            positionlist:=[1..t];
 
-            positionlist:=[];
-
-            for j in [1..t] do
-                Append(positionlist,[j]);
+            for j in [t+1..t+u] do
+                Append(positionlist,[j,j]);
+                
+                x := coordinates[j];
+                Append(longcoordinates,[x,x^2]);
             od;
-
+            
             for j in [t+1..t+u+v] do
                 Append(positionlist,[j,j]);
+                
+                x := coordinates[j];
+                Append(longcoordinates,[x,x^3]);
             od;
 
             for j in [t+u+v+1..dim] do
                 Append(positionlist,[j,-j,-j,j]);
+                
+                x := coordinates[j];
+                Append(longcoordinates,[x,x^2,x^3,x^4]); 
             od;
+            
+            longcoordinates := Flat(longcoordinates);
 
             orbits:=Orbits(G,coordinates);
 
@@ -1877,7 +1883,7 @@ function(G,T)
                 Add(representatives,Position(coordinates,x));
             od;
 
-            for j in [1..Size(Orbits)] do
+            for j in [1..Size(orbits)] do
                 x := Representative(orbits[j]);
                 if Order(x) <> 2 then
                     Add(representatives,Position(coordinates,x));
@@ -1889,11 +1895,11 @@ function(G,T)
 
             for j in [1..dim] do
                 k:=1;
-                while k < Size(Orbits) + 1 do
+                while k < Size(orbits) + 1 do
                     if coordinates[j] in orbits[k] then
                         Add(orbitlist,k);
                         Add(conjelements,RepresentativeAction(G,representatives[k],coordinates[j]));
-                        k := Size(Orbits) + 1;
+                        k := Size(orbits) + 1;
                     else
                         k := k + 1;
                     fi;
@@ -2003,16 +2009,6 @@ function(G,T)
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
 
-            # Set up Gram matrix
-
-            GramMatrix :=
-
-            NullMat(dim,dim);
-            for j in [1..dim] do
-                for k in [1..dim] do
-                    GramMatrix[j][k] := false;
-                od;
-            od;
 
             # Set up algebra product and gram matrices
 
@@ -3092,16 +3088,6 @@ function(G,T)
                                     break;
                                 fi;
                                 
-                             #   if Size(Solution[2]) = Size(Solution[1]) then 
-                             #       Output[i] := [ StructuralCopy(Shape)
-                             #                , "Fail"
-                             #                , "Missing inner product values"
-                             #                , StructuralCopy(GramMatrix)];
-                             #       Error("Missing inner products");
-                             #   
-                             #       break;
-                             #   fi;
-                                
                         else
                             Output[i] := [ Shape
                                          , "Error"
@@ -3356,14 +3342,14 @@ function(G,T)
                 vec := x[2];
                 record := x[3];
                 
-                #if LI = 0 then 
-                #            
-                #    x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
-                #    
-                #    Append(mat,x[1]);
-                #    Append(vec,x[2]);
-                #
-                #fi;
+                if LI = 0 then 
+                            
+                    x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
+                    
+                    Append(mat,x[1]);
+                    Append(vec,x[2]);
+                
+                fi;
                 
                 if mat <> [] then 
                     Solution:=MAJORANA_SolutionMatVecs(mat,vec);
