@@ -1105,7 +1105,6 @@ function(v,NullSp)
     
     );
 
-
 InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
     function(k,l, GramMatrix, AlgebraProducts, ProductList, pairrepresentatives)
@@ -1254,88 +1253,6 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
     
     end );
     
-InstallGlobalFunction(MAJORANA_EchelonMat,
-function( mat )
-    local nrows,     # number of rows in <mat>
-          ncols,     # number of columns in <mat>
-          vectors,   # list of basis vectors
-          heads,     # list of pivot positions in `vectors'
-          i,         # loop over rows
-          j,         # loop over columns
-          x,         # a current element
-          nzheads,   # list of non-zero heads
-          row,       # the row of current interest
-          inv,       # inverse of a matrix entry
-          temp;
-
-    nrows:= Length( mat );
-    ncols:= Length( mat[1] );
-    
-    heads:= ListWithIdenticalEntries( ncols, 0 );
-    nzheads := [];
-    vectors := [];
-    
-    i := 1;
-
-    while i <= nrows do
-    
-        if not i in nzheads then 
-            row := mat[i];
-            # Reduce the row with the known basis vectors.
-            for j in [ 1 .. Length(nzheads) ] do
-                x := row[nzheads[j]];
-                if x <> 0 then
-                  AddRowVector( row, vectors[ j ], - x );
-                fi;
-            od;
-
-            j := PositionNot( row, 0 );
-            if j <= ncols then
-
-                # We found a new basis vector.
-                inv:= Inverse( row[j] );
-                MultRowVector( row, inv );
-                
-                if j = i then 
-                    i := i + 1;
-                elif j > i then 
-                
-                    # Swap rows i and j 
-                
-                    temp := ShallowCopy(mat[i]);
-                    mat[i] := ShallowCopy(mat[j]);
-                    mat[j] := ShallowCopy(temp);
-                    
-                elif j < i then 
-                
-                    # Swap rows i and j 
-                    
-                    temp := ShallowCopy(mat[i]);
-                    mat[i] := ShallowCopy(mat[j]);
-                    mat[j] := ShallowCopy(temp);
-                    
-                    i := i + 1;
-                fi;
-                
-                Add( vectors, row );
-                Add( nzheads, j );
-                heads[j]:= Length( vectors );
-            else;
-                i := i + 1;
-            fi;
-        else
-            i := i + 1;
-        fi;
-    od;
-    
-    for i in [1..nrows] do 
-        for j in [i + 1..nrows] do
-            mat[i] := mat[i] - mat[j]*mat[i][j];
-        od; 
-    od;
-    
-    end );
-    
 InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
 function( mat )
     local nrows,     # number of rows in <mat>
@@ -1450,13 +1367,10 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                         y := [1..dim]*0; y[j] := 1;
                         
                         sum := sum - u[i]*v[j]*MAJORANA_AlgebraProduct(x,y,AlgebraProducts,ProductList);
-                        
                     else
                         
                         pos := Position(UnknownAlgebraProducts,l);
-                        
                         row[pos] := row[pos] + u[i]*v[j]; 
-                        
                     fi;
                 fi;
             od;
@@ -1590,11 +1504,8 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     record := [];
     
     for j in [1..t] do 
-    
         for k in [1..3] do
-        
             for l in [1..2] do 
-            
                 if [k,l] <> [2,2] then 
             
                     x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
