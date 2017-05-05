@@ -5,49 +5,61 @@
 # Implementations
 #
 
-# Temporary replacement for KnownAlgebraProducts. To be removed
-# after all functions have been cleaned up.
+# Creates list of indexes of coordinates whose algebra products are not known
+
 BindGlobal( "MAJORANA_ExtractUnknownAlgebraProducts",
 function(AlgebraProducts,pairorbitlist)
-    local table, i, j, dim;
+    local   unknowns,   # list of unknown algebra products
+            i,          # loop over coordinates
+            j,          # loop over coordinates
+            dim;        # size of coordinates
     
-    table := [];
+    unknowns := [];
     dim := Size(AlgebraProducts[1]);
     
     for i in [1..dim] do
         for j in [i..dim] do 
             if AlgebraProducts[pairorbitlist[i][j]] = false then 
-                Add(table,[i,j]);
+                Add(unknowns,[i,j]);
             fi;
         od;
     od;
 
-    return AsSet(table);
+    return AsSet(unknowns);
 end);
 
+# Table of fusion rules
 
-BindGlobal("MAJORANA_TestFusionTable",
+BindGlobal("MAJORANA_FusionTable",
            [ [    1,    0,   1/4, 1/32]
             ,[    0,    0,   1/4, 1/32]
             ,[  1/4,  1/4,     0, 1/32]
             ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
 
-# This is the test function for fusion
+# This creates new eigenvectors through fusion rules
 
 InstallGlobalFunction( MAJORANA_Fusion,
 function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList, dim)
 
-    local u, zeros, x, y, z, k, l, NewEigenVectors, ev_a, ev_b, ev, table, FusionError;
+    local   u,                  # vector with 1 in the j th position
+            x,                  # new eigenvector
+            y,                  # inner product of u and x
+            z,                  # algebra product of u and x
+            NewEigenVectors,    # list of new eigenvectors
+            k,                  # run through ev_a-eigenvectors
+            l,                  # run through ev_b-eigenvectors
+            ev_a,               # first eigenvector
+            ev_b,               # second eigenvector
+            ev,                 # new eigenvector
+            pos,                # index of new eigenvector              
+            FusionError;        # list of indexes which do not obey fusion
 
-    table := [0, 1/4, 1/32];
-    ev := MAJORANA_TestFusionTable[a+1][b+1];
+    ev := MAJORANA_FusionTable[a+1][b+1];
     
+    NewEigenVectors := [];
     FusionError := [];
 
-    zeros := [1..dim] * 0;
-    u := ShallowCopy(zeros);
-    u[j] := 1;
-    NewEigenVectors := [];
+    u := [1..dim]*0;; u[j] := 1;
 
     ev_a := EigenVectors[j][a];
     ev_b := EigenVectors[j][b];
@@ -62,13 +74,14 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 if x <> false then
                     y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3]);
                     if y <> false then
-                        z := x - y*u;
+                        x := x - y*u;
+                        
+                        z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList);
 
-                        if MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList) <> false and
-                           MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList ) <> zeros then
+                        if (z <> false) and (z <> x*0) then
                             Add(FusionError,[k,l]);
                         else
-                            Add(NewEigenVectors, z);
+                            Add(NewEigenVectors,x);
                         fi;
                     fi;
                 fi;
@@ -87,16 +100,17 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                     
                     if y <> false then
                         
-                        z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
+                        x := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
                         
-                        if z <> false then 
-                            z := z - y*u;
+                        if x <> false then 
+                            x := x - y*u;
+                            
+                            z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList);
                         
-                            if MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList) <> false and
-                               MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList ) <> z/4 then
+                            if (z <> false) and ( z <> x/4) then
                                 Add(FusionError,[k,l]);
                             else
-                                Add(NewEigenVectors, z);
+                                Add(NewEigenVectors,x);
                             fi;
                         fi;
                     fi;
@@ -113,9 +127,9 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 
                 if x <> false then 
                 
-                    y := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
+                    z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
 
-                    if y <> false and y <> ev * x then
+                    if (z <> false) and (z <> ev * x) then
                         Add(FusionError,[k,l]);
                     else
                         Add(NewEigenVectors, x);
@@ -128,7 +142,8 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
     if Size(FusionError) > 0 then
         return [false, FusionError];
     else
-        return [true, NewEigenVectors, Position(table,ev)];
+        pos := Position(MAJORANA_FusionTable[1],ev) - 1;
+        return [true, NewEigenVectors, pos];
     fi;
 end);
 
@@ -136,7 +151,8 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
         function(mat) # Takes as input matrix, returns a matrix whose rows form a basis of the nullspace of mat
 
-        local A,B;
+        local   A,      # input matrix
+                B;      # output matrix
 
         A := ShallowCopy(mat);
         
@@ -324,38 +340,40 @@ function(mat,vecs) # Takes as input two matrices, the second being interpreted a
             fi;
         od;
 
-
-
         return [sol,unsolved];
 
-
-        end
-
-        );
+        end );
 
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
 function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
 
-        local B, n, L, D, i, j, k, temp;
+        local   B,      # input matrix
+                n,      # size of matrix
+                L,      # output lower triangular matrix    
+                D,      # output diagonal matrix
+                i,      # loop over rows of matrix
+                j,      # loop over columns of matrix
+                k,      # loop over diagonals
+                sum;    # sum used in values of L and D
 
         B:=ShallowCopy(A); n:=Size(B); L:=NullMat(n,n); D:=NullMat(n,n);
 
         for i in [1..n] do
-            temp:=[];
+            sum := 0;
             for j in [1..i-1] do
-                Append(temp,[L[i][j]*L[i][j]*D[j][j]]);
+                sum := sum + L[i][j]*L[i][j]*D[j][j];
             od;
 
-            D[i][i] := B[i][i] - Sum(temp);
+            D[i][i] := B[i][i] - sum;
 
-            if D[i][i] =0 then
+            if D[i][i] = 0 then
                     for j in [i+1..n] do
-                        temp:=[];
+                        sum := 0;
                         for k in [1..i-1] do
-                            Append(temp,[L[j][k]*L[i][k]*D[k][k]]);
+                            sum := sum + L[j][k]*L[i][k]*D[k][k];
                         od;
-                        if B[j][i] - Sum(temp)= 0 then
+                        if B[j][i] - sum = 0 then
                             L[j][i]:=0;
                         else
                             return D;
@@ -364,13 +382,13 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                     L[i][i]:=1;
             else
                 for j in [i+1..n] do
-                    temp:=[];
+                    sum := 0;
                     for k in [1..i-1] do
-                        Append(temp,[L[j][k]*L[i][k]*D[k][k]]);
+                        sum := sum + L[j][k]*L[i][k]*D[k][k];
                     od;
-                    L[j][i]:=(B[j][i] - Sum(temp))/D[i][i];
+                    L[j][i] := B[j][i] - sum/D[i][i];
                 od;
-                L[i][i]:=1;
+                L[i][i] := 1;
             fi;
         od;
 
@@ -1447,7 +1465,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 list := [];
                 bad := [];
                 
-                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_TestFusionTable[ev_a + 1][ev_b + 1]*beta,gamma,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
+                x := MAJORANA_SeparateAlgebraProduct(MAJORANA_FusionTable[ev_a + 1][ev_b + 1]*beta,gamma,UnknownAlgebraProducts,AlgebraProducts,ProductList,pairrepresentatives);
                 
                 row := row + x[1];
                 sum := sum + x[2];
