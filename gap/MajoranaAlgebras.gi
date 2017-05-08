@@ -2836,7 +2836,6 @@ function(G,T)
                                                , NullSp
                                                , ProductList
                                                , pairrepresentatives ]);
-                                Error("Fusion");
                                 break;
                             fi;
                         od;
