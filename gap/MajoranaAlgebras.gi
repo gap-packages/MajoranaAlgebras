@@ -1424,7 +1424,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
         od;
     od;
     
-    return([mat,vec,record]);
+    return [mat,vec,record];
         
 end );
 
@@ -1457,7 +1457,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
         od;
     od;
     
-    return([mat,vec,record]);
+    return [mat,vec,record];
     
     end);
     
@@ -1501,7 +1501,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
         od;
     od;
     
-    return([mat,vec,record]);
+    return [mat,vec,record];
     
     end );
     
@@ -1525,11 +1525,28 @@ InstallGlobalFunction( MAJORANA_FindConjElement,
         g := RepresentativeAction(G,y,x,OnPairs);
         
         if g <> fail then         
-            return(g);
+            return g;
         else
             g := RepresentativeAction(G,y,Reversed(x),OnPairs);
-            return(g);
+            return g;
         fi;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_MakeVector,
+
+    function( pos, vals, dim);
+    
+    local   vec,    # output vector
+            i;      # loop over input
+            
+    vec := [1..dim]*0;;
+    
+    for i in [1..Size(pos)] do
+        vec[pos[i]] := vec[pos[i]] + vals[i];
+    od;
+    
+    return vec;
     
     end );
         
