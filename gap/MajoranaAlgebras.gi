@@ -5,17 +5,17 @@
 # Implementations
 #
 
-# Creates list of indexes of coordinates whose algebra products are not known
+# Creates list of indexes of ProductList[1] whose algebra products are not known
 
 BindGlobal( "MAJORANA_ExtractUnknownAlgebraProducts",
 
 function(AlgebraProducts, ProductList)
 
     local   unknowns,   # list of unknown algebra products
-            i,          # loop over coordinates
-            j,          # loop over coordinates
+            i,          # loop over ProductList[1]
+            j,          # loop over ProductList[1]
             k,          # pair orbit index
-            dim;        # size of coordinates
+            dim;        # size of ProductList[1]
     
     unknowns := [];
     dim := Size(AlgebraProducts[1]);
@@ -441,7 +441,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
         function(u,v,AlgebraProducts,list) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
-        # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp,pairrepresentatives,Orbitals]
+        # list should be of the form [ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp,pairrepresentatives,Orbitals]
 
         local   i,      # loop over u 
                 j,      # loop over v
@@ -561,13 +561,13 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(GramMatrix,AlgebraProducts,list) 
 
-    # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist]
+    # list should be of the form [ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist]
 
         local   ErrorM1,    # list of indices which do not obey axiom M1
                 j,          # loop over algebra products
-                k,          # loop over coordinates
+                k,          # loop over ProductList[1]
                 p,          # second product
-                dim,        # size of coordinates
+                dim,        # size of ProductList[1]
                 x,          # first inner product
                 y,          # second inner product
                 u,          # vectors
@@ -618,10 +618,10 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
     function(GramMatrix,AlgebraProducts,EigenVectors,ProductList) 
         
-    # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
+    # list should be of the form [ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
         
         local   errorfusion,    # list of indices which do not obey fusion rules
-                dim,            # size of coordinates
+                dim,            # size of ProductList[1]
                 a,              # first eigenvalue
                 b,              # second eigenvalue
                 ev_a,           # a - eigenvectors
@@ -820,8 +820,8 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
         function(GramMatrix,AlgebraProducts,ProductList) # Tests that the algebra obeys axiom M2
 
         local   B,      # matrix of inner products
-                dim,    # size of coordinates
-                j,      # loop through coordinates
+                dim,    # size of ProductList[1]
+                j,      # loop through ProductList[1]
                 k,      # 
                 l,      #
                 m,      #
@@ -871,10 +871,10 @@ InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
 function(GramMatrix, ProductList)
 
-    local   i,                  # loop over coordinates
-            j,                  # loop over coordinates
+    local   i,                  # loop over ProductList[1]
+            j,                  # loop over ProductList[1]
             k,                  # pair orbit index
-            dim,                # size of coordinates
+            dim,                # size of ProductList[1]
             GramMatrixFull;     # output matrix
 
     dim := Size(ProductList[1]);
@@ -904,7 +904,7 @@ function(a,b,n,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
             vec,                    # vector of knowns
             row,                    # row of matrix
             sum,                    # element of vec
-            j,                      # loop over coordinates
+            j,                      # loop over ProductList[1]
             ev_a,                   # a - eigenvectors
             ev_b,                   # b - eigenvectors
             v,                      # a - eigenvector
@@ -1013,7 +1013,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductLi
             u,          # vector with 1 in j th position
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
-            dim;        # size of coordinates
+            dim;        # size of ProductList[1]
     
     mat := []; vec :=[];
     
@@ -1614,7 +1614,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T)
 
     local   # Seress
-            coordinates, representatives, conjelements, orbitlist, pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist, ProductList,
+            pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist, ProductList,
 
             # error checking
             ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
@@ -1839,14 +1839,14 @@ function(G,T)
                 5Aaxes[j] := 5Aaxes[j][1];
             od;
 
-            coordinates:=[];
+            ProductList[1]:=[];
 
-            Append(coordinates,T);
-            Append(coordinates,3Aaxes);
-            Append(coordinates,4Aaxes);
-            Append(coordinates,5Aaxes);
+            Append(ProductList[1],T);
+            Append(ProductList[1],3Aaxes);
+            Append(ProductList[1],4Aaxes);
+            Append(ProductList[1],5Aaxes);
 
-            dim := Size(coordinates);
+            dim := Size(ProductList[1]);
             
             longcoordinates:=StructuralCopy(T);
             positionlist:=[1..t];
@@ -1854,61 +1854,27 @@ function(G,T)
             for j in [t+1..t+u] do
                 Append(positionlist,[j,j]);
                 
-                x := coordinates[j];
+                x := ProductList[1][j];
                 Append(longcoordinates,[x,x^2]);
             od;
             
             for j in [t+1..t+u+v] do
                 Append(positionlist,[j,j]);
                 
-                x := coordinates[j];
+                x := ProductList[1][j];
                 Append(longcoordinates,[x,x^3]);
             od;
 
             for j in [t+u+v+1..dim] do
                 Append(positionlist,[j,-j,-j,j]);
                 
-                x := coordinates[j];
+                x := ProductList[1][j];
                 Append(longcoordinates,[x,x^2,x^3,x^4]); 
             od;
             
             longcoordinates := Flat(longcoordinates);
 
-            orbits:=Orbits(G,coordinates);
-
-            OrbitsT:=Filtered(orbits,x->Order(Representative(x)) = 2);
-
-            representatives:=[];
-
-            for j in [1..Size(OrbitsT)] do
-                x := Representative(OrbitsT[j]);
-                Add(representatives,Position(coordinates,x));
-            od;
-
-            for j in [1..Size(orbits)] do
-                x := Representative(orbits[j]);
-                if Order(x) <> 2 then
-                    Add(representatives,Position(coordinates,x));
-                fi;
-            od;
-
-            conjelements:=[];
-            orbitlist:=[];
-
-            for j in [1..dim] do
-                k:=1;
-                while k < Size(orbits) + 1 do
-                    if coordinates[j] in orbits[k] then
-                        Add(orbitlist,k);
-                        Add(conjelements,RepresentativeAction(G,representatives[k],coordinates[j]));
-                        k := Size(orbits) + 1;
-                    else
-                        k := k + 1;
-                    fi;
-                od;
-            od;
-
-            x:=Orbits(G,Cartesian(coordinates,coordinates),OnPairs);
+            x:=Orbits(G,Cartesian(ProductList[1],ProductList[1]),OnPairs);
             
             Orbitals := [];
     
@@ -1986,7 +1952,7 @@ function(G,T)
             for j in [1..SizeOrbitals] do
             
                 x := Orbitals[j][1];
-                y := [Position(coordinates,x[1]), Position(coordinates,x[2])];
+                y := [Position(ProductList[1],x[1]), Position(ProductList[1],x[2])];
                 
                 Add(pairrepresentatives, y);
                 
@@ -1997,7 +1963,7 @@ function(G,T)
                 pairorbitlist[y[2]][y[1]] := j;
             od; 
 
-            ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,[],pairrepresentatives,G, Orbitals];
+            ProductList:=[ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist,[],pairrepresentatives,G, Orbitals];
 
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
@@ -2199,7 +2165,7 @@ function(G,T)
                 
                 for k in [t+1..dim] do 
                 
-                    h := coordinates[k];
+                    h := ProductList[1][k];
                     
                     if not h^T[j] in [h,h^2] then 
                     
@@ -2227,7 +2193,7 @@ function(G,T)
                 x := pairrepresentatives[j][1];
                 y := pairrepresentatives[j][2];
 
-                if Order(coordinates[x]) = 2 and Order(coordinates[y]) = 2 then
+                if Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 2 then
 
                     if Shape[j] = ['1','A'] then
 
@@ -2343,10 +2309,10 @@ function(G,T)
 
                 # 2,3 products
 
-                elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 3 then
-                    if coordinates[x]*coordinates[y] in T then 
+                elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 3 then
+                    if ProductList[1][x]*ProductList[1][y] in T then 
 
-                        s := coordinates[x]; h := coordinates[y];
+                        s := ProductList[1][x]; h := ProductList[1][y];
 
                         # Inside a 3A algebra
                         
@@ -2365,10 +2331,10 @@ function(G,T)
 
                 # 2,4 products
 
-                elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 4 then
+                elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 4 then
 
-                    s := coordinates[x];
-                    h := coordinates[y];
+                    s := ProductList[1][x];
+                    h := ProductList[1][y];
 
                     if s*h in T then
 
@@ -2391,10 +2357,10 @@ function(G,T)
 
                 # (2,5) values
 
-                elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 5 then
+                elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 5 then
 
-                    s := coordinates[x];
-                    h := coordinates[y];
+                    s := ProductList[1][x];
+                    h := ProductList[1][y];
 
                     if s*h in T then
 
@@ -2416,7 +2382,7 @@ function(G,T)
                     fi;
                 elif x = y then 
                 
-                    h := coordinates[x];
+                    h := ProductList[1][x];
                     
                     if Order(h) = 3 then    # (3,3) values
                         
