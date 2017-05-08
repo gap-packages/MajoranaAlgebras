@@ -441,7 +441,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
         function(u,v,AlgebraProducts,list) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
-        # list should be of the form [ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp,pairrepresentatives,Orbitals]
+        # list should be of the form [ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5],ProductList[6],ProductList[7],ProductList[9]]
 
         local   i,      # loop over u 
                 j,      # loop over v
@@ -561,7 +561,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(GramMatrix,AlgebraProducts,list) 
 
-    # list should be of the form [ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist]
+    # list should be of the form [ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5]]
 
         local   ErrorM1,    # list of indices which do not obey axiom M1
                 j,          # loop over algebra products
@@ -618,7 +618,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
     function(GramMatrix,AlgebraProducts,EigenVectors,ProductList) 
         
-    # list should be of the form [ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
+    # list should be of the form [ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5],ProductList[6]]
         
         local   errorfusion,    # list of indices which do not obey fusion rules
                 dim,            # size of ProductList[1]
@@ -1037,7 +1037,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductLi
     
 InstallGlobalFunction(MAJORANA_RemoveNullSpace,
 
-function(v,NullSp) 
+function(v,ProductList[6]) 
 
     local   i,      # loop over nullspace
             j,      # leading coefficient (from rhs)
@@ -1045,11 +1045,11 @@ function(v,NullSp)
     
     dim := Size(v);
 
-    if Size(NullSp) > 0 then 
-        for i in [1..Size(NullSp)] do
-            j := Position(Reversed(NullSp[i]),1);
+    if Size(ProductList[6]) > 0 then 
+        for i in [1..Size(ProductList[6])] do
+            j := Position(Reversed(ProductList[6][i]),1);
             if v[dim - j + 1] <> 0 then 
-                v := v - v[dim - j + 1]*NullSp[i];
+                v := v - v[dim - j + 1]*ProductList[6][i];
             fi;
         od;
     fi;
@@ -1480,11 +1480,11 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
-    function(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList)
+    function(ProductList[6], UnknownAlgebraProducts, AlgebraProducts, ProductList)
     
     local i, m, j, k, row, sum, dim, y, mat, vec, a, x, record;
     
-    dim := Size(NullSp[1]);
+    dim := Size(ProductList[6][1]);
     
     mat := [];
     vec := [];
@@ -1498,12 +1498,12 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
         
             a := [1..dim]*0; a[j] := 1;        
         
-            for k in [1..Size(NullSp)] do
+            for k in [1..Size(ProductList[6])] do
             
                 row := [1..Size(UnknownAlgebraProducts)]*0;
                 sum := [];
                 
-                x := MAJORANA_SeparateAlgebraProduct(a,NullSp[k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
+                x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
 
                 if ForAll(x[1], x -> x = 0) then 
                     if ForAny( x[2] , y -> y <> 0) then 
@@ -1614,15 +1614,13 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T)
 
     local   # Seress
-            pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist, ProductList,
-
-            error,
+            ProductList, error,
 
             # indexing and temporary variables
             i, j, k, l, m, n, x, y, z, b,
 
             # Step 0 - Set Up
-            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT,  
+            Output, t, SizeOrbitals, OrbitalsT, SizeOrbitalsT,  
 
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
@@ -1634,13 +1632,13 @@ function(G,T)
             GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
 
             # Step 4 - More products and evecs
-            h, s, NullSp, dim, a, g,
+            h, s, dim, a, g,
 
             # Step 5 - More evecs
             switch, Dimensions, NewDimensions, NewEigenVectors, table, ev_a, ev_b,
 
             # Step 6 - More inner products
-            UnknownInnerProducts, mat, vec, sum, row, Solution, record,
+            UnknownInnerProducts, mat, vec, Solution, record,
             
             vals, pos,
 
@@ -1775,12 +1773,14 @@ function(G,T)
     Binaries:=AsList(FullRowSpace(GF(2),Size(Unknowns3X)));
 
     for i in [1..Size(Binaries)] do
+        
+        ProductList := [1..9]*0;
 
         Output[i]:=[];
 
         master:=1;
         
-        NullSp := [];
+        ProductList[6] := [];
 
         while master = 1 do
 
@@ -1847,81 +1847,81 @@ function(G,T)
 
             dim := Size(ProductList[1]);
             
-            longcoordinates:=StructuralCopy(T);
-            positionlist:=[1..t];
+            ProductList[2]:=StructuralCopy(T);
+            ProductList[5]:=[1..t];
 
             for j in [t+1..t+u] do
-                Append(positionlist,[j,j]);
+                Append(ProductList[5],[j,j]);
                 
                 x := ProductList[1][j];
-                Append(longcoordinates,[x,x^2]);
+                Append(ProductList[2],[x,x^2]);
             od;
             
             for j in [t+1..t+u+v] do
-                Append(positionlist,[j,j]);
+                Append(ProductList[5],[j,j]);
                 
                 x := ProductList[1][j];
-                Append(longcoordinates,[x,x^3]);
+                Append(ProductList[2],[x,x^3]);
             od;
 
             for j in [t+u+v+1..dim] do
-                Append(positionlist,[j,-j,-j,j]);
+                Append(ProductList[5],[j,-j,-j,j]);
                 
                 x := ProductList[1][j];
-                Append(longcoordinates,[x,x^2,x^3,x^4]); 
+                Append(ProductList[2],[x,x^2,x^3,x^4]); 
             od;
             
-            longcoordinates := Flat(longcoordinates);
+            ProductList[2] := Flat(ProductList[2]);
 
             x:=Orbits(G,Cartesian(ProductList[1],ProductList[1]),OnPairs);
             
-            Orbitals := [];
+            ProductList[9] := [];
     
             for j in [1..Size(x)] do
-                Add(Orbitals, ShallowCopy(x[j]));
+                Add(ProductList[9], ShallowCopy(x[j]));
             od;
 
             # This is a bit of a patch, ask Markus tomorrow
 
             j:=1;
 
-            while j < Size(Orbitals) + 1 do
-                if Order(Orbitals[j][1][1]) = 2 and Order(Orbitals[j][1][2]) = 2 then
-                    Remove(Orbitals,j);
+            while j < Size(ProductList[9]) + 1 do
+                if Order(ProductList[9][j][1][1]) = 2 and Order(ProductList[9][j][1][2]) = 2 then
+                    Remove(ProductList[9],j);
                 else
                     j := j+1;
                 fi;
             od;
 
-            Orbitals := Concatenation(OrbitalsT,Orbitals);
+            ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
             
             j := SizeOrbitalsT + 1;
             
-            while j < Size(Orbitals) + 1 do 
+            while j < Size(ProductList[9]) + 1 do 
     
-                if not [Orbitals[j][1][2],Orbitals[j][1][1]] in Orbitals[j] then
+                if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
                 
                     k := j + 1;
                     
-                    while k < Size(Orbitals) +1 do
+                    while k < Size(ProductList[9]) +1 do
                     
-                        if  [Orbitals[j][1][2],Orbitals[j][1][1]]  in Orbitals[k] then
+                        if  [ProductList[9][j][1][2],ProductList[9][j][1][1]]  in ProductList[9][k] then
                         
-                            if Order(Orbitals[j][1][1]) < Order(Orbitals[j][1][2]) then 
+                            if Order(ProductList[9][j][1][1]) < Order(ProductList[9][j][1][2]) then 
                         
-                                Append(Orbitals[j],Orbitals[k]);
-                                Remove(Orbitals,k);
+                                Append(ProductList[9][j],ProductList[9][k]);
+                                Remove(ProductList[9],k);
                             
                             else 
                             
-                                Append(Orbitals[k],Orbitals[j]);
-                                Remove(Orbitals,j);
+                                Append(ProductList[9][k],ProductList[9][j]);
+                                Remove(ProductList[9],j);
                                 
                                 j := j - 1;
                                 
                             fi;
                             
-                            k := Size(Orbitals) + 1;
+                            k := Size(ProductList[9]) + 1;
                             
                         else
                             
@@ -1935,34 +1935,34 @@ function(G,T)
                 
             od;
 
-            SizeOrbitals:=Size(Orbitals);
+            SizeOrbitals:=Size(ProductList[9]);
 
-            pairrepresentatives:=[];
-            pairconjelements:=NullMat(dim,dim);
-            pairorbitlist := NullMat(dim,dim);
+            ProductList[7] := [];
+            ProductList[4] := NullMat(dim,dim);
+            ProductList[3] := NullMat(dim,dim);
             
             for j in [1..dim] do
                 for k in [1..dim] do 
-                    pairconjelements[j][k] := false;
-                    pairorbitlist[j][k] := false;
+                    ProductList[4][j][k] := false;
+                    ProductList[3][j][k] := false;
                 od;
             od;
 
             for j in [1..SizeOrbitals] do
             
-                x := Orbitals[j][1];
+                x := ProductList[9][j][1];
                 y := [Position(ProductList[1],x[1]), Position(ProductList[1],x[2])];
                 
-                Add(pairrepresentatives, y);
+                Add(ProductList[7], y);
                 
-                pairconjelements[y[1]][y[2]] := ();
-                pairconjelements[y[2]][y[1]] := ();
+                ProductList[4][y[1]][y[2]] := ();
+                ProductList[4][y[2]][y[1]] := ();
                 
-                pairorbitlist[y[1]][y[2]] := j;
-                pairorbitlist[y[2]][y[1]] := j;
+                ProductList[3][y[1]][y[2]] := j;
+                ProductList[3][y[2]][y[1]] := j;
             od; 
 
-            ProductList:=[ProductList[1],longcoordinates,pairorbitlist,pairconjelements,positionlist,[],pairrepresentatives,G, Orbitals];
+            ProductList:=[ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5],[],ProductList[7],G, ProductList[9]];
 
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
@@ -2027,7 +2027,7 @@ function(G,T)
                         pos := [j, k, 0, 0];
 
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
-                        pos[4] := positionlist[Position(longcoordinates,T[j]*T[k])];
+                        pos[4] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
 
                         vals := [-10/27, 32/27, 32/27, 1];
 
@@ -2060,7 +2060,7 @@ function(G,T)
                         pos := [j, k, 0, 0, 0];
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
                         pos[4] := Position(T, T[k]*T[j]*T[k]);
-                        pos[5] := positionlist[Position(longcoordinates,T[j]*T[k])];
+                        pos[5] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
 
                         vals := [-1/2, 2, 2, 1, 1];
 
@@ -2095,7 +2095,7 @@ function(G,T)
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
                         pos[4] := Position(T, T[k]*T[j]*T[k]);
                         pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
-                        pos[6] := positionlist[Position(longcoordinates,T[j]*T[k])]; 
+                        pos[6] := ProductList[5][Position(ProductList[2],T[j]*T[k])]; 
 
                         if pos[6] < 0 then
                             pos[6] := -pos[6];
@@ -2132,7 +2132,7 @@ function(G,T)
                         pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
                         pos[6] := Position(T, T[k]*T[j]*T[k]*T[j]*T[k]);
                         pos[7] := Position(T, (T[j]*T[k])^3);
-                        pos[8] := positionlist[Position(longcoordinates,(T[j]*T[k])^2)];
+                        pos[8] := ProductList[5][Position(ProductList[2],(T[j]*T[k])^2)];
 
                         vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
 
@@ -2169,7 +2169,7 @@ function(G,T)
                     if not h^T[j] in [h,h^2] then 
                     
                         pos := [k, 0];
-                        pos[2] := positionlist[Position(longcoordinates,h^T[j])];
+                        pos[2] := ProductList[5][Position(ProductList[2],h^T[j])];
                         
                         if pos[2] < 0 then
                             pos[2] := -pos[2];
@@ -2189,8 +2189,8 @@ function(G,T)
 
             for j in [1..SizeOrbitals] do
 
-                x := pairrepresentatives[j][1];
-                y := pairrepresentatives[j][2];
+                x := ProductList[7][j][1];
+                y := ProductList[7][j][2];
 
                 if Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 2 then
 
@@ -2223,7 +2223,7 @@ function(G,T)
                     
                         pos := [x, y, 0, 0];
                         pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        pos[4] := positionlist[Position(longcoordinates,T[x]*T[y])];
+                        pos[4] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
 
                         vals := [1/16, 1/16, 1/32, -135/2048];
                         
@@ -2247,7 +2247,7 @@ function(G,T)
                         pos := [x, y, 0, 0, 0];
                         pos[3] := Position(T,T[x]*T[y]*T[x]);
                         pos[4] := Position(T,T[y]*T[x]*T[y]);
-                        pos[5] := positionlist[Position(longcoordinates,T[x]*T[y])];
+                        pos[5] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
 
                         vals := [3/64, 3/64, 1/64, 1/64, -3/64]; 
     
@@ -2274,7 +2274,7 @@ function(G,T)
                         pos[3] := Position(T,T[x]*T[y]*T[x]);
                         pos[4] := Position(T,T[y]*T[x]*T[y]);
                         pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
-                        pos[6] := positionlist[Position(longcoordinates,T[x]*T[y])];
+                        pos[6] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
 
                         if pos[6] < 0 then
                             pos[6] := -pos[6];
@@ -2297,7 +2297,7 @@ function(G,T)
                         pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
                         pos[6] := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
                         pos[7] := Position(T,(T[x]*T[y])^3);
-                        pos[8] := positionlist[Position(longcoordinates,(T[x]*T[y])^2)];
+                        pos[8] := ProductList[5][Position(ProductList[2],(T[x]*T[y])^2)];
                         
                         vals := [1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048];
 
@@ -2530,13 +2530,13 @@ function(G,T)
                                                     " eigenvectors does not hold" )
                                                , j
                                                , x[2]
-                                               , Orbitals
+                                               , ProductList[9]
                                                , GramMatrix
                                                , AlgebraProducts
                                                , EigenVectors
-                                               , NullSp
+                                               , ProductList[6]
                                                , ProductList
-                                               , pairrepresentatives ]);
+                                               , ProductList[7] ]);
                                 break;
                             fi;
                         od;
@@ -2620,13 +2620,13 @@ function(G,T)
                                                         , " eigenvectors does not hold" )
                                                    , j
                                                    , x[2]
-                                                   , Orbitals
+                                                   , ProductList[9]
                                                    , GramMatrix
                                                    , AlgebraProducts
                                                    , EigenVectors
-                                                   , NullSp
+                                                   , ProductList[6]
                                                    , ProductList
-                                                   , pairrepresentatives ]);
+                                                   , ProductList[7] ]);
                                         break;
                                     fi;
                                 od;
@@ -2661,13 +2661,13 @@ function(G,T)
                                         , mat
                                         , vec
                                         ,
-                                        , Orbitals
+                                        , ProductList[9]
                                         , GramMatrix
                                         , AlgebraProducts
                                         , EigenVectors
-                                        , NullSp
+                                        , ProductList[6]
                                         , ProductList
-                                        , pairrepresentatives ]);
+                                        , ProductList[7] ]);
                             break;
                         fi;
                     fi;
@@ -2695,19 +2695,19 @@ function(G,T)
                         break;
                     elif x = 0 then
                     
-                        NullSp := MAJORANA_NullSpace(GramMatrixFull);
+                        ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
                         
-                        ProductList[6] := NullSp;
+                        ProductList[6] := ProductList[6];
                     fi;
                 fi;
 
-                if Size(NullSp) > 0 then
+                if Size(ProductList[6]) > 0 then
 
                     # Change alg products to get rid of any axes not in the basis
                     
                     for k in [1..SizeOrbitals] do
                         if AlgebraProducts[k] <> false then
-                            AlgebraProducts[k]:= MAJORANA_RemoveNullSpace(AlgebraProducts[k], NullSp);
+                            AlgebraProducts[k]:= MAJORANA_RemoveNullSpace(AlgebraProducts[k], ProductList[6]);
                         fi;
                     od;
 
@@ -2716,7 +2716,7 @@ function(G,T)
                     for j in [1..t] do
                         for k in [1..3] do
                             for l in [1..Size(EigenVectors[j][k])] do
-                                EigenVectors[j][k][l] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                                EigenVectors[j][k][l] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],ProductList[6]);
                             od;
                         od;
                     od;
@@ -2747,13 +2747,13 @@ function(G,T)
                                  , "Algebra does not obey fusion rules step 7"
                                  , error
                                  , 
-                                 , Orbitals
+                                 , ProductList[9]
                                  , GramMatrix
                                  , AlgebraProducts
                                  , EigenVectors
-                                 , NullSp
+                                 , ProductList[6]
                                  , ProductList
-                                 , pairrepresentatives]);
+                                 , ProductList[7]]);
                     break;
                 fi;
 
@@ -2784,9 +2784,9 @@ function(G,T)
                         
                         # use fact that if v in null space then a \cdot v = 0
                         
-                        if Size(NullSp) > 0 then 
+                        if Size(ProductList[6]) > 0 then 
                             
-                            x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                            x := MAJORANA_NullSpaceAlgebraProducts(ProductList[6], UnknownAlgebraProducts, AlgebraProducts, ProductList);
                             
                             Append(mat,x[1]);
                             Append(vec,x[2]);
@@ -2863,10 +2863,10 @@ function(G,T)
                     break;
                 fi;
                 
-                if NullSp <> [] then
+                if ProductList[6] <> [] then
                     for j in [1..t] do 
                         for k in [1..3] do
-                            Append(EigenVectors[j][1],NullSp);
+                            Append(EigenVectors[j][1],ProductList[6]);
                         od;
                     od;
                 fi;
@@ -2889,9 +2889,9 @@ function(G,T)
                 vec := x[2];
                 record := x[3];
                 
-                if Size(NullSp) > 0 then 
+                if Size(ProductList[6]) > 0 then 
                             
-                    x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                    x := MAJORANA_NullSpaceAlgebraProducts(ProductList[6], UnknownAlgebraProducts, AlgebraProducts, ProductList);
                     
                     Append(mat,x[1]);
                     Append(vec,x[2]);
@@ -2953,10 +2953,10 @@ function(G,T)
                             EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
 
                             
-                            if Size(NullSp) > 0 then 
+                            if Size(ProductList[6]) > 0 then 
                                 for k in [1..4] do 
                                     for l in [1..Size(EigenVectors[j][k])] do
-                                        MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
+                                        MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],ProductList[6]);
                                     od;
                                 od;
                             fi;
@@ -2967,13 +2967,13 @@ function(G,T)
                                             , "Algebra does not obey axiom M5"
                                             ,
                                             ,
-                                            , Orbitals
+                                            , ProductList[9]
                                             , GramMatrix
                                             , AlgebraProducts
                                             , EigenVectors
-                                            , NullSp
+                                            , ProductList[6]
                                             , ProductList
-                                            , pairrepresentatives ]);
+                                            , ProductList[7] ]);
                                 break;
                             elif Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim then
                                 Output[i] := StructuralCopy([Shape
@@ -2981,13 +2981,13 @@ function(G,T)
                                             , "Algebra does not obey axiom M4"
                                             , 
                                             ,
-                                            , Orbitals
+                                            , ProductList[9]
                                             , GramMatrix
                                             , AlgebraProducts
                                             , EigenVectors
-                                            , NullSp
+                                            , ProductList[6]
                                             , ProductList
-                                            , pairrepresentatives ]);
+                                            , ProductList[7] ]);
                                 break;
                             fi;
                         fi;
@@ -3026,13 +3026,13 @@ function(G,T)
                                 , "Missing values"
                                 , 
                                 , 
-                                , Orbitals
+                                , ProductList[9]
                                 , GramMatrix
                                 , AlgebraProducts
                                 , EigenVectors
-                                , NullSp
+                                , ProductList[6]
                                 , ProductList
-                                , pairrepresentatives ]);
+                                , ProductList[7] ]);
                     break;
                 else
                     maindimensions := StructuralCopy(newdimensions);
@@ -3061,13 +3061,13 @@ function(G,T)
                             , "Gram Matrix is not positive definite"
                             , 
                             , 
-                            , Orbitals
+                            , ProductList[9]
                             , GramMatrix
                             , AlgebraProducts
                             , EigenVectors
-                            , NullSp
+                            , ProductList[6]
                             , ProductList
-                            , pairrepresentatives ]);
+                            , ProductList[7] ]);
             fi;
 
             # Check that all triples obey axiom M1
@@ -3080,13 +3080,13 @@ function(G,T)
                             , "Algebra does not obey axiom M1"
                             , error 
                             ,
-                            , Orbitals
+                            , ProductList[9]
                             , GramMatrix
                             , AlgebraProducts
                             , EigenVectors
-                            , NullSp
+                            , ProductList[6]
                             , ProductList
-                            , pairrepresentatives ]);
+                            , ProductList[7] ]);
             fi;
 
             # Check that eigenvectors obey the fusion rules
@@ -3099,13 +3099,13 @@ function(G,T)
                             , "Algebra does not obey fusion rules"
                             , error
                             ,
-                            , Orbitals
+                            , ProductList[9]
                             , GramMatrix
                             , AlgebraProducts
                             , EigenVectors
-                            , NullSp
+                            , ProductList[6]
                             , ProductList
-                            , pairrepresentatives ]);
+                            , ProductList[7] ]);
                 break;
             fi;
 
@@ -3119,13 +3119,13 @@ function(G,T)
                             , "Eigenspaces are not orthogonal with respect to the inner product"
                             , error
                             ,
-                            , Orbitals
+                            , ProductList[9]
                             , GramMatrix 
                             , AlgebraProducts
                             , EigenVectors
-                            , NullSp
+                            , ProductList[6]
                             , ProductList
-                            , pairrepresentatives ]);
+                            , ProductList[7] ]);
                 break;
             fi;
 
@@ -3139,13 +3139,13 @@ function(G,T)
             #                , "Algebra does not obey axiom M2"
             #                , error
             #                ,
-            #                , Orbitals
+            #                , ProductList[9]
            #                 , GramMatrix
             #                , AlgebraProducts
             #                , EigenVectors
-            #                , NullSp
+            #                , ProductList[6]
            #                 , ProductList
-            #                , pairrepresentatives ]);
+            #                , ProductList[7] ]);
              #   break;
             #fi;
 
@@ -3154,13 +3154,13 @@ function(G,T)
                         , 3Aaxes
                         , 4Aaxes
                         , 5Aaxes
-                        , Orbitals
+                        , ProductList[9]
                         , GramMatrix
                         , AlgebraProducts
                         , EigenVectors
-                        , NullSp
+                        , ProductList[6]
                         , ProductList
-                        , pairrepresentatives ]);
+                        , ProductList[7] ]);
 
             master:=0;
         od;
