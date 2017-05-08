@@ -434,7 +434,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
         function(u,v,AlgebraProducts,list) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
-        # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
+        # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp,pairrepresentatives]
 
         local   i,      # loop over u 
                 j,      # loop over v
@@ -459,7 +459,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         x := AlgebraProducts[list[3][i][j]];
                         
                         if x <> false then
-                        
+                            
+                            if list[4][i][j] = false then 
+                                list[4][i][j] := MAJORANA_FindConjElement(i,j,list[1],list[3],list[7],list[8]);
+                            fi;
+                            
                             g := list[4][i][j];
                             
                             vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
@@ -984,7 +988,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList)
+function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductList, G)
 
     local mat, vec, row, sum, table, i, k, l, m, x, y, a, b, dim, g, sign, record;
     
@@ -1012,6 +1016,10 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepre
                             
                     if g = 0 then 
                     
+                        if ProductList[4][j][m] = false then 
+                            ProductList[4][j][m] := MAJORANA_FindConjElement(j, m, ProductList[1], ProductList[3], ProductList[7], ProductList[8]);
+                        fi;
+                    
                         g := ProductList[4][j][m];
                         
                         row[Position(UnknownAlgebraProducts,x)] := EigenVectors[j][ev][l][m];                    
@@ -1027,7 +1035,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepre
                             y[2] := -y[2];
                         fi;
                         
-                        if pairrepresentatives[x] = y or pairrepresentatives[x] = [y[2],y[1]] then 
+                        if ProductList[7][x] = y or ProductList[7][x] = [y[2],y[1]] then 
                             
                             row[Position(UnknownAlgebraProducts,x)] := sign*EigenVectors[j][ev][l][m];
                             
@@ -1586,7 +1594,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
 InstallGlobalFunction( MAJORANA_FindConjElement,
 
-    function( i, j, G, coordinates, pairorbitlist, pairrepresentatives)
+    function( i, j, coordinates, pairorbitlist, pairrepresentatives, G)
     
         local   x,      # input elements
                 y,      # representative elements
@@ -2007,7 +2015,7 @@ function(G,T)
                 od;
             od;
 
-            ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,[]];
+            ProductList:=[coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,[],pairrepresentatives,G];
 
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
@@ -3231,7 +3239,7 @@ function(G,T)
                         
                         for k in [1..3] do 
                         
-                            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList);
+                            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductList);
                             
                             if x <> 0 then 
                                 Append(mat,x[1]);
@@ -3365,9 +3373,13 @@ function(G,T)
                                 
                                 y := pairorbitlist[x[1]][x[2]];
                                 
+                                if pairconjelements[x[1]][x[2]] = false then
+                                    pairconjelements[x[1]][x[2]] := MAJORANA_FindConjElement( x[1], x[2], coordinates, pairorbitlist, pairrepresentatives, G);
+                                fi;
+                                
                                 g := Inverse(pairconjelements[x[1]][x[2]]);
                                                                 
-                                AlgebraProducts[y]:=MAJORANA_ConjugateVector(Solution[1][k],g,ProductList);
+                                AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],g,ProductList);
                             fi;
                         od;
                     else
