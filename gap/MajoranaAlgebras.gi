@@ -2452,58 +2452,6 @@ function(G,T)
 
                         GramMatrix[j]:=1/4;
 
-                    elif Order(coordinates[x]*coordinates[y]) = 3 then
-
-                        s := coordinates[x]; h := coordinates[y];
-
-                        # Case (2A,3A) in IPSS10
-
-                        xj := positionlist[Position(longcoordinates,s*h*s)];
-                        xk := positionlist[Position(longcoordinates,h*s*h*h*s*h*h)];
-                        xl := positionlist[Position(longcoordinates,h*h*s*h*s*h)];
-
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=1/9;
-                        AlgebraProducts[j][y]:=5/64;
-                        AlgebraProducts[j][xj]:=3/64;
-                        AlgebraProducts[j][xk]:=-1/16;
-                        AlgebraProducts[j][xl]:=-1/16;
-
-                        GramMatrix[j]:=1/9;
-
-                    elif Order(coordinates[x]*coordinates[y]) =4 and (coordinates[x]*coordinates[y])^2 in T then
-
-                        s := coordinates[x]; h := coordinates[y];
-
-                        # Case (2A,3A) in IPSS10
-
-                        xik:=Position(T,h*h*s*h);
-                        xil:=Position(T,h*s*h*h);
-                        xjk:=Position(T,s*h*h*s*h*s);
-                        xjl:=Position(T,s*h*s*h*h*s);
-                        xkl:=Position(T,h*s*h*s*h*h*s*h*h);
-                        xx:=Position(T,h*h*s*h*s*h*h);
-                        xj := positionlist[Position(longcoordinates,s*h*s)];
-                        xk := positionlist[Position(longcoordinates,h*s*h*h*s*h*h)];
-                        xl := positionlist[Position(longcoordinates,h*h*s*h*s*h)];
-
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=1/45;
-                        AlgebraProducts[j][y]:=1/64;
-                        AlgebraProducts[j][xik]:=-1/90;
-                        AlgebraProducts[j][xil]:=-1/90;
-                        AlgebraProducts[j][xjk]:=-1/90;
-                        AlgebraProducts[j][xjl]:=-1/90;
-                        AlgebraProducts[j][xkl]:=1/45;
-                        AlgebraProducts[j][xx]:=-1/45;
-                        AlgebraProducts[j][xj]:=-1/64;
-                        AlgebraProducts[j][xk]:=1/64;
-                        AlgebraProducts[j][xl]:=1/64;
-
-                        GramMatrix[j]:=1/36;
-
                     else
  
                         GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
@@ -2694,7 +2642,7 @@ function(G,T)
 
             GramMatrixT:=MAJORANA_FillGramMatrix(GramMatrix,OrbitalsT,longcoordinates,pairorbitlist,t);
 
-            x:=MAJORANA_PositiveDefinite(GramMatrixT);
+            x := MAJORANA_PositiveDefinite(GramMatrixT);
 
             if x = -1 then
                 Output[i]:=[StructuralCopy(Shape),"Error","Inner product not positive definite on A", StructuralCopy(GramMatrixT)];
@@ -3135,15 +3083,7 @@ function(G,T)
                 
                     a := [1..dim]*0; a[j]:=1;
                 
-                    UnknownAlgebraProducts := [];
-                
-                    for k in [1..SizeOrbitals] do
-                    
-                        if AlgebraProducts[k] = false and pairrepresentatives[k][1] = j then 
-                            Add(UnknownAlgebraProducts,k);
-                        fi;
-                            
-                    od;
+                    UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,pairorbitlist);
                     
                     if UnknownAlgebraProducts <> [] then
                     
