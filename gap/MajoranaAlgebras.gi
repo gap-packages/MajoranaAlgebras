@@ -1986,7 +1986,7 @@ function(G,T)
             
             for j in [1..dim] do
                 for k in [1..dim] do 
-                    pairconjelements := false;
+                    pairconjelements[j][k] := false;
                 od;
             od;
 
