@@ -460,11 +460,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         
                         if x <> false then
                             
-                            if list[4][i][j] = false then 
-                                list[4][i][j] := MAJORANA_FindConjElement(i,j,list[1],list[3],list[7],list[8]);
-                            fi;
-                            
-                            g := list[4][i][j];
+                            g := MAJORANA_FindConjElement(i,j,list[4],list[1],list[3],list[7],list[8]);
                             
                             vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
                         else
@@ -1507,28 +1503,42 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
 InstallGlobalFunction( MAJORANA_FindConjElement,
 
-    function( i, j, coordinates, pairorbitlist, pairrepresentatives, G)
+    function( i, j, pairconjelements, coordinates, pairorbitlist, pairrepresentatives, G)
     
         local   x,      # input elements
                 y,      # representative elements
                 k,      # orbital of elements
                 g;      # conjugating element
+                
+        if pairconjelements[i][j] = false then 
         
-        x := [coordinates[i],coordinates[j]];
-        y := [0,0];
+            x := [coordinates[i],coordinates[j]];
+            y := [0,0];
+            
+            k := pairorbitlist[i][j];
         
-        k := pairorbitlist[i][j];
-    
-        y[1] := coordinates[pairrepresentatives[k][1]];
-        y[2] := coordinates[pairrepresentatives[k][2]];
-    
-        g := RepresentativeAction(G,y,x,OnPairs);
+            y[1] := coordinates[pairrepresentatives[k][1]];
+            y[2] := coordinates[pairrepresentatives[k][2]];
         
-        if g <> fail then         
-            return g;
+            g := RepresentativeAction(G,y,x,OnPairs);
+            
+            if g <> fail then
+                
+                pairconjelements[i][j] := g;
+                pairconjelements[j][i] := g;
+                     
+                return g;
+            else
+            
+                g := RepresentativeAction(G,y,Reversed(x),OnPairs);
+                
+                pairconjelements[i][j] := g;
+                pairconjelements[j][i] := g;
+                
+                return g;
+            fi;
         else
-            g := RepresentativeAction(G,y,Reversed(x),OnPairs);
-            return g;
+            return pairconjelements[i][j];
         fi;
     
     end );
@@ -1924,13 +1934,18 @@ function(G,T)
             od;
 
             for j in [1..SizeOrbitals] do
+            
                 x := Orbitals[j][1];
                 y := [Position(coordinates,x[1]), Position(coordinates,x[2])];
                 
                 Add(pairrepresentatives, y);
+                
                 pairconjelements[y[1]][y[2]] := ();
                 pairconjelements[y[2]][y[1]] := ();
-            od;  
+                
+                pairorbitlist[y[1]][y[2]] := j;
+                pairorbitlist[y[2]][y[1]] := j;
+            od; 
 
             for j in [1..dim] do
                 for k in [1..dim] do
@@ -2798,13 +2813,9 @@ function(G,T)
                                         
                                         y := pairorbitlist[x[1]][x[2]];
                                         
-                                        if pairconjelements[x[1]][x[2]] = false then
-                                            pairconjelements[x[1]][x[2]] := MAJORANA_FindConjElement( x[1], x[2], coordinates, pairorbitlist, pairrepresentatives, G);
-                                        fi;
-                                        
-                                        g := Inverse(pairconjelements[x[1]][x[2]]);
+                                        g := MAJORANA_FindConjElement( x[1], x[2], pairconjelements, coordinates, pairorbitlist, pairrepresentatives, G);
                                                                         
-                                        AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],g,ProductList);
+                                        AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
                                     fi;
                                 od;
                             else
@@ -2907,13 +2918,9 @@ function(G,T)
                                 
                                 y := pairorbitlist[x[1]][x[2]];
                                 
-                                if pairconjelements[x[1]][x[2]] = false then
-                                    pairconjelements[x[1]][x[2]] := MAJORANA_FindConjElement( x[1], x[2], coordinates, pairorbitlist, pairrepresentatives, G);
-                                fi;
-                                
-                                g := Inverse(pairconjelements[x[1]][x[2]]);
+                                g := MAJORANA_FindConjElement( x[1], x[2], pairconjelements, coordinates, pairorbitlist, pairrepresentatives, G);
                                                                 
-                                AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],g,ProductList);
+                                AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
                             fi;
                         od;
                     else
