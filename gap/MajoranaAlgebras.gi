@@ -452,25 +452,26 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         fi;
 
         for i in [1..dim] do
-			if u[i] <> 0 then 
-				for j in [1..dim] do
-					if v[j] <> 0 then 
+            if u[i] <> 0 then 
+                for j in [1..dim] do
+                    if v[j] <> 0 then 
                     
-						x := AlgebraProducts[list[3][i][j]];
+                        x := AlgebraProducts[list[3][i][j]];
                         
-						if x <> false then
+                        if x <> false then
                         
                             g := list[4][i][j];
+                            
                             vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
-						else
-							if u[i] <> 0 and v[j] <> 0 then
-								# cannot calculate product
-								return false;
-							fi;
-						fi;
-					fi;
-				od;
-			fi;
+                        else
+                            if u[i] <> 0 and v[j] <> 0 then
+                                # cannot calculate product
+                                return false;
+                            fi;
+                        fi;
+                    fi;
+                od;
+            fi;
         od;
         
         vec := MAJORANA_RemoveNullSpace(vec, list[6]);
@@ -564,33 +565,33 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         ErrorM1:=[];
         
         for j in [1..Size(AlgebraProducts)] do
-			if AlgebraProducts[j] <> false then
-				for k in [1..dim] do 
-					
-					u := NullMat(1,dim)[1];
-					u[pairrepresentatives[j][1]] := 1;
-					
-					v := NullMat(1,dim)[1];
-					v[pairrepresentatives[j][2]] := 1;
-					
-					w := NullMat(1,dim)[1];
-					w[k] := 1;
-					
-					p := MAJORANA_AlgebraProduct(v,w,AlgebraProducts,list);
-					
-					if p <> false then
-						x := MAJORANA_InnerProduct(u,p,GramMatrix, list[3]);
-						y := MAJORANA_InnerProduct(AlgebraProducts[j],w,GramMatrix, list[3]);
-						
-						if x <> false and y <> false and x <> y then 
-							Add(ErrorM1,[j,k]);
-						fi;
-						
-					fi;
-				od;
-			fi;
-		od;
-					
+            if AlgebraProducts[j] <> false then
+                for k in [1..dim] do 
+                    
+                    u := NullMat(1,dim)[1];
+                    u[pairrepresentatives[j][1]] := 1;
+                    
+                    v := NullMat(1,dim)[1];
+                    v[pairrepresentatives[j][2]] := 1;
+                    
+                    w := NullMat(1,dim)[1];
+                    w[k] := 1;
+                    
+                    p := MAJORANA_AlgebraProduct(v,w,AlgebraProducts,list);
+                    
+                    if p <> false then
+                        x := MAJORANA_InnerProduct(u,p,GramMatrix, list[3]);
+                        y := MAJORANA_InnerProduct(AlgebraProducts[j],w,GramMatrix, list[3]);
+                        
+                        if x <> false and y <> false and x <> y then 
+                            Add(ErrorM1,[j,k]);
+                        fi;
+                        
+                    fi;
+                od;
+            fi;
+        od;
+                    
         return ErrorM1;
 
         end
@@ -602,9 +603,9 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 InstallGlobalFunction(MAJORANA_TestFusion,
 
     function(GramMatrix,AlgebraProducts,EigenVectors,ProductList) 
-		
-	# list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
-		
+        
+    # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist,NullSp]
+        
         local   errorfusion,    # list of indices which do not obey fusion rules
                 dim,            # size of coordinates
                 a,              # first eigenvalue
@@ -863,10 +864,10 @@ function(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim)
     GramMatrixFull := NullMat(dim,dim);
     
     for i in [1..dim] do 
-		for j in [1..dim] do
-			GramMatrixFull[i][j] := GramMatrix[pairorbitlist[i][j]];
-		od;
-	od;
+        for j in [1..dim] do
+            GramMatrixFull[i][j] := GramMatrix[pairorbitlist[i][j]];
+        od;
+    od;
 
     return GramMatrixFull;
 
@@ -908,17 +909,17 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
             row := [1..Size(UnknownInnerProducts)]*0;
 
             for j in [1..dim] do
-				if v[j] <> 0 then 
+                if v[j] <> 0 then 
 
-					m := pairorbitlist[j][n];
+                    m := pairorbitlist[j][n];
 
-					if GramMatrix[m] <> false then
-						sum := sum - v[j]*GramMatrix[m];
-					else
-						pos := Position(UnknownInnerProducts,m);
+                    if GramMatrix[m] <> false then
+                        sum := sum - v[j]*GramMatrix[m];
+                    else
+                        pos := Position(UnknownInnerProducts,m);
                         row[pos] := row[pos] + v[j];
-					fi;
-				fi;
+                    fi;
+                fi;
             od;
 
             if ForAll(row, x -> x = 0) then
@@ -942,22 +943,22 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
                 row := [1..Size(UnknownInnerProducts)]*0;
 
                 for k in [1..dim] do
-					if v[k] <> 0 then
-						for l in [1..dim] do
-							if w[l] <> 0 then 
-							
-								m := pairorbitlist[k][l];
+                    if v[k] <> 0 then
+                        for l in [1..dim] do
+                            if w[l] <> 0 then 
+                            
+                                m := pairorbitlist[k][l];
 
-								if GramMatrix[m] <> false then
-									sum := sum - v[k]*w[l]*GramMatrix[m];
-								else
-									pos := Position(UnknownInnerProducts,m);
-									row[pos] := row[pos] + v[k]*w[l];
-								fi;
-							fi;
-						od;
-					fi;
-				od;
+                                if GramMatrix[m] <> false then
+                                    sum := sum - v[k]*w[l]*GramMatrix[m];
+                                else
+                                    pos := Position(UnknownInnerProducts,m);
+                                    row[pos] := row[pos] + v[k]*w[l];
+                                fi;
+                            fi;
+                        od;
+                    fi;
+                od;
 
                 if ForAll(row, x -> x = 0) then
                     if sum <> 0 then
@@ -985,28 +986,28 @@ InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
 function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepresentatives, ProductList)
 
-	local mat, vec, row, sum, table, i, k, l, m, x, y, a, b, dim, g, sign, record;
+    local mat, vec, row, sum, table, i, k, l, m, x, y, a, b, dim, g, sign, record;
     
     mat := []; vec :=[]; record := [];
     
     g := 0;
-	
-	table := [0, 1/4, 1/32];
-	
-	dim := Size(AlgebraProducts[1]);
-	
-	a := [1..dim]*0; a[j] := 1;
-	
-	for l in [1..Size(EigenVectors[j][ev])] do
-					
-		row := [1..Size(UnknownAlgebraProducts)]*0;
-		sum := [];
-		
-		for m in [1..dim] do 
-			if EigenVectors[j][ev][l][m] <> 0 then
-				
-				x := ProductList[3][j][m];
-                				
+    
+    table := [0, 1/4, 1/32];
+    
+    dim := Size(AlgebraProducts[1]);
+    
+    a := [1..dim]*0; a[j] := 1;
+    
+    for l in [1..Size(EigenVectors[j][ev])] do
+                    
+        row := [1..Size(UnknownAlgebraProducts)]*0;
+        sum := [];
+        
+        for m in [1..dim] do 
+            if EigenVectors[j][ev][l][m] <> 0 then
+                
+                x := ProductList[3][j][m];
+                                
                 if AlgebraProducts[x] = false then 
                             
                     if g = 0 then 
@@ -1042,8 +1043,8 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepre
                     b := [1..dim]*0; b[m] := 1;
                     sum := sum + EigenVectors[j][ev][l][m]*MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
                 fi;
-			fi;
-		od;
+            fi;
+        od;
         
         if row <> [] then 
         
@@ -1088,12 +1089,12 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, pairrepre
                 fi;
             fi;
         fi;
-		
-	od;
+        
+    od;
     
     return [mat,vec,record];
-	
-	end);
+    
+    end);
     
 InstallGlobalFunction(MAJORANA_RemoveNullSpace,
 
@@ -1582,6 +1583,34 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     return([mat,vec,record]);
     
     end );
+    
+InstallGlobalFunction( MAJORANA_FindConjElement,
+
+    function( i, j, G, coordinates, pairorbitlist, pairrepresentatives)
+    
+        local   x,      # input elements
+                y,      # representative elements
+                k,      # orbital of elements
+                g;      # conjugating element
+        
+        x := [coordinates[i],coordinates[j]];
+        y := [0,0];
+        
+        k := pairorbitlist[i][j];
+    
+        y[1] := coordinates[pairrepresentatives[k][1]];
+        y[2] := coordinates[pairrepresentatives[k][2]];
+    
+        g := RepresentativeAction(G,y,x,OnPairs);
+        
+        if g <> fail then         
+            return(g);
+        else
+            g := RepresentativeAction(G,y,Reversed(x),OnPairs);
+            return(g);
+        fi;
+    
+    end );
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -1641,44 +1670,44 @@ function(G,T)
 
     # Construct orbitals of G on T
 
-    x:=OrbitsDomain(G,Cartesian(T,T),OnPairs);
+    x := OrbitsDomain(G,Cartesian(T,T),OnPairs);
     
     OrbitalsT := [];
     
     for i in [1..Size(x)] do
-		Add(OrbitalsT, ShallowCopy(x[i]));
-	od;
+        Add(OrbitalsT, ShallowCopy(x[i]));
+    od;
     
     i := 1;
     
     while i < Size(OrbitalsT) do 
     
-		if not [OrbitalsT[i][1][2],OrbitalsT[i][1][1]] in OrbitalsT[i] then
-		
-			j := i + 1;
-			
-			while j < Size(OrbitalsT) + 1 do
-			
-				if  [OrbitalsT[i][1][2],OrbitalsT[i][1][1]]  in OrbitalsT[j] then
-				
+        if not [OrbitalsT[i][1][2],OrbitalsT[i][1][1]] in OrbitalsT[i] then
+        
+            j := i + 1;
+            
+            while j < Size(OrbitalsT) + 1 do
+            
+                if  [OrbitalsT[i][1][2],OrbitalsT[i][1][1]]  in OrbitalsT[j] then
+                
                     Append(OrbitalsT[i],OrbitalsT[j]);
                     Remove(OrbitalsT,j);
                         
-					
-					j := Size(OrbitalsT) + 1;
-					
-				else
-					
-					j := j + 1;
-				fi;
-			od;
-		fi;
-		
-		i := i + 1;
-		
-	od;
-	
-	 SizeOrbitalsT:=Size(OrbitalsT);
+                    
+                    j := Size(OrbitalsT) + 1;
+                    
+                else
+                    
+                    j := j + 1;
+                fi;
+            od;
+        fi;
+        
+        i := i + 1;
+        
+    od;
+    
+     SizeOrbitalsT:=Size(OrbitalsT);
 
                                         ## STEP 1: SHAPE ##
 
@@ -1761,9 +1790,9 @@ function(G,T)
             for j in [1..Size(Unknowns3X)] do
                 k:=Unknowns3X[j];
                 if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3C";
-                else
                     Shape[k]:="3A";
+                else
+                    Shape[k]:="3C";
                 fi;
             od;
 
@@ -1776,19 +1805,19 @@ function(G,T)
             for j in [1..SizeOrbitalsT] do
                 if Shape[j]=['3','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
-						x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                        x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
                         Add(3Aaxes,Set([x,x^2]));
                     od;
                 fi;
                 if Shape[j]=['4','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
-						x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                        x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
                         Add(4Aaxes,Set([x,x^3]));
                     od;
                 fi;
                 if Shape[j]=['5','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
-						x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                        x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
                         Add(5Aaxes,Set([x,x^2,x^3,x^4]));
                     od;
                 fi;
@@ -1798,17 +1827,17 @@ function(G,T)
             4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
             5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
 
-			for j in [1..u] do
-				3Aaxes[j] := 3Aaxes[j][1];
-			od;
-			
-			for j in [1..v] do
-				4Aaxes[j] := 4Aaxes[j][1];
-			od;
-			
-			for j in [1..w] do
-				5Aaxes[j] := 5Aaxes[j][1];
-			od;
+            for j in [1..u] do
+                3Aaxes[j] := 3Aaxes[j][1];
+            od;
+            
+            for j in [1..v] do
+                4Aaxes[j] := 4Aaxes[j][1];
+            od;
+            
+            for j in [1..w] do
+                5Aaxes[j] := 5Aaxes[j][1];
+            od;
 
             coordinates:=[];
 
@@ -1883,9 +1912,9 @@ function(G,T)
             
             Orbitals := [];
     
-			for j in [1..Size(x)] do
-				Add(Orbitals, ShallowCopy(x[j]));
-			od;
+            for j in [1..Size(x)] do
+                Add(Orbitals, ShallowCopy(x[j]));
+            od;
 
             # This is a bit of a patch, ask Markus tomorrow
 
@@ -1905,16 +1934,16 @@ function(G,T)
             
             while j < Size(Orbitals) + 1 do 
     
-				if not [Orbitals[j][1][2],Orbitals[j][1][1]] in Orbitals[j] then
-				
-					k := j + 1;
-					
-					while k < Size(Orbitals) +1 do
-					
-						if  [Orbitals[j][1][2],Orbitals[j][1][1]]  in Orbitals[k] then
+                if not [Orbitals[j][1][2],Orbitals[j][1][1]] in Orbitals[j] then
+                
+                    k := j + 1;
+                    
+                    while k < Size(Orbitals) +1 do
+                    
+                        if  [Orbitals[j][1][2],Orbitals[j][1][1]]  in Orbitals[k] then
                         
                             if Order(Orbitals[j][1][1]) < Order(Orbitals[j][1][2]) then 
-						
+                        
                                 Append(Orbitals[j],Orbitals[k]);
                                 Remove(Orbitals,k);
                             
@@ -1926,49 +1955,50 @@ function(G,T)
                                 j := j - 1;
                                 
                             fi;
-							
-							k := Size(Orbitals) + 1;
-							
-						else
-							
-							k := k + 1;
-						fi;
-					od;
-										
-				fi;
-				
-				j := j + 1;
-				
-			od;
+                            
+                            k := Size(Orbitals) + 1;
+                            
+                        else
+                            
+                            k := k + 1;
+                        fi;
+                    od;
+                                        
+                fi;
+                
+                j := j + 1;
+                
+            od;
 
             SizeOrbitals:=Size(Orbitals);
 
             pairrepresentatives:=[];
+            pairconjelements:=NullMat(dim,dim);
+            pairorbitlist := NullMat(dim,dim);
+            
+            for j in [1..dim] do
+                for k in [1..dim] do 
+                    pairconjelements := false;
+                od;
+            od;
 
             for j in [1..SizeOrbitals] do
                 x := Orbitals[j][1];
-                Add(pairrepresentatives, [Position(coordinates,x[1]), Position(coordinates,x[2])]);
-            od;
-
-            pairconjelements:=NullMat(dim,dim);
-            pairorbitlist := NullMat(dim,dim);
+                y := [Position(coordinates,x[1]), Position(coordinates,x[2])];
+                
+                Add(pairrepresentatives, y);
+                pairconjelements[y[1]][y[2]] := ();
+                pairconjelements[y[2]][y[1]] := ();
+            od;  
 
             for j in [1..dim] do
                 for k in [1..dim] do
                     l:=1;
                     while l < SizeOrbitals + 1 do
                         if [coordinates[j],coordinates[k]] in Orbitals[l] then
+                        
                             pairorbitlist[j][k] := l;
                             
-                            x := RepresentativeAction(G,[coordinates[pairrepresentatives[l][1]],coordinates[pairrepresentatives[l][2]]],[coordinates[j],coordinates[k]],OnPairs);
-                            
-                            if x <> fail then         
-								pairconjelements[j][k] := x;
-							else
-								x := RepresentativeAction(G,[coordinates[pairrepresentatives[l][1]],coordinates[pairrepresentatives[l][2]]],[coordinates[k],coordinates[j]],OnPairs);
-								pairconjelements[j][k] := x;
-							fi;
-								
                             l := SizeOrbitals + 1;
                         else
                             l := l+1;
@@ -2709,7 +2739,7 @@ function(G,T)
 
                     else
                     
-						GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
 
                 fi;

@@ -58,3 +58,5 @@ DeclareGlobalFunction( "MAJORANA_EchelonMat" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
 
+DeclareGlobalFunction( "MAJORANA_FindConjElement" );
+
