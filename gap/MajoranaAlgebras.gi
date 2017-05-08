@@ -359,23 +359,23 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                 k,      # loop over diagonals
                 sum;    # sum used in values of L and D
 
-        B:=ShallowCopy(A); n:=Size(B); L:=NullMat(n,n); D:=NullMat(n,n);
+        B := ShallowCopy(A); n := Size(B); L := NullMat(n,n); D := NullMat(n,n);
 
         for i in [1..n] do
-            sum := 0;
+            sum := [];
             for j in [1..i-1] do
-                sum := sum + L[i][j]*L[i][j]*D[j][j];
+                Add(sum, L[i][j]*L[i][j]*D[j][j]);
             od;
 
-            D[i][i] := B[i][i] - sum;
+            D[i][i] := B[i][i] - Sum(sum);
 
             if D[i][i] = 0 then
                     for j in [i+1..n] do
-                        sum := 0;
+                        sum := [];
                         for k in [1..i-1] do
-                            sum := sum + L[j][k]*L[i][k]*D[k][k];
+                            Add(sum, L[j][k]*L[i][k]*D[k][k]);
                         od;
-                        if B[j][i] - sum = 0 then
+                        if B[j][i] - Sum(sum) = 0 then
                             L[j][i]:=0;
                         else
                             return D;
@@ -384,11 +384,11 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                     L[i][i]:=1;
             else
                 for j in [i+1..n] do
-                    sum := 0;
+                    sum := [];
                     for k in [1..i-1] do
-                        sum := sum + L[j][k]*L[i][k]*D[k][k];
+                        Add(sum, L[j][k]*L[i][k]*D[k][k]);
                     od;
-                    L[j][i] := B[j][i] - sum/D[i][i];
+                    L[j][i] := B[j][i] - Sum(sum)/D[i][i];
                 od;
                 L[i][i] := 1;
             fi;
@@ -520,9 +520,9 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
                 Diagonals,  # list of diagonals from decomposition
                 i;          # loop over sze of matrix
 
-        L:=MAJORANA_LDLTDecomposition(GramMatrix);
+        L := MAJORANA_LDLTDecomposition(GramMatrix);
 
-        Diagonals:=[];
+        Diagonals := [];
 
         for i in [1..Size(GramMatrix)] do
             Append(Diagonals,[L[2][i][i]]);
@@ -2628,7 +2628,6 @@ function(G,T)
                     if x = y then
 
                         AlgebraProducts[j] := NullMat(1,dim)[1];
-
                         AlgebraProducts[j][x] := 1;
 
                         GramMatrix[j] := 8/5;
@@ -3061,17 +3060,19 @@ function(G,T)
                                 fi;
                                 
                         else
-                            Output[i] := [ Shape
-                                         , "Error"
-                                         , "Inconsistent system of unknown inner products"
-                                         , mat
-                                         , vec
-                                         , EigenVectors
-                                         , AlgebraProducts
-                                         , GramMatrix
-                                         , UnknownInnerProducts ];
-                            Output[i]:=StructuralCopy(Output[i]);
-                            
+                            Output[i] := StructuralCopy([ Shape
+                                        , "Error"
+                                        , "Inconsistent system of unknown inner products"
+                                        , mat
+                                        , vec
+                                        ,
+                                        , Orbitals
+                                        , GramMatrix
+                                        , AlgebraProducts
+                                        , EigenVectors
+                                        , NullSp
+                                        , ProductList
+                                        , pairrepresentatives ]);
                             break;
                         fi;
                     fi;
@@ -3386,13 +3387,32 @@ function(G,T)
                             fi;
                                                    
                             if Size(EigenVectors[j][4]) <> 1 then
-                                Output[i]:=[Shape,"Error","Algebra does not obey axiom M5",GramMatrix,AlgebraProducts,EigenVectors];
-                                Output[i]:=StructuralCopy(Output[i]);
+                                Output[i] := StructuralCopy([Shape
+                                            , "Error"
+                                            , "Algebra does not obey axiom M5"
+                                            ,
+                                            ,
+                                            , Orbitals
+                                            , GramMatrix
+                                            , AlgebraProducts
+                                            , EigenVectors
+                                            , NullSp
+                                            , ProductList
+                                            , pairrepresentatives ]);
                                 break;
-                            elif Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim then
-                                Output[i]:=[Shape,"Error","Algebra does not obey axiom M4",GramMatrix,AlgebraProducts,EigenVectors];
-                                Error("M4");
-                                Output[i]:=StructuralCopy(Output[i]);
+                            elif Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim then
+                                Output[i] := StructuralCopy([Shape
+                                            , "Error"
+                                            , "Algebra does not obey axiom M4"
+                                            , 
+                                            ,
+                                            , Orbitals
+                                            , GramMatrix
+                                            , AlgebraProducts
+                                            , EigenVectors
+                                            , NullSp
+                                            , ProductList
+                                            , pairrepresentatives ]);
                                 break;
                             fi;
                         fi;
@@ -3407,7 +3427,9 @@ function(G,T)
                 newdimensions := [];
                 
                 for j in [1..t] do 
-                    Add(newdimensions, Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + 1);
+                    Add(newdimensions, Size(EigenVectors[j][1]) 
+                                        + Size(EigenVectors[j][2]) 
+                                        + Size(EigenVectors[j][3]) + 1);
                 od;
                 
                 newfalsecount := [0,0];
@@ -3424,9 +3446,18 @@ function(G,T)
                     break;
                 elif newdimensions = maindimensions and newfalsecount = falsecount then 
 
-                    Output[i] := [Shape,"Fail","Missing values",GramMatrix, [], AlgebraProducts,EigenVectors];
-                    Error("Missing values");
-                    Output[i] := StructuralCopy(Output[i]);
+                    Output[i] := StructuralCopy([Shape
+                                , "Fail"
+                                , "Missing values"
+                                , 
+                                , 
+                                , Orbitals
+                                , GramMatrix
+                                , AlgebraProducts
+                                , EigenVectors
+                                , NullSp
+                                , ProductList
+                                , pairrepresentatives ]);
                     break;
                 else
                     maindimensions := StructuralCopy(newdimensions);
@@ -3450,8 +3481,18 @@ function(G,T)
             GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, longcoordinates, pairorbitlist, dim);
 
             if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-                Output[i]:=[Shape,"Error","Gram Matrix is not positive definite",GramMatrix, AlgebraProducts, EigenVectors];
-                Output[i]:=StructuralCopy(Output[i]);
+                Output[i] := StructuralCopy([ Shape
+                            , "Error"
+                            , "Gram Matrix is not positive definite"
+                            , 
+                            , 
+                            , Orbitals
+                            , GramMatrix
+                            , AlgebraProducts
+                            , EigenVectors
+                            , NullSp
+                            , ProductList
+                            , pairrepresentatives ]);
             fi;
 
             # Check that all triples obey axiom M1
@@ -3459,8 +3500,18 @@ function(G,T)
             ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
 
             if Size(ErrorM1)>0 then
-                Output[i]:=[Shape,"Error","Algebra does not obey axiom M1",GramMatrix,AlgebraProducts,ErrorM1];
-                Output[i]:=StructuralCopy(Output[i]);
+                Output[i] := StructuralCopy([ Shape
+                            , "Error"
+                            , "Algebra does not obey axiom M1"
+                            , ErrorM1 
+                            ,
+                            , Orbitals
+                            , GramMatrix
+                            , AlgebraProducts
+                            , EigenVectors
+                            , NullSp
+                            , ProductList
+                            , pairrepresentatives ]);
             fi;
 
             # Check that eigenvectors obey the fusion rules
@@ -3468,8 +3519,18 @@ function(G,T)
             ErrorFusion:=MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if ForAny(ErrorFusion,x->Size(x)>0) then
-                Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];
-                Output[i]:=StructuralCopy(Output[i]);
+                Output[i] := StructuralCopy([Shape
+                            , "Error"
+                            , "Algebra does not obey fusion rules"
+                            , ErrorFusion
+                            ,
+                            , Orbitals
+                            , GramMatrix
+                            , AlgebraProducts
+                            , EigenVectors
+                            , NullSp
+                            , ProductList
+                            , pairrepresentatives ]);
                 break;
             fi;
 
@@ -3495,16 +3556,36 @@ function(G,T)
 
             # Check M2
 
-            ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList,pairorbitlist);
+            # ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList,pairorbitlist);
 
-            if ErrorM2 = -1 then
-                Output[i]:=[Shape,"Error","Algebra does not obey axiom M2",GramMatrix,AlgebraProducts,ErrorM2];
-                Output[i]:=StructuralCopy(Output[i]);
-                break;
-            fi;
+            # if ErrorM2 = -1 then
+            #    Output[i] := StructuralCopy([Shape
+            #                , "Error"
+            #                , "Algebra does not obey axiom M2"
+            #                , ErrorM2
+            #                ,
+            #                , Orbitals
+           #                 , GramMatrix
+            #                , AlgebraProducts
+            #                , EigenVectors
+            #                , NullSp
+           #                 , ProductList
+            #                , pairrepresentatives ]);
+             #   break;
+            #fi;
 
-            Output[i]:=[Shape,"Success",3Aaxes,4Aaxes,5Aaxes,Orbitals,GramMatrix,AlgebraProducts,EigenVectors,NullSp,ProductList,pairrepresentatives];
-            Output[i]:=StructuralCopy(Output[i]);
+            Output[i] := StructuralCopy([Shape
+                        , "Success"
+                        , 3Aaxes
+                        , 4Aaxes
+                        , 5Aaxes
+                        , Orbitals
+                        , GramMatrix
+                        , AlgebraProducts
+                        , EigenVectors
+                        , NullSp
+                        , ProductList
+                        , pairrepresentatives ]);
 
             master:=0;
         od;
