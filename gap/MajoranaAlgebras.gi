@@ -1616,14 +1616,13 @@ function(G,T)
     local   # Seress
             pairrepresentatives, pairconjelements, pairorbitlist, longcoordinates, positionlist, ProductList,
 
-            # error checking
-            ErrorFusion, ErrorM1, ErrorM2, ErrorOrthogonality,
+            error,
 
             # indexing and temporary variables
             i, j, k, l, m, n, x, y, z, b,
 
             # Step 0 - Set Up
-            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT, orbits, OrbitsT, 
+            Output, t, Orbitals, SizeOrbitals, OrbitalsT, SizeOrbitalsT,  
 
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
@@ -1632,7 +1631,7 @@ function(G,T)
             Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, u, v, w,
 
             # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixT, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
+            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
 
             # Step 4 - More products and evecs
             h, s, NullSp, dim, a, g,
@@ -2727,26 +2726,26 @@ function(G,T)
 
                 # Check fusion and M1
 
-                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
+                error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-                if Size(ErrorM1)>0 then
+                if Size(error)>0 then
                     Output[i] := [ StructuralCopy(Shape)
                                  , "Error"
                                  , "Algebra does not obey axiom M1 step 7"
                                  , StructuralCopy(GramMatrix)
                                  , StructuralCopy(AlgebraProducts)
-                                 , StructuralCopy(ErrorM1)];
+                                 , StructuralCopy(error)];
                     break;
                 fi;
 
-                ErrorFusion:=MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
+                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
-                if Size(ErrorFusion) > 0 then
+                if Size(error) > 0 then
                 
                     Output[i] := StructuralCopy([ Shape
                                  , "Error"
                                  , "Algebra does not obey fusion rules step 7"
-                                 , ErrorFusion
+                                 , error
                                  , 
                                  , Orbitals
                                  , GramMatrix
@@ -2838,21 +2837,21 @@ function(G,T)
 
                 # Check fusion and M1
 
-                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
+                error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-                if Size(ErrorM1)>0 then
+                if Size(error)>0 then
                     Output[i] := [ StructuralCopy(Shape)
                                  , "Error"
                                  , "Algebra does not obey axiom M1 step 8"
                                  , StructuralCopy(GramMatrix)
                                  , [] # StructuralCopy(KnownAlgebraProducts)
                                  , StructuralCopy(AlgebraProducts)
-                                 , StructuralCopy(ErrorM1)];
+                                 , StructuralCopy(error)];
                 fi;
 
-                ErrorFusion:=MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
-                if ForAny(ErrorFusion, x->Size(x) > 0) then
+                if ForAny(error, x->Size(x) > 0) then
                     Output[i] := [ StructuralCopy(Shape)
                                  , "Error"
                                  , "Algebra does not obey fusion rules step 8"
@@ -2860,7 +2859,7 @@ function(G,T)
                                  , []
                                  , StructuralCopy(AlgebraProducts)
                                  , StructuralCopy(EigenVectors)
-                                 , StructuralCopy(ErrorFusion)];
+                                 , StructuralCopy(error)];
                     break;
                 fi;
                 
@@ -3073,13 +3072,13 @@ function(G,T)
 
             # Check that all triples obey axiom M1
 
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
+            error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-            if Size(ErrorM1)>0 then
+            if Size(error)>0 then
                 Output[i] := StructuralCopy([ Shape
                             , "Error"
                             , "Algebra does not obey axiom M1"
-                            , ErrorM1 
+                            , error 
                             ,
                             , Orbitals
                             , GramMatrix
@@ -3092,13 +3091,13 @@ function(G,T)
 
             # Check that eigenvectors obey the fusion rules
 
-            ErrorFusion:=MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+            error:=MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
-            if ForAny(ErrorFusion,x->Size(x)>0) then
+            if ForAny(error,x->Size(x)>0) then
                 Output[i] := StructuralCopy([Shape
                             , "Error"
                             , "Algebra does not obey fusion rules"
-                            , ErrorFusion
+                            , error
                             ,
                             , Orbitals
                             , GramMatrix
@@ -3112,13 +3111,13 @@ function(G,T)
 
             # Check that the eigenspaces are orthogonal
 
-            ErrorOrthogonality := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+            error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
-            if Size(ErrorOrthogonality) > 0 then
+            if Size(error) > 0 then
                 Output[i] := StructuralCopy([Shape
                             , "Error"
                             , "Eigenspaces are not orthogonal with respect to the inner product"
-                            , ErrorOrthogonality
+                            , error
                             ,
                             , Orbitals
                             , GramMatrix 
@@ -3132,13 +3131,13 @@ function(G,T)
 
             # Check M2
 
-            # ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
+            # error:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
 
-            # if ErrorM2 = -1 then
+            # if error = -1 then
             #    Output[i] := StructuralCopy([Shape
             #                , "Error"
             #                , "Algebra does not obey axiom M2"
-            #                , ErrorM2
+            #                , error
             #                ,
             #                , Orbitals
            #                 , GramMatrix
