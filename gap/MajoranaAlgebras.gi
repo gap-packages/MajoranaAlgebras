@@ -624,7 +624,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
         errorfusion:=[];
 
-        t := Size(GramMatrix);
+        t := Size(EigenVectors);
         dim := Size(AlgebraProducts[1]);
 
         for j in [1..t] do
@@ -753,7 +753,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                 w,          # b - eigenvector
                 x;          # inner product
 
-        t:=Size(GramMatrix);
+        t:=Size(EigenVectors);
         
         errorortho := [];
 
@@ -3273,7 +3273,7 @@ function(G,T)
                                  , StructuralCopy(ErrorM1)];
                 fi;
 
-                ErrorFusion:=MAJORANA_TestFusion(T, GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+                ErrorFusion:=MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
                 if ForAny(ErrorFusion, x->Size(x) > 0) then
                     Output[i] := [ StructuralCopy(Shape)
@@ -3465,7 +3465,7 @@ function(G,T)
 
             # Check that eigenvectors obey the fusion rules
 
-            ErrorFusion:=MAJORANA_TestFusion(T,GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+            ErrorFusion:=MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if ForAny(ErrorFusion,x->Size(x)>0) then
                 Output[i]:=[Shape,"Error","Algebra does not obey fusion rules",GramMatrix,AlgebraProducts,EigenVectors,ErrorFusion];
@@ -3475,11 +3475,21 @@ function(G,T)
 
             # Check that the eigenspaces are orthogonal
 
-            ErrorOrthogonality:=MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist);
+            ErrorOrthogonality := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist);
 
-            if ErrorOrthogonality > 0 then
-                Output[i]:=[Shape,"Error","Eigenspaces are not orthogonal with respect to the inner product",GramMatrix,AlgebraProducts,EigenVector,ErrorOrthogonality];
-                Output[i]:=StructuralCopy(Output[i]);
+            if Size(ErrorOrthogonality) > 0 then
+                Output[i] := StructuralCopy([Shape
+                            , "Error"
+                            , "Eigenspaces are not orthogonal with respect to the inner product"
+                            , ErrorOrthogonality
+                            ,
+                            , Orbitals
+                            , GramMatrix 
+                            , AlgebraProducts
+                            , EigenVectors
+                            , NullSp
+                            , ProductList
+                            , pairrepresentatives ]);
                 break;
             fi;
 
