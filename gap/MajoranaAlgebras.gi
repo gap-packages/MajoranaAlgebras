@@ -2187,124 +2187,104 @@ function(G,T)
 
                     elif Shape[j] = ['2','A'] then
 
-                        x2:=Position(T,T[x]*T[y]);
+                        pos := [x, y, 0];
+                        pos[3] := Position(T,T[x]*T[y]);
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:= 1/8;
-                        AlgebraProducts[j][y]:= 1/8;
-                        AlgebraProducts[j][x2]:=-1/8;
+                        vals := [1/8, 1/8, -1/8];
+                        
+                        AlgebraProducts[j] := MAJORANA_MakeVector( pos, vals, dim);
 
                         GramMatrix[j] := 1/8;
 
                     elif Shape[j] = ['2','B'] then
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
+                        AlgebraProducts[j] := NullMat(1,dim)[1];
 
-                        GramMatrix[j]:=0;
+                        GramMatrix[j] := 0;
 
                     elif Shape[j] = ['3','A'] then
+                    
+                        pos := [x, y, 0, 0];
+                        pos[3] := Position(T,T[x]*T[y]*T[x]);
+                        pos[4] := positionlist[Position(longcoordinates,T[x]*T[y])];
 
-                        xm1 := Position(T,T[x]*T[y]*T[x]);
-                        x3 := positionlist[Position(longcoordinates,T[x]*T[y])];
+                        vals := [1/16, 1/16, 1/32, -135/2048];
+                        
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=1/16;
-                        AlgebraProducts[j][y]:=1/16;
-                        AlgebraProducts[j][xm1]:=1/32;
-                        AlgebraProducts[j][x3]:= - 135/2048;
-
-                        GramMatrix[j]:=13/256;
+                        GramMatrix[j] := 13/256;
 
                     elif Shape[j] = ['3','C'] then
+                    
+                        pos := [x, y, 0];
+                        pos[3] := Position(T,T[x]*T[y]*T[x]);
+                        
+                        vals := [1/64, 1/64, -1/64];
 
-                        xm1 := Position(T,T[x]*T[y]*T[x]);
-
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=1/64;
-                        AlgebraProducts[j][y]:=1/64;
-                        AlgebraProducts[j][xm1]:=-1/64;
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j]:=1/64;
 
                     elif Shape[j] = ['4','A'] then
 
-                        xm1 := Position(T,T[x]*T[y]*T[x]);
-                        x2 := Position(T,T[y]*T[x]*T[y]);
-                        x4 := positionlist[Position(longcoordinates,T[x]*T[y])];
+                        pos := [x, y, 0, 0, 0];
+                        pos[3] := Position(T,T[x]*T[y]*T[x]);
+                        pos[4] := Position(T,T[y]*T[x]*T[y]);
+                        pos[5] := positionlist[Position(longcoordinates,T[x]*T[y])];
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
+                        vals := [3/64, 3/64, 1/64, 1/64, -3/64]; 
+    
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
-                        AlgebraProducts[j][x]:=3/64;
-                        AlgebraProducts[j][y]:=3/64;
-                        AlgebraProducts[j][xm1]:=1/64;
-                        AlgebraProducts[j][x2]:=1/64;
-                        AlgebraProducts[j][x4]:= -3/64;
-
-                        GramMatrix[j]:=1/32;
+                        GramMatrix[j] := 1/32;
 
                     elif Shape[j] = ['4','B'] then
+                    
+                        pos := [x, y, 0, 0, 0];
+                        pos[3] := Position(T,T[x]*T[y]*T[x]);
+                        pos[4] := Position(T,T[y]*T[x]*T[y]);
+                        pos[5] := Position(T,(T[x]*T[y])^2);
 
-                        xm1 := Position(T,T[x]*T[y]*T[x]);
-                        x2 := Position(T,T[y]*T[x]*T[y]);
-                        x2A := Position(T,(T[x]*T[y])^2);
+                        vals := [1/64, 1/64, -1/64, -1/64, 1/64];
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=1/64;
-                        AlgebraProducts[j][y]:=1/64;
-                        AlgebraProducts[j][xm1]:=-1/64;
-                        AlgebraProducts[j][x2]:=-1/64;
-                        AlgebraProducts[j][x2A]:= 1/64;
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j]:=1/64;
 
                     elif  Shape[j] = ['5','A'] then
+                    
+                        pos := [x, y, 0, 0, 0, 0];
+                        pos[3] := Position(T,T[x]*T[y]*T[x]);
+                        pos[4] := Position(T,T[y]*T[x]*T[y]);
+                        pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
+                        pos[6] := positionlist[Position(longcoordinates,T[x]*T[y])];
 
-                        xm1 := Position(T,T[x]*T[y]*T[x]);
-                        x2 := Position(T,T[y]*T[x]*T[y]);
-                        xm2 := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
-                        x5 := positionlist[Position(longcoordinates,T[x]*T[y])];
-
-                        if x5 < 0 then
-                            x5 := -x5;
+                        if pos[6] < 0 then
+                            pos[6] := -pos[6];
                             sign := -1;
                         else
-                            sign:=1;
+                            sign := 1;
                         fi;
+                        
+                        vals := [3/128, 3/128, -1/128, -1/128, -1/128, sign];
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=3/128;
-                        AlgebraProducts[j][y]:=3/128;
-                        AlgebraProducts[j][xm1]:=-1/128;
-                        AlgebraProducts[j][x2]:=-1/128;
-                        AlgebraProducts[j][xm2]:=-1/128;
-                        AlgebraProducts[j][x5] := sign*1;
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j]:=3/128;
 
                     elif Shape[j] = ['6','A'] then
+                    
+                        pos := [x, y, 0, 0, 0, 0, 0, 0];
+                        pos[3] := Position(T,T[x]*T[y]*T[x]);
+                        pos[4] := Position(T,T[y]*T[x]*T[y]);
+                        pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
+                        pos[6] := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
+                        pos[7] := Position(T,(T[x]*T[y])^3);
+                        pos[8] := positionlist[Position(longcoordinates,(T[x]*T[y])^2)];
+                        
+                        vals := [1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048];
 
-                        xm1 := Position(T,T[x]*T[y]*T[x]);
-                        x2 := Position(T,T[y]*T[x]*T[y]);
-                        xm2 := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
-                        x3 := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
-                        x2A := Position(T,(T[x]*T[y])^3);
-                        x3A := positionlist[Position(longcoordinates,(T[x]*T[y])^2)];
-
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=1/64;
-                        AlgebraProducts[j][y]:=1/64;
-                        AlgebraProducts[j][xm1]:=-1/64;
-                        AlgebraProducts[j][x2]:=-1/64;
-                        AlgebraProducts[j][xm2]:=-1/64;
-                        AlgebraProducts[j][x3] := -1/64;
-                        AlgebraProducts[j][x2A] := 1/64;
-                        AlgebraProducts[j][x3A] := 45/2048;
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j]:=5/256;
                     fi;
