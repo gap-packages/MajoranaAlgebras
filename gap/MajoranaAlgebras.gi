@@ -8,7 +8,9 @@
 # Creates list of indexes of coordinates whose algebra products are not known
 
 BindGlobal( "MAJORANA_ExtractUnknownAlgebraProducts",
-function(AlgebraProducts,pairorbitlist, coordinates, Orbitals)
+
+function(AlgebraProducts, ProductList)
+
     local   unknowns,   # list of unknown algebra products
             i,          # loop over coordinates
             j,          # loop over coordinates
@@ -21,7 +23,7 @@ function(AlgebraProducts,pairorbitlist, coordinates, Orbitals)
     for i in [1..dim] do
         for j in [i..dim] do 
             
-            k := MAJORANA_FindPairOrbit(i, j, pairorbitlist, coordinates, Orbitals);
+            k := MAJORANA_FindPairOrbit(i, j, ProductList);
         
             if AlgebraProducts[k] = false then 
                 Add(unknowns,[i,j]);
@@ -43,6 +45,7 @@ BindGlobal("MAJORANA_FusionTable",
 # This creates new eigenvectors through fusion rules
 
 InstallGlobalFunction( MAJORANA_Fusion,
+
 function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList, dim)
 
     local   u,                  # vector with 1 in the j th position
@@ -76,7 +79,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
                 if x <> false then
-                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3], ProductList[1], ProductList[9]);
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList);
                     if y <> false then
                         x := x - y*u;
                         
@@ -100,7 +103,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
 
                 if x <> false then
                     
-                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3], ProductList[1], ProductList[9]);
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList);
                     
                     if y <> false then
                         
@@ -461,11 +464,13 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 for j in [1..dim] do
                     if v[j] <> 0 then 
                     
-                        k := MAJORANA_FindPairOrbit(i, j, list[3], list[1], list[9]);
+                        k := MAJORANA_FindPairOrbit(i, j, list);
+                        
+                        x := AlgebraProducts[k];
                         
                         if x <> false then
                             
-                            g := MAJORANA_FindConjElement(i,j,list[4],list[1],list[3],list[7], list[9], list[8]);
+                            g := MAJORANA_FindConjElement(i,j,list);
                             
                             vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
                         else
@@ -489,7 +494,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
 InstallGlobalFunction(  MAJORANA_InnerProduct,
 
-    function(u,v,GramMatrix, pairorbitlist, coordinates, Orbitals) # If all the relevant products are known, returns the algebra product of u and v. If not, returns [0]
+    function(u, v, GramMatrix, ProductList) # If all the relevant products are known, returns the algebra product of u and v. If not, returns [0]
 
         local   i,      # loop over u 
                 j,      # loop over v
@@ -503,7 +508,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 for j in [1..Size(v)] do
                     if v[j] <> 0 then
                     
-                        k := MAJORANA_FindPairOrbit(i, j, pairorbitlist, coordinates, Orbitals);
+                        k := MAJORANA_FindPairOrbit(i, j, ProductList);
                         
                         if GramMatrix[k] <> false then
                             sum := sum + u[i]*v[j]*GramMatrix[k];
@@ -554,7 +559,7 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
 InstallGlobalFunction(MAJORANA_AxiomM1,
 
-    function(GramMatrix,AlgebraProducts,Orbitals,list,pairrepresentatives) 
+    function(GramMatrix,AlgebraProducts,list) 
 
     # list should be of the form [coordinates,longcoordinates,pairorbitlist,pairconjelements,positionlist]
 
@@ -578,10 +583,10 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                 for k in [1..dim] do 
                     
                     u := NullMat(1,dim)[1];
-                    u[pairrepresentatives[j][1]] := 1;
+                    u[list[7][j][1]] := 1;
                     
                     v := NullMat(1,dim)[1];
-                    v[pairrepresentatives[j][2]] := 1;
+                    v[list[7][j][2]] := 1;
                     
                     w := NullMat(1,dim)[1];
                     w[k] := 1;
@@ -589,8 +594,8 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     p := MAJORANA_AlgebraProduct(v,w,AlgebraProducts,list);
                     
                     if p <> false then
-                        x := MAJORANA_InnerProduct(u,p,GramMatrix, list[3], list[1], Orbitals);
-                        y := MAJORANA_InnerProduct(AlgebraProducts[j],w,GramMatrix, list[3], list[1], Orbitals);
+                        x := MAJORANA_InnerProduct(u,p,GramMatrix, list);
+                        y := MAJORANA_InnerProduct(AlgebraProducts[j],w,GramMatrix, list);
                         
                         if x <> false and y <> false and x <> y then 
                             Add(ErrorM1,[j,k]);
@@ -682,7 +687,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                 
                                 if x <> false then
                                     
-                                    z := MAJORANA_InnerProduct(u,x,GramMatrix, ProductList[3], ProductList[1], ProductList[9]);
+                                    z := MAJORANA_InnerProduct(u,x,GramMatrix, ProductList);
                                         
                                     if z <> false then 
                                         
@@ -718,7 +723,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                     
                                     if x0 <> false then 
                                     
-                                        y := MAJORANA_InnerProduct(u,x,GramMatrix,ProductList[3], ProductList[1], ProductList[9]);
+                                        y := MAJORANA_InnerProduct(u,x,GramMatrix,ProductList);
                     
                                         if y <> 0 then 
                                             
@@ -749,7 +754,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
 InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
-    function(GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist, coordinates, Orbitals) # Tests that eigenspaces are orthogonal with respect to the inner product
+    function(GramMatrix,AlgebraProducts,EigenVectors, ProductList) # Tests that eigenspaces are orthogonal with respect to the inner product
 
         local   errorortho, # list of indices which do not obey orthogonality of eigenvectors
                 u,          # vector with 1 in j th position
@@ -778,7 +783,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                 ev_a := EigenVectors[j][a];
                 
                 for v in ev_a do
-                    x := MAJORANA_InnerProduct(u,v,GramMatrix,pairorbitlist, coordinates, Orbitals);
+                    x := MAJORANA_InnerProduct(u, v, GramMatrix, ProductList);
                     
                     if (x <> false) and (x <> 0) then 
                         Add(errorortho, [j,1,a,u,v]);
@@ -793,7 +798,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                     
                     for v in ev_a do
                         for w in ev_b do
-                            x := MAJORANA_InnerProduct(v,w,GramMatrix,pairorbitlist, coordinates, Orbitals);
+                            x := MAJORANA_InnerProduct(v, w, GramMatrix, ProductList);
                             
                             if (x <> false) and (x <> 0) then 
                                 Add(errorortho, [j,a,b,u,v]);
@@ -812,7 +817,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
 InstallGlobalFunction(MAJORANA_AxiomM2,
 
-        function(GramMatrix,AlgebraProducts,ProductList,pairorbitlist) # Tests that the algebra obeys axiom M2
+        function(GramMatrix,AlgebraProducts,ProductList) # Tests that the algebra obeys axiom M2
 
         local   B,      # matrix of inner products
                 dim,    # size of coordinates
@@ -849,8 +854,8 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
                         x3 := MAJORANA_AlgebraProduct(a,d,AlgebraProducts,ProductList);
                     
                         B[dim*(j-1) + k][dim*(l-1) +m]:=
-                              MAJORANA_InnerProduct(x0,x1,GramMatrix, pairorbitlist, ProductList[1], ProductList[9])
-                            - MAJORANA_InnerProduct(x2,x3,GramMatrix, pairorbitlist, ProductList[1], ProductList[9]);
+                              MAJORANA_InnerProduct(x0,x1,GramMatrix, ProductList)
+                            - MAJORANA_InnerProduct(x2,x3,GramMatrix, ProductList);
                     od;
                 od;
             od;
@@ -864,19 +869,22 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
 
 InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
-function(GramMatrix, Orbitals, coordinates, pairorbitlist, dim)
+function(GramMatrix, ProductList)
 
     local   i,                  # loop over coordinates
             j,                  # loop over coordinates
             k,                  # pair orbit index
+            dim,                # size of coordinates
             GramMatrixFull;     # output matrix
 
+    dim := Size(ProductList[1]);
+    
     GramMatrixFull := NullMat(dim,dim);
     
     for i in [1..dim] do 
         for j in [1..dim] do
             
-            k := MAJORANA_FindPairOrbit(i, j, pairorbitlist, coordinates, Orbitals);
+            k := MAJORANA_FindPairOrbit(i, j, ProductList);
         
             GramMatrixFull[i][j] := GramMatrix[k];
         od;
@@ -890,7 +898,7 @@ function(GramMatrix, Orbitals, coordinates, pairorbitlist, dim)
 
 InstallGlobalFunction(MAJORANA_Orthogonality,
 
-function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, coordinates, Orbitals, dim)
+function(a,b,n,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
 
     local   mat,                    # matrix of unknowns 
             vec,                    # vector of knowns
@@ -924,7 +932,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
             for j in [1..dim] do
                 if v[j] <> 0 then 
 
-                    m := MAJORANA_FindPairOrbit(j, n, pairorbitlist, coordinates, Orbitals);;
+                    m := MAJORANA_FindPairOrbit(j, n, ProductList);;
 
                     if GramMatrix[m] <> false then
                         sum := sum - v[j]*GramMatrix[m];
@@ -960,7 +968,7 @@ function(a,b,n,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,repre
                         for l in [1..dim] do
                             if w[l] <> 0 then 
                             
-                                m := MAJORANA_FindPairOrbit(k, l, pairorbitlist, coordinates, Orbitals);;
+                                m := MAJORANA_FindPairOrbit(k, l, ProductList);;
 
                                 if GramMatrix[m] <> false then
                                     sum := sum - v[k]*w[l]*GramMatrix[m];
@@ -1054,7 +1062,7 @@ function(v,NullSp)
 
 InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
-    function(k,l, GramMatrix, AlgebraProducts, ProductList, pairrepresentatives)
+    function(k,l, GramMatrix, AlgebraProducts, ProductList)
     
     local j,dim,res,x,y,z,u,v,w;
 
@@ -1069,15 +1077,15 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
         if AlgebraProducts[j] <> false and AlgebraProducts[j][k] <> 0 then 
         
             u := [1..dim]*0; u[l] := 1;
-            v := [1..dim]*0; v[pairrepresentatives[j][1]] := 1;
+            v := [1..dim]*0; v[ProductList[7][j][1]] := 1;
         
             x := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
         
             if x <> false then
                 
-                u := [1..dim]*0; u[pairrepresentatives[j][2]] := 1;
+                u := [1..dim]*0; u[ProductList[7][j][2]] := 1;
             
-                y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3], ProductList[1], ProductList[9]);
+                y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList);
                 
                 if y <> false then 
                     
@@ -1085,7 +1093,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                     
                     w := [1..dim]*0; w[l] := 1;
                     
-                    z := MAJORANA_InnerProduct(w,v,GramMatrix, ProductList[3], ProductList[1], ProductList[9]);
+                    z := MAJORANA_InnerProduct(w,v,GramMatrix, ProductList);
                     
                     if z <> false then 
                                            
@@ -1103,15 +1111,15 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
             else
             
                 u := [1..dim]*0; u[l] := 1;
-                v := [1..dim]*0; v[pairrepresentatives[j][2]] := 1;
+                v := [1..dim]*0; v[ProductList[7][j][2]] := 1;
             
                 x := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
         
                 if x <> false then
                     
-                    u := [1..dim]*0; u[pairrepresentatives[j][1]] := 1;
+                    u := [1..dim]*0; u[ProductList[7][j][1]] := 1;
                 
-                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList[3], ProductList[1], ProductList[9]);
+                    y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList);
                     
                     if y <> false then 
                         
@@ -1119,7 +1127,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                         
                         w := [1..dim]*0; w[l] := 1;
                         
-                        z := MAJORANA_InnerProduct(w,v,GramMatrix, ProductList[3], ProductList[1], ProductList[1]);
+                        z := MAJORANA_InnerProduct(w,v,GramMatrix, ProductList);
                         
                         if z <> false then 
                                                
@@ -1150,7 +1158,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
 InstallGlobalFunction(MAJORANA_FullUnknownsAxiomM1,
 
-function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
+function(i,GramMatrix,AlgebraProducts,ProductList)
 
     local j, k, l, x, res;
     
@@ -1158,18 +1166,18 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
     
     j := 1;
     
-    while j < Size(Orbitals[i]) + 1 do 
+    while j < Size(ProductList[9][i]) + 1 do 
         
-        k := ProductList[5][Position(ProductList[2],Orbitals[i][j][1])];
-        l := ProductList[5][Position(ProductList[2],Orbitals[i][j][2])];
+        k := ProductList[5][Position(ProductList[2],ProductList[9][i][j][1])];
+        l := ProductList[5][Position(ProductList[2],ProductList[9][i][j][2])];
         
         if k > 0 and l > 0 then 
 
-            res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+            res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList);
         
         elif k > 0 and l < 0 then 
         
-            x := MAJORANA_UnknownsAxiomM1(k,-l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+            x := MAJORANA_UnknownsAxiomM1(k,-l,GramMatrix,AlgebraProducts,ProductList);
         
             if x <> false then 
                 res := - x;
@@ -1177,7 +1185,7 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
             
         elif k < 0 and l > 0 then 
         
-            x := MAJORANA_UnknownsAxiomM1(-k,l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+            x := MAJORANA_UnknownsAxiomM1(-k,l,GramMatrix,AlgebraProducts,ProductList);
         
             if x <> false then 
                 res := - x;
@@ -1185,13 +1193,13 @@ function(i,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives)
             
         else
         
-            res := MAJORANA_UnknownsAxiomM1(-k,-l,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+            res := MAJORANA_UnknownsAxiomM1(-k,-l,GramMatrix,AlgebraProducts,ProductList);
         fi;
         
         if res = false then 
             j := j + 1;
         else
-            j := Size(Orbitals[i]) + 1;
+            j := Size(ProductList[9][i]) + 1;
         fi;
         
     od;
@@ -1330,7 +1338,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     
 InstallGlobalFunction(MAJORANA_Resurrection,
 
-    function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp)
+    function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix)
     
     local a, b, sum, row, alpha, beta, gamma, mat, vec, bad, list, j, m, k, l, dim, u, v, x, y, z, g, sign, record;
     
@@ -1405,7 +1413,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                     if ev_b = 2 then 
                     
                         u := [1..dim]*0; u[i] := 1; 
-                        x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList[3], ProductList[1], ProductList[9]);
+                        x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList);
                     
                         if x <> false then 
                             sum := sum + u*x/4;
@@ -1421,7 +1429,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                             fi;
                         else
                         
-                            sum := MAJORANA_RemoveNullSpace(sum,NullSp);
+                            sum := MAJORANA_RemoveNullSpace(sum,ProductList[6]);
                              
                             Add(mat,row);
                             Add(vec,sum);
@@ -1439,7 +1447,7 @@ end );
 
 InstallGlobalFunction(MAJORANA_FullResurrection,
 
-    function(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp)
+    function(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix)
     
     local mat, vec, record, j, k, l, x, t;
     
@@ -1454,7 +1462,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             for l in [1..2] do 
                 if [k,l] <> [2,2] then 
             
-                    x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
+                    x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix);
                     
                     if x[1] <> [] then 
                         Append(mat, x[1]);
@@ -1472,7 +1480,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
-    function(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives)
+    function(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList)
     
     local i, m, j, k, row, sum, dim, y, mat, vec, a, x, record;
     
@@ -1516,62 +1524,62 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
 InstallGlobalFunction( MAJORANA_FindConjElement,
 
-    function( i, j, pairconjelements, coordinates, pairorbitlist, pairrepresentatives, Orbitals, G)
+    function( i, j, ProductList)
     
         local   x,      # input elements
                 y,      # representative elements
                 k,      # orbital of elements
                 g;      # conjugating element
                 
-        if pairconjelements[i][j] = false then 
+        if ProductList[4][i][j] = false then 
         
-            x := [coordinates[i],coordinates[j]];
+            x := [ProductList[1][i],ProductList[1][j]];
             y := [0,0];
             
-            k := MAJORANA_FindPairOrbit(i, j, pairorbitlist, coordinates, Orbitals);
+            k := MAJORANA_FindPairOrbit(i, j, ProductList);
         
-            y[1] := coordinates[pairrepresentatives[k][1]];
-            y[2] := coordinates[pairrepresentatives[k][2]];
+            y[1] := ProductList[1][ProductList[7][k][1]];
+            y[2] := ProductList[1][ProductList[7][k][2]];
         
-            g := RepresentativeAction(G,y,x,OnPairs);
+            g := RepresentativeAction(ProductList[8],y,x,OnPairs);
             
             if g <> fail then
                 
-                pairconjelements[i][j] := g;
-                pairconjelements[j][i] := g;
+                ProductList[4][i][j] := g;
+                ProductList[4][j][i] := g;
                      
                 return g;
             else
             
-                g := RepresentativeAction(G,y,Reversed(x),OnPairs);
+                g := RepresentativeAction(ProductList[8],y,Reversed(x),OnPairs);
                 
-                pairconjelements[i][j] := g;
-                pairconjelements[j][i] := g;
+                ProductList[4][i][j] := g;
+                ProductList[4][j][i] := g;
                 
                 return g;
             fi;
         else
-            return pairconjelements[i][j];
+            return ProductList[4][i][j];
         fi;
     
     end );
     
 InstallGlobalFunction( MAJORANA_FindPairOrbit,
 
-    function( i, j, pairorbitlist, coordinates, Orbitals)
+    function( i, j, ProductList)
     
         local k;    # loop through orbitals
         
-        if pairorbitlist[i][j] = false then 
+        if ProductList[3][i][j] = false then 
             
             k := 1;
             
-            while k < Size(Orbitals) + 1 do
+            while k < Size(ProductList[9]) + 1 do
             
-                if [coordinates[i],coordinates[j]] in Orbitals[k] then
+                if [ProductList[1][i],ProductList[1][j]] in ProductList[9][k] then
                 
-                    pairorbitlist[i][j] := k;
-                    pairorbitlist[j][i] := k;
+                    ProductList[3][i][j] := k;
+                    ProductList[3][j][i] := k;
                     
                     return k;
                 else
@@ -1579,7 +1587,7 @@ InstallGlobalFunction( MAJORANA_FindPairOrbit,
                 fi;
             od;
         else
-            return pairorbitlist[i][j];
+            return ProductList[3][i][j];
         fi;
         
     end );
@@ -2027,7 +2035,7 @@ function(G,T)
             for j in [1..t] do
                 for k in [1..t] do
 
-                    l := MAJORANA_FindPairOrbit(j, k, pairorbitlist, coordinates, Orbitals);
+                    l := MAJORANA_FindPairOrbit(j, k, ProductList);
 
                     if Shape[l] = ['2','A'] then
                     
@@ -2179,7 +2187,7 @@ function(G,T)
                         
                         # put in products of 2A and 3A axes
                         
-                        l := MAJORANA_FindPairOrbit(pos[7], pos[8], pairorbitlist, coordinates, Orbitals);
+                        l := MAJORANA_FindPairOrbit(pos[7], pos[8], ProductList);
                         
                         AlgebraProducts[l] := [1..dim]*0;
                         
@@ -2352,7 +2360,7 @@ function(G,T)
 
                         GramMatrix[j]:=1/4;
                     else
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
 
                 # 2,4 products
@@ -2378,7 +2386,7 @@ function(G,T)
                         GramMatrix[j] := 3/8;
 
                     else
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
 
                 # (2,5) values
@@ -2404,7 +2412,7 @@ function(G,T)
 
                         GramMatrix[j] := 0;
                     else
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
                 elif x = y then 
                 
@@ -2463,7 +2471,7 @@ function(G,T)
             
                 for j in [1..SizeOrbitals] do
                     if GramMatrix[j] = false then 
-                        x := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        x := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                         
                         if x <> false then 
                             count := count + 1;
@@ -2477,15 +2485,6 @@ function(G,T)
                     break;
                 fi;
             od;            
-
-            GramMatrixT:=MAJORANA_FillGramMatrix(GramMatrix,OrbitalsT,coordinates,pairorbitlist,t);
-
-            x := MAJORANA_PositiveDefinite(GramMatrixT);
-
-            if x = -1 then
-                Output[i]:=[StructuralCopy(Shape),"Error","Inner product not positive definite on A", StructuralCopy(GramMatrixT)];
-                break;
-            fi;
 
                                         ## STEP 4: MORE PRODUCTS ##
             
@@ -2640,7 +2639,7 @@ function(G,T)
                             for k in [0..3] do 
                                 for l in [k+1..3] do
 
-                                    x := MAJORANA_Orthogonality(k,l,j,UnknownInnerProducts,EigenVectors,GramMatrix, pairorbitlist,representatives, coordinates, Orbitals, dim);
+                                    x := MAJORANA_Orthogonality(k,l,j,UnknownInnerProducts,EigenVectors,GramMatrix, ProductList, dim);
                                     
                                     if x[1] then 
                                         Append(mat,x[2][1]);
@@ -2716,7 +2715,7 @@ function(G,T)
                 # Check that GramMatrix matrix is pd
                 
                 if ForAll(GramMatrix, x -> x <> false) then 
-                    GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, coordinates, pairorbitlist, dim);
+                    GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
 
                     x := MAJORANA_PositiveDefinite(GramMatrixFull);
 
@@ -2762,7 +2761,7 @@ function(G,T)
 
                 # Check fusion and M1
 
-                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
+                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
                 if Size(ErrorM1)>0 then
                     Output[i] := [ StructuralCopy(Shape)
@@ -2799,7 +2798,7 @@ function(G,T)
                 
                     a := [1..dim]*0; a[j]:=1;
                 
-                    UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,pairorbitlist, coordinates, Orbitals);
+                    UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                     
                     if UnknownAlgebraProducts <> [] then
                     
@@ -2822,7 +2821,7 @@ function(G,T)
                         
                         if Size(NullSp) > 0 then 
                             
-                            x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
+                            x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList);
                             
                             Append(mat,x[1]);
                             Append(vec,x[2]);
@@ -2839,9 +2838,9 @@ function(G,T)
                                     
                                         x := UnknownAlgebraProducts[k]; 
                                         
-                                        y := MAJORANA_FindPairOrbit(x[1], x[2], pairorbitlist, coordinates, Orbitals);
+                                        y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
                                         
-                                        g := MAJORANA_FindConjElement( x[1], x[2], pairconjelements, coordinates, pairorbitlist, pairrepresentatives, Orbitals, G);
+                                        g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
                                                                         
                                         AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
                                     fi;
@@ -2873,7 +2872,7 @@ function(G,T)
 
                 # Check fusion and M1
 
-                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
+                ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
                 if Size(ErrorM1)>0 then
                     Output[i] := [ StructuralCopy(Shape)
@@ -2917,9 +2916,9 @@ function(G,T)
                     od;
                 od;
                 
-                UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,pairorbitlist, coordinates, Orbitals);
+                UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                         
-                x := MAJORANA_FullResurrection(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,pairrepresentatives,NullSp);
+                x := MAJORANA_FullResurrection(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix);
                 
                 mat := x[1];
                 vec := x[2];
@@ -2927,7 +2926,7 @@ function(G,T)
                 
                 if Size(NullSp) > 0 then 
                             
-                    x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
+                    x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList);
                     
                     Append(mat,x[1]);
                     Append(vec,x[2]);
@@ -2944,9 +2943,9 @@ function(G,T)
                             
                                 x := UnknownAlgebraProducts[k]; 
                                 
-                                y := MAJORANA_FindPairOrbit( x[1], x[2], pairorbitlist, coordinates, Orbitals);
+                                y := MAJORANA_FindPairOrbit( x[1], x[2], ProductList);
                                 
-                                g := MAJORANA_FindConjElement( x[1], x[2], pairconjelements, coordinates, pairorbitlist, pairrepresentatives, Orbitals, G);
+                                g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
                                                                 
                                 AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
                             fi;
@@ -3089,7 +3088,7 @@ function(G,T)
 
             # Check bilinear form is positive definite
             
-            GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, Orbitals, coordinates, pairorbitlist, dim);
+            GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
 
             if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
                 Output[i] := StructuralCopy([ Shape
@@ -3108,7 +3107,7 @@ function(G,T)
 
             # Check that all triples obey axiom M1
 
-            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,Orbitals,ProductList,pairrepresentatives);
+            ErrorM1:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
             if Size(ErrorM1)>0 then
                 Output[i] := StructuralCopy([ Shape
@@ -3147,7 +3146,7 @@ function(G,T)
 
             # Check that the eigenspaces are orthogonal
 
-            ErrorOrthogonality := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,pairorbitlist, coordinates, Orbitals);
+            ErrorOrthogonality := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if Size(ErrorOrthogonality) > 0 then
                 Output[i] := StructuralCopy([Shape
@@ -3167,7 +3166,7 @@ function(G,T)
 
             # Check M2
 
-            # ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList,pairorbitlist);
+            # ErrorM2:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
 
             # if ErrorM2 = -1 then
             #    Output[i] := StructuralCopy([Shape
