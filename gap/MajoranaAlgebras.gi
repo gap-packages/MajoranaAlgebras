@@ -1775,6 +1775,8 @@ function(G,T)
     for i in [1..Size(Binaries)] do
         
         ProductList := [1..9]*0;
+        
+        ProductList[8] := G;
 
         Output[i]:=[];
 
@@ -1961,9 +1963,6 @@ function(G,T)
                 ProductList[3][y[1]][y[2]] := j;
                 ProductList[3][y[2]][y[1]] := j;
             od; 
-
-            ProductList:=[ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5],[],ProductList[7],G, ProductList[9]];
-
 
                                         ## STEP 3: PRODUCTS AND EVECS I ##
 
