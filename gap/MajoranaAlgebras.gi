@@ -1573,11 +1573,10 @@ function(G,T)
             Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, u, v, w,
 
             # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixT, GramMatrixFull, LI, AlgebraProducts, EigenVectors,
-            EigenVector, sign, x0, x1, xm1, x2, xm2, x3, x4, x5, x2A, x3A,
+            GramMatrix, GramMatrixT, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
 
             # Step 4 - More products and evecs
-            h, s, xj, xk, xl, xik, xil, xjk, xjl, xkl, xx, NullSp, dim, a, g,
+            h, s, NullSp, dim, a, g,
 
             # Step 5 - More evecs
             switch, Dimensions, NewDimensions, NewEigenVectors, table, ev_a, ev_b,
@@ -1647,7 +1646,7 @@ function(G,T)
         
     od;
     
-     SizeOrbitalsT:=Size(OrbitalsT);
+    SizeOrbitalsT:=Size(OrbitalsT);
 
                                         ## STEP 1: SHAPE ##
 
@@ -1658,7 +1657,9 @@ function(G,T)
     RepsSquares6A:=[];
 
     for i in [1..SizeOrbitalsT] do
+    
         x:=Representative(OrbitalsT[i]);
+        
         if Order(x[1]*x[2]) = 1 then
             Shape[i]:="1A";
         fi;
@@ -1786,7 +1787,7 @@ function(G,T)
             Append(coordinates,4Aaxes);
             Append(coordinates,5Aaxes);
 
-            dim:=Size(coordinates);
+            dim := Size(coordinates);
             
             longcoordinates:=StructuralCopy(T);
             positionlist:=[1..t];
@@ -2110,12 +2111,7 @@ function(G,T)
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
 
                     elif Shape[l] = ['6','A'] then
-                    
-                        # put in products of 2A and 3A axes
-                        
-                        AlgebraProducts[pairorbitlist[x2A][x3A]] := [1..dim]*0;
-                        GramMatrix[pairorbitlist[x2A][x3A]] := 0;
-                    
+
                         pos := [j, k, 0, 0, 0, 0, 0, 0];
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
                         pos[4] := Position(T, T[k]*T[j]*T[k]);
@@ -2139,6 +2135,11 @@ function(G,T)
                         vals := [0, 0, 0, 1, -1, 0, 0, 0];
 
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                        
+                        # put in products of 2A and 3A axes
+                        
+                        AlgebraProducts[pairorbitlist[pos[7]][[pos[8]]]] := [1..dim]*0;
+                        GramMatrix[pairorbitlist[pos[7]][pos[8]]] := 0;
 
                     fi;
                 od;
@@ -2433,8 +2434,6 @@ function(G,T)
                     break;
                 fi;
             od;            
-
-            LI:=1;
 
             GramMatrixT:=MAJORANA_FillGramMatrix(GramMatrix,OrbitalsT,longcoordinates,pairorbitlist,t);
 
@@ -2799,29 +2798,17 @@ function(G,T)
                         NullSp:=MAJORANA_NullSpace(GramMatrixFull);
                         
                         ProductList[6] := NullSp;
-                        
-                        LI:=0;
-                    else
-                        LI:=1;
                     fi;
-                else
-                    LI := 1;
                 fi;
 
-                if LI=0 then
-
-                    dim:=t+u+v+w;
-                    
-                    n := Size(NullSp);
+                if Size(NullSp) > 0 then
 
                     # Change alg products to get rid of any axes not in the basis
-
-                    for j in [1..n] do
-                        for k in [1..SizeOrbitals] do
-                            if AlgebraProducts[k] <> false then
-                                AlgebraProducts[k]:= MAJORANA_RemoveNullSpace(AlgebraProducts[k], NullSp);
-                            fi;
-                        od;
+                    
+                    for k in [1..SizeOrbitals] do
+                        if AlgebraProducts[k] <> false then
+                            AlgebraProducts[k]:= MAJORANA_RemoveNullSpace(AlgebraProducts[k], NullSp);
+                        fi;
                     od;
 
                     # Change evecs to get rid of any axes not in the basis
@@ -2833,8 +2820,6 @@ function(G,T)
                             od;
                         od;
                     od;
-                else
-                    dim:=t+u+v+w;
                 fi;
 
                                             ## STEP 7: MORE PRODUCTS II ##
@@ -2899,7 +2884,7 @@ function(G,T)
                         
                         # use fact that if v in null space then a \cdot v = 0
                         
-                        if LI = 0 then 
+                        if Size(NullSp) > 0 then 
                             
                             x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
                             
@@ -3008,7 +2993,7 @@ function(G,T)
                 vec := x[2];
                 record := x[3];
                 
-                if LI = 0 then 
+                if Size(NullSp) > 0 then 
                             
                     x := MAJORANA_NullSpaceAlgebraProducts(NullSp, UnknownAlgebraProducts, AlgebraProducts, ProductList, pairrepresentatives);
                     
@@ -3076,7 +3061,7 @@ function(G,T)
                             EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
 
                             
-                            if LI = 0 then 
+                            if Size(NullSp) > 0 then 
                                 for k in [1..4] do 
                                     for l in [1..Size(EigenVectors[j][k])] do
                                         MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],NullSp);
