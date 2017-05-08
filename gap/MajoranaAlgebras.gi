@@ -1535,7 +1535,7 @@ InstallGlobalFunction( MAJORANA_FindConjElement,
     
 InstallGlobalFunction( MAJORANA_MakeVector,
 
-    function( pos, vals, dim);
+    function( pos, vals, dim)
     
     local   vec,    # output vector
             i;      # loop over input
@@ -1584,6 +1584,8 @@ function(G,T)
 
             # Step 6 - More inner products
             UnknownInnerProducts, mat, vec, sum, row, Solution, record,
+            
+            vals, pos,
 
             
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts;     
@@ -1981,258 +1983,162 @@ function(G,T)
             # Add eigenvectors from IPSS10
 
             for j in [1..t] do
+                for k in [1..t] do
 
-                x0:=j;
+                    l := pairorbitlist[j][k];
 
-                for l in [1..t] do
+                    if Shape[l] = ['2','A'] then
+                    
+                        pos := [j, k, 0];
+                        pos[3] := Position(T,T[j]*T[k]);
+                        
+                        vals := [-1/4, 1, 1];
+                        
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+                        
+                        vals := [0, 1, -1];
 
-                    k:=pairorbitlist[x0][l];
+                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
 
-                    x1 := Position(pairorbitlist[x0],k);
+                    elif Shape[l] = ['2','B'] then
+                    
+                        pos := [k];
+                        vals := [1];
 
-                    if Shape[k] = ['2','A'] then
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                        x2 := Position(T,T[x0]*T[x1]);
+                    elif Shape[l] = ['3','A'] then
+                    
+                        pos := [j, k, 0, 0];
 
-                        EigenVector:=[1..dim]*0;
+                        pos[3] := Position(T, T[j]*T[k]*T[j]);
+                        pos[4] := positionlist[Position(longcoordinates,T[j]*T[k])];
 
-                        EigenVector[x0] :=-1/4;
-                        EigenVector[x1] :=1;
-                        EigenVector[x2] :=1;
+                        vals := [-10/27, 32/27, 32/27, 1];
 
-                        Add(EigenVectors[j][1],EigenVector);
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+                        
+                        vals := [-8/45, -32/45, -32/45, 1];
 
-                        EigenVector:=[1..dim]*0;
+                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
 
-                        EigenVector[x1]:=1;
-                        EigenVector[x2]:=-1;
+                        vals := [0, 1, -1, 0];
 
-                        Add(EigenVectors[j][2],EigenVector);
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[k] = ['2','B'] then
+                    elif Shape[l] = ['3','C'] then
+                    
+                        pos := [j, k, 0];
 
-                        EigenVector := [1..dim]*0;
+                        pos[3] := Position(T, T[j]*T[k]*T[j]);
 
-                        EigenVector[x1] := 1;
+                        vals := [-1/32, 1, 1];
 
-                        Add(EigenVectors[j][1],EigenVector);
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[k] = ['3','A'] then
+                        vals := [0, 1, -1];
 
-                        xm1 := Position(T, T[x0]*T[x1]*T[x0]);
-                        x3 := positionlist[Position(longcoordinates,T[x0]*T[x1])];
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                        EigenVector := [1..dim]*0;;
+                    elif Shape[l] = ['4','A'] then
+                        
+                        pos := [j, k, 0, 0, 0];
+                        pos[3] := Position(T, T[j]*T[k]*T[j]);
+                        pos[4] := Position(T, T[k]*T[j]*T[k]);
+                        pos[5] := positionlist[Position(longcoordinates,T[j]*T[k])];
 
-                        EigenVector[x0]:=-10/27;
-                        EigenVector[x1]:=32/27;
-                        EigenVector[xm1]:=32/27;
-                        EigenVector[x3]:=1;
+                        vals := [-1/2, 2, 2, 1, 1];
 
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        vals := [-1/3, 2/3, -2/3, -1/3, 1]; 
 
-                        EigenVector[x0]:=-8/45;
-                        EigenVector[x1]:=-32/45;
-                        EigenVector[xm1]:=-32/45;
-                        EigenVector[x3]:=1;
+                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
 
-                        Add(EigenVectors[j][2],StructuralCopy(EigenVector));
+                        vals := [0, 1, -1, 0, 0];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
+                    elif Shape[l] = ['4','B'] then
+                        
+                        pos := [j, k, 0, 0, 0];
+                        pos[3] := Position(T, T[j]*T[k]*T[j]);
+                        pos[4] := Position(T, T[k]*T[j]*T[k]);
+                        pos[5] := Position(T, (T[j]*T[k])^2);
+                        
+                        vals := [-1/32, 1, 1, 1/8, -1/8];
 
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[k] = ['3','C'] then
+                        vals := [0, 1, -1, 0, 0];
 
-                        xm1 := Position(T, T[x0]*T[x1]*T[x0]);
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                        EigenVector:=NullMat(1,dim)[1];
+                    elif Shape[l] = ['5','A'] then
+                    
+                        pos := [j, k, 0, 0, 0, 0];
+                        pos[3] := Position(T, T[j]*T[k]*T[j]);
+                        pos[4] := Position(T, T[k]*T[j]*T[k]);
+                        pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
+                        pos[6] := positionlist[Position(longcoordinates,T[j]*T[k])]; 
 
-                        EigenVector[x0]:=-1/32;
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=1;
-
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
-
-                    elif Shape[k] = ['4','A'] then
-
-                        xm1 := Position(T, T[x0]*T[x1]*T[x0]);
-                        x2 := Position(T, T[x1]*T[x0]*T[x1]);
-                        x4 := positionlist[Position(longcoordinates,T[x0]*T[x1])];
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/2;
-                        EigenVector[x1]:=2;
-                        EigenVector[xm1]:=2;
-                        EigenVector[x2]:=1;
-                        EigenVector[x4]:=1;
-
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/3;
-                        EigenVector[x1]:=-2/3;
-                        EigenVector[xm1]:=-2/3;
-                        EigenVector[x2]:=-1/3;
-                        EigenVector[x4]:=1;
-
-                        Add(EigenVectors[j][2],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
-
-                    elif Shape[k] = ['4','B'] then
-
-                        xm1 := Position(T, T[x0]*T[x1]*T[x0]);
-                        x2 := Position(T, T[x1]*T[x0]*T[x1]);
-                        x4 := Position(T, (T[x0]*T[x1])^2);
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-1/32;
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=1;
-                        EigenVector[x2]:=1/8;
-                        EigenVector[x4]:=-1/8;
-
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
-
-                    elif Shape[k] = ['5','A'] then
-
-                        xm1 := Position(T, T[x0]*T[x1]*T[x0]);
-                        x2 := Position(T, T[x1]*T[x0]*T[x1]);
-                        xm2 := Position(T, T[x0]*T[x1]*T[x0]*T[x1]*T[x0]);
-                        x5 := positionlist[Position(longcoordinates,T[x0]*T[x1])];
-
-                        if x5 < 0 then
-                            x5 := -x5;
+                        if pos[6] < 0 then
+                            pos[6] := -pos[6];
                             sign := -1;
                         else
                             sign := 1;
                         fi;
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        vals := [3/512, -15/128, -15/128, -1/128, -1/128, sign*1];
 
-                        EigenVector[x0]:=3/512;
-                        EigenVector[x1]:=-15/128;
-                        EigenVector[xm1]:=-15/128;
-                        EigenVector[x2]:=-1/128;
-                        EigenVector[xm2]:=-1/128;
-                        EigenVector[x5]:=sign*1;
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
 
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+                        vals := [-3/512, 1/128, 1/128, 15/128, 15/128, sign*1];
 
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x0]:=-3/512;
-                        EigenVector[x1]:=1/128;
-                        EigenVector[xm1]:=1/128;
-                        EigenVector[x2]:=15/128;
-                        EigenVector[xm2]:=15/128;
-                        EigenVector[x5]:=sign*1;
-
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1/128;
-                        EigenVector[xm1]:=1/128;
-                        EigenVector[x2]:=-1/128;
-                        EigenVector[xm2]:=-1/128;
-                        EigenVector[x5]:=sign*1;
-
-                        Add(EigenVectors[j][2],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x2]:=1;
-                        EigenVector[xm2]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
-
-                    elif Shape[k] = ['6','A'] then
-
-                        xm1 := Position(T, T[x0]*T[x1]*T[x0]);
-                        x2 := Position(T, T[x1]*T[x0]*T[x1]);
-                        xm2 := Position(T, T[x0]*T[x1]*T[x0]*T[x1]*T[x0]);
-                        x3 := Position(T, T[x1]*T[x0]*T[x1]*T[x0]*T[x1]);
-                        x2A := Position(T, (T[x0]*T[x1])^3);
-                        x3A := positionlist[Position(longcoordinates,(T[x0]*T[x1])^2)];
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
                         
+                        vals := [0, 1/128, 1/128, -1/128, -1/128, sign*1];
+
+                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
+
+                        vals := [0, 1, -1, 0, 0, 0];
+
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+
+                        vals := [0, 0, 0, 1, -1, 0];
+
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+
+                    elif Shape[l] = ['6','A'] then
+                    
                         # put in products of 2A and 3A axes
                         
                         AlgebraProducts[pairorbitlist[x2A][x3A]] := [1..dim]*0;
                         GramMatrix[pairorbitlist[x2A][x3A]] := 0;
+                    
+                        pos := [j, k, 0, 0, 0, 0, 0, 0];
+                        pos[3] := Position(T, T[j]*T[k]*T[j]);
+                        pos[4] := Position(T, T[k]*T[j]*T[k]);
+                        pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
+                        pos[6] := Position(T, T[k]*T[j]*T[k]*T[j]*T[k]);
+                        pos[7] := Position(T, (T[j]*T[k])^3);
+                        pos[8] := positionlist[Position(longcoordinates,(T[j]*T[k])^2)];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
 
-                        EigenVector[x0]:=2/45;
-                        EigenVector[x1]:=-256/45;
-                        EigenVector[xm1]:=-256/45;
-                        EigenVector[x2]:=-32/45;
-                        EigenVector[xm2]:=-32/45;
-                        EigenVector[x3]:=-32/45;
-                        EigenVector[x2A]:=32/45;
-                        EigenVector[x3A]:=1;
+                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
 
-                        Add(EigenVectors[j][1],StructuralCopy(EigenVector));
+                        vals := [-8/45, 0, 0, -32/45, -32/45, -32/45, 32/45, 1];
 
-                        EigenVector:=NullMat(1,dim)[1];
+                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
+                        
+                        vals := [0, 1, -1, 0, 0, 0, 0, 0];
 
-                        EigenVector[x0]:=-8/45;
-                        EigenVector[x2]:=-32/45;
-                        EigenVector[xm2]:=-32/45;
-                        EigenVector[x3]:=-32/45;
-                        EigenVector[x2A]:=32/45;
-                        EigenVector[x3A]:=1;
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
 
-                        Add(EigenVectors[j][2],StructuralCopy(EigenVector));
+                        vals := [0, 0, 0, 1, -1, 0, 0, 0];
 
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x1]:=1;
-                        EigenVector[xm1]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
-
-                        EigenVector:=NullMat(1,dim)[1];
-
-                        EigenVector[x2]:=1;
-                        EigenVector[xm2]:=-1;
-
-                        Add(EigenVectors[j][3],StructuralCopy(EigenVector));
+                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
 
                     fi;
                 od;
@@ -2395,7 +2301,7 @@ function(G,T)
                         AlgebraProducts[j][y]:=1/64;
                         AlgebraProducts[j][xm1]:=-1/64;
                         AlgebraProducts[j][x2]:=-1/64;
-                        AlgebraProducts[j][x4]:= 1/64;
+                        AlgebraProducts[j][x2A]:= 1/64;
 
                         GramMatrix[j]:=1/64;
 
