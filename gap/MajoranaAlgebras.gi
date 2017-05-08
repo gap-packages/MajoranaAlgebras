@@ -1037,7 +1037,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductLi
     
 InstallGlobalFunction(MAJORANA_RemoveNullSpace,
 
-function(v,ProductList[6]) 
+function(v,NullSp) 
 
     local   i,      # loop over nullspace
             j,      # leading coefficient (from rhs)
@@ -1045,11 +1045,11 @@ function(v,ProductList[6])
     
     dim := Size(v);
 
-    if Size(ProductList[6]) > 0 then 
-        for i in [1..Size(ProductList[6])] do
-            j := Position(Reversed(ProductList[6][i]),1);
+    if Size(NullSp) > 0 then 
+        for i in [1..Size(NullSp)] do
+            j := Position(Reversed(NullSp[i]),1);
             if v[dim - j + 1] <> 0 then 
-                v := v - v[dim - j + 1]*ProductList[6][i];
+                v := v - v[dim - j + 1]*NullSp[i];
             fi;
         od;
     fi;
@@ -1480,7 +1480,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
-    function(ProductList[6], UnknownAlgebraProducts, AlgebraProducts, ProductList)
+    function(UnknownAlgebraProducts, AlgebraProducts, ProductList)
     
     local i, m, j, k, row, sum, dim, y, mat, vec, a, x, record;
     
@@ -2785,7 +2785,7 @@ function(G,T)
                         
                         if Size(ProductList[6]) > 0 then 
                             
-                            x := MAJORANA_NullSpaceAlgebraProducts(ProductList[6], UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                            x := MAJORANA_NullSpaceAlgebraProducts(UnknownAlgebraProducts, AlgebraProducts, ProductList);
                             
                             Append(mat,x[1]);
                             Append(vec,x[2]);
@@ -2890,7 +2890,7 @@ function(G,T)
                 
                 if Size(ProductList[6]) > 0 then 
                             
-                    x := MAJORANA_NullSpaceAlgebraProducts(ProductList[6], UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                    x := MAJORANA_NullSpaceAlgebraProducts(UnknownAlgebraProducts, AlgebraProducts, ProductList);
                     
                     Append(mat,x[1]);
                     Append(vec,x[2]);
