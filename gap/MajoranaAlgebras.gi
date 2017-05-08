@@ -1543,6 +1543,34 @@ InstallGlobalFunction( MAJORANA_FindConjElement,
     
     end );
     
+InstallGlobalFunction( MAJORANA_FindPairOrbit,
+
+    function( i, j, pairorbitlist, coordinates, Orbitals)
+    
+        local k;    # loop through orbitals
+        
+        if pairorbitlist[i][j] = false then 
+            
+            k := 1;
+            
+            while k < Size(Orbitals) + 1 do
+            
+                if [coordinates[i],coordinates[j]] in Orbitals[k] then
+                
+                    pairorbitlist[i][j] := k;
+                    pairorbitlist[j][i] := k;
+                    
+                    return k;
+                else
+                    k := k + 1;
+                fi;
+            od;
+        else
+            return pairorbitlist[i][j];
+        fi;
+        
+    end );
+    
 InstallGlobalFunction( MAJORANA_MakeVector,
 
     function( pos, vals, dim)

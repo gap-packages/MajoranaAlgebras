@@ -60,5 +60,7 @@ DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
 
 DeclareGlobalFunction( "MAJORANA_FindConjElement" );
 
+DeclareGlobalFunction( "MAJORANA_FindPairOrbit" );
+
 DeclareGlobalFunction( "MAJORANA_MakeVector" );
 
