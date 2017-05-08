@@ -1318,7 +1318,6 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     return [row,sum];
     
     end);
-
     
 InstallGlobalFunction(MAJORANA_Resurrection,
 
@@ -3054,7 +3053,6 @@ function(G,T)
                                  , StructuralCopy(GramMatrix)
                                  , StructuralCopy(AlgebraProducts)
                                  , StructuralCopy(ErrorM1)];
-                    Error("axiom M1");
                     break;
                 fi;
 
@@ -3118,14 +3116,22 @@ function(G,T)
                             Solution:=MAJORANA_SolutionMatVecs(mat,vec);
 
                             if Size(Solution) = 2 then
-                                    for k in [1..Size(Solution[1])] do
-                                        if not k in Solution[2] then
-
-                                            x:=UnknownAlgebraProducts[k]; 
-
-                                            AlgebraProducts[x]:=MAJORANA_RemoveNullSpace(Solution[1][k],NullSp);
+                                for k in [1..Size(UnknownAlgebraProducts)] do
+                                    if not k in Solution[2] then 
+                                    
+                                        x := UnknownAlgebraProducts[k]; 
+                                        
+                                        y := pairorbitlist[x[1]][x[2]];
+                                        
+                                        if pairconjelements[x[1]][x[2]] = false then
+                                            pairconjelements[x[1]][x[2]] := MAJORANA_FindConjElement( x[1], x[2], coordinates, pairorbitlist, pairrepresentatives, G);
                                         fi;
-                                    od;
+                                        
+                                        g := Inverse(pairconjelements[x[1]][x[2]]);
+                                                                        
+                                        AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],g,ProductList);
+                                    fi;
+                                od;
                             else
                                 Output[i] := [ StructuralCopy(Shape)
                                              , "Error"
