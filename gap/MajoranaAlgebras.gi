@@ -2297,23 +2297,18 @@ function(G,T)
                         s := coordinates[x]; h := coordinates[y];
 
                         # Inside a 3A algebra
+                        
+                        pos := [x, 0, 0, y];
+                        pos[2] := Position(T,s*h);
+                        pos[3] := Position(T,s*h*h);
+                        
+                        vals := [2/9, -1/9, -1/9, 5/32];
 
-                        x1 := Position(T,s*h);
-                        xm1 := Position(T,s*h*h);
-
-                        AlgebraProducts[j] := NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=2/9;
-                        AlgebraProducts[j][x1]:=-1/9;
-                        AlgebraProducts[j][xm1]:=-1/9;
-                        AlgebraProducts[j][y]:=5/32;
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j]:=1/4;
-
                     else
- 
                         GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
-
                     fi;
 
                 # 2,4 products
@@ -2326,20 +2321,17 @@ function(G,T)
                     if s*h in T then
 
                         # Inside a 4A algebra
+                        
+                        pos := [x, 0, 0, 0, y];
+                        pos[2] := Position(T,s*h);
+                        pos[3] := Position(T,s*h*h*h);
+                        pos[4] := Position(T,s*h*h);
+                        
+                        vals := [5/16, -1/8, -1/8, -1/16, 3/16];
 
-                        x1 := Position(T,s*h);
-                        xm1 := Position(T,s*h*h*h);
-                        x2 := Position(T,s*h*h);
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x]:=5/16;
-                        AlgebraProducts[j][x1]:=-1/8;
-                        AlgebraProducts[j][xm1]:=-1/8;
-                        AlgebraProducts[j][x2]:=-1/16;
-                        AlgebraProducts[j][y]:= 3/16;
-
-                        GramMatrix[j]:=3/8;
+                        GramMatrix[j] := 3/8;
 
                     else
                         GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
@@ -2347,7 +2339,7 @@ function(G,T)
 
                 # (2,5) values
 
-                 elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 5 then
+                elif Order(coordinates[x]) = 2 and Order(coordinates[y]) = 5 then
 
                     s := coordinates[x];
                     h := coordinates[y];
@@ -2355,107 +2347,58 @@ function(G,T)
                     if s*h in T then
 
                         # Inside a 5A algebra
+                        
+                        pos := [0, 0, 0, 0, y];
+                        pos[1] := Position(T,s*h);
+                        pos[2] := Position(T,s*h^4);
+                        pos[3] := Position(T,s*h^2);
+                        pos[4] := Position(T,s*h^3);
+                        
+                        vals := [7/4096, 7/4096, -7/4096, -7/4096, 7/32];
 
-                        x1 := Position(T,s*h);
-                        xm1 := Position(T,s*h^4);
-                        x2 := Position(T,s*h^2);
-                        xm2 := Position(T,s*h^3);
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
-                        AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x1] := 7/4096;
-                        AlgebraProducts[j][xm1] := 7/4096;
-                        AlgebraProducts[j][x2] := -7/4096;
-                        AlgebraProducts[j][xm2] := -7/4096;
-                        AlgebraProducts[j][y] := 7/32;
-
-                        GramMatrix[j]:=0;
+                        GramMatrix[j] := 0;
                     else
-
                         GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
-
                     fi;
-
-                # 3,3 values
-
-                elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 3 then
-
+                elif x = y then 
+                
                     h := coordinates[x];
-                    k := coordinates[y];
-
-                    if x = y then
-
+                    
+                    if Order(h) = 3 then    # (3,3) values
+                        
                         AlgebraProducts[j] := NullMat(1,dim)[1];
                         AlgebraProducts[j][x] := 1;
 
                         GramMatrix[j] := 8/5;
-
-                    else
-
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
-                    fi;
-
-                # (3,4) values
-
-                elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 4 then
-                
-                    GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
-
-                # (3,5) values
-
-                elif Order(coordinates[x]) = 3 and Order(coordinates[y]) = 5 then
-
-                    GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
+                        
+                    elif Order(h) = 4 then  # (4,4) values
                     
-                # (4,4) values
+                        AlgebraProducts[j] := NullMat(1,dim)[1];
+                        AlgebraProducts[j][x] := 1;
 
-                elif Order(coordinates[x]) = 4 and Order(coordinates[y]) = 4 then
-
-                if x = y then
-
-                    AlgebraProducts[j] := NullMat(1,dim)[1];
-
-                    AlgebraProducts[j][x] := 1;
-
-                    GramMatrix[j] := 2;
-
-                else
-                
-                    GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
-                
-                fi;
-
+                        GramMatrix[j] := 2;
+                        
+                    elif Order(h) = 5 then  # (5,5) values
                     
-                # (4,5) values
-
-                elif Order(coordinates[x]) = 4 and Order(coordinates[y]) = 5 then
-                
-                GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
-
-                # (5,5) values
-
-                elif Order(coordinates[x]) = 5 and Order(coordinates[y]) = 5 then
-       
-                    h := coordinates[x];
-                    k := coordinates[y];
-
-                    if x = y then
-
                         l:=1;
 
                         while l < t+1 do
 
                             if T[l]*h in T then
 
-                                s:=T[l]; x1:=Position(T,s*h); x2:=Position(T,s*h*h); x3:=Position(T,s*h*h*h); x4:=Position(T,s*h*h*h*h);
+                                s:=T[l]; 
+                                
+                                pos := [l, 0, 0, 0, 0];
+                                pos[2] := Position(T,s*h); 
+                                pos[3] := Position(T,s*h^2); 
+                                pos[4] := Position(T,s*h^3); 
+                                pos[5] := Position(T,s*h^4);
+                                
+                                vals := [1..5]*(175/524288);
 
-                                AlgebraProducts[j]:=NullMat(1,dim)[1];
-
-                                AlgebraProducts[j][l]:=175/524288;
-                                AlgebraProducts[j][x1]:=175/524288;
-                                AlgebraProducts[j][x2]:=175/524288;
-                                AlgebraProducts[j][x3]:=175/524288;
-                                AlgebraProducts[j][x4]:=175/524288;
+                                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                                 l:=t+1;
                             else
@@ -2464,15 +2407,10 @@ function(G,T)
                         od;
 
                         GramMatrix[j] := 875/2^(19);
-
-                    else
-                    
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,Orbitals,GramMatrix,AlgebraProducts,ProductList,pairrepresentatives);
                     fi;
-
                 fi;
             od;
-            
+
             switch := 1;
             
             while switch = 1 do
