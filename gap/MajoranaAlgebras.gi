@@ -1774,7 +1774,7 @@ function(G,T)
             h, s, dim, a, g,
 
             # Step 5 - More evecs
-            switch, Dimensions, NewDimensions, NewEigenVectors, ev,
+            switch, Dimensions, NewDimensions, ev,
 
             # Step 6 - More inner products
             unknowns, mat, vec, 
