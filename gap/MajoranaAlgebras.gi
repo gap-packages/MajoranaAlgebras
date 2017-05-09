@@ -949,7 +949,7 @@ function(GramMatrix, ProductList)
 
 InstallGlobalFunction(MAJORANA_Orthogonality,
 
-function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
+function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
 
     local   mat,                    # matrix of unknowns 
             vec,                    # vector of knowns
@@ -964,7 +964,10 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
             l,                      # loop over w 
             m,                      # orbit of pair 
             pos,                    # position of unknown product
+            dim,                    # size of coordinates
             OrthogonalityError;     # list of vectors which do not obey orthogonality
+            
+    dim := Size(ProductList[1]);
 
     mat := [];
     vec := [];
@@ -1053,6 +1056,54 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
     end
 
     );
+    
+InstallGlobalFunction(MAJORANA_FullOrthogonality,
+
+    function(unknowns,EigenVectors,GramMatrix, ProductList)
+    
+    local   i,          # loop over T
+            j,          # loop over eigenvalues
+            t,          # size of T
+            k,          # loop over eigenvalues
+            x,          # res of orthogonality
+            mat,        # matrix of unknown values
+            vec,        # vector of known values
+            ev;         # pair of eigenvalues          
+            
+    mat := [];
+    vec := [];
+    
+    t := Size(EigenVectors);
+
+    for i in [1..t] do
+        for j in [0..3] do 
+            for k in [j+1..3] do
+
+                x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
+                
+                if x[1] then 
+                    Append(mat,x[2][1]);
+                    Append(vec,x[2][2]);
+                else
+                    ev := [,];
+                
+                    ev[1] := MAJORANA_FusionTable[1][j + 1];
+                    ev[2] := MAJORANA_FusionTable[1][k + 1];
+                    
+                    return [false, 
+                            STRINGIFY( "Orthogonality of "
+                                , ev[1], ",", ev[2] 
+                                , " eigenvectors does not hold"),
+                            x[2]];
+                fi;
+            od;
+        od;
+    od;
+    
+    return [true, mat, vec];
+    
+    end );
+
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
@@ -2116,19 +2167,16 @@ function(G,T)
             
             # Start filling in values and products!
 
-            l:=1;
-
             # (2,2) products and eigenvectors from IPSS10
-
 
             # Add eigenvectors from IPSS10
 
             for j in [1..t] do
                 for k in [1..t] do
 
-                    l := MAJORANA_FindPairOrbit(j, k, ProductList);
+                    x := MAJORANA_FindPairOrbit(j, k, ProductList);
 
-                    if Shape[l] = ['2','A'] then
+                    if Shape[x] = ['2','A'] then
                     
                         pos := [j, k, 0];
                         pos[3] := Position(T,T[j]*T[k]);
@@ -2141,14 +2189,14 @@ function(G,T)
 
                         Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[l] = ['2','B'] then
+                    elif Shape[x] = ['2','B'] then
                     
                         pos := [k];
                         vals := [1];
 
                         Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[l] = ['3','A'] then
+                    elif Shape[x] = ['3','A'] then
                     
                         pos := [j, k, 0, 0];
 
@@ -2167,7 +2215,7 @@ function(G,T)
 
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[l] = ['3','C'] then
+                    elif Shape[x] = ['3','C'] then
                     
                         pos := [j, k, 0];
 
@@ -2181,7 +2229,7 @@ function(G,T)
 
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[l] = ['4','A'] then
+                    elif Shape[x] = ['4','A'] then
                         
                         pos := [j, k, 0, 0, 0];
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
@@ -2200,7 +2248,7 @@ function(G,T)
 
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[l] = ['4','B'] then
+                    elif Shape[x] = ['4','B'] then
                         
                         pos := [j, k, 0, 0, 0];
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
@@ -2215,7 +2263,7 @@ function(G,T)
 
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                    elif Shape[l] = ['5','A'] then
+                    elif Shape[x] = ['5','A'] then
                     
                         pos := [j, k, 0, 0, 0, 0];
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
@@ -2250,7 +2298,7 @@ function(G,T)
 
                         Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
 
-                    elif Shape[l] = ['6','A'] then
+                    elif Shape[x] = ['6','A'] then
 
                         pos := [j, k, 0, 0, 0, 0, 0, 0];
                         pos[3] := Position(T, T[j]*T[k]*T[j]);
@@ -2278,11 +2326,11 @@ function(G,T)
                         
                         # put in products of 2A and 3A axes
                         
-                        l := MAJORANA_FindPairOrbit(pos[7], pos[8], ProductList);
+                        x := MAJORANA_FindPairOrbit(pos[7], pos[8], ProductList);
                         
-                        AlgebraProducts[l] := [1..dim]*0;
+                        AlgebraProducts[x] := [1..dim]*0;
                         
-                        GramMatrix[l] := 0;
+                        GramMatrix[x] := 0;
                     fi;
                 od;
                 
@@ -2505,6 +2553,7 @@ function(G,T)
                     else
                         GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
+                    
                 elif x = y then 
                 
                     h := ProductList[1][x];
@@ -2525,15 +2574,15 @@ function(G,T)
                         
                     elif Order(h) = 5 then  # (5,5) values
                     
-                        l:=1;
+                        k := 1;
 
-                        while l < t+1 do
+                        while k < t+1 do
 
-                            if T[l]*h in T then
+                            if T[k]*h in T then
 
-                                s:=T[l]; 
+                                s:=T[k]; 
                                 
-                                pos := [l, 0, 0, 0, 0];
+                                pos := [k, 0, 0, 0, 0];
                                 pos[2] := Position(T,s*h); 
                                 pos[3] := Position(T,s*h^2); 
                                 pos[4] := Position(T,s*h^3); 
@@ -2543,9 +2592,9 @@ function(G,T)
 
                                 AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
-                                l:=t+1;
+                                k:=t+1;
                             else
-                                l:=l+1;
+                                k:=k+1;
                             fi;
                         od;
 
@@ -2681,49 +2730,25 @@ function(G,T)
                         
                     else
 
-                        mat:=[];
-                        vec:=[];
-
-                        for j in [1..t] do
-                            for k in [0..3] do 
-                                for l in [k+1..3] do
-
-                                    x := MAJORANA_Orthogonality(k,l,j,unknowns,EigenVectors,GramMatrix, ProductList, dim);
-                                    
-                                    if x[1] then 
-                                        Append(mat,x[2][1]);
-                                        Append(vec,x[2][2]);
-                                    else
-                                        ev := [,];
-                                    
-                                        ev[1] := MAJORANA_FusionTable[1][k + 1];
-                                        ev[2] := MAJORANA_FusionTable[1][l + 1];
-                                    
-                                        Output[i] := MAJORANA_OutputError( STRINGIFY( "Orthogonality of "
-                                                        , ev[1], ",", ev[2] 
-                                                        , " eigenvectors does not hold" ),
-                                                    x[2],
-                                                    OutputList);
-                                                   
-                                        break;
-                                    fi;
-                                od;
-                            od;
-                        od;
-                        
-                        if Size(Output[i]) > 0 then 
-                            break;
-                        fi;
-
-                        x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, GramMatrix);
+                        x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
                         
                         if not x[1] then 
-                            if Size(x[2]) <> 2 then 
-                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                            , [mat,vec]
+                            Output[i] := MAJORANA_OutputError( x[2]
+                                            , x[3]
                                             , OutputList);
-                            fi;
                             break;
+                        else 
+                        
+                            y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
+                            
+                            if not y[1] then 
+                                if Size(y[2]) <> 2 then 
+                                    Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
+                                                , [mat,vec]
+                                                , OutputList);
+                                fi;
+                                break;
+                            fi;
                         fi;
                     fi;
                 od;
