@@ -1723,10 +1723,10 @@ function(G,T)
             h, s, dim, a, g,
 
             # Step 5 - More evecs
-            switch, Dimensions, NewDimensions, NewEigenVectors, table, ev_a, ev_b,
+            switch, Dimensions, NewDimensions, NewEigenVectors, ev,
 
             # Step 6 - More inner products
-            unknowns, mat, vec, Solution, record,
+            unknowns, mat, vec, 
             
             vals, pos, OutputList,
 
@@ -2598,15 +2598,12 @@ function(G,T)
 
                 while switch = 0 do
                     for j in [1..t] do
-                        # 1, x fusion is a waste of time because a_0 obviously just preserves the evectors!
-                        Output[i] := [];
-                        
-                        table := [0,1/4,1/32];
-                        
                         for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
                         
-                            ev_a := table[k[1]];
-                            ev_b := table[k[2]];
+                            ev := [,];
+                        
+                            ev[1] := MAJORANA_FusionTable[1][k[1] + 1];
+                            ev[2] := MAJORANA_FusionTable[1][k[2] + 1];
 
                             x := MAJORANA_Fusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
                             
@@ -2614,7 +2611,7 @@ function(G,T)
                                 Append(NewEigenVectors[j][x[3]], x[2]);
                             else
                                 Output[i] := MAJORANA_OutputError( STRINGIFY( "Fusion of ", 
-                                                                    ev_a, ",", ev_b, 
+                                                                    ev[1], ",", ev[2], 
                                                                     " eigenvectors does not hold" ),
                                                                     x[2],
                                                                     OutputList);
@@ -2690,11 +2687,13 @@ function(G,T)
                                         Append(mat,x[2][1]);
                                         Append(vec,x[2][2]);
                                     else
-                                        ev_a := MAJORANA_FusionTable[1][k + 1];
-                                        ev_b := MAJORANA_FusionTable[1][l + 1];
+                                        ev := [,];
+                                    
+                                        ev[1] := MAJORANA_FusionTable[1][k + 1];
+                                        ev[2] := MAJORANA_FusionTable[1][l + 1];
                                     
                                         Output[i] := MAJORANA_OutputError( STRINGIFY( "Orthogonality of "
-                                                        , ev_a, ",", ev_b 
+                                                        , ev[1], ",", ev[2] 
                                                         , " eigenvectors does not hold" ),
                                                     x[2],
                                                     OutputList);
@@ -2877,7 +2876,6 @@ function(G,T)
                 
                 mat := x[1];
                 vec := x[2];
-                record := x[3];
                 
                 if Size(ProductList[6]) > 0 then 
                             
