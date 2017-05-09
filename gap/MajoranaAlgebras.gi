@@ -1807,7 +1807,7 @@ function(G,T)
             ProductList, error,
 
             # indexing and temporary variables
-            i, j, k, l, x, y, b,
+            i, j, k, x, y, b,
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, 
@@ -2729,7 +2729,6 @@ function(G,T)
                         break;
                         
                     else
-
                         x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
                         
                         if not x[1] then 
@@ -2788,8 +2787,8 @@ function(G,T)
 
                     for j in [1..t] do
                         for k in [1..3] do
-                            for l in [1..Size(EigenVectors[j][k])] do
-                                EigenVectors[j][k][l] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],ProductList[6]);
+                            for x in EigenVectors[j][k] do
+                                x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
                             od;
                         od;
                     od;
@@ -2959,8 +2958,8 @@ function(G,T)
 
                             if Size(ProductList[6]) > 0 then 
                                 for k in [1..4] do 
-                                    for l in [1..Size(EigenVectors[j][k])] do
-                                        MAJORANA_RemoveNullSpace(EigenVectors[j][k][l],ProductList[6]);
+                                    for x in EigenVectors[j][k] do
+                                        x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
                                     od;
                                 od;
                             fi;
