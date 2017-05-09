@@ -68,3 +68,5 @@ DeclareGlobalFunction( "MAJORANA_OutputError" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
+DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
+

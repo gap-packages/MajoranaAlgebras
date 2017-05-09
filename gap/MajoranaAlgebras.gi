@@ -898,7 +898,7 @@ function(GramMatrix, ProductList)
 
 InstallGlobalFunction(MAJORANA_Orthogonality,
 
-function(a,b,n,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
+function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
 
     local   mat,                    # matrix of unknowns 
             vec,                    # vector of knowns
@@ -922,7 +922,7 @@ function(a,b,n,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
 
     if a = 0 then
     
-        ev_b := EigenVectors[n][b];
+        ev_b := EigenVectors[i][b];
 
         for v in ev_b do
 
@@ -932,7 +932,7 @@ function(a,b,n,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
             for j in [1..dim] do
                 if v[j] <> 0 then 
 
-                    m := MAJORANA_FindPairOrbit(j, n, ProductList);;
+                    m := MAJORANA_FindPairOrbit(j, i, ProductList);;
 
                     if GramMatrix[m] <> false then
                         sum := sum - v[j]*GramMatrix[m];
@@ -954,8 +954,8 @@ function(a,b,n,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList, dim)
         od;
     else
     
-        ev_a := EigenVectors[n][a];
-        ev_b := EigenVectors[n][b];
+        ev_a := EigenVectors[i][a];
+        ev_b := EigenVectors[i][b];
         
         for v in ev_a do
             for w in ev_b do
@@ -1655,6 +1655,42 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             return [true];
             
         else
+            return [false, Solution];
+        fi;
+    fi;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
+
+    function( mat, vec, UnknownInnerProducts, GramMatrix)
+    
+    local   Solution,   # solution of system
+            i,          # loop over <UnknownInnerProducts>
+            x;          # element of <UnknownInnerProducts>
+    
+    if mat <> [] then     
+    
+        Solution := MAJORANA_SolutionMatVecs(mat,vec);
+
+        if Size(Solution) = 2 then                    
+            
+            for i in [1..Size(Solution[1])] do
+                if not i in Solution[2] then
+
+                    x:=UnknownInnerProducts[i]; 
+
+                    GramMatrix[x]:=Solution[1][i][1];
+                fi;
+            od;
+            
+            if Size(Solution[2]) = Size(Solution[1]) then
+                return [false, Solution];
+            fi;
+            
+            return [true];
+        else
+        
             return [false, Solution];
         fi;
     fi;
@@ -2673,27 +2709,14 @@ function(G,T)
                             break;
                         fi;
 
-                        Solution := MAJORANA_SolutionMatVecs(mat,vec);
-
-                        if Size(Solution) = 2 then                    
-                            
-                                for k in [1..Size(Solution[1])] do
-                                    if not k in Solution[2] then
-
-                                        x:=UnknownInnerProducts[k]; 
-
-                                        GramMatrix[x]:=Solution[1][k][1];
-                                    fi;
-                                od;
-                                
-                                if Size(Solution[2]) = Size(Solution[1]) then
-                                    break;
-                                fi;
-                                
-                        else
-                            Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                        , [mat,vec]
-                                        , OutputList);
+                        x := MAJORANA_SolutionInnerProducts(mat, vec, UnknownInnerProducts, GramMatrix);
+                        
+                        if not x[1] then 
+                            if Size(x[2]) <> 2 then 
+                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
+                                            , [mat,vec]
+                                            , OutputList);
+                            fi;
                             break;
                         fi;
                     fi;
@@ -2799,7 +2822,7 @@ function(G,T)
                         
                         if not x[1] then 
                             Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                            , Solution
+                                            , x[2]
                                             , OutputList);
                             break;
                         fi;
@@ -2869,7 +2892,7 @@ function(G,T)
                         
                 if not x[1] then 
                     Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                    , Solution
+                                    , x[2]
                                     , OutputList);
                     break;
                 fi;
