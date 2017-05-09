@@ -66,3 +66,5 @@ DeclareGlobalFunction( "MAJORANA_MakeVector" );
 
 DeclareGlobalFunction( "MAJORANA_OutputError" );
 
+DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
+

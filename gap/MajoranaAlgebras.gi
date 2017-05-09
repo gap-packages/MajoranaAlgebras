@@ -1625,6 +1625,41 @@ InstallGlobalFunction( MAJORANA_OutputError,
     return StructuralCopy(output);
     
     end );
+    
+InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
+
+    function( mat, vec, UnknownAlgebraProducts, AlgebraProducts, ProductList)
+    
+    local   Solution,   # solution of system
+            i,          # loop over <UnknownAlgebraProducts>
+            x,          # element of <UnknownAlgebraProducts>
+            y,          # orbit of x
+            g;          # conj element of x
+    
+    if mat <> [] then 
+        Solution := MAJORANA_SolutionMatVecs(mat,vec);
+
+        if Size(Solution) = 2 then
+            for i in [1..Size(UnknownAlgebraProducts)] do
+                if not i in Solution[2] then 
+                
+                    x := UnknownAlgebraProducts[i]; 
+                    
+                    y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
+                    g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
+                                                    
+                    AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                fi;
+            od;
+            
+            return [true];
+            
+        else
+            return [false, Solution];
+        fi;
+    fi;
+    
+    end );
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -1705,7 +1740,6 @@ function(G,T)
                     Append(OrbitalsT[i],OrbitalsT[j]);
                     Remove(OrbitalsT,j);
                         
-                    
                     j := Size(OrbitalsT) + 1;
                     
                 else
@@ -2572,7 +2606,6 @@ function(G,T)
                         Append(NewDimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
                     od;
 
-
                     if NewDimensions = Dimensions then
                         switch := 1;
                     elif ForAll(NewDimensions,x->x=dim-1) then
@@ -2740,7 +2773,6 @@ function(G,T)
                     
                         mat := [];
                         vec := [];
-                        record := [];
                         
                         for k in [1..3] do 
                         
@@ -2761,31 +2793,15 @@ function(G,T)
                             
                             Append(mat,x[1]);
                             Append(vec,x[2]);
-                            Append(record,x[3]);
-                        
                         fi;
                                      
-                        if mat <> [] then 
-                            Solution:=MAJORANA_SolutionMatVecs(mat,vec);
-
-                            if Size(Solution) = 2 then
-                                for k in [1..Size(UnknownAlgebraProducts)] do
-                                    if not k in Solution[2] then 
-                                    
-                                        x := UnknownAlgebraProducts[k]; 
-                                        
-                                        y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
-                                        g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
-                                                                        
-                                        AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
-                                    fi;
-                                od;
-                            else
-                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                                , Solution
-                                                , OutputList);
-                                break;
-                            fi;
+                        x := MAJORANA_SolutionAlgProducts(mat,vec, UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                        
+                        if not x[1] then 
+                            Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                                            , Solution
+                                            , OutputList);
+                            break;
                         fi;
                     fi;                        
                 od;
@@ -2849,28 +2865,13 @@ function(G,T)
                 
                 fi;
                 
-                if mat <> [] then 
-                    Solution:=MAJORANA_SolutionMatVecs(mat,vec);
-
-                    if Size(Solution)  = 2 then
+                x := MAJORANA_SolutionAlgProducts(mat,vec, UnknownAlgebraProducts, AlgebraProducts, ProductList);
                         
-                        for k in [1..Size(UnknownAlgebraProducts)] do
-                            if not k in Solution[2] then 
-                            
-                                x := UnknownAlgebraProducts[k]; 
-                                
-                                y := MAJORANA_FindPairOrbit( x[1], x[2], ProductList);
-                                g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
-                                                                
-                                AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
-                            fi;
-                        od;
-                    else
-                        MAJORANA_OutputError("Inconsistent system of unknown algebra products"
-                                    , [mat,vec]
+                if not x[1] then 
+                    Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                                    , Solution
                                     , OutputList);
-                        break;
-                    fi;
+                    break;
                 fi;
 
                                             ## STEP 9: MORE EVECS II ##
