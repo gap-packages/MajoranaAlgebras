@@ -1705,7 +1705,7 @@ function(G,T)
             ProductList, error,
 
             # indexing and temporary variables
-            i, j, k, l, x, y, z, b,
+            i, j, k, l, x, y, b,
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, 
@@ -1726,12 +1726,12 @@ function(G,T)
             switch, Dimensions, NewDimensions, NewEigenVectors, table, ev_a, ev_b,
 
             # Step 6 - More inner products
-            UnknownInnerProducts, mat, vec, Solution, record,
+            unknowns, mat, vec, Solution, record,
             
             vals, pos, OutputList,
 
             
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts;     
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
             
  
 
@@ -2663,15 +2663,15 @@ function(G,T)
 
                 while switch = 0 do 
                 
-                    UnknownInnerProducts:=[];
+                    unknowns:=[];
 
                     for j in [1..SizeOrbitals] do
                         if GramMatrix[j] = false then
-                            Add(UnknownInnerProducts,j);
+                            Add(unknowns,j);
                         fi;
                     od;
                 
-                    if Size(UnknownInnerProducts) = 0 then
+                    if Size(unknowns) = 0 then
                         
                         break;
                         
@@ -2684,7 +2684,7 @@ function(G,T)
                             for k in [0..3] do 
                                 for l in [k+1..3] do
 
-                                    x := MAJORANA_Orthogonality(k,l,j,UnknownInnerProducts,EigenVectors,GramMatrix, ProductList, dim);
+                                    x := MAJORANA_Orthogonality(k,l,j,unknowns,EigenVectors,GramMatrix, ProductList, dim);
                                     
                                     if x[1] then 
                                         Append(mat,x[2][1]);
@@ -2709,7 +2709,7 @@ function(G,T)
                             break;
                         fi;
 
-                        x := MAJORANA_SolutionInnerProducts(mat, vec, UnknownInnerProducts, GramMatrix);
+                        x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, GramMatrix);
                         
                         if not x[1] then 
                             if Size(x[2]) <> 2 then 
@@ -2790,16 +2790,16 @@ function(G,T)
                 
                 for j in [1..t] do
                 
-                    UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
+                    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                     
-                    if UnknownAlgebraProducts <> [] then
+                    if unknowns <> [] then
                     
                         mat := [];
                         vec := [];
                         
                         for k in [1..3] do 
                         
-                            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, unknowns, AlgebraProducts, ProductList);
                             
                             if x <> 0 then 
                                 Append(mat,x[1]);
@@ -2812,13 +2812,13 @@ function(G,T)
                         
                         if Size(ProductList[6]) > 0 then 
                             
-                            x := MAJORANA_NullSpaceAlgebraProducts(UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                            x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
                             
                             Append(mat,x[1]);
                             Append(vec,x[2]);
                         fi;
                                      
-                        x := MAJORANA_SolutionAlgProducts(mat,vec, UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                        x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
                         if not x[1] then 
                             Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
@@ -2871,9 +2871,9 @@ function(G,T)
                     od;
                 od;
                 
-                UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
+                unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                         
-                x := MAJORANA_FullResurrection(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix);
+                x := MAJORANA_FullResurrection(EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                 
                 mat := x[1];
                 vec := x[2];
@@ -2881,14 +2881,14 @@ function(G,T)
                 
                 if Size(ProductList[6]) > 0 then 
                             
-                    x := MAJORANA_NullSpaceAlgebraProducts(UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                    x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
                     
                     Append(mat,x[1]);
                     Append(vec,x[2]);
                 
                 fi;
                 
-                x := MAJORANA_SolutionAlgProducts(mat,vec, UnknownAlgebraProducts, AlgebraProducts, ProductList);
+                x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
                 if not x[1] then 
                     Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
