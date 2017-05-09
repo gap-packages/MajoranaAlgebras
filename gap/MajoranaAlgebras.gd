@@ -24,6 +24,8 @@ DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
 DeclareGlobalFunction( "MAJORANA_Fusion" );
 
+DeclareGlobalFunction( "MAJORANA_FullFusion" );
+
 DeclareGlobalFunction( "MAJORANA_PositiveDefinite" );
 
 DeclareGlobalFunction( "MAJORANA_AxiomM1" );

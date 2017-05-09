@@ -46,7 +46,7 @@ BindGlobal("MAJORANA_FusionTable",
 
 InstallGlobalFunction( MAJORANA_Fusion,
 
-function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList, dim)
+function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
 
     local   u,                  # vector with 1 in the j th position
             x,                  # new eigenvector
@@ -58,8 +58,11 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
             ev_a,               # first eigenvector
             ev_b,               # second eigenvector
             ev,                 # new eigenvector
-            pos,                # index of new eigenvector              
+            pos,                # index of new eigenvector
+            dim,                # size of coordinates              
             FusionError;        # list of indexes which do not obey fusion
+            
+    dim := Size(ProductList[1]);
 
     ev := MAJORANA_FusionTable[a+1][b+1];
     
@@ -153,6 +156,54 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
         return [true, NewEigenVectors, pos];
     fi;
 end);
+
+InstallGlobalFunction(MAJORANA_FullFusion,
+
+    function(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList)
+    
+    local   t,      # size of T
+            j,      # loop over T
+            k,      # loop over pairs of eigenvalues
+            ev,     # a pair of eigenvalues
+            x,      # result of fusion
+            new;    # new eigenvectors
+            
+    t := Size(EigenVectors);
+    
+    new := [1..t]*0;
+
+    for j in [1..t] do
+        
+        new[j] := [ [], [], [] ];
+        
+        for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
+        
+            ev := [,];
+        
+            ev[1] := MAJORANA_FusionTable[1][k[1] + 1];
+            ev[2] := MAJORANA_FusionTable[1][k[2] + 1];
+
+            x := MAJORANA_Fusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+            
+            if x[1] then
+                Append(new[j][x[3]], x[2]);
+            else
+                return [false, 
+                        STRINGIFY( "Fusion of ", 
+                            ev[1], ",", ev[2], 
+                            " eigenvectors does not hold" ),
+                        x[2] ];
+            fi;
+        od;
+
+        Append(EigenVectors[j][1],new[j][1]);
+        Append(EigenVectors[j][2],new[j][2]);
+        Append(EigenVectors[j][3],new[j][3]);
+    od;
+    
+    return [true];
+    
+    end );
 
 # Takes input matrix, returns a matrix whose rows form a basis of the nullspace of mat
 
@@ -2588,43 +2639,14 @@ function(G,T)
                     switch:=1;
                 fi;
 
-                NewEigenVectors:=NullMat(t,3);
-
-                for j in [1..t] do
-                    for k in [1..3] do
-                        NewEigenVectors[j][k]:=[];
-                    od;
-                od;
-
                 while switch = 0 do
-                    for j in [1..t] do
-                        for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
-                        
-                            ev := [,];
-                        
-                            ev[1] := MAJORANA_FusionTable[1][k[1] + 1];
-                            ev[2] := MAJORANA_FusionTable[1][k[2] + 1];
-
-                            x := MAJORANA_Fusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList, dim);
-                            
-                            if x[1] then
-                                Append(NewEigenVectors[j][x[3]], x[2]);
-                            else
-                                Output[i] := MAJORANA_OutputError( STRINGIFY( "Fusion of ", 
-                                                                    ev[1], ",", ev[2], 
-                                                                    " eigenvectors does not hold" ),
-                                                                    x[2],
-                                                                    OutputList);
-                                break;
-                            fi;
-                        od;
-
-                        Append(EigenVectors[j][1],NewEigenVectors[j][1]);
-                        Append(EigenVectors[j][2],NewEigenVectors[j][2]);
-                        Append(EigenVectors[j][3],NewEigenVectors[j][3]);
-                    od;
-
-                    if Output[i] <> [] then
+                
+                    x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+                    
+                    if not x[1] then 
+                        Output[i] := MAJORANA_OutputError(x[2],
+                                        x[3],
+                                        OutputList);
                         break;
                     fi;
 
