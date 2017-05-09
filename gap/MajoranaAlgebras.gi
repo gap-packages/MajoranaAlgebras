@@ -1765,7 +1765,7 @@ function(G,T)
             Shape, RepsSquares6A, Unknowns3X,
 
             # Step 2 - Possible shapes
-            Binaries, master, 3Aaxes, 4Aaxes, 5Aaxes, u, v, w,
+            Binaries, master,
 
             # Step 3 - Products and evecs I
             GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
@@ -1919,6 +1919,7 @@ function(G,T)
         master:=1;
         
         ProductList[6] := [];
+        ProductList[1] := StructuralCopy(T);
 
         while master = 1 do
 
@@ -1935,78 +1936,62 @@ function(G,T)
 
             # Create lists of 3A, 4A and 5A axes
 
-            3Aaxes:=[];
-            4Aaxes:=[];
-            5Aaxes:=[];
-
             for j in [1..Size(OrbitalsT)] do
                 if Shape[j]=['3','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
                         x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                        Add(3Aaxes,Set([x,x^2]));
+                        Add(ProductList[1],Set([x,x^2]));
                     od;
                 fi;
+            od;
+            
+            for j in [1..Size(OrbitalsT)] do
                 if Shape[j]=['4','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
                         x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                        Add(4Aaxes,Set([x,x^3]));
+                        Add(ProductList[1],Set([x,x^3]));
                     od;
                 fi;
+            od;
+            
+            for j in [1..Size(OrbitalsT)] do 
                 if Shape[j]=['5','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
                         x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                        Add(5Aaxes,Set([x,x^2,x^3,x^4]));
+                        Add(ProductList[1],Set([x,x^2,x^3,x^4]));
                     od;
                 fi;
             od;
 
-            3Aaxes:=DuplicateFreeList(3Aaxes); u:=Size(3Aaxes);
-            4Aaxes:=DuplicateFreeList(4Aaxes); v:=Size(4Aaxes);
-            5Aaxes:=DuplicateFreeList(5Aaxes); w:=Size(5Aaxes);
-
-            for j in [1..u] do
-                3Aaxes[j] := 3Aaxes[j][1];
-            od;
+            ProductList[1] := DuplicateFreeList(ProductList[1]);
             
-            for j in [1..v] do
-                4Aaxes[j] := 4Aaxes[j][1];
-            od;
-            
-            for j in [1..w] do
-                5Aaxes[j] := 5Aaxes[j][1];
-            od;
-
-            ProductList[1]:=[];
-
-            Append(ProductList[1],T);
-            Append(ProductList[1],3Aaxes);
-            Append(ProductList[1],4Aaxes);
-            Append(ProductList[1],5Aaxes);
-
             dim := Size(ProductList[1]);
+
+            for j in [t+1..dim] do
+                ProductList[1][j] := ProductList[1][j][1];
+            od;
             
             ProductList[2]:=StructuralCopy(T);
             ProductList[5]:=[1..t];
 
-            for j in [t+1..t+u] do
-                Append(ProductList[5],[j,j]);
+            for j in [t+1..dim] do
                 
                 x := ProductList[1][j];
-                Append(ProductList[2],[x,x^2]);
-            od;
             
-            for j in [t+1..t+u+v] do
-                Append(ProductList[5],[j,j]);
-                
-                x := ProductList[1][j];
-                Append(ProductList[2],[x,x^3]);
-            od;
+                if Order(x) = 3 then 
+            
+                    Append(ProductList[5],[j,j]);
+                    Append(ProductList[2],[x,x^2]);
+                    
+                elif Order(x) = 4 then 
 
-            for j in [t+u+v+1..dim] do
-                Append(ProductList[5],[j,-j,-j,j]);
-                
-                x := ProductList[1][j];
-                Append(ProductList[2],[x,x^2,x^3,x^4]); 
+                    Append(ProductList[5],[j,j]);
+                    Append(ProductList[2],[x,x^3]);
+                    
+                elif Order(x) = 5 then 
+                    Append(ProductList[5],[j,-j,-j,j]);
+                    Append(ProductList[2],[x,x^2,x^3,x^4]); 
+                fi;
             od;
             
             ProductList[2] := Flat(ProductList[2]);
