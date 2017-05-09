@@ -2947,7 +2947,6 @@ function(G,T)
                             EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
                             EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
 
-                            
                             if Size(ProductList[6]) > 0 then 
                                 for k in [1..4] do 
                                     for l in [1..Size(EigenVectors[j][k])] do
