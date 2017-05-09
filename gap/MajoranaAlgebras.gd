@@ -64,3 +64,5 @@ DeclareGlobalFunction( "MAJORANA_FindPairOrbit" );
 
 DeclareGlobalFunction( "MAJORANA_MakeVector" );
 
+DeclareGlobalFunction( "MAJORANA_OutputError" );
+

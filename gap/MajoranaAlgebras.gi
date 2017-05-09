@@ -86,7 +86,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                         z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList);
 
                         if (z <> false) and (z <> x*0) then
-                            Add(FusionError,[k,l]);
+                            Add(FusionError,[j,k,l]);
                         else
                             Add(NewEigenVectors,x);
                         fi;
@@ -115,7 +115,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                             z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList);
                         
                             if (z <> false) and ( z <> x/4) then
-                                Add(FusionError,[k,l]);
+                                Add(FusionError,[j,k,l]);
                             else
                                 Add(NewEigenVectors,x);
                             fi;
@@ -137,7 +137,7 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList,
                     z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
 
                     if (z <> false) and (z <> ev * x) then
-                        Add(FusionError,[k,l]);
+                        Add(FusionError,[j,k,l]);
                     else
                         Add(NewEigenVectors, x);
                     fi;
@@ -1608,6 +1608,23 @@ InstallGlobalFunction( MAJORANA_MakeVector,
     return vec;
     
     end );
+    
+InstallGlobalFunction( MAJORANA_OutputError,
+
+    function(message, error, OutputList)
+    
+    local   output,         # output vector
+            i;              # loop over output list
+            
+    output := ["Error", message, error];
+    
+    for i in [1..5] do 
+        Add(output, OutputList[i]);
+    od;
+    
+    return StructuralCopy(output);
+    
+    end );
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -1620,8 +1637,8 @@ function(G,T)
             i, j, k, l, m, n, x, y, z, b,
 
             # Step 0 - Set Up
-            Output, t, SizeOrbitals, OrbitalsT, SizeOrbitalsT,  
-
+            Output, t, SizeOrbitals, OrbitalsT, 
+            
             # Step 1 - Shape
             Shape, RepsSquares6A, Unknowns3X,
 
@@ -1640,7 +1657,7 @@ function(G,T)
             # Step 6 - More inner products
             UnknownInnerProducts, mat, vec, Solution, record,
             
-            vals, pos,
+            vals, pos, OutputList,
 
             
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count, UnknownAlgebraProducts;     
@@ -1701,18 +1718,16 @@ function(G,T)
         i := i + 1;
         
     od;
-    
-    SizeOrbitalsT:=Size(OrbitalsT);
 
                                         ## STEP 1: SHAPE ##
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    Shape:=NullMat(1,SizeOrbitalsT)[1];
+    Shape:=NullMat(1,Size(OrbitalsT))[1];
 
     RepsSquares6A:=[];
 
-    for i in [1..SizeOrbitalsT] do
+    for i in [1..Size(OrbitalsT)] do
     
         x:=Representative(OrbitalsT[i]);
         
@@ -1745,11 +1760,11 @@ function(G,T)
 
     # Check for inclusions of 3A in 6A
 
-    for i in [1..SizeOrbitalsT] do
+    for i in [1..Size(OrbitalsT)] do
         if Shape[i][1] = '3' then
-            j:=0;
-            while j<Size(OrbitalsT[i]) do
-                j:=j+1;
+            j := 0;
+            while j < Size(OrbitalsT[i]) do
+                j := j + 1;
                 if OrbitalsT[i][j][1]*OrbitalsT[i][j][2] in RepsSquares6A then
                     Shape[i]:="3A";;
                     j:=Size(OrbitalsT[i])+1;;
@@ -1760,7 +1775,7 @@ function(G,T)
 
     Unknowns3X:=[];
 
-    for i in [1..SizeOrbitalsT] do
+    for i in [1..Size(OrbitalsT)] do
         if Shape[i] = ['3','X'] then
             Add(Unknowns3X,i);
         fi;
@@ -1803,7 +1818,7 @@ function(G,T)
             4Aaxes:=[];
             5Aaxes:=[];
 
-            for j in [1..SizeOrbitalsT] do
+            for j in [1..Size(OrbitalsT)] do
                 if Shape[j]=['3','A'] then
                     for k in [1..Size(OrbitalsT[j])] do
                         x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
@@ -1897,12 +1912,10 @@ function(G,T)
 
             ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
             
-            j := SizeOrbitalsT + 1;
+            j := Size(OrbitalsT) + 1;
             
             while j < Size(ProductList[9]) + 1 do 
-    
                 if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
-                
                     k := j + 1;
                     
                     while k < Size(ProductList[9]) +1 do
@@ -1968,6 +1981,8 @@ function(G,T)
 
 
             # Set up algebra product and gram matrices
+            
+            OutputList := [0,0,0,0,0];
 
             AlgebraProducts := NullMat(1,SizeOrbitals)[1];
             GramMatrix := NullMat(1,SizeOrbitals)[1];
@@ -1986,7 +2001,13 @@ function(G,T)
                     EigenVectors[j][k]:=[];
                 od;
             od;
-
+            
+            OutputList[1] := Shape;
+            OutputList[2] := GramMatrix;
+            OutputList[3] := AlgebraProducts;
+            OutputList[4] := EigenVectors;
+            OutputList[5] := ProductList;
+            
             # Start filling in values and products!
 
             l:=1;
@@ -2522,20 +2543,11 @@ function(G,T)
                             if x[1] then
                                 Append(NewEigenVectors[j][x[3]], x[2]);
                             else
-                                Output[i] := StructuralCopy([ Shape
-                                               , "Error"
-                                               , STRINGIFY( "Fusion of ", 
-                                                    ev_a, ",", ev_b, 
-                                                    " eigenvectors does not hold" )
-                                               , j
-                                               , x[2]
-                                               , ProductList[9]
-                                               , GramMatrix
-                                               , AlgebraProducts
-                                               , EigenVectors
-                                               , ProductList[6]
-                                               , ProductList
-                                               , ProductList[7] ]);
+                                Output[i] := MAJORANA_OutputError( STRINGIFY( "Fusion of ", 
+                                                                    ev_a, ",", ev_b, 
+                                                                    " eigenvectors does not hold" ),
+                                                                    x[2],
+                                                                    OutputList);
                                 break;
                             fi;
                         od;
@@ -2612,20 +2624,12 @@ function(G,T)
                                         ev_a := MAJORANA_FusionTable[1][k + 1];
                                         ev_b := MAJORANA_FusionTable[1][l + 1];
                                     
-                                        Output[i] := StructuralCopy([ Shape
-                                                   , "Error"
-                                                   , STRINGIFY( "Orthogonality of "
+                                        Output[i] := MAJORANA_OutputError( STRINGIFY( "Orthogonality of "
                                                         , ev_a, ",", ev_b 
-                                                        , " eigenvectors does not hold" )
-                                                   , j
-                                                   , x[2]
-                                                   , ProductList[9]
-                                                   , GramMatrix
-                                                   , AlgebraProducts
-                                                   , EigenVectors
-                                                   , ProductList[6]
-                                                   , ProductList
-                                                   , ProductList[7] ]);
+                                                        , " eigenvectors does not hold" ),
+                                                    x[2],
+                                                    OutputList);
+                                                   
                                         break;
                                     fi;
                                 od;
@@ -2654,19 +2658,9 @@ function(G,T)
                                 fi;
                                 
                         else
-                            Output[i] := StructuralCopy([ Shape
-                                        , "Error"
-                                        , "Inconsistent system of unknown inner products"
-                                        , mat
-                                        , vec
-                                        ,
-                                        , ProductList[9]
-                                        , GramMatrix
-                                        , AlgebraProducts
-                                        , EigenVectors
-                                        , ProductList[6]
-                                        , ProductList
-                                        , ProductList[7] ]);
+                            Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
+                                        , [mat,vec]
+                                        , OutputList);
                             break;
                         fi;
                     fi;
@@ -2684,19 +2678,12 @@ function(G,T)
                     x := MAJORANA_PositiveDefinite(GramMatrixFull);
 
                     if x < 0 then
-                        Output[i] := [ StructuralCopy(Shape)
-                                     , "Error"
-                                     , "The inner product is not positive definite"
-                                     , StructuralCopy(3Aaxes)
-                                     , StructuralCopy(4Aaxes)
-                                     , StructuralCopy(5Aaxes)
-                                     , StructuralCopy(GramMatrix) ];
+                        Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
+                                        , []
+                                        , OutputList);                                     
                         break;
                     elif x = 0 then
-                    
                         ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
-                        
-                        ProductList[6] := ProductList[6];
                     fi;
                 fi;
 
@@ -2728,39 +2715,24 @@ function(G,T)
                 error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
                 if Size(error)>0 then
-                    Output[i] := [ StructuralCopy(Shape)
-                                 , "Error"
-                                 , "Algebra does not obey axiom M1 step 7"
-                                 , StructuralCopy(GramMatrix)
-                                 , StructuralCopy(AlgebraProducts)
-                                 , StructuralCopy(error)];
+                    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+                                    , error
+                                    , OutputList);
                     break;
                 fi;
 
                 error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
                 if Size(error) > 0 then
-                
-                    Output[i] := StructuralCopy([ Shape
-                                 , "Error"
-                                 , "Algebra does not obey fusion rules step 7"
+                    Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
                                  , error
-                                 , 
-                                 , ProductList[9]
-                                 , GramMatrix
-                                 , AlgebraProducts
-                                 , EigenVectors
-                                 , ProductList[6]
-                                 , ProductList
-                                 , ProductList[7]]);
+                                 , OutputList);
                     break;
                 fi;
 
                 # Use eigenvectors to find more products
                 
                 for j in [1..t] do
-                
-                    a := [1..dim]*0; a[j]:=1;
                 
                     UnknownAlgebraProducts := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                     
@@ -2803,25 +2775,15 @@ function(G,T)
                                         x := UnknownAlgebraProducts[k]; 
                                         
                                         y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
-                                        
                                         g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
                                                                         
                                         AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
                                     fi;
                                 od;
                             else
-                                Output[i] := [ StructuralCopy(Shape)
-                                             , "Error"
-                                             , "Inconsistent system of unknown algebra products step 7"
-                                             , StructuralCopy(GramMatrix)
-                                             , [] # StructuralCopy(KnownAlgebraProducts)
-                                             , StructuralCopy(AlgebraProducts)
-                                             , StructuralCopy(EigenVectors)
-                                             , StructuralCopy(mat)
-                                             , StructuralCopy(vec)
-                                             , StructuralCopy(Solution)
-                                             , StructuralCopy(UnknownAlgebraProducts)];
-                                Error("Step 7");
+                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                                                , Solution
+                                                , OutputList);
                                 break;
                             fi;
                         fi;
@@ -2839,27 +2801,17 @@ function(G,T)
                 error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
                 if Size(error)>0 then
-                    Output[i] := [ StructuralCopy(Shape)
-                                 , "Error"
-                                 , "Algebra does not obey axiom M1 step 8"
-                                 , StructuralCopy(GramMatrix)
-                                 , [] # StructuralCopy(KnownAlgebraProducts)
-                                 , StructuralCopy(AlgebraProducts)
-                                 , StructuralCopy(error)];
+                    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+                                    , error
+                                    , OutputList);
                 fi;
 
                 error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
                 if ForAny(error, x->Size(x) > 0) then
-                    Output[i] := [ StructuralCopy(Shape)
-                                 , "Error"
-                                 , "Algebra does not obey fusion rules step 8"
-                                 , StructuralCopy(GramMatrix)
-                                 , []
-                                 , StructuralCopy(AlgebraProducts)
-                                 , StructuralCopy(EigenVectors)
-                                 , StructuralCopy(error)];
-                    break;
+                    Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+                                    , error
+                                    , OutputList);
                 fi;
                 
                 if ProductList[6] <> [] then
@@ -2908,16 +2860,15 @@ function(G,T)
                                 x := UnknownAlgebraProducts[k]; 
                                 
                                 y := MAJORANA_FindPairOrbit( x[1], x[2], ProductList);
-                                
                                 g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
                                                                 
                                 AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][k],Inverse(g),ProductList);
                             fi;
                         od;
                     else
-                        Output[i] := [Shape,"Error","Inconsistent system of unknown algebra products 2",mat,vec,AlgebraProducts,EigenVectors];
-                        Output[i] := StructuralCopy(Output[i]);
-                        Error("Inconsistent system of unknown algebra products");
+                        MAJORANA_OutputError("Inconsistent system of unknown algebra products"
+                                    , [mat,vec]
+                                    , OutputList);
                         break;
                     fi;
                 fi;
@@ -2931,6 +2882,7 @@ function(G,T)
                     a := [1..dim]*0; a[j] := 1;
                 
                     if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then
+                    
                         mat:=[];
 
                         for k in [1..dim] do
@@ -2961,32 +2913,14 @@ function(G,T)
                             fi;
                                                    
                             if Size(EigenVectors[j][4]) <> 1 then
-                                Output[i] := StructuralCopy([Shape
-                                            , "Error"
-                                            , "Algebra does not obey axiom M5"
-                                            ,
-                                            ,
-                                            , ProductList[9]
-                                            , GramMatrix
-                                            , AlgebraProducts
-                                            , EigenVectors
-                                            , ProductList[6]
-                                            , ProductList
-                                            , ProductList[7] ]);
+                                Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M5"
+                                    , []
+                                    , OutputList);
                                 break;
                             elif Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim then
-                                Output[i] := StructuralCopy([Shape
-                                            , "Error"
-                                            , "Algebra does not obey axiom M4"
-                                            , 
-                                            ,
-                                            , ProductList[9]
-                                            , GramMatrix
-                                            , AlgebraProducts
-                                            , EigenVectors
-                                            , ProductList[6]
-                                            , ProductList
-                                            , ProductList[7] ]);
+                                Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M4"
+                                    , []
+                                    , OutputList);
                                 break;
                             fi;
                         fi;
@@ -3020,18 +2954,14 @@ function(G,T)
                     break;
                 elif newdimensions = maindimensions and newfalsecount = falsecount then 
 
-                    Output[i] := StructuralCopy([Shape
-                                , "Fail"
+                    Output[i] := StructuralCopy(["Fail"
                                 , "Missing values"
-                                , 
-                                , 
-                                , ProductList[9]
-                                , GramMatrix
-                                , AlgebraProducts
-                                , EigenVectors
-                                , ProductList[6]
-                                , ProductList
-                                , ProductList[7] ]);
+                                ,
+                                , OutputList[1]
+                                , OutputList[2]
+                                , OutputList[3]
+                                , OutputList[4]
+                                , OutputList[5]]);
                     break;
                 else
                     maindimensions := StructuralCopy(newdimensions);
@@ -3055,18 +2985,10 @@ function(G,T)
             GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
 
             if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-                Output[i] := StructuralCopy([ Shape
-                            , "Error"
-                            , "Gram Matrix is not positive definite"
-                            , 
-                            , 
-                            , ProductList[9]
-                            , GramMatrix
-                            , AlgebraProducts
-                            , EigenVectors
-                            , ProductList[6]
-                            , ProductList
-                            , ProductList[7] ]);
+                Output[i] := MAJORANA_OutputError("Gram Matrix is not positive definite"
+                                , []
+                                , OutputList);
+                            
             fi;
 
             # Check that all triples obey axiom M1
@@ -3074,18 +2996,9 @@ function(G,T)
             error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
             if Size(error)>0 then
-                Output[i] := StructuralCopy([ Shape
-                            , "Error"
-                            , "Algebra does not obey axiom M1"
-                            , error 
-                            ,
-                            , ProductList[9]
-                            , GramMatrix
-                            , AlgebraProducts
-                            , EigenVectors
-                            , ProductList[6]
-                            , ProductList
-                            , ProductList[7] ]);
+                Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+                                    , error
+                                    , OutputList);
             fi;
 
             # Check that eigenvectors obey the fusion rules
@@ -3093,18 +3006,9 @@ function(G,T)
             error:=MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if ForAny(error,x->Size(x)>0) then
-                Output[i] := StructuralCopy([Shape
-                            , "Error"
-                            , "Algebra does not obey fusion rules"
-                            , error
-                            ,
-                            , ProductList[9]
-                            , GramMatrix
-                            , AlgebraProducts
-                            , EigenVectors
-                            , ProductList[6]
-                            , ProductList
-                            , ProductList[7] ]);
+                Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+                                    , error
+                                    , OutputList);
                 break;
             fi;
 
@@ -3113,18 +3017,9 @@ function(G,T)
             error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if Size(error) > 0 then
-                Output[i] := StructuralCopy([Shape
-                            , "Error"
-                            , "Eigenspaces are not orthogonal with respect to the inner product"
+                Output[i] := MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
                             , error
-                            ,
-                            , ProductList[9]
-                            , GramMatrix 
-                            , AlgebraProducts
-                            , EigenVectors
-                            , ProductList[6]
-                            , ProductList
-                            , ProductList[7] ]);
+                            , OutputList);
                 break;
             fi;
 
@@ -3133,34 +3028,20 @@ function(G,T)
             # error:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
 
             # if error = -1 then
-            #    Output[i] := StructuralCopy([Shape
-            #                , "Error"
-            #                , "Algebra does not obey axiom M2"
-            #                , error
-            #                ,
-            #                , ProductList[9]
-           #                 , GramMatrix
-            #                , AlgebraProducts
-            #                , EigenVectors
-            #                , ProductList[6]
-           #                 , ProductList
-            #                , ProductList[7] ]);
-             #   break;
+            #    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M2"
+            #                        , error
+            #                        , OutputList);
+            #   break;
             #fi;
 
-            Output[i] := StructuralCopy([Shape
-                        , "Success"
-                        , 3Aaxes
-                        , 4Aaxes
-                        , 5Aaxes
-                        , ProductList[9]
-                        , GramMatrix
-                        , AlgebraProducts
-                        , EigenVectors
-                        , ProductList[6]
-                        , ProductList
-                        , ProductList[7] ]);
-
+            Output[i] := StructuralCopy(["Success"
+                        ,
+                        ,
+                        , OutputList[1]
+                        , OutputList[2]
+                        , OutputList[3]
+                        , OutputList[4]
+                        , OutputList[5]]);
             master:=0;
         od;
         
