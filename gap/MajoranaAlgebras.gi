@@ -1634,7 +1634,7 @@ function(G,T)
             ProductList, error,
 
             # indexing and temporary variables
-            i, j, k, l, m, n, x, y, z, b,
+            i, j, k, l, x, y, z, b,
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, 
