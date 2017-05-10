@@ -1041,7 +1041,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
                     fi;
                 else
                     Add(mat,row);
-                    Add(vec,sum);
+                    Add(vec,[sum]);
                 fi;
             od;
         od;
