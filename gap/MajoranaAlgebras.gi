@@ -1155,7 +1155,8 @@ function(v,NullSp)
     
     dim := Size(v);
 
-    if Size(NullSp) > 0 then 
+
+    if NullSp <> [] and NullSp <> false then 
         for i in [1..Size(NullSp)] do
             j := Position(Reversed(NullSp[i]),1);
             if v[dim - j + 1] <> 0 then 
@@ -1974,7 +1975,7 @@ function(G,T)
 
         master:=1;
         
-        ProductList[6] := [];
+        ProductList[6] := false;
         ProductList[1] := StructuralCopy(T);
 
         while master = 1 do
@@ -2682,7 +2683,7 @@ function(G,T)
                 
                     x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
                     
-                    if not x[1] then 
+                    if not x[1] and ProductList[6] <> false then 
                         Output[i] := MAJORANA_OutputError(x[2],
                                         x[3],
                                         OutputList);
@@ -2778,7 +2779,7 @@ function(G,T)
                     fi;
                 fi;
 
-                if Size(ProductList[6]) > 0 then
+                if ProductList[6] <> [] and ProductList <> false then
 
                     # Change alg products to get rid of any axes not in the basis
                     
@@ -2805,7 +2806,7 @@ function(G,T)
 
                 error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-                if Size(error)>0 then
+                if Size(error) > 0 and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
                                     , error
                                     , OutputList);
@@ -2814,7 +2815,7 @@ function(G,T)
 
                 error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
-                if Size(error) > 0 then
+                if Size(error) > 0 and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
                                  , error
                                  , OutputList);
@@ -2852,7 +2853,7 @@ function(G,T)
                         
                         # use fact that if v in null space then a \cdot v = 0
                         
-                        if Size(ProductList[6]) > 0 then 
+                        if ProductList[6] <> [] and ProductList[6] <> false then 
                             
                             x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
                             
@@ -2864,7 +2865,7 @@ function(G,T)
                                      
                             x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                             
-                            if not x[1] then 
+                            if not x[1] and ProductList[6] <> false then 
                                 Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
                                                 , [mat,vec,record]
                                                 , OutputList);
@@ -2882,9 +2883,9 @@ function(G,T)
 
                 # Check fusion and M1
 
-                error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
+                error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-                if Size(error)>0 then
+                if Size(error) > 0 and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
                                     , error
                                     , OutputList);
@@ -2892,13 +2893,13 @@ function(G,T)
 
                 error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
-                if ForAny(error, x->Size(x) > 0) then
+                if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
                                     , error
                                     , OutputList);
                 fi;
                 
-                if ProductList[6] <> [] then
+                if ProductList[6] <> [] and ProductList[6] <> false then
                     for j in [1..t] do 
                         for k in [1..3] do
                             Append(EigenVectors[j][1],ProductList[6]);
@@ -2924,7 +2925,7 @@ function(G,T)
                 vec := x[2];
                 record := x[3];
                 
-                if Size(ProductList[6]) > 0 then 
+                if ProductList[6] <> [] and ProductList[6] <> false then 
                             
                     x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
                     
@@ -2935,7 +2936,7 @@ function(G,T)
                 
                 x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
-                if not x[1] then 
+                if not x[1] and ProductList[6] <> false then 
                     Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 8"
                                     , [x[2],mat,vec,record]
                                     , OutputList);
@@ -2972,7 +2973,7 @@ function(G,T)
                             EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
                             EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
 
-                            if Size(ProductList[6]) > 0 then 
+                            if ProductList[6] <> [] and ProductList[6] <> false then 
                                 for k in [1..4] do 
                                     for x in EigenVectors[j][k] do
                                         x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
@@ -2980,12 +2981,13 @@ function(G,T)
                                 od;
                             fi;
                                                    
-                            if Size(EigenVectors[j][4]) <> 1 then
+                            if Size(EigenVectors[j][4]) <> 1 and ProductList[6] <> false then
                                 Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M5"
                                     , []
                                     , OutputList);
                                 break;
-                            elif Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim then
+                            elif Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim 
+                                and ProductList[6] <> false then
                                 Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M4"
                                     , []
                                     , OutputList);
