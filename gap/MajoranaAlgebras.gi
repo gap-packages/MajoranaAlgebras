@@ -1602,29 +1602,26 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
     for m in [1..Size(UnknownAlgebraProducts)] do
     
-        for i in [1,2] do 
+        j := UnknownAlgebraProducts[m][1];
+    
+        a := [1..dim]*0; a[j] := 1;        
+    
+        for k in [1..Size(ProductList[6])] do
         
-            j := UnknownAlgebraProducts[m][i];
-        
-            a := [1..dim]*0; a[j] := 1;        
-        
-            for k in [1..Size(ProductList[6])] do
+            row := [1..Size(UnknownAlgebraProducts)]*0;
+            sum := [];
             
-                row := [1..Size(UnknownAlgebraProducts)]*0;
-                sum := [];
-                
-                x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
+            x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
 
-                if ForAll(x[1], x -> x = 0) then 
-                    if ForAny( x[2] , y -> y <> 0) then 
-                        Error("Nullspace"); 
-                    fi;
-                else
-                    Add(mat,x[1]);
-                    Add(vec,x[2]);
-                    Add(record,[i,k,"n"]);
+            if ForAll(x[1], x -> x = 0) then 
+                if ForAny( x[2] , y -> y <> 0) then 
+                    Error("Nullspace"); 
                 fi;
-            od;
+            else
+                Add(mat,x[1]);
+                Add(vec,x[2]);
+                Add(record,[k,"n"]);
+            fi;
         od;
     od;
     
@@ -2794,14 +2791,14 @@ function(G,T)
                     # Change evecs to get rid of any axes not in the basis
 
                     for j in [1..t] do
-                        for k in [1..3] do
-                            for x in EigenVectors[j][k] do
-                                x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
-                            od;
+                        for k in [1..3] do                        
+                            for x in [1..Size(EigenVectors[j][k])] do
+                                EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList[6]);
+                            od;                            
                         od;
                     od;
                 fi;
-
+                
                                             ## STEP 7: MORE PRODUCTS II ##
 
                 # Check fusion and M1
@@ -2871,7 +2868,6 @@ function(G,T)
                                 Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
                                                 , [mat,vec,record]
                                                 , OutputList);
-                                Display(Size(Output[1][3]));
                                 break;
                             fi;
                         fi;
