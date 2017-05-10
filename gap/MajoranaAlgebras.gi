@@ -446,7 +446,7 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                     for k in [1..i-1] do
                         Add(sum, L[j][k]*L[i][k]*D[k][k]);
                     od;
-                    L[j][i] := B[j][i] - Sum(sum)/D[i][i];
+                    L[j][i] := (B[j][i] - Sum(sum))/D[i][i];
                 od;
                 L[i][i] := 1;
             fi;
@@ -1111,13 +1111,14 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductLi
 
     local   mat,        # matrix of unknowns
             vec,        # vector of knowns
+            record,     # record of eigenvectors
             table,      # table of eigenvalues
             u,          # vector with 1 in j th position
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
             dim;        # size of ProductList[1]
     
-    mat := []; vec :=[];
+    mat := []; vec :=[]; record := [];
     
     table := [0, 1/4, 1/32];
     
@@ -1129,11 +1130,18 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductLi
         
         x := MAJORANA_SeparateAlgebraProduct(u,v,UnknownAlgebraProducts,AlgebraProducts,ProductList);
         
-        Add(mat, x[1]);
-        Add(vec, x[2] + table[ev]*v);        
+        if ForAll(x[1], y -> y = 0) then 
+            if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
+                return [false,v];
+            fi;
+        else        
+            Add(mat, x[1]);
+            Add(vec, x[2] + table[ev]*v);  
+            Add(record, [j,ev,Position(EigenVectors[j][ev],v)]);      
+        fi;
     od;
     
-    return [mat,vec];
+    return [true,mat,vec,record];
     
     end);
     
@@ -1407,7 +1415,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             dim;        # dimension
     
     row := [1..Size(UnknownAlgebraProducts)]*0;
-    sum := [];
+    sum := 0;
     
     dim := Size(AlgebraProducts[1]);
     
@@ -1830,7 +1838,7 @@ function(G,T)
             # Step 6 - More inner products
             unknowns, mat, vec, 
             
-            vals, pos, OutputList,
+            vals, pos, OutputList, record,
 
             
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
@@ -2822,20 +2830,27 @@ function(G,T)
                 
                     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                     
+                    unknowns := Filtered( unknowns, x -> x[1] = j);
+                    
                     if unknowns <> [] then
                     
                         mat := [];
                         vec := [];
+                        record := [];
                         
                         for k in [1..3] do 
                         
                             x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, unknowns, AlgebraProducts, ProductList);
                             
-                            if x <> 0 then 
-                                Append(mat,x[1]);
-                                Append(vec,x[2]);
+                            if not x[1] then 
+                                Output[i] := MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
+                                , [j, x[2]]
+                                , OutputList);                                
+                            else
+                                Append(mat,x[2]);
+                                Append(vec,x[3]);
+                                Append(record,x[4]);
                             fi;
-                        
                         od;
                         
                         # use fact that if v in null space then a \cdot v = 0
@@ -2847,14 +2862,18 @@ function(G,T)
                             Append(mat,x[1]);
                             Append(vec,x[2]);
                         fi;
-                                     
-                        x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
-                        if not x[1] then 
-                            Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                            , x[2]
-                                            , OutputList);
-                            break;
+                        if mat <> [] then 
+                                     
+                            x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+                            
+                            if not x[1] then 
+                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                                                , [mat,vec,record]
+                                                , OutputList);
+                                Display(Size(Output[1][3]));
+                                break;
+                            fi;
                         fi;
                     fi;                        
                 od;
@@ -2907,6 +2926,7 @@ function(G,T)
                 
                 mat := x[1];
                 vec := x[2];
+                record := x[3];
                 
                 if Size(ProductList[6]) > 0 then 
                             
@@ -2920,8 +2940,8 @@ function(G,T)
                 x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
                 if not x[1] then 
-                    Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                    , x[2]
+                    Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 8"
+                                    , [x[2],mat,vec,record]
                                     , OutputList);
                     break;
                 fi;
