@@ -2588,7 +2588,7 @@ function(G,T)
                                 pos[4] := Position(T,s*h^3); 
                                 pos[5] := Position(T,s*h^4);
                                 
-                                vals := [1..5]*(175/524288);
+                                vals := [1,1,1,1,1]*(175/524288);
 
                                 AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
