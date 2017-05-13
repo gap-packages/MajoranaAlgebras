@@ -436,7 +436,7 @@ function(A) # Takes as input a matrix A. If A is positive semidefinite then will
                         if B[j][i] - Sum(sum) = 0 then
                             L[j][i]:=0;
                         else
-                            return D;
+                            return false;
                         fi;
                     od;
                     L[i][i]:=1;
@@ -587,7 +587,11 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
                 i;          # loop over sze of matrix
 
         L := MAJORANA_LDLTDecomposition(GramMatrix);
-
+        
+        if L = false then
+            return -1;
+        fi;
+        
         Diagonals := [];
 
         for i in [1..Size(GramMatrix)] do
@@ -2671,15 +2675,9 @@ function(G,T)
 
                 # Use these eigenvectors and the fusion rules to find more
 
-                switch:=0;
-
                 Dimensions := StructuralCopy(maindimensions);
 
-                if ForAll(Dimensions,x->x=dim) then
-                    switch:=1;
-                fi;
-
-                while switch = 0 do
+                if ForAny(Dimensions, x -> x < dim - 1) then                
                 
                     x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
                     
@@ -2690,26 +2688,14 @@ function(G,T)
                         break;
                     fi;
 
-                    NewDimensions:=[];
-
                     for j in [1..t] do
                         for k in [1..3] do
                             if Size(EigenVectors[j][k]) > 0 then
                                 EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
                             fi;
                         od;
-                        Append(NewDimensions,[Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])]);
                     od;
-
-                    if NewDimensions = Dimensions then
-                        switch := 1;
-                    elif ForAll(NewDimensions,x->x=dim-1) then
-                        switch := 1;
-                    else
-                        Dimensions:=StructuralCopy(NewDimensions);
-                    fi;
-
-                od;
+                fi;
                 
                 if Output[i] <> [] then
                     break;
