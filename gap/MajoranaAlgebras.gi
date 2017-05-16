@@ -2250,7 +2250,7 @@ function(G,T)
 
                         Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                        vals := [-1/3, 2/3, -2/3, -1/3, 1]; 
+                        vals := [-1/3, -2/3, -2/3, -1/3, 1]; 
 
                         Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
 
@@ -2928,7 +2928,7 @@ function(G,T)
                                     , OutputList);
                     break;
                 fi;
-
+                
                                             ## STEP 9: MORE EVECS II ##
 
                 # Step 8 - check if we have full espace decomp, if not find it
@@ -3035,7 +3035,7 @@ function(G,T)
             fi;
 
                                         ## STEP 11: CHECK ALGEBRA ##
-
+                                    
             # Check bilinear form is positive definite
             
             GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
