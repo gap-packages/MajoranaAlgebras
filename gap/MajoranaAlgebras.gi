@@ -1123,6 +1123,7 @@ function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductLi
         
         if ForAll(x[1], y -> y = 0) then 
             if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
+                Error("pause");
                 return [false,v];
             fi;
         else        
@@ -1492,7 +1493,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             Sort(x);
             
             pos := Position(unknowns,x);
-            output[pos] := row[i];
+            output[pos] := sign*row[i];
             
         fi;
     od;
