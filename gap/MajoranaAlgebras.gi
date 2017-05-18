@@ -1711,41 +1711,73 @@ InstallGlobalFunction( MAJORANA_FindPairConjElement,
 
     function( i, j, ProductList)
     
-        local   x,      # input elements
-                y,      # representative elements
-                k,      # orbital of elements
-                g;      # conjugating element
-                
-        if ProductList[4][i][j] = false then 
-        
-            x := [ProductList[1][i],ProductList[1][j]];
-            y := [0,0];
+    local   x,      # input elements
+            y,      # representative elements
+            z,      # index of elements which will also have g
+            list,   # list of indices z
+            k,      # orbital of elements
+            l,
+            table,
+            pos_1,
+            pos_2,
+            g;      # conjugating element
             
-            k := MAJORANA_FindPairOrbit(i, j, ProductList);
-        
-            y[1] := ProductList[1][ProductList[7][k][1]];
-            y[2] := ProductList[1][ProductList[7][k][2]];
-        
-            g := RepresentativeAction(ProductList[8],y,x,OnPairs);
+    table := [[],[1],[1,2],[1,3],[1,2,3,4]];
             
-            if g <> fail then
+    if ProductList[4][i][j] in [false,fail] then 
+    
+        x := [ProductList[1][i],ProductList[1][j]];
+        y := [0,0];
+        
+        # create list of other indices which are going to have this elt
+        
+        list := [];
+        
+        for k in table[Order(x[1])] do 
+            for l in table[Order(x[2])] do
                 
-                ProductList[4][i][j] := g;
-                ProductList[4][j][i] := g;
-                     
-                return g;
-            else
+                pos_1 := Position(ProductList[2],x[1]^k);
+                pos_2 := Position(ProductList[2],x[2]^l);
             
-                g := RepresentativeAction(ProductList[8],y,Reversed(x),OnPairs);
+                z := [0,0];
                 
-                ProductList[4][i][j] := g;
-                ProductList[4][j][i] := g;
-                
-                return g;
-            fi;
+                z[1] := AbsInt(ProductList[5][pos_1]);
+                z[2] := AbsInt(ProductList[5][pos_2]);
+            
+                Add(list,z);
+                Add(list,Reversed(z));
+            od;
+        od;
+        
+        list := DuplicateFreeList(list);
+        
+        k := MAJORANA_FindPairOrbit(i, j, ProductList);
+    
+        y[1] := ProductList[1][ProductList[7][k][1]];
+        y[2] := ProductList[1][ProductList[7][k][2]];
+    
+        g := RepresentativeAction(ProductList[8],y,x,OnPairs);
+        
+        if g <> fail then
+        
+            for z in list do
+                ProductList[4][z[1]][z[2]] := g;
+            od;
+                 
+            return g;
         else
-            return ProductList[4][i][j];
+        
+            g := RepresentativeAction(ProductList[8],y,Reversed(x),OnPairs);
+            
+            for z in list do
+                ProductList[4][z[1]][z[2]] := g;
+            od;
+            
+            return g;
         fi;
+    else
+        return ProductList[4][i][j];
+    fi;
     
     end );
     
@@ -1763,10 +1795,20 @@ InstallGlobalFunction( MAJORANA_FindPairOrbit,
             
                 if [ProductList[1][i],ProductList[1][j]] in ProductList[9][k] then
                 
-                    ProductList[3][i][j] := k;
-                    ProductList[3][j][i] := k;
+                    if [ProductList[1][i],ProductList[1][j]] in ProductList[14] then
                     
-                    return k;
+                        ProductList[3][i][j] := -k;
+                        ProductList[3][j][i] := -k;
+                        
+                        return -k;
+                    
+                    else
+                
+                        ProductList[3][i][j] := k;
+                        ProductList[3][j][i] := k;
+                        
+                        return k;
+                    fi;
                 else
                     k := k + 1;
                 fi;
@@ -1833,7 +1875,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
                     g := MAJORANA_FindPairConjElement( x[1], x[2], ProductList);
                                                     
-                    AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                    if y > 0 then 
+                        AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                    else
+                        AlgebraProducts[-y] := -MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                    fi;
                 fi;
             od;
             
@@ -1884,7 +1930,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     
 InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
 
-    function(ProductList, negativeorbitals, OrbitalsT)
+    function(ProductList, OrbitalsT)
     
     local   i,      # loop over orbitals
             x,      # representative of orbital
@@ -1897,12 +1943,9 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
     i := Size(OrbitalsT) + 1;
             
     while i < Size(ProductList[9]) + 1 do
+        
+        x := ProductList[9][i][1];
 
-        x := [0,0];
-        
-        x[1] := ProductList[1][ProductList[7][i][1]];
-        x[2] := ProductList[1][ProductList[7][i][2]];
-        
         y := [Order(x[1]),Order(x[2])];
         
         table  := [[],[1],[1,2],[1,3],[1,2,3,4]];
@@ -1925,7 +1968,7 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
                            if 5 in y and not (y = [5,5] 
                                 and [j,k] in [[2,2],[3,2],[2,3],[3,3]]) then 
                                     
-                                Append(negativeorbitals, ProductList[9][l]);
+                                Append(ProductList[14], ProductList[9][l]);
                            fi;
                            
                            Remove(ProductList[9],l);
@@ -1950,7 +1993,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T)
 
     local   # Seress
-            ProductList, error, OrbitsT,
+            ProductList, error, OrbitsT, 
 
             # indexing and temporary variables
             i, j, k, l, x, y, b,
@@ -1976,7 +2019,7 @@ function(G,T)
             # Step 6 - More inner products
             unknowns, mat, vec, 
             
-            vals, pos, OutputList, record,
+            vals, pos, OutputList, record, 
 
             
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
@@ -2287,7 +2330,9 @@ function(G,T)
                 
             od;
             
+            ProductList[14] := [];
             
+            MAJORANA_MergeOrbitalsAxes(ProductList, OrbitalsT);
 
             SizeOrbitals:=Size(ProductList[9]);
 
@@ -2296,7 +2341,7 @@ function(G,T)
             ProductList[3] := NullMat(dim,dim);
             
             for j in [1..dim] do
-                for k in [1..dim] do 
+                for k in [1..dim] do
                     ProductList[4][j][k] := false;
                     ProductList[3][j][k] := false;
                 od;
@@ -2316,6 +2361,13 @@ function(G,T)
                 ProductList[3][y[2]][y[1]] := j;
             od; 
 
+            for j in [1..dim] do
+                for k in [1..dim] do 
+                    ProductList[3][j][k] := MAJORANA_FindPairOrbit(j,k,ProductList);
+                    ProductList[4][j][k] := MAJORANA_FindPairConjElement(j,k,ProductList);
+                od;
+            od;
+            
                                         ## STEP 3: PRODUCTS AND EVECS I ##
 
 
