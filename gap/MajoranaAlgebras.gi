@@ -1447,6 +1447,58 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     
     end);
     
+InstallGlobalFunction(MAJORANA_ConjugateRow,
+
+    function(row, g, unknowns, ProductList)
+    
+    local   output,     # output row
+            len,        # length of row
+            i,          # loop over length of row
+            j,          # first elt of original product
+            k,          # second elt of original product
+            x,          # new product
+            pos_1,      # position of first element conjugated
+            pos_2,      # position of second element conjugated
+            sign,       # corrects sign of 5A axis
+            pos;        # position of new product
+            
+    
+    len := Size(row);
+    output := [1..len]*0;
+    
+    for i in [1..row] do
+        if row[i] <> 0 then 
+    
+            j := unknowns[i][1];
+            k := unknowns[i][2];
+            
+            x := [0,0];
+            
+            pos_1 := Position(ProductList[2],(ProductList[1][j])^g);
+            pos_2 := Position(ProductList[2],(ProductList[1][k])^g);
+            
+            x[1] := ProductList[5][pos_1];
+            x[2] := ProductList[5][pos_2];
+            
+            if x[1]*x[2] < 0 then 
+                sign := -1;
+            else
+                sign := 1;
+            fi;
+            
+            x[1] := AbsInt(x[1]);
+            x[2] := AbsInt(x[2]);
+            
+            Sort(x);
+            
+            pos := Position(unknowns,x);
+            output[pos] := row[i];
+            
+        fi;
+    od;
+    
+    end);     
+    
 InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix)

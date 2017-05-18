@@ -54,6 +54,8 @@ DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
+DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
+
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
 DeclareGlobalFunction( "MAJORANA_FullResurrection" );
