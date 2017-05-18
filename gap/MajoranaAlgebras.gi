@@ -2800,7 +2800,7 @@ function(G,T)
                     break;
                 fi;
 
-                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
+                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList,representatives);
 
                 if Size(error) > 0 and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
@@ -2878,7 +2878,7 @@ function(G,T)
                                     , OutputList);
                 fi;
 
-                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList,representatives);
 
                 if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
