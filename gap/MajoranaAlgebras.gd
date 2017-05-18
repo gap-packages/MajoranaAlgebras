@@ -76,3 +76,5 @@ DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
+DeclareGlobalFunction( "MAJORANA_MergeOrbitalsAxes" );
+

@@ -1881,6 +1881,69 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     fi;
     
     end );
+    
+InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
+
+    function(ProductList, negativeorbitals, OrbitalsT)
+    
+    local   i,      # loop over orbitals
+            x,      # representative of orbital
+            y,      # orders of representatives
+            table,  # table of orders of axes
+            j,      # loop over orders of first axis
+            k,      # loop over orders of second axis
+            l;      # loop over orbitals
+    
+    i := Size(OrbitalsT) + 1;
+            
+    while i < Size(ProductList[9]) + 1 do
+
+        x := [0,0];
+        
+        x[1] := ProductList[1][ProductList[7][i][1]];
+        x[2] := ProductList[1][ProductList[7][i][2]];
+        
+        y := [Order(x[1]),Order(x[2])];
+        
+        table  := [[],[1],[1,2],[1,3],[1,2,3,4]];
+        
+        for j in table[y[1]] do
+            for k in table[y[2]] do  
+                      
+                if not [x[1]^j, x[2]^k] in ProductList[9][i] then
+                    
+                    l := i + 1;
+                    
+                    while l < Size(ProductList[9]) + 1 do
+                    
+                        if [x[1]^j, x[2]^k] in ProductList[9][l] then 
+                        
+                           Append(ProductList[9][i],ProductList[9][l]);
+                           
+                           l := Size(ProductList[9]) + 1;
+                           
+                           if 5 in y and not (y = [5,5] 
+                                and [j,k] in [[2,2],[3,2],[2,3],[3,3]]) then 
+                                    
+                                Append(negativeorbitals, ProductList[9][l]);
+                           fi;
+                           
+                           Remove(ProductList[9],l);
+                           
+                        else
+                            l := l + 1;
+                        fi;
+                        
+                    od;
+                fi;
+            od;
+        od;
+        
+        i := i + 1;       
+        
+    od;
+        
+    end );    
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -2223,6 +2286,8 @@ function(G,T)
                 j := j + 1;
                 
             od;
+            
+            
 
             SizeOrbitals:=Size(ProductList[9]);
 
