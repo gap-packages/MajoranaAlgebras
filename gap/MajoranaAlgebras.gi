@@ -159,15 +159,15 @@ end);
 
 InstallGlobalFunction(MAJORANA_FullFusion,
 
-    function(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList,representatives)
+    function(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList)
     
-    local   j,      # loop over T
-            k,      # loop over pairs of eigenvalues
-            ev,     # a pair of eigenvalues
-            x,      # result of fusion
-            new;    # new eigenvectors
+    local   j,                  # loop over T
+            k,                  # loop over pairs of eigenvalues
+            ev,                 # a pair of eigenvalues
+            x,                  # result of fusion
+            new;                # new eigenvectors
 
-    for j in representatives do
+    for j in ProductList[10] do
         
         new := [ [], [], [] ];
         
@@ -516,7 +516,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         
                         if x <> false then
                             
-                            g := MAJORANA_FindConjElement(i,j,list);
+                            g := MAJORANA_FindPairConjElement(i,j,list);
                             
                             vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
                         else
@@ -666,7 +666,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
 InstallGlobalFunction(MAJORANA_TestFusion,
 
-    function(GramMatrix,AlgebraProducts,EigenVectors,ProductList,representatives) 
+    function(GramMatrix,AlgebraProducts,EigenVectors,ProductList) 
         
     # list should be of the form [ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5],ProductList[6]]
         
@@ -690,7 +690,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
         dim := Size(AlgebraProducts[1]);
 
-        for j in representatives do
+        for j in ProductList[10] do
 
             u := [1..dim]*0; u[j]:=1;
             
@@ -802,7 +802,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
 InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
-    function(GramMatrix,AlgebraProducts,EigenVectors, ProductList,representatives) # Tests that eigenspaces are orthogonal with respect to the inner product
+    function(GramMatrix,AlgebraProducts,EigenVectors, ProductList) # Tests that eigenspaces are orthogonal with respect to the inner product
 
         local   errorortho, # list of indices which do not obey orthogonality of eigenvectors
                 u,          # vector with 1 in j th position
@@ -817,7 +817,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         
         errorortho := [];
 
-        for j in representatives do
+        for j in ProductList[10] do
 
             u := [1..Size(AlgebraProducts[1])]*0; u[j]:=1;
             
@@ -1053,7 +1053,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
     
 InstallGlobalFunction(MAJORANA_FullOrthogonality,
 
-    function(unknowns,EigenVectors,GramMatrix, ProductList, representatives)
+    function(unknowns,EigenVectors,GramMatrix, ProductList)
     
     local   i,          # loop over T
             j,          # loop over eigenvalues
@@ -1066,7 +1066,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     mat := [];
     vec := [];
 
-    for i in representatives do
+    for i in ProductList[10] do
         for j in [0..3] do 
             for k in [j+1..3] do
 
@@ -1549,15 +1549,34 @@ end );
 
 InstallGlobalFunction(MAJORANA_FullResurrection,
 
-    function(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix,representatives)
+    function(EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix)
     
-    local mat, vec, record, j, k, l, x;
+    local mat, vec, record, j, k, l, x, g, t;
     
     mat := [];
     vec := [];
     record := [];
     
-    for j in representatives do 
+    t := Size(EigenVectors);
+    
+    for j in [1..t] do 
+    
+        if EigenVectors[j][1] = false then 
+        
+            g := MAJORANA_FindConjElement(j,ProductList);
+            x := MAJORANA_FindOrbit(j,ProductList);
+            k := ProductList[10][x];
+            
+            for l in [1..3] do 
+            
+                EigenVectors[j][l] := [];
+                
+                for x in EigenVectors[k][l] do
+                    Add(EigenVectors[j][l], MAJORANA_ConjugateVector(x,g,ProductList));
+                od;
+            od;
+        fi;
+    
         for k in [1..3] do
             for l in [1..2] do 
                 if [k,l] <> [2,2] then 
@@ -1619,7 +1638,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
     end );
     
-InstallGlobalFunction( MAJORANA_FindConjElement,
+InstallGlobalFunction( MAJORANA_FindPairConjElement,
 
     function( i, j, ProductList)
     
@@ -1689,6 +1708,76 @@ InstallGlobalFunction( MAJORANA_FindPairOrbit,
         
     end );
     
+InstallGlobalFunction( MAJORANA_FindConjElement,
+
+    function( i, ProductList)  
+    
+    local   x,                # input element    
+            y,                # representative of orbit
+            k,                # orbit of x
+            g,                # conjugating element
+            coordinates,      #
+            G,                #
+            representatives,  #
+            conjelements;     #
+    
+    coordinates     := ProductList[1];        
+    G               := ProductList[8];
+    representatives := ProductList[10];
+    conjelements    := ProductList[12];
+    
+    if conjelements[i] = false then
+        
+        x := coordinates[i];
+        
+        k := MAJORANA_FindOrbit(i, ProductList);
+        
+        y := coordinates[representatives[k]];
+        
+        g := RepresentativeAction(G,y,x);
+        
+        conjelements[i] := g;
+        
+        return g;
+    
+    else
+        return conjelements[i];
+    fi;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_FindOrbit,
+
+    function( i, ProductList)
+    
+    local   j,              # loop over orbits
+            coordinates,    #
+            OrbitsT,        #
+            orbitlist;      #
+            
+    coordinates := ProductList[1];
+    OrbitsT     := ProductList[11];
+    orbitlist   := ProductList[13];
+    
+    if orbitlist[i] = false then
+        j := 1;
+        
+        while j < Size(OrbitsT) + 1 do
+            if coordinates[i] in OrbitsT[j] then
+            
+                orbitlist[i] := j;
+                return j;
+            else
+                j := j + 1;
+            fi;
+        od;
+        
+    else
+        return orbitlist[i];
+    fi;
+
+    end);
+    
 InstallGlobalFunction( MAJORANA_MakeVector,
 
     function( pos, vals, dim)
@@ -1743,7 +1832,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     x := UnknownAlgebraProducts[i]; 
                     
                     y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
-                    g := MAJORANA_FindConjElement( x[1], x[2], ProductList);
+                    g := MAJORANA_FindPairConjElement( x[1], x[2], ProductList);
                                                     
                     AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
                 fi;
@@ -1799,7 +1888,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(G,T)
 
     local   # Seress
-            ProductList, error, representatives, OrbitsT,
+            ProductList, error, OrbitsT,
 
             # indexing and temporary variables
             i, j, k, l, x, y, b,
@@ -1848,14 +1937,26 @@ function(G,T)
         od;
     od;
     
+    # Set up ProductList
+    
+    ProductList := [1..13]*0;
+        
+    ProductList[8]  := G;
+    ProductList[10] := [];
+    ProductList[12] := [1..t]*0;
+    ProductList[13] := [1..t]*0;
+    
+    for i in [1..t] do
+        ProductList[12][i] := false;
+        ProductList[13][i] := false;
+    od;
+    
     # Construct orbits of G on T
     
-    OrbitsT := OrbitsDomain(G,T);
+    ProductList[11] := OrbitsDomain(G,T);
     
-    representatives := [];
-    
-    for x in OrbitsT do
-        Add(representatives, Position( T, Representative(x)));
+    for x in ProductList[11] do
+        Add(ProductList[10], Position( T, Representative(x)));
     od;
 
     # Construct orbitals of G on T
@@ -1966,10 +2067,6 @@ function(G,T)
 
     for i in [1..Size(Binaries)] do
         
-        ProductList := [1..9]*0;
-        
-        ProductList[8] := G;
-
         Output[i]:=[];
 
         master:=1;
@@ -2159,7 +2256,7 @@ function(G,T)
             EigenVectors:=NullMat(t,3);
 
             for j in [1..t] do
-                if j in representatives then
+                if j in ProductList[10] then
                     for k in [1..3] do
                         EigenVectors[j][k] := [];
                     od;
@@ -2182,7 +2279,7 @@ function(G,T)
 
             # Add eigenvectors from IPSS10
 
-            for j in representatives do
+            for j in ProductList[10] do
                 for k in [1..t] do
 
                     x := MAJORANA_FindPairOrbit(j, k, ProductList);
@@ -2641,7 +2738,7 @@ function(G,T)
             
             maindimensions:=[];
 
-            for j in representatives do
+            for j in ProductList[10] do
                 for k in [1..3] do
                     if Size(EigenVectors[j][k]) > 0 then
                         EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
@@ -2680,7 +2777,7 @@ function(G,T)
 
                 if ForAny(Dimensions, x -> x < dim - 1) then                
                 
-                    x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList,representatives);
+                    x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
                     
                     if not x[1] and ProductList[6] <> false then 
                         Output[i] := MAJORANA_OutputError(x[2],
@@ -2689,7 +2786,7 @@ function(G,T)
                         break;
                     fi;
 
-                    for j in representatives do
+                    for j in ProductList[10] do
                         for k in [1..3] do
                             if Size(EigenVectors[j][k]) > 0 then
                                 EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
@@ -2722,7 +2819,7 @@ function(G,T)
                         break;
                         
                     else
-                        x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList,representatives);
+                        x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
                         
                         if not x[1] then 
                             Output[i] := MAJORANA_OutputError( x[2]
@@ -2778,7 +2875,7 @@ function(G,T)
 
                     # Change evecs to get rid of any axes not in the basis
 
-                    for j in representatives do
+                    for j in ProductList[10] do
                         for k in [1..3] do                        
                             for x in [1..Size(EigenVectors[j][k])] do
                                 EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList[6]);
@@ -2800,7 +2897,7 @@ function(G,T)
                     break;
                 fi;
 
-                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList,representatives);
+                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
                 if Size(error) > 0 and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
@@ -2811,7 +2908,7 @@ function(G,T)
 
                 # Use eigenvectors to find more products
                 
-                for j in representatives do
+                for j in ProductList[10] do
                 
                     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                     
@@ -2878,7 +2975,7 @@ function(G,T)
                                     , OutputList);
                 fi;
 
-                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList,representatives);
+                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
                 if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
                     Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
@@ -2887,7 +2984,7 @@ function(G,T)
                 fi;
                 
                 if ProductList[6] <> [] and ProductList[6] <> false then
-                    for j in representatives do 
+                    for j in ProductList[10] do 
                         for k in [1..3] do
                             Append(EigenVectors[j][1],ProductList[6]);
                         od;
@@ -2896,7 +2993,7 @@ function(G,T)
                 
                 # put eigenvectors into reversed echelon form 
                 
-                for j in representatives do 
+                for j in ProductList[10] do 
                     for k in [1..3] do 
                         if EigenVectors[j][k] <> [] then
                             MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
@@ -2906,7 +3003,7 @@ function(G,T)
                 
                 unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                         
-                x := MAJORANA_FullResurrection(EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix,representatives);
+                x := MAJORANA_FullResurrection(EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                 
                 mat := x[1];
                 vec := x[2];
@@ -2934,7 +3031,7 @@ function(G,T)
 
                 # Step 8 - check if we have full espace decomp, if not find it
 
-                for j in representatives do
+                for j in ProductList[10] do
                     
                     a := [1..dim]*0; a[j] := 1;
                 
@@ -2991,7 +3088,7 @@ function(G,T)
 
                 newdimensions := [];
                 
-                for j in representatives do 
+                for j in ProductList[10] do 
                     Add(newdimensions, Size(EigenVectors[j][1]) 
                                         + Size(EigenVectors[j][2]) 
                                         + Size(EigenVectors[j][3]) + 1);
@@ -3060,7 +3157,7 @@ function(G,T)
 
             # Check that eigenvectors obey the fusion rules
 
-            error := MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList,representatives);
+            error := MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if ForAny(error,x->Size(x)>0) then
                 Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
@@ -3071,7 +3168,7 @@ function(G,T)
 
             # Check that the eigenspaces are orthogonal
 
-            error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList,representatives);
+            error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
             if Size(error) > 0 then
                 Output[i] := MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
