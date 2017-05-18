@@ -1332,55 +1332,64 @@ function( mat )
 
     while i <= nrows do
     
-        if not i in nzheads then 
-            # Reduce the row with the known basis vectors.
-            for j in [ 1 .. Length(nzheads) ] do
-                x := mat[i][ncols + 1 - nzheads[j]];
-                if x <> 0 then
-                  mat[i] := mat[i] - mat[ nzheads[j] ]*x;
-                fi;
-            od;
-
-            j := PositionNot( Reversed(mat[i]), 0 );
+        if ForAll(mat[i], x -> x = 0) then 
+        
+            i := i + 1;
+        
+        else
+    
+            if not i in nzheads then 
             
-            if j <= nrows then
+                # Reduce the row with the known basis vectors.
+                
+                for j in [ 1 .. Length(nzheads) ] do
+                    x := mat[i][ncols + 1 - nzheads[j]];
+                    if x <> 0 then
+                      mat[i] := mat[i] - mat[ nzheads[j] ]*x;
+                    fi;
+                od;
 
-                # We found a new basis vector.
+                j := PositionNot( Reversed(mat[i]), 0 );
+                
+                if j <= nrows then
 
-                mat[i] := mat[i]/mat[i][ncols + 1 - j] ;
-                
-                if j = i then 
+                    # We found a new basis vector.
+
+                    mat[i] := mat[i]/mat[i][ncols + 1 - j] ;
                     
-                    temp := ShallowCopy(mat[i]);
+                    if j = i then 
+                        
+                        temp := ShallowCopy(mat[i]);
+                        
+                        i := i + 1;
+                        
+                    elif j > i then 
                     
-                    i := i + 1;
+                        # Swap rows i and j 
                     
-                elif j > i then 
-                
-                    # Swap rows i and j 
-                
-                    temp := ShallowCopy(mat[i]);
-                    mat[i] := ShallowCopy(mat[j]);
-                    mat[j] := ShallowCopy(temp);
+                        temp := ShallowCopy(mat[i]);
+                        mat[i] := ShallowCopy(mat[j]);
+                        mat[j] := ShallowCopy(temp);
+                        
+                    elif j < i then 
                     
-                elif j < i then 
-                
-                    # Swap rows i and n - j 
-                    
-                    temp := ShallowCopy(mat[i]);
-                    mat[i] := ShallowCopy(mat[j]);
-                    mat[j] := ShallowCopy(temp);
-                    
+                        # Swap rows i and n - j 
+                        
+                        temp := ShallowCopy(mat[i]);
+                        mat[i] := ShallowCopy(mat[j]);
+                        mat[j] := ShallowCopy(temp);
+                        
+                        i := i + 1;
+                    fi;
+
+                    Add( nzheads, j );
+                    Add( vectors, temp );
+                else;
                     i := i + 1;
                 fi;
-
-                Add( nzheads, j );
-                Add( vectors, temp );
-            else;
+            else
                 i := i + 1;
             fi;
-        else
-            i := i + 1;
         fi;
     od;
     
