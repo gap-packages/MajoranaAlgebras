@@ -1466,7 +1466,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     len := Size(row);
     output := [1..len]*0;
     
-    for i in [1..row] do
+    for i in [1..Size(row)] do
         if row[i] <> 0 then 
     
             j := unknowns[i][1];
@@ -1496,6 +1496,8 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             
         fi;
     od;
+    
+    return output;
     
     end);     
     
@@ -1591,12 +1593,16 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                 Error("Resurrection error");
                             fi;
                         else
-                        
-                            sum := MAJORANA_RemoveNullSpace(sum,ProductList[6]);
-                             
-                            Add(mat,row);
-                            Add(vec,sum);
-                            Add(record,[i,ev_a,ev_b,alpha,beta,gamma]);
+                            
+                            for g in DuplicateFreeList(ProductList[12]) do
+                                if g <> false then 
+                                
+                                    Add(mat,MAJORANA_ConjugateRow(row,g,UnknownAlgebraProducts,ProductList));
+                                    Add(vec,MAJORANA_ConjugateVector(sum,g,ProductList));
+                                    
+                                    Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
+                                fi;
+                            od;
                         fi;  
                     fi;
                 fi;
@@ -1620,7 +1626,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     
     t := Size(EigenVectors);
     
-    for j in [1..t] do 
+    for j in ProductList[10] do 
     
         if EigenVectors[j][1] = false then 
         
@@ -2007,11 +2013,6 @@ function(G,T)
     ProductList[12] := [1..t]*0;
     ProductList[13] := [1..t]*0;
     
-    for i in [1..t] do
-        ProductList[12][i] := false;
-        ProductList[13][i] := false;
-    od;
-    
     # Construct orbits of G on T
     
     ProductList[11] := OrbitsDomain(G,T);
@@ -2019,8 +2020,29 @@ function(G,T)
     for x in ProductList[11] do
         Add(ProductList[10], Position( T, Representative(x)));
     od;
+    
+    for i in [1..t] do
+        
+        j := 1;
+        
+        while j < Size(ProductList[11]) + 1 do 
+            if T[i] in ProductList[11][j] then 
+            
+                ProductList[13][i] := j;
+                
+                k := ProductList[10][j];
+                
+                ProductList[12][i] := RepresentativeAction(G,T[k],T[i]);
+                
+                j := Size(ProductList[11]) + 1;;
+                
+            else
+                j := j + 1;
+            fi;
+        od;
+    od;
 
-    # Construct orbitals of G on T
+    # Construct orbitals of G on T x T
 
     x := OrbitsDomain(G,Cartesian(T,T),OnPairs);
     
@@ -3079,13 +3101,15 @@ function(G,T)
                 
                 fi;
                 
-                x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+                if mat <> [] then 
+                    x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
-                if not x[1] and ProductList[6] <> false then 
-                    Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 8"
-                                    , [x[2],mat,vec,record]
-                                    , OutputList);
-                    break;
+                    if not x[1] and ProductList[6] <> false then 
+                        Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 8"
+                                        , [x[2],mat,vec,record]
+                                        , OutputList);
+                        break;
+                    fi;
                 fi;
                 
                                             ## STEP 9: MORE EVECS II ##
