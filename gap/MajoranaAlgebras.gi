@@ -1630,8 +1630,9 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     
         if EigenVectors[j][1] = false then 
         
-            g := MAJORANA_FindConjElement(j,ProductList);
-            x := MAJORANA_FindOrbit(j,ProductList);
+            g := ProductList[12][j];
+            x := ProductList[13][j];
+            
             k := ProductList[10][x];
             
             for l in [1..3] do 
@@ -1774,76 +1775,6 @@ InstallGlobalFunction( MAJORANA_FindPairOrbit,
         fi;
         
     end );
-    
-InstallGlobalFunction( MAJORANA_FindConjElement,
-
-    function( i, ProductList)  
-    
-    local   x,                # input element    
-            y,                # representative of orbit
-            k,                # orbit of x
-            g,                # conjugating element
-            coordinates,      #
-            G,                #
-            representatives,  #
-            conjelements;     #
-    
-    coordinates     := ProductList[1];        
-    G               := ProductList[8];
-    representatives := ProductList[10];
-    conjelements    := ProductList[12];
-    
-    if conjelements[i] = false then
-        
-        x := coordinates[i];
-        
-        k := MAJORANA_FindOrbit(i, ProductList);
-        
-        y := coordinates[representatives[k]];
-        
-        g := RepresentativeAction(G,y,x);
-        
-        conjelements[i] := g;
-        
-        return g;
-    
-    else
-        return conjelements[i];
-    fi;
-    
-    end );
-    
-InstallGlobalFunction( MAJORANA_FindOrbit,
-
-    function( i, ProductList)
-    
-    local   j,              # loop over orbits
-            coordinates,    #
-            OrbitsT,        #
-            orbitlist;      #
-            
-    coordinates := ProductList[1];
-    OrbitsT     := ProductList[11];
-    orbitlist   := ProductList[13];
-    
-    if orbitlist[i] = false then
-        j := 1;
-        
-        while j < Size(OrbitsT) + 1 do
-            if coordinates[i] in OrbitsT[j] then
-            
-                orbitlist[i] := j;
-                return j;
-            else
-                j := j + 1;
-            fi;
-        od;
-        
-    else
-        return orbitlist[i];
-    fi;
-
-    end);
     
 InstallGlobalFunction( MAJORANA_MakeVector,
 
