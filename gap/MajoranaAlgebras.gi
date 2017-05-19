@@ -2154,7 +2154,7 @@ function(G,T)
             ProductList, error, OrbitsT, 
 
             # indexing and temporary variables
-            i, j, k, l, x, y, b,
+            i, j, k, x, y, b,
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, 
@@ -2169,10 +2169,7 @@ function(G,T)
             GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
 
             # Step 4 - More products and evecs
-            h, s, dim, a, g,
-
-            # Step 5 - More evecs
-            switch, Dimensions, NewDimensions, ev,
+            h, s, dim, a,
 
             # Step 6 - More inner products
             unknowns, mat, vec, 
@@ -3024,9 +3021,7 @@ function(G,T)
 
                 # Use these eigenvectors and the fusion rules to find more
 
-                Dimensions := StructuralCopy(maindimensions);
-
-                if ForAny(Dimensions, x -> x < dim - 1) then                
+                if ForAny(maindimensions, x -> x < dim - 1) then                
                 
                     x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
                     
