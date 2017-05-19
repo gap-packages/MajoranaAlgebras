@@ -1309,7 +1309,7 @@ function(i,GramMatrix,AlgebraProducts,ProductList)
             sign := -1;
         fi;
         
-        res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList);
+        res := MAJORANA_UnknownsAxiomM1(AbsInt(k),AbsInt(l),GramMatrix,AlgebraProducts,ProductList);
         
         if res = false then 
             j := j + 1;
@@ -1317,6 +1317,8 @@ function(i,GramMatrix,AlgebraProducts,ProductList)
             return sign*res;
         fi;        
     od;
+    
+    return false;
 
     end );
     
