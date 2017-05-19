@@ -1937,32 +1937,29 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     
     local   Solution,   # solution of system
             i,          # loop over <UnknownInnerProducts>
-            x;          # element of <UnknownInnerProducts>
+            x;          # element of <UnknownInnerProducts>     
     
-    if mat <> [] then     
-    
-        Solution := MAJORANA_SolutionMatVecs(mat,vec);
+    Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
-        if Size(Solution) = 2 then                    
-            
-            for i in [1..Size(Solution[1])] do
-                if not i in Solution[2] then
-
-                    x:=UnknownInnerProducts[i]; 
-
-                    GramMatrix[x]:=Solution[1][i][1];
-                fi;
-            od;
-            
-            if Size(Solution[2]) = Size(Solution[1]) then
-                return [false, Solution];
-            fi;
-            
-            return [true];
-        else
+    if Size(Solution) = 2 then                    
         
+        for i in [1..Size(Solution[1])] do
+            if not i in Solution[2] then
+
+                x:=UnknownInnerProducts[i]; 
+
+                GramMatrix[x]:=Solution[1][i][1];
+            fi;
+        od;
+        
+        if Size(Solution[2]) = Size(Solution[1]) then
             return [false, Solution];
         fi;
+        
+        return [true];
+    else
+    
+        return [false, Solution];
     fi;
     
     end );
@@ -2000,17 +1997,19 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
                     
                         if [x[1]^j, x[2]^k] in ProductList[9][l] then 
                         
-                           Append(ProductList[9][i],ProductList[9][l]);
+                            Append(ProductList[9][i],ProductList[9][l]);
                            
-                           if 5 in y and not (y = [5,5] 
-                                and [j,k] in [[2,2],[3,2],[2,3],[3,3]]) then 
-                                    
+                            if y = [5,5] then
+                                if [j,k] in [[1,2],[2,1],[1,3],[3,1],[2,4],[4,2],[3,4],[4,3]] then 
+                                    Append(ProductList[14], ProductList[9][l]);
+                                fi;
+                            elif y[2] = 5 and k in [2,3] then 
                                 Append(ProductList[14], ProductList[9][l]);
-                           fi;
+                            fi;
                            
-                           Remove(ProductList[9],l);
+                            Remove(ProductList[9],l);
                            
-                           l := Size(ProductList[9]) + 1;
+                            l := Size(ProductList[9]) + 1;
                            
                         else
                             l := l + 1;
@@ -2997,7 +2996,7 @@ function(G,T)
                                             , x[3]
                                             , OutputList);
                             break;
-                        else 
+                        elif x[2] <> [] then 
                         
                             y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
                             
