@@ -1044,7 +1044,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
                 fi;
             else
                 Add(mat,x[1]);
-                Add(vec,x[2]);
+                Add(vec,[x[2]]);
             fi;
         od;
     else
@@ -1063,7 +1063,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
                     fi;
                 else
                     Add(mat,x[1]);
-                    Add(vec,x[2]);
+                    Add(vec,[x[2]]);
                 fi;
                 
             od;
@@ -2994,51 +2994,39 @@ function(G,T)
                
                                             ## STEP 6: MORE INNER PRODUCTS ##
                 # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
-
-                switch := 0;
-
-                while switch = 0 do 
                 
-                    unknowns:=[];
+                unknowns:=[];
 
-                    for j in [1..SizeOrbitals] do
-                        if GramMatrix[j] = false then
-                            Add(unknowns,j);
-                        fi;
-                    od;
-                
-                    if Size(unknowns) = 0 then
-                        
-                        break;
-                        
-                    else
-                        x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
-                        
-                        if not x[1] then 
-                            Output[i] := MAJORANA_OutputError( x[2]
-                                            , x[3]
-                                            , OutputList);
-                            break;
-                        elif x[2] <> [] then 
-                        
-                            y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
-                            
-                            if not y[1] then 
-                                if Size(y[2]) <> 2 then 
-                                    Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                                , [mat,vec]
-                                                , OutputList);
-                                fi;
-                                break;
-                            fi;
-                        fi;
+                for j in [1..SizeOrbitals] do
+                    if GramMatrix[j] = false then
+                        Add(unknowns,j);
                     fi;
                 od;
-                
-                if Size(Output[i]) > 0 then
-                    break;
-                fi;
+            
+                if Size(unknowns) > 0 then
 
+                    x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
+                    
+                    if not x[1] then 
+                        Output[i] := MAJORANA_OutputError( x[2]
+                                        , x[3]
+                                        , OutputList);
+                        break;
+                    elif x[2] <> [] then 
+                    
+                        y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
+                        
+                        if not y[1] then 
+                            if Size(y[2]) <> 2 then 
+                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
+                                            , [mat,vec]
+                                            , OutputList);
+                            fi;
+                            break;
+                        fi;
+                    fi;
+                fi;
+                
                 # Check that GramMatrix matrix is pd
                 
                 if ForAll(GramMatrix, x -> x <> false) then 
