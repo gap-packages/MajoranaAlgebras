@@ -958,6 +958,55 @@ function(GramMatrix, ProductList)
     end
 
     );
+    
+InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
+
+    function(u,v,UnknownInnerProducts,GramMatrix,ProductList)
+
+    local   row,        # record values of unknowns 
+            sum,        # record values of knowns
+            dim,        # size of coordinates
+            i,          # index for dim of u
+            j,          # index for dim of v
+            m,          # orbit of i,j
+            pos,        # position of m in unknowns
+            sign;       # correct sign of 5A axes
+            
+    dim := Size(ProductList[1]);
+            
+    sum := 0;
+    row := [1..Size(UnknownInnerProducts)]*0;
+
+    for i in [1..dim] do
+        if u[i] <> 0 then
+            for j in [1..dim] do
+                if v[j] <> 0 then 
+                
+                    m := MAJORANA_FindPairOrbit(i, j, ProductList);;
+                    
+                    if m > 0 then 
+                        sign := 1;
+                    else
+                        sign := -1;
+                    fi;
+                    
+                    m := AbsInt(m);
+
+                    if GramMatrix[m] <> false then
+                        sum := sum - sign*u[i]*v[j]*GramMatrix[m];
+                    else
+                        pos := Position(UnknownInnerProducts,m);
+                        row[pos] := row[pos] + sign*u[i]*v[j];
+                    fi;
+                fi;
+            od;
+        fi;
+    od;
+
+    return [row,sum];
+
+    end );
+
 
 InstallGlobalFunction(MAJORANA_Orthogonality,
 
@@ -965,19 +1014,12 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
 
     local   mat,                    # matrix of unknowns 
             vec,                    # vector of knowns
-            row,                    # row of matrix
-            sum,                    # element of vec
-            j,                      # loop over ProductList[1]
             ev_a,                   # a - eigenvectors
             ev_b,                   # b - eigenvectors
-            v,                      # a - eigenvector
-            w,                      # b - eigenvector
-            k,                      # loop over v
-            l,                      # loop over w 
-            m,                      # orbit of pair 
-            pos,                    # position of unknown product
+            u,                      # a - eigenvector
+            v,                      # b - eigenvector
+            x,                      # result of separate inner product 
             dim,                    # size of coordinates
-            sign,                   # correct sign of 5A axes
             OrthogonalityError;     # list of vectors which do not obey orthogonality
             
     dim := Size(ProductList[1]);
@@ -990,41 +1032,19 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
     if a = 0 then
     
         ev_b := EigenVectors[i][b];
+        u := [1..dim]*0; u[i] := 1;
 
         for v in ev_b do
 
-            sum := 0;
-            row := [1..Size(UnknownInnerProducts)]*0;
+            x := MAJORANA_SeparateInnerProduct(u,v,UnknownInnerProducts,GramMatrix,ProductList);
 
-            for j in [1..dim] do
-                if v[j] <> 0 then 
-
-                    m := MAJORANA_FindPairOrbit(j, i, ProductList);
-                    
-                    if m > 0 then 
-                        sign := 1;
-                    else
-                        sign := -1;
-                    fi;
-                    
-                    m := AbsInt(m);
-
-                    if GramMatrix[m] <> false then
-                        sum := sum - sign*v[j]*GramMatrix[m];
-                    else
-                        pos := Position(UnknownInnerProducts,m);
-                        row[pos] := row[pos] + sign*v[j];
-                    fi;
-                fi;
-            od;
-
-            if ForAll(row, x -> x = 0) then
-                if sum <> 0 then
-                    Add(OrthogonalityError,v);
+            if ForAll(x[1], y -> y = 0) then
+                if x[2] <> 0 then
+                    Add(OrthogonalityError,[u,v]);
                 fi;
             else
-                Add(mat,row);
-                Add(vec,sum);
+                Add(mat,x[1]);
+                Add(vec,x[2]);
             fi;
         od;
     else
@@ -1032,46 +1052,20 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
         ev_a := EigenVectors[i][a];
         ev_b := EigenVectors[i][b];
         
-        for v in ev_a do
-            for w in ev_b do
+        for u in ev_a do
+            for v in ev_b do
 
-                sum := 0;
-                row := [1..Size(UnknownInnerProducts)]*0;
+                x := MAJORANA_SeparateInnerProduct(u,v,UnknownInnerProducts,GramMatrix,ProductList);
 
-                for k in [1..dim] do
-                    if v[k] <> 0 then
-                        for l in [1..dim] do
-                            if w[l] <> 0 then 
-                            
-                                m := MAJORANA_FindPairOrbit(k, l, ProductList);;
-                                
-                                if m > 0 then 
-                                    sign := 1;
-                                else
-                                    sign := -1;
-                                fi;
-                                
-                                m := AbsInt(m);
-
-                                if GramMatrix[m] <> false then
-                                    sum := sum - sign*v[k]*w[l]*GramMatrix[m];
-                                else
-                                    pos := Position(UnknownInnerProducts,m);
-                                    row[pos] := row[pos] + sign*v[k]*w[l];
-                                fi;
-                            fi;
-                        od;
-                    fi;
-                od;
-
-                if ForAll(row, x -> x = 0) then
-                    if sum <> 0 then
-                        Add(OrthogonalityError,[v,w]);
+                if ForAll(x[1], y -> y = 0) then
+                    if x[2] <> 0 then
+                        Add(OrthogonalityError,[u,v]);
                     fi;
                 else
-                    Add(mat,row);
-                    Add(vec,[sum]);
+                    Add(mat,x[1]);
+                    Add(vec,x[2]);
                 fi;
+                
             od;
         od;
     fi;
