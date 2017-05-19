@@ -82,3 +82,5 @@ DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
 DeclareGlobalFunction( "MAJORANA_MergeOrbitalsAxes" );
 
+DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
+

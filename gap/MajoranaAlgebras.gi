@@ -2096,6 +2096,55 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
     od;
         
     end );    
+    
+InstallGlobalFunction(MAJORANA_CheckNullSpace,
+
+    function(GramMatrix,AlgebraProducts,EigenVectors,ProductList)
+    
+    local   GramMatrixFull,     # full gram matrix
+            x,                  # result of positive definite
+            i,                  # loop over orbitals
+            j,                  # loop over representatives
+            k;                  # loop over eigenvalues
+    
+        if ProductList[6] = false then 
+            if ForAll(GramMatrix, x -> x <> false) then 
+                GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
+
+                x := MAJORANA_PositiveDefinite(GramMatrixFull);
+
+                if x < 0 then
+                    return false;
+                elif x = 0 then
+                    ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
+                fi;
+            fi;
+
+            if ProductList[6] <> [] then
+
+                # Change alg products to get rid of any axes not in the basis
+                
+                for i in [1..Size(ProductList[9])] do
+                    if AlgebraProducts[i] <> false then
+                        AlgebraProducts[i]:= MAJORANA_RemoveNullSpace(AlgebraProducts[i], ProductList[6]);
+                    fi;
+                od;
+
+                # Change evecs to get rid of any axes not in the basis
+
+                for j in ProductList[10] do
+                    for k in [1..3] do                        
+                        for x in [1..Size(EigenVectors[j][k])] do
+                            EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList[6]);
+                        od;                            
+                    od;
+                od;
+            fi;
+        fi;
+        
+        return true;
+    
+    end );
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -2959,6 +3008,15 @@ function(G,T)
                                             ## STEP 5: INNER PRODUCTS M1 ##
                                             
                 MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
+                
+                x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+                
+                if x = false then
+                    Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
+                                        , []
+                                        , OutputList);                                     
+                    break;
+                fi;
                             
                 
                                             ## STEP 6: FUSION ##                                        
@@ -2991,83 +3049,8 @@ function(G,T)
                 if Output[i] <> [] then
                     break;
                 fi;
-               
-                                            ## STEP 6: MORE INNER PRODUCTS ##
-                    
-                                            
-                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
                 
-                unknowns:=[];
-
-                for j in [1..SizeOrbitals] do
-                    if GramMatrix[j] = false then
-                        Add(unknowns,j);
-                    fi;
-                od;
-            
-                if Size(unknowns) > 0 then
-
-                    x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
-                    
-                    if not x[1] then 
-                        Output[i] := MAJORANA_OutputError( x[2]
-                                        , x[3]
-                                        , OutputList);
-                        break;
-                    elif x[2] <> [] then 
-                    
-                        y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
-                        
-                        if not y[1] then 
-                            if Size(y[2]) <> 2 then 
-                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                            , [mat,vec]
-                                            , OutputList);
-                            fi;
-                            break;
-                        fi;
-                    fi;
-                fi;
-                
-                # Check that GramMatrix matrix is pd
-                
-                if ForAll(GramMatrix, x -> x <> false) then 
-                    GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
-
-                    x := MAJORANA_PositiveDefinite(GramMatrixFull);
-
-                    if x < 0 then
-                        Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
-                                        , []
-                                        , OutputList);                                     
-                        break;
-                    elif x = 0 then
-                        ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
-                    fi;
-                fi;
-
-                if ProductList[6] <> [] and ProductList <> false then
-
-                    # Change alg products to get rid of any axes not in the basis
-                    
-                    for k in [1..SizeOrbitals] do
-                        if AlgebraProducts[k] <> false then
-                            AlgebraProducts[k]:= MAJORANA_RemoveNullSpace(AlgebraProducts[k], ProductList[6]);
-                        fi;
-                    od;
-
-                    # Change evecs to get rid of any axes not in the basis
-
-                    for j in ProductList[10] do
-                        for k in [1..3] do                        
-                            for x in [1..Size(EigenVectors[j][k])] do
-                                EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList[6]);
-                            od;                            
-                        od;
-                    od;
-                fi;
-                
-                                            ## STEP 7: MORE PRODUCTS II ##
+                                            ## STEP 7: PRODUCTS FROM EIGENVECTORS ##
 
                 # Check fusion and M1
 
@@ -3263,13 +3246,57 @@ function(G,T)
                                 break;
                             fi;
                         fi;
-                    fi;
-                    
+                    fi; 
                 od;
-
+                
                 if Size(Output[i]) > 0 then
                     break;
-                fi;          
+                fi;                  
+                                                ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
+                    
+                                            
+                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
+                
+                unknowns:=[];
+
+                for j in [1..SizeOrbitals] do
+                    if GramMatrix[j] = false then
+                        Add(unknowns,j);
+                    fi;
+                od;
+            
+                if Size(unknowns) > 0 then
+
+                    x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
+                    
+                    if not x[1] then 
+                        Output[i] := MAJORANA_OutputError( x[2]
+                                        , x[3]
+                                        , OutputList);
+                        break;
+                    elif x[2] <> [] then 
+                    
+                        y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
+                        
+                        if not y[1] then 
+                            if Size(y[2]) <> 2 then 
+                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
+                                            , [mat,vec]
+                                            , OutputList);
+                            fi;
+                            break;
+                        fi;
+                    fi;
+                fi;
+                
+                x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+                
+                if x = false then
+                    Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
+                                        , []
+                                        , OutputList);                                     
+                    break;
+                fi;
 
                 newdimensions := [];
                 
