@@ -23,7 +23,7 @@ function(AlgebraProducts, ProductList)
     for i in [1..dim] do
         for j in [i..dim] do 
             
-            k := MAJORANA_FindPairOrbit(i, j, ProductList);
+            k := AbsInt(MAJORANA_FindPairOrbit(i, j, ProductList));
         
             if AlgebraProducts[k] = false then 
                 Add(unknowns,[i,j]);
@@ -494,6 +494,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 k,      # pair orbit index
                 x,      # algebra product
                 g,      # conjugating element
+                sign,   # correct sign of 5A axes
                 vec,    # output vec
                 dim;    # size of vectors 
 
@@ -512,13 +513,19 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                     
                         k := MAJORANA_FindPairOrbit(i, j, list);
                         
-                        x := AlgebraProducts[k];
+                        if k > 0 then 
+                            sign := 1;
+                        else
+                            sign ::= -1;
+                        fi;
+                        
+                        x := AlgebraProducts[AbsInt(k)];
                         
                         if x <> false then
                             
                             g := MAJORANA_FindPairConjElement(i,j,list);
                             
-                            vec := vec + u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
+                            vec := vec + sign*u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
                         else
                             if u[i] <> 0 and v[j] <> 0 then
                                 # cannot calculate product
@@ -545,6 +552,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
         local   i,      # loop over u 
                 j,      # loop over v
                 k,      # pair orbit index
+                sign,   # correct for 5A axes
                 sum;    # output value
 
         sum := 0;
@@ -556,8 +564,14 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                     
                         k := MAJORANA_FindPairOrbit(i, j, ProductList);
                         
-                        if GramMatrix[k] <> false then
-                            sum := sum + u[i]*v[j]*GramMatrix[k];
+                        if k > 0 then 
+                            sign := 1;
+                        else
+                            sign := -1;
+                        fi;
+                        
+                        if GramMatrix[AbsInt(k)] <> false then
+                            sum := sum + sign*u[i]*v[j]*GramMatrix[AbsInt(k)];
                         else
                             # cannot calculate product
                             return false;
@@ -930,8 +944,12 @@ function(GramMatrix, ProductList)
         for j in [1..dim] do
             
             k := MAJORANA_FindPairOrbit(i, j, ProductList);
-        
-            GramMatrixFull[i][j] := GramMatrix[k];
+            
+            if k > 0 then 
+                GramMatrixFull[i][j] := GramMatrix[k];
+            else
+                GramMatrixFull[i][j] := -GramMatrix[-k];
+            fi;
         od;
     od;
 
@@ -959,6 +977,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
             m,                      # orbit of pair 
             pos,                    # position of unknown product
             dim,                    # size of coordinates
+            sign,                   # correct sign of 5A axes
             OrthogonalityError;     # list of vectors which do not obey orthogonality
             
     dim := Size(ProductList[1]);
@@ -980,13 +999,21 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
             for j in [1..dim] do
                 if v[j] <> 0 then 
 
-                    m := MAJORANA_FindPairOrbit(j, i, ProductList);;
+                    m := MAJORANA_FindPairOrbit(j, i, ProductList);
+                    
+                    if m > 0 then 
+                        sign := 1;
+                    else
+                        sign := -1;
+                    fi;
+                    
+                    m := AbsInt(m);
 
                     if GramMatrix[m] <> false then
-                        sum := sum - v[j]*GramMatrix[m];
+                        sum := sum - sign*v[j]*GramMatrix[m];
                     else
                         pos := Position(UnknownInnerProducts,m);
-                        row[pos] := row[pos] + v[j];
+                        row[pos] := row[pos] + sign*v[j];
                     fi;
                 fi;
             od;
@@ -1017,12 +1044,20 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
                             if w[l] <> 0 then 
                             
                                 m := MAJORANA_FindPairOrbit(k, l, ProductList);;
+                                
+                                if m > 0 then 
+                                    sign := 1;
+                                else
+                                    sign := -1;
+                                fi;
+                                
+                                m := AbsInt(m);
 
                                 if GramMatrix[m] <> false then
-                                    sum := sum - v[k]*w[l]*GramMatrix[m];
+                                    sum := sum - sign*v[k]*w[l]*GramMatrix[m];
                                 else
                                     pos := Position(UnknownInnerProducts,m);
-                                    row[pos] := row[pos] + v[k]*w[l];
+                                    row[pos] := row[pos] + sign*v[k]*w[l];
                                 fi;
                             fi;
                         od;
@@ -1740,10 +1775,9 @@ InstallGlobalFunction( MAJORANA_FindPairConjElement,
             od;
         od;
         
-        k := MAJORANA_FindPairOrbit(i, j, ProductList);
+        k := AbsInt(MAJORANA_FindPairOrbit(i, j, ProductList));
     
-        y[1] := ProductList[1][ProductList[7][k][1]];
-        y[2] := ProductList[1][ProductList[7][k][2]];
+        y := ProductList[9][k][1];
         
         l := 1;
         
@@ -1772,8 +1806,8 @@ InstallGlobalFunction( MAJORANA_FindPairConjElement,
                 
                     for z in list do
                     
-                        pos_1 := AbsInt(Position(ProductList[2],z[1]));
-                        pos_2 := AbsInt(Position(ProductList[2],z[2]));
+                        pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
+                        pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
                         
                         ProductList[4][pos_1][pos_2] := g;
                         ProductList[4][pos_2][pos_1] := g;
@@ -1974,8 +2008,6 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
                         
                            Append(ProductList[9][i],ProductList[9][l]);
                            
-                           l := Size(ProductList[9]) + 1;
-                           
                            if 5 in y and not (y = [5,5] 
                                 and [j,k] in [[2,2],[3,2],[2,3],[3,3]]) then 
                                     
@@ -1983,6 +2015,8 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
                            fi;
                            
                            Remove(ProductList[9],l);
+                           
+                           l := Size(ProductList[9]) + 1;
                            
                         else
                             l := l + 1;
