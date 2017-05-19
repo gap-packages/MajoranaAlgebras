@@ -1735,46 +1735,57 @@ InstallGlobalFunction( MAJORANA_FindPairConjElement,
         
         for k in table[Order(x[1])] do 
             for l in table[Order(x[2])] do
-                
-                pos_1 := Position(ProductList[2],x[1]^k);
-                pos_2 := Position(ProductList[2],x[2]^l);
             
-                z := [0,0];
-                
-                z[1] := AbsInt(ProductList[5][pos_1]);
-                z[2] := AbsInt(ProductList[5][pos_2]);
-            
-                Add(list,z);
-                Add(list,Reversed(z));
+                Add(list,[x[1]^k,x[2]^l]);
             od;
         od;
-        
-        list := DuplicateFreeList(list);
         
         k := MAJORANA_FindPairOrbit(i, j, ProductList);
     
         y[1] := ProductList[1][ProductList[7][k][1]];
         y[2] := ProductList[1][ProductList[7][k][2]];
+        
+        l := 1;
+        
+        while l  < Size(list) + 1 do 
     
-        g := RepresentativeAction(ProductList[8],y,x,OnPairs);
+            g := RepresentativeAction(ProductList[8],y,list[l],OnPairs);
         
-        if g <> fail then
-        
-            for z in list do
-                ProductList[4][z[1]][z[2]] := g;
-            od;
-                 
-            return g;
-        else
-        
-            g := RepresentativeAction(ProductList[8],y,Reversed(x),OnPairs);
+            if g <> fail then
             
-            for z in list do
-                ProductList[4][z[1]][z[2]] := g;
-            od;
+                for z in list do
+                    
+                    pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
+                    pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+                    
+                    ProductList[4][pos_1][pos_2] := g;
+                    ProductList[4][pos_2][pos_1] := g;
+                od;
+                
+                return g;
+                
+            else 
+                     
+                g := RepresentativeAction(ProductList[8],y,Reversed(list[l]),OnPairs);
             
-            return g;
-        fi;
+                if g <> fail then 
+                
+                    for z in list do
+                    
+                        pos_1 := AbsInt(Position(ProductList[2],z[1]));
+                        pos_2 := AbsInt(Position(ProductList[2],z[2]));
+                        
+                        ProductList[4][pos_1][pos_2] := g;
+                        ProductList[4][pos_2][pos_1] := g;
+                    od;
+                
+                    return g;
+                
+                else
+                    l := l + 1;
+                fi;
+            fi;
+        od;
     else
         return ProductList[4][i][j];
     fi;
