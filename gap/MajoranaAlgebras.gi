@@ -1290,35 +1290,59 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
 InstallGlobalFunction(MAJORANA_FullUnknownsAxiomM1,
 
-function(i,GramMatrix,AlgebraProducts,ProductList)
+function(GramMatrix,AlgebraProducts,ProductList)
 
-    local j, k, l, x, res, sign;
+    local   switch,         # switch for while loop
+            count,          # counts any newly found products
+            i,              # loop over orbitals
+            j,              # loop over an orbital 
+            k,              # position of first element
+            l,              # position of second element
+            res,            # result of unknowns axiom M1
+            sign;           # correct sign of 5A axes
     
-    res := false;
-    
-    j := 1;
-    
-    while j < Size(ProductList[9][i]) + 1 do 
+    switch := 1;
+            
+    while switch = 1 do
         
-        k := ProductList[5][Position(ProductList[2],ProductList[9][i][j][1])];
-        l := ProductList[5][Position(ProductList[2],ProductList[9][i][j][2])];
+        count := 0;
+
+        for i in [1..Size(ProductList[9])] do
+            if GramMatrix[i] = false then
+            
+                j := 1;
+    
+                while j < Size(ProductList[9][i]) + 1 do 
+                    
+                    k := ProductList[5][Position(ProductList[2],ProductList[9][i][j][1])];
+                    l := ProductList[5][Position(ProductList[2],ProductList[9][i][j][2])];
+                    
+                    if k*l > 0 then 
+                        sign := 1;
+                    else
+                        sign := -1;
+                    fi;
+                    
+                    res := MAJORANA_UnknownsAxiomM1(AbsInt(k),AbsInt(l),GramMatrix,AlgebraProducts,ProductList);
+                    
+                    if res = false then 
+                        j := j + 1;
+                    else
+                        GramMatrix[i] := sign*res;
+                        count := count + 1;
+                        
+                        j := Size(ProductList[9][i]) + 1;
+                    fi;        
+                od;
+
+            fi;
+        od;
         
-        if k*l > 0 then 
-            sign := 1;
-        else
-            sign := -1;
+        if count = 0 then 
+            switch := 0;
+            break;
         fi;
-        
-        res := MAJORANA_UnknownsAxiomM1(AbsInt(k),AbsInt(l),GramMatrix,AlgebraProducts,ProductList);
-        
-        if res = false then 
-            j := j + 1;
-        else
-            return sign*res;
-        fi;        
-    od;
-    
-    return false;
+    od; 
 
     end );
     
@@ -2799,8 +2823,6 @@ function(G,T)
                         AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j]:=1/4;
-                    else
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
 
                 # 2,4 products
@@ -2824,9 +2846,6 @@ function(G,T)
                         AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j] := 3/8;
-
-                    else
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
 
                 # (2,5) values
@@ -2851,8 +2870,6 @@ function(G,T)
                         AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                         GramMatrix[j] := 0;
-                    else
-                        GramMatrix[j] := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
                     fi;
                     
                 elif x = y then 
@@ -2904,30 +2921,7 @@ function(G,T)
                 fi;
             od;
 
-            switch := 1;
-            
-            while switch = 1 do
-                
-                count := 0;
-            
-                for j in [1..SizeOrbitals] do
-                    if GramMatrix[j] = false then 
-                        x := MAJORANA_FullUnknownsAxiomM1(j,GramMatrix,AlgebraProducts,ProductList);
-                        
-                        if x <> false then 
-                            count := count + 1;
-                            GramMatrix[j] := x;
-                        fi;
-                    fi;
-                od;
-                
-                if count = 0 then 
-                    switch := 0;
-                    break;
-                fi;
-            od;            
-
-                                        ## STEP 4: MORE PRODUCTS ##
+                                        ## STEP 4: MAIN LOOP ##
             
             maindimensions:=[];
 
@@ -2962,7 +2956,13 @@ function(G,T)
                 
                 count := count + 1;
 
-                                            ## STEP 5: MORE EVECS ##
+                                            ## STEP 5: INNER PRODUCTS M1 ##
+                                            
+                MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
+                            
+                
+                                            ## STEP 6: FUSION ##                                        
+                                        
 
                 # Use these eigenvectors and the fusion rules to find more
 
@@ -2993,6 +2993,8 @@ function(G,T)
                 fi;
                
                                             ## STEP 6: MORE INNER PRODUCTS ##
+                    
+                                            
                 # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
                 
                 unknowns:=[];
