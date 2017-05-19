@@ -1292,7 +1292,7 @@ InstallGlobalFunction(MAJORANA_FullUnknownsAxiomM1,
 
 function(i,GramMatrix,AlgebraProducts,ProductList)
 
-    local j, k, l, x, res;
+    local j, k, l, x, res, sign;
     
     res := false;
     
@@ -1303,41 +1303,21 @@ function(i,GramMatrix,AlgebraProducts,ProductList)
         k := ProductList[5][Position(ProductList[2],ProductList[9][i][j][1])];
         l := ProductList[5][Position(ProductList[2],ProductList[9][i][j][2])];
         
-        if k > 0 and l > 0 then 
-
-            res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList);
-        
-        elif k > 0 and l < 0 then 
-        
-            x := MAJORANA_UnknownsAxiomM1(k,-l,GramMatrix,AlgebraProducts,ProductList);
-        
-            if x <> false then 
-                res := - x;
-            fi;
-            
-        elif k < 0 and l > 0 then 
-        
-            x := MAJORANA_UnknownsAxiomM1(-k,l,GramMatrix,AlgebraProducts,ProductList);
-        
-            if x <> false then 
-                res := - x;
-            fi; 
-            
+        if k*l > 0 then 
+            sign := 1;
         else
-        
-            res := MAJORANA_UnknownsAxiomM1(-k,-l,GramMatrix,AlgebraProducts,ProductList);
+            sign := -1;
         fi;
+        
+        res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList);
         
         if res = false then 
             j := j + 1;
         else
-            j := Size(ProductList[9][i]) + 1;
-        fi;
-        
+            return sign*res;
+        fi;        
     od;
-    
-    return res;
-    
+
     end );
     
 InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
