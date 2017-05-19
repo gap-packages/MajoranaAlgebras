@@ -23,7 +23,7 @@ function(AlgebraProducts, ProductList)
     for i in [1..dim] do
         for j in [i..dim] do 
             
-            k := AbsInt(MAJORANA_FindPairOrbit(i, j, ProductList));
+            k := AbsInt(ProductList[3][i][j]);
         
             if AlgebraProducts[k] = false then 
                 Add(unknowns,[i,j]);
@@ -511,7 +511,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 for j in [1..dim] do
                     if v[j] <> 0 then 
                     
-                        k := MAJORANA_FindPairOrbit(i, j, list);
+                        k := list[3][i][j];
                         
                         if k > 0 then 
                             sign := 1;
@@ -523,7 +523,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         
                         if x <> false then
                             
-                            g := MAJORANA_FindPairConjElement(i,j,list);
+                            g := list[4][i][j];
                             
                             vec := vec + sign*u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
                         else
@@ -562,7 +562,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 for j in [1..Size(v)] do
                     if v[j] <> 0 then
                     
-                        k := MAJORANA_FindPairOrbit(i, j, ProductList);
+                        k := ProductList[3][i][j];
                         
                         if k > 0 then 
                             sign := 1;
@@ -943,7 +943,7 @@ function(GramMatrix, ProductList)
     for i in [1..dim] do 
         for j in [1..dim] do
             
-            k := MAJORANA_FindPairOrbit(i, j, ProductList);
+            k := ProductList[3][i][j];
             
             if k > 0 then 
                 GramMatrixFull[i][j] := GramMatrix[k];
@@ -982,7 +982,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             for j in [1..dim] do
                 if v[j] <> 0 then 
                 
-                    m := MAJORANA_FindPairOrbit(i, j, ProductList);;
+                    m := ProductList[3][i][j];
                     
                     if m > 0 then 
                         sign := 1;
@@ -1736,127 +1736,192 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
     end );
     
-InstallGlobalFunction( MAJORANA_FindPairConjElement,
+InstallGlobalFunction( MAJORANA_PairConjElements,
 
-    function( i, j, ProductList)
+    function(ProductList)
     
     local   x,      # input elements
             y,      # representative elements
             z,      # index of elements which will also have g
             list,   # list of indices z
+            i,      # first basis element
+            j,      # second basis element
             k,      # orbital of elements
             l,
             table,
             pos_1,
             pos_2,
+            dim,    # size of coordinates
             g;      # conjugating element
             
     table := [[],[1],[1,2],[1,3],[1,2,3,4]];
-            
-    if ProductList[4][i][j] in [false,fail] then 
     
-        x := [ProductList[1][i],ProductList[1][j]];
-        y := [0,0];
-        
-        # create list of other indices which are going to have this elt
-        
-        list := [];
-        
-        for k in table[Order(x[1])] do 
-            for l in table[Order(x[2])] do
-            
-                Add(list,[x[1]^k,x[2]^l]);
-            od;
-        od;
-        
-        k := AbsInt(MAJORANA_FindPairOrbit(i, j, ProductList));
+    dim := Size(ProductList[1]);
     
-        y := ProductList[9][k][1];
-        
-        l := 1;
-        
-        while l  < Size(list) + 1 do 
-    
-            g := RepresentativeAction(ProductList[8],y,list[l],OnPairs);
-        
-            if g <> fail then
+    for i in [1..dim] do
+        for j in [1..dim] do
+            if ProductList[4][i][j] = 0 then 
             
-                for z in list do
-                    
-                    pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
-                    pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
-                    
-                    ProductList[4][pos_1][pos_2] := g;
-                    ProductList[4][pos_2][pos_1] := g;
+                x := [ProductList[1][i],ProductList[1][j]];
+                y := [0,0];
+                
+                # create list of other indices which are going to have this elt
+                
+                list := [];
+                
+                for k in table[Order(x[1])] do 
+                    for l in table[Order(x[2])] do
+                        Add(list,[x[1]^k,x[2]^l]);
+                    od;
                 od;
                 
-                return g;
-                
-            else 
-                     
-                g := RepresentativeAction(ProductList[8],y,Reversed(list[l]),OnPairs);
+                k := AbsInt(ProductList[3][i][j]);
             
-                if g <> fail then 
+                y := ProductList[9][k][1];
                 
-                    for z in list do
+                l := 1;
+                
+                while l  < Size(list) + 1 do 
+            
+                    g := RepresentativeAction(ProductList[8],y,list[l],OnPairs);
+                
+                    if g <> fail then
                     
-                        pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
-                        pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+                        for z in list do
+                            
+                            pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
+                            pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+                            
+                            ProductList[4][pos_1][pos_2] := g;
+                            ProductList[4][pos_2][pos_1] := g;
+                        od;
                         
-                        ProductList[4][pos_1][pos_2] := g;
-                        ProductList[4][pos_2][pos_1] := g;
-                    od;
-                
-                    return g;
-                
-                else
-                    l := l + 1;
-                fi;
+                        l := Size(list) + 1;
+                        
+                    else 
+                             
+                        g := RepresentativeAction(ProductList[8],y,Reversed(list[l]),OnPairs);
+                    
+                        if g <> fail then 
+                        
+                            for z in list do
+                            
+                                pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
+                                pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+                                
+                                ProductList[4][pos_1][pos_2] := g;
+                                ProductList[4][pos_2][pos_1] := g;
+                            od;
+                            
+                            l := Size(list) + 1;
+                            
+                        else
+                            l := l + 1;
+                        fi;
+                    fi;
+                od;
             fi;
         od;
-    else
-        return ProductList[4][i][j];
-    fi;
+    od;
     
     end );
     
-InstallGlobalFunction( MAJORANA_FindPairOrbit,
+InstallGlobalFunction( MAJORANA_PairOrbits,
 
-    function( i, j, ProductList)
+    function(ProductList)
     
-        local k;    # loop through orbitals
+    local   i,    # first basis element
+            j,    # second basis element
+            dim,  # size of coordinates  
+            k;    # loop through orbitals
+            
+    dim := Size(ProductList[1]);
+    
+    for i in [1..dim] do
+        for j in [1..dim] do
         
-        if ProductList[3][i][j] = false then 
-            
-            k := 1;
-            
-            while k < Size(ProductList[9]) + 1 do
-            
-                if [ProductList[1][i],ProductList[1][j]] in ProductList[9][k] then
+            if ProductList[3][i][j] = 0 then 
                 
-                    if [ProductList[1][i],ProductList[1][j]] in ProductList[14] then
+                k := 1;
+                
+                while k < Size(ProductList[9]) + 1 do
+                
+                    if [ProductList[1][i],ProductList[1][j]] in ProductList[9][k] then
                     
-                        ProductList[3][i][j] := -k;
-                        ProductList[3][j][i] := -k;
+                        if [ProductList[1][i],ProductList[1][j]] in ProductList[14] then
                         
-                        return -k;
+                            ProductList[3][i][j] := -k;
+                            ProductList[3][j][i] := -k;
+                        
+                        else
                     
+                            ProductList[3][i][j] := k;
+                            ProductList[3][j][i] := k;
+                        fi;
+                        
+                        k := Size(ProductList[9]) + 1;
+                        
                     else
-                
-                        ProductList[3][i][j] := k;
-                        ProductList[3][j][i] := k;
-                        
-                        return k;
+                        k := k + 1;
                     fi;
-                else
-                    k := k + 1;
-                fi;
-            od;
-        else
-            return ProductList[3][i][j];
-        fi;
+                od;
+            fi;
+        od;
+    od;
+    
         
     end );
+    
+InstallGlobalFunction(MAJORANA_PairRepresentatives,
+
+    function(ProductList)
+    
+    local   i,          # loop through orbitals
+            x,          # representative elements
+            y,          # positions of representatives
+            list,       # list of equivalent pairs of elts
+            j,          # orders of first element
+            k,          # orders of second element
+            pos_1,      # position of first element
+            pos_2,      # position of second element
+            table,      # table of orders of basis elements
+            z;          # an equivalent pair of elements       
+            
+    table := [[],[1],[1,2],[1,3],[1,2,3,4]];
+
+    for i in [1..Size(ProductList[9])] do
+            
+        x := ProductList[9][i][1];
+        y := [Position(ProductList[1],x[1]), Position(ProductList[1],x[2])];
+        
+        Add(ProductList[7], y);
+        
+        # create list of other indices which are going to have this elt
+                
+        list := [];
+        
+        for j in table[Order(x[1])] do 
+            for k in table[Order(x[2])] do
+                Add(list,[x[1]^j,x[2]^k]);
+            od;
+        od;
+        
+        # put conj elt and pair orbit for representatives 
+        
+        for z in list do
+                            
+            pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
+            pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+            
+            ProductList[4][pos_1][pos_2] := ();
+            ProductList[4][pos_2][pos_1] := ();
+            
+            ProductList[3][pos_1][pos_2] := i;
+            ProductList[3][pos_2][pos_1] := i;
+        od;
+    od;
+    
+    end);
     
 InstallGlobalFunction( MAJORANA_MakeVector,
 
@@ -1911,8 +1976,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                 
                     x := UnknownAlgebraProducts[i]; 
                     
-                    y := MAJORANA_FindPairOrbit(x[1], x[2], ProductList);
-                    g := MAJORANA_FindPairConjElement( x[1], x[2], ProductList);
+                    y := ProductList[3][x[1]][x[2]];
+                    g := ProductList[4][x[1]][x[2]];
                                                     
                     if y > 0 then 
                         AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
@@ -2378,33 +2443,9 @@ function(G,T)
             ProductList[4] := NullMat(dim,dim);
             ProductList[3] := NullMat(dim,dim);
             
-            for j in [1..dim] do
-                for k in [1..dim] do
-                    ProductList[4][j][k] := false;
-                    ProductList[3][j][k] := false;
-                od;
-            od;
-
-            for j in [1..SizeOrbitals] do
-            
-                x := ProductList[9][j][1];
-                y := [Position(ProductList[1],x[1]), Position(ProductList[1],x[2])];
-                
-                Add(ProductList[7], y);
-                
-                ProductList[4][y[1]][y[2]] := ();
-                ProductList[4][y[2]][y[1]] := ();
-                
-                ProductList[3][y[1]][y[2]] := j;
-                ProductList[3][y[2]][y[1]] := j;
-            od; 
-
-            for j in [1..dim] do
-                for k in [1..dim] do 
-                    ProductList[3][j][k] := MAJORANA_FindPairOrbit(j,k,ProductList);
-                    ProductList[4][j][k] := MAJORANA_FindPairConjElement(j,k,ProductList);
-                od;
-            od;
+            MAJORANA_PairRepresentatives(ProductList);
+            MAJORANA_PairOrbits(ProductList);
+            MAJORANA_PairConjElements(ProductList);
             
                                         ## STEP 3: PRODUCTS AND EVECS I ##
 
@@ -2452,7 +2493,7 @@ function(G,T)
             for j in ProductList[10] do
                 for k in [1..t] do
 
-                    x := MAJORANA_FindPairOrbit(j, k, ProductList);
+                    x := ProductList[3][j][k];
 
                     if Shape[x] = ['2','A'] then
                     
@@ -2604,7 +2645,7 @@ function(G,T)
                         
                         # put in products of 2A and 3A axes
                         
-                        x := MAJORANA_FindPairOrbit(pos[7], pos[8], ProductList);
+                        x := ProductList[3][pos[7]][pos[8]];
                         
                         AlgebraProducts[x] := [1..dim]*0;
                         
