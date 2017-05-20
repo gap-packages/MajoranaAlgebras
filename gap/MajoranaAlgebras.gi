@@ -401,7 +401,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         
 InstallGlobalFunction(MAJORANA_Append,
 
-    function(x,mat,vec,record)
+    function(x,mat,vec)
 
     local   i,          # loop over size of x
             pos;        # position of first non zero elt of row
@@ -411,7 +411,7 @@ InstallGlobalFunction(MAJORANA_Append,
             pos := PositionNonZero(x[1][i]);
             
             Add(mat,x[1][i]/x[1][i][pos]);
-            Add(vec,x[2][i]/x[2][i][pos]);
+            Add(vec,x[2][i]/x[1][i][pos]);
             
         fi;
     od;
