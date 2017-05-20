@@ -14,6 +14,8 @@ DeclareGlobalFunction( "MAJORANA_LDLTDecomposition" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
 
+DeclareGlobalFunction( "MAJORANA_Append" );
+
 DeclareGlobalFunction( "MAJORANA_NullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVector" );

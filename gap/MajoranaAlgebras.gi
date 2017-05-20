@@ -398,10 +398,29 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         return [sol,unsolved];
 
         end );
+        
+InstallGlobalFunction(MAJORANA_Append,
+
+    function(x,mat,vec,record)
+
+    local   i,          # loop over size of x
+            pos;        # position of first non zero elt of row
+    
+    for i in [1..Size(x[1])] do
+        if not x[1][i] in mat then 
+            pos := PositionNonZero(x[1][i]);
+            
+            Add(mat,x[1][i]/x[1][i][pos]);
+            Add(vec,x[2][i]/x[2][i][pos]);
+            
+        fi;
+    od;
+    
+    end);
 
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
-function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
+    function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
 
         local   B,      # input matrix
                 n,      # size of matrix
