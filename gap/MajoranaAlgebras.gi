@@ -1121,8 +1121,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
                 x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
                 
                 if x[1] then 
-                    Append(mat,x[2][1]);
-                    Append(vec,x[2][2]);
+                    MAJORANA_Append(x[2],mat,vec);
                 else
                     ev := [,];
                 
@@ -1707,8 +1706,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
                     x := MAJORANA_Resurrection(j,k,l,EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix);
                     
                     if x[1] <> [] then 
-                        Append(mat, x[1]);
-                        Append(vec, x[2]);
+                        MAJORANA_Append(x,mat,vec);
                         Append(record, x[3]);
                     fi;
                 fi;
@@ -3109,8 +3107,7 @@ function(G,T)
                                 , [j, x[2]]
                                 , OutputList);                                
                             else
-                                Append(mat,x[2]);
-                                Append(vec,x[3]);
+                                MAJORANA_Append(x{[2,3]},mat,vec);
                                 Append(record,x[4]);
                             fi;
                         od;
@@ -3121,8 +3118,7 @@ function(G,T)
                             
                             x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
                             
-                            Append(mat,x[1]);
-                            Append(vec,x[2]);
+                            MAJORANA_Append(x,mat,vec);
                         fi;
                         
                         if mat <> [] then 
@@ -3193,9 +3189,7 @@ function(G,T)
                             
                     x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
                     
-                    Append(mat,x[1]);
-                    Append(vec,x[2]);
-                
+                    MAJORANA_Append(x,mat,vec);
                 fi;
                 
                 if mat <> [] then 
