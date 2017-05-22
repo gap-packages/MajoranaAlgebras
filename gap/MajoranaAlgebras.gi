@@ -1117,10 +1117,12 @@ function(EigenVectors, AlgebraProducts, ProductList)
         if Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1 <> dim then
         
             u := [1..dim]*0; u[i] := 1;
+            
+            mat := [];
 
             for j in [1..dim] do
             
-                v := [1..dim]*0; u[j] := 1;
+                v := [1..dim]*0; v[j] := 1;
                 
                 x := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
                 
@@ -3215,59 +3217,21 @@ function(G,T)
 
                 # Check if we have full espace decomp, if not find it
 
-                for j in ProductList[10] do
-                    
-                    a := [1..dim]*0; a[j] := 1;
+                x := MAJORANA_MoreEigenvectors(EigenVectors, AlgebraProducts, ProductList);
                 
-                    if Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3]) + 1 <> dim then
-                    
-                        mat:=[];
-
-                        for k in [1..dim] do
-                            b := [1..dim]*0; b[k] := 1;
-                            x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-                            if x <> false then
-                                Add(mat,x);
-                            else
-                                mat := [];
-                                break;
-                            fi;
-                        od;
-
-                        if mat <> [] then 
-
-                            EigenVectors[j][1]:=ShallowCopy(NullspaceMat(mat));
-                            EigenVectors[j][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
-                            EigenVectors[j][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
-                            EigenVectors[j][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
-
-                            if ProductList[6] <> [] and ProductList[6] <> false then 
-                                for k in [1..4] do 
-                                    for x in EigenVectors[j][k] do
-                                        x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
-                                    od;
-                                od;
-                            fi;
-                                                   
-                            if Size(EigenVectors[j][4]) <> 1 and ProductList[6] <> false then
-                                Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M5"
-                                    , []
-                                    , OutputList);
-                                break;
-                            elif Size(EigenVectors[j][1]) + Size(EigenVectors[j][2]) + Size(EigenVectors[j][3]) + Size(EigenVectors[j][4]) > dim 
-                                and ProductList[6] <> false then
-                                Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M4"
-                                    , []
-                                    , OutputList);
-                                break;
-                            fi;
-                        fi;
-                    fi; 
-                od;
-                
-                if Size(Output[i]) > 0 then
-                    break;
-                fi;                  
+                if not x[1] then 
+                    if x[2] = 1 then 
+                        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M5"
+                            , []
+                            , OutputList);
+                        break;
+                    elif x[2] = 2 then 
+                        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M4"
+                            , []
+                            , OutputList);
+                        break;
+                    fi;
+                fi;
 
                 newdimensions := [];
                 
