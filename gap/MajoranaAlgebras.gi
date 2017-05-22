@@ -1098,6 +1098,71 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
     end );
 
+InstallGlobalFunction(MAJORANA_MoreEigenvectors,
+
+function(EigenVectors, AlgebraProducts, ProductList)
+
+    local   i,          # loop over representatives
+            j,          # loop over coordinates
+            u,          # vector with 1 in i th position
+            v,          # vector with 1 in j th position
+            x,          # algebra product of u,v
+            dim,        # size of coordinates
+            mat;        # matrix of algebra products
+            
+    dim := Size(ProductList[1]);
+            
+    for i in ProductList[10] do
+    
+        if Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1 <> dim then
+        
+            u := [1..dim]*0; u[i] := 1;
+
+            for j in [1..dim] do
+            
+                v := [1..dim]*0; u[j] := 1;
+                
+                x := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+                
+                if x <> false then
+                    Add(mat,x);
+                else
+                    mat := [];
+                    break;
+                fi;
+            od;
+            
+            if mat <> [] then 
+
+                EigenVectors[i][1]:=ShallowCopy(NullspaceMat(mat));
+                EigenVectors[i][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
+                EigenVectors[i][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
+                EigenVectors[i][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
+
+                if ProductList[6] <> [] and ProductList[6] <> false then 
+                    for j in [1..4] do 
+                        for x in EigenVectors[i][j] do
+                            x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
+                        od;
+                    od;
+                fi;
+                                       
+                if Size(EigenVectors[i][4]) <> 1 and ProductList[6] <> false then
+                
+                    return [false, 1, i];
+                    
+                elif Size(EigenVectors[i][1]) + Size(EigenVectors[i][2]) + Size(EigenVectors[i][3]) + Size(EigenVectors[i][4]) > dim 
+                    and ProductList[6] <> false then
+                    
+                    return [false, 2, i];
+                fi;
+            fi;
+        fi; 
+    od;
+    
+    return [true];
+    
+    end );
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
