@@ -243,8 +243,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
             pos_1,
             pos_2,
             sol,
-            unsolved,
-            zeros;
+            unsolved;
     
     m := Size(mat);
     n := Size(mat[1]);
@@ -311,76 +310,48 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     
     # solve system
      
-    zeros:=NullMat(1,n)[1];
-    sol:=NullMat(1,n)[1];
-    unsolved:=[];
+    sol := [1..n]*0;
+    unsolved := [];
 
-    if A[n] = zeros then
-        # sol[n] is unknown
-
-        sol[n]:=[];
-        Append(unsolved,[n]);
-
-    else
-        sol[n]:=B[n];
-    fi;
-
-    for i in [1..n-1] do
-        if A[n-i] = zeros then
-            sol[n-i] := [];
-            Append(unsolved,[n-i]);
-        else
-            list:=[];
-            j:=n-i+1;
-            while j<=n do
-                if A[n-i][j] <> 0 then
-                    if not j in unsolved then
-                        Append(list,[A[n-i][j]*sol[j]]);
-                        j:=j+1;
-                    else
-                        sol[n-i] := [];
-                        Append(unsolved,[n-i]);
-                        j:=n+1;
-                    fi;
-                else
-                    j:=j+1;
+    for i in Reversed([1..n]) do
+        if i in unsolved then
+            
+            for j in [1..i - 1] do
+                if A[j][i] <> 0 then 
+                    Add(unsolved,j);
+                    sol[j] := [];
                 fi;
             od;
-            if not n-i in unsolved then
-                sol[n-i]:=(B[n-i] - Sum(list))/A[n-i][n-i];
-            fi;
+            
+        elif A[i][i] = 0 then 
+        
+            sol[i] := [];
+            Append(unsolved,[i]);
+            
+            for j in [1..i - 1] do
+                if A[j][i] <> 0 then 
+                    Add(unsolved,j);
+                    sol[j] := [];
+                fi;
+            od;
+            
+        else
+            list:=[];
+            
+            j:= i + 1;
+            
+            sol[i] := B[i];
+            
+            for j in [1 .. i - 1] do
+                if A[j][i] <> 0 then 
+                    B[j] := B[j] - B[i]*A[j][i];
+                    A[j] := A[j] - A[i]*A[j][i];
+                fi;
+            od;
         fi;
     od;
 
     return [sol,unsolved];
-    
-    sol := [1..n]*0;
-    unsolved := [];
-    
-    for i in Reversed([1..n]) do
-        if A[i][i] <> 0 and not i in unsolved then 
-        
-            sol[i] := B[i];
-            
-            for j in [1 .. i - 1] do
-                B[j] := B[j] - B[i]*A[j][i];
-                A[j] := A[j] - A[i]*A[j][i];
-            od;
-            
-        elif not i in unsolved then 
-            Add(unsolved, i);
-            
-            for j in [1 .. i - 1] do
-                if A[j][i] <> 0 then 
-                    Add(unsolved,j);
-                fi;
-            od;
-        fi;
-    od;
-    
-    Sort(unsolved);
-    
-    return[sol,unsolved];
     
     end );
     
@@ -1304,42 +1275,64 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(j, ev, EigenVectors, UnknownAlgebraProducts, AlgebraProducts, ProductList)
+function(EigenVectors, AlgebraProducts, ProductList)
 
-    local   mat,        # matrix of unknowns
+    local   i,          # loop over representatives
+            ev,         # loop over eigenvalues
+            unknowns,   # unknown algebra products
+            mat,        # matrix of unknowns
             vec,        # vector of knowns
-            record,     # record of eigenvectors
             table,      # table of eigenvalues
             u,          # vector with 1 in j th position
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
             dim;        # size of ProductList[1]
     
-    mat := []; vec :=[]; record := [];
-    
     table := [0, 1/4, 1/32];
     
     dim := Size(AlgebraProducts[1]);
     
-    u := [1..dim]*0; u[j] := 1;
+    for i in ProductList[10] do
     
-    for v in EigenVectors[j][ev] do
+        unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
+                
+        unknowns := Filtered( unknowns, x -> x[1] = i);
         
-        x := MAJORANA_SeparateAlgebraProduct(u,v,UnknownAlgebraProducts,AlgebraProducts,ProductList);
+        if unknowns <> [] then
         
-        if ForAll(x[1], y -> y = 0) then 
-            if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
-                Error("pause");
-                return [false,v];
+            mat := [];
+            vec := [];
+        
+            for ev in [1..3] do 
+            
+                u := [1..dim]*0; u[i] := 1;
+                
+                for v in EigenVectors[i][ev] do
+                    
+                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
+                    
+                    if ForAll(x[1], y -> y = 0) then 
+                        if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
+                            return [false,1,v];
+                        fi;
+                    elif not x[1] in mat then         
+                        Add(mat, x[1]);
+                        Add(vec, x[2] + table[ev]*v);       
+                    fi;
+                od;
+            od;
+        
+            if mat <> [] then 
+                x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+                
+                if not x[1] and ProductList[6] <> false then 
+                    return [false,2,x];
+                fi;
             fi;
-        else        
-            Add(mat, x[1]);
-            Add(vec, x[2] + table[ev]*v);  
-            Add(record, [j,ev,Position(EigenVectors[j][ev],v)]);      
         fi;
     od;
-    
-    return [true,mat,vec,record];
+            
+    return [true];
     
     end);
     
@@ -3245,57 +3238,20 @@ function(G,T)
 
                 # Use eigenvectors to find more products
                 
-                for j in ProductList[10] do
+                x := MAJORANA_EigenvectorsAlgebraUnknowns(EigenVectors,AlgebraProducts,ProductList);
                 
-                    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
-                    
-                    unknowns := Filtered( unknowns, x -> x[1] = j);
-                    
-                    if unknowns <> [] then
-                    
-                        mat := [];
-                        vec := [];
-                        record := [];
-                        
-                        for k in [1..3] do 
-                        
-                            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, k, EigenVectors, unknowns, AlgebraProducts, ProductList);
-                            
-                            if not x[1] then 
-                                Output[i] := MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
-                                , [j, x[2]]
-                                , OutputList);                                
-                            else
-                                MAJORANA_Append(x{[2,3]},mat,vec);
-                                Append(record,x[4]);
-                            fi;
-                        od;
-                        
-                        # use fact that if v in null space then a \cdot v = 0
-                        
-                        if ProductList[6] <> [] and ProductList[6] <> false then 
-                            
-                            x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
-                            
-                            MAJORANA_Append(x,mat,vec);
-                        fi;
-                        
-                        if mat <> [] then 
-                                     
-                            x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
-                            
-                            if not x[1] and ProductList[6] <> false then 
-                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                                , [mat,vec,record]
-                                                , OutputList);
-                                break;
-                            fi;
-                        fi;
-                    fi;                        
-                od;
-
-                if Size(Output[i])>0 then
-                    break;
+                if not x[1] then 
+                    if x[2] = 1 then 
+                        Output[i] := MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
+                                , x[3]
+                                , OutputList);
+                        break;
+                    elif x[2] = 2 then 
+                        Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                                , x[3]
+                                , OutputList);
+                        break;
+                    fi;
                 fi;
                 
                                                    ## STEP 8: RESURRECTION PRINCIPLE I ##
@@ -3351,6 +3307,8 @@ function(G,T)
                     MAJORANA_Append(x,mat,vec);
                 fi;
                 
+                a := 0;
+                
                 if mat <> [] then 
                     x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
@@ -3364,7 +3322,7 @@ function(G,T)
                 
                                             ## STEP 9: MORE EVECS II ##
 
-                # Step 8 - check if we have full espace decomp, if not find it
+                # Check if we have full espace decomp, if not find it
 
                 for j in ProductList[10] do
                     
