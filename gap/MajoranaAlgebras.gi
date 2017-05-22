@@ -155,7 +155,8 @@ function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
         pos := Position(MAJORANA_FusionTable[1],ev) - 1;
         return [true, NewEigenVectors, pos];
     fi;
-end);
+end);        
+            
 
 InstallGlobalFunction(MAJORANA_FullFusion,
 
@@ -242,7 +243,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
             pos_1,
             pos_2,
             sol,
-            unsolved;
+            unsolved,
+            zeros;
     
     m := Size(mat);
     n := Size(mat[1]);
@@ -308,6 +310,49 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     Unbind(vec);
     
     # solve system
+     
+    zeros:=NullMat(1,n)[1];
+    sol:=NullMat(1,n)[1];
+    unsolved:=[];
+
+    if A[n] = zeros then
+        # sol[n] is unknown
+
+        sol[n]:=[];
+        Append(unsolved,[n]);
+
+    else
+        sol[n]:=B[n];
+    fi;
+
+    for i in [1..n-1] do
+        if A[n-i] = zeros then
+            sol[n-i] := [];
+            Append(unsolved,[n-i]);
+        else
+            list:=[];
+            j:=n-i+1;
+            while j<=n do
+                if A[n-i][j] <> 0 then
+                    if not j in unsolved then
+                        Append(list,[A[n-i][j]*sol[j]]);
+                        j:=j+1;
+                    else
+                        sol[n-i] := [];
+                        Append(unsolved,[n-i]);
+                        j:=n+1;
+                    fi;
+                else
+                    j:=j+1;
+                fi;
+            od;
+            if not n-i in unsolved then
+                sol[n-i]:=(B[n-i] - Sum(list))/A[n-i][n-i];
+            fi;
+        fi;
+    od;
+
+    return [sol,unsolved];
     
     sol := [1..n]*0;
     unsolved := [];
@@ -317,15 +362,15 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         
             sol[i] := B[i];
             
-            for j in Reversed([i + 1 .. n]) do
-                A[j] := A[j] - A[i]*A[j][i];
+            for j in [1 .. i - 1] do
                 B[j] := B[j] - B[i]*A[j][i];
+                A[j] := A[j] - A[i]*A[j][i];
             od;
             
         elif not i in unsolved then 
             Add(unsolved, i);
             
-            for j in Reversed([1 .. i - 1]) do
+            for j in [1 .. i - 1] do
                 if A[j][i] <> 0 then 
                     Add(unsolved,j);
                 fi;
@@ -1519,7 +1564,7 @@ function( mat )
 
                 j := PositionNot( Reversed(mat[i]), 0 );
                 
-                if j <= nrows then
+                if j <= nrows and j < ncols + 1 then
 
                     # We found a new basis vector.
 
@@ -2104,7 +2149,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             y,          # orbit of x
             g;          # conj element of x
     
-    if mat <> [] then 
+    if mat <> [] then
+        
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
         if Size(Solution) = 2 then
@@ -2139,7 +2185,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     
     local   Solution,   # solution of system
             i,          # loop over <UnknownInnerProducts>
-            x;          # element of <UnknownInnerProducts>     
+            x;          # element of <UnknownInnerProducts>    
     
     Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
@@ -2147,7 +2193,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
         
         for i in [1..Size(Solution[1])] do
             if not i in Solution[2] then
-
+    
                 x:=UnknownInnerProducts[i]; 
 
                 GramMatrix[x]:=Solution[1][i][1];
@@ -3444,6 +3490,8 @@ function(G,T)
                         break;
                     elif x[2] <> [] then 
                     
+                        Error("Inner");
+                    
                         y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
                         
                         if not y[1] then 
@@ -3462,7 +3510,7 @@ function(G,T)
                 if x = false then
                     Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
                                         , []
-                                        , OutputList);                                     
+                                        , OutputList);    
                     break;
                 fi;
 
