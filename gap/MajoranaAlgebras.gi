@@ -2217,7 +2217,7 @@ function(G,T)
             ProductList, error, OrbitsT, 
 
             # indexing and temporary variables
-            i, j, k, x, y, b,
+            i, j, k, x, y,
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, 
@@ -2232,7 +2232,7 @@ function(G,T)
             GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
 
             # Step 4 - More products and evecs
-            h, s, dim, a,
+            h, s, dim, 
 
             # Step 6 - More inner products
             unknowns, mat, vec, 
@@ -3147,7 +3147,27 @@ function(G,T)
                     fi;
                 fi;
                 
-                                                   ## STEP 8: RESURRECTION PRINCIPLE I ##
+                                                    ## STEP 8: MORE EVECS II ##
+
+                # Check if we have full espace decomp, if not find it
+
+                x := MAJORANA_MoreEigenvectors(EigenVectors, AlgebraProducts, ProductList);
+                
+                if not x[1] then 
+                    if x[2] = 1 then 
+                        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M5"
+                            , []
+                            , OutputList);
+                        break;
+                    elif x[2] = 2 then 
+                        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M4"
+                            , []
+                            , OutputList);
+                        break;
+                    fi;
+                fi;
+                
+                                                   ## STEP 9: RESURRECTION PRINCIPLE I ##
 
                 # Check fusion and M1
 
@@ -3200,8 +3220,6 @@ function(G,T)
                     MAJORANA_Append(x,mat,vec);
                 fi;
                 
-                a := 0;
-                
                 if mat <> [] then 
                     x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
                         
@@ -3213,25 +3231,6 @@ function(G,T)
                     fi;
                 fi;
                 
-                                            ## STEP 9: MORE EVECS II ##
-
-                # Check if we have full espace decomp, if not find it
-
-                x := MAJORANA_MoreEigenvectors(EigenVectors, AlgebraProducts, ProductList);
-                
-                if not x[1] then 
-                    if x[2] = 1 then 
-                        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M5"
-                            , []
-                            , OutputList);
-                        break;
-                    elif x[2] = 2 then 
-                        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M4"
-                            , []
-                            , OutputList);
-                        break;
-                    fi;
-                fi;
 
                 newdimensions := [];
                 
