@@ -1067,9 +1067,10 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
     
 InstallGlobalFunction(MAJORANA_FullOrthogonality,
 
-    function(unknowns,EigenVectors,GramMatrix, ProductList)
+    function(EigenVectors,GramMatrix, ProductList)
     
-    local   i,          # loop over T
+    local   unknowns,   # list of indexes with unknown inner product
+            i,          # loop over T
             j,          # loop over eigenvalues
             k,          # loop over eigenvalues
             x,          # res of orthogonality
@@ -1079,30 +1080,46 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
             
     mat := [];
     vec := [];
+    
+    unknowns:=[];
 
-    for i in ProductList[10] do
-        for j in [0..3] do 
-            for k in [j+1..3] do
+    for i in [1..Size(ProductList[9])] do
+        if GramMatrix[i] = false then
+            Add(unknowns,i);
+        fi;
+    od;
+    
+    if unknowns <> [] then 
+        for i in ProductList[10] do
+            for j in [0..3] do 
+                for k in [j+1..3] do
 
-                x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
-                
-                if x[1] then 
-                    MAJORANA_Append(x[2],mat,vec);
-                else
-                    ev := [,];
-                
-                    ev[1] := MAJORANA_FusionTable[1][j + 1];
-                    ev[2] := MAJORANA_FusionTable[1][k + 1];
+                    x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
                     
-                    return [false, 
-                            STRINGIFY( "Orthogonality of "
-                                , ev[1], ",", ev[2] 
-                                , " eigenvectors does not hold"),
-                            x[2]];
-                fi;
+                    if x[1] then 
+                        MAJORANA_Append(x[2],mat,vec);
+                    else
+                        ev := [,];
+                    
+                        ev[1] := MAJORANA_FusionTable[1][j + 1];
+                        ev[2] := MAJORANA_FusionTable[1][k + 1];
+                        
+                        return [false, 
+                                STRINGIFY( "Orthogonality of "
+                                    , ev[1], ",", ev[2] 
+                                    , " eigenvectors does not hold"),
+                                x[2]];
+                    fi;
+                od;
             od;
         od;
-    od;
+    fi;
+    
+    x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, GramMatrix);
+            
+    if not x[1] then 
+        return [false, "Inconsistent system of unknown inner products", x];
+    fi;
     
     return [true, mat, vec];
     
@@ -2261,7 +2278,10 @@ InstallGlobalFunction(MAJORANA_MainSteps,
             switch,     # 1 if new values have been found
             falsecount,
             count,
-            newfalsecount;
+            newfalsecount,
+            j,
+            y,
+            unknowns;
             
     dim := Size(ProductList[1]);
     
@@ -2376,6 +2396,26 @@ InstallGlobalFunction(MAJORANA_MainSteps,
                 break;
             fi;
         fi;
+        
+        ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
+                    
+        x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
+        
+        if not x[1] then 
+            Output[i] := MAJORANA_OutputError( x[2]
+                            , x[3]
+                            , OutputList);
+            break;
+        fi;
+        
+        x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+        
+        if x = false then
+            Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
+                                , []
+                                , OutputList);    
+            break;
+        fi;
     
         if  Size(Positions(AlgebraProducts,false)) = falsecount[1] and
             Size(Positions(GramMatrix,false)) = falsecount[2] then
@@ -2422,11 +2462,8 @@ function(G,T)
             
             vals, pos, OutputList, record, 
 
-            
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
             
- 
-
                                             ## STEP 0: SETUP ##
 
     Output:=[];
@@ -3316,55 +3353,6 @@ function(G,T)
             if Output[i] <> [] then 
                 break;
             fi;
-            
-                                    ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
-                    
-                                            
-                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
-                
-                unknowns:=[];
-
-                for j in [1..SizeOrbitals] do
-                    if GramMatrix[j] = false then
-                        Add(unknowns,j);
-                    fi;
-                od;
-            
-                if Size(unknowns) > 0 then
-
-                    x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
-                    
-                    if not x[1] then 
-                        Output[i] := MAJORANA_OutputError( x[2]
-                                        , x[3]
-                                        , OutputList);
-                        break;
-                    elif x[2] <> [] then 
-                    
-                        Error("Inner");
-                    
-                        y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
-                        
-                        if not y[1] then 
-                            if Size(y[2]) <> 2 then 
-                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                            , x
-                                            , OutputList);
-                            fi;
-                            break;
-                        fi;
-                    fi;
-                fi;
-                
-                x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-                
-                if x = false then
-                    Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
-                                        , []
-                                        , OutputList);    
-                    break;
-                fi;
-
 
                                         ## STEP 11: CHECK ALGEBRA ##
                                     
