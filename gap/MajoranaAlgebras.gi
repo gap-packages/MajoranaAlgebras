@@ -1738,6 +1738,26 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     vec := [];
     record := [];
     
+    # Add nullspace to eigenvectors
+                    
+    if ProductList[6] <> [] and ProductList[6] <> false then
+        for j in ProductList[10] do 
+            for k in [1..3] do
+                Append(EigenVectors[j][1],ProductList[6]);
+            od;
+        od;
+    fi;
+    
+    # put eigenvectors into reversed echelon form 
+    
+    for j in ProductList[10] do 
+        for k in [1..3] do 
+            if EigenVectors[j][k] <> [] then
+                MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
+            fi;
+        od;
+    od;
+    
     t := Size(EigenVectors);
     
     for j in ProductList[10] do 
@@ -1773,6 +1793,13 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             od;
         od;
     od;
+    
+    if ProductList[6] <> [] and ProductList[6] <> false then 
+                                
+        x := MAJORANA_NullSpaceAlgebraProducts(UnknownAlgebraProducts, AlgebraProducts, ProductList);
+        
+        MAJORANA_Append(x,mat,vec);
+    fi;
     
     return [mat,vec,record];
     
@@ -3209,7 +3236,7 @@ function(G,T)
                 falsecount[2] := Size(Positions(AlgebraProducts,false));
             fi;
             
-            if ForAll(maindimensions, x -> x = dim) and falsecount = [0,0] then 
+            if falsecount = [0,0] then 
                 switchmain := 1;
             else
                 switchmain := 0;
@@ -3226,46 +3253,17 @@ function(G,T)
                 if false in AlgebraProducts then 
                 
                                                 ## STEP 9: RESURRECTION PRINCIPLE ##
-                
-                    # Add nullspace to eigenvectors
-                    
-                    if ProductList[6] <> [] and ProductList[6] <> false then
-                        for j in ProductList[10] do 
-                            for k in [1..3] do
-                                Append(EigenVectors[j][1],ProductList[6]);
-                            od;
-                        od;
-                    fi;
-                    
-                    # put eigenvectors into reversed echelon form 
-                    
-                    for j in ProductList[10] do 
-                        for k in [1..3] do 
-                            if EigenVectors[j][k] <> [] then
-                                MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
-                            fi;
-                        od;
-                    od;
                     
                     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                             
                     x := MAJORANA_FullResurrection(EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                     
-                    mat := x[1]; vec := x[2]; record := x[3];
-                    
-                    if ProductList[6] <> [] and ProductList[6] <> false then 
-                                
-                        x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
-                        
-                        MAJORANA_Append(x,mat,vec);
-                    fi;
-                    
                     if mat <> [] then 
-                        x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+                        y := MAJORANA_SolutionAlgProducts(x[1],x[2], unknowns, AlgebraProducts, ProductList);
                             
                         if not x[1] and ProductList[6] <> false then 
                             Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 8"
-                                            , [x[2],mat,vec,record]
+                                            , [y[2],x[1],x[2],x[3]]
                                             , OutputList);
                             break;
                         fi;
