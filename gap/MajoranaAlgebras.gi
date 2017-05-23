@@ -202,7 +202,7 @@ InstallGlobalFunction(MAJORANA_FullFusion,
 
         for k in [1..3] do
             Append(EigenVectors[j][k],new[k]);
-            EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
+            EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
         od;        
         
     od;
@@ -2273,7 +2273,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
 InstallGlobalFunction(MAJORANA_MainSteps,
 
-    function(i,GramMatrix,AlgebraProducts,EigenVectors,ProductList,Output,OutputList,maindimensions)
+    function(i,GramMatrix,AlgebraProducts,EigenVectors,ProductList,Output,OutputList)
 
     local   x,          # result of calculations
             dim,        # size of coordinates
@@ -2283,7 +2283,9 @@ InstallGlobalFunction(MAJORANA_MainSteps,
             count,
             newfalsecount,
             j,
+            k,
             y,
+            dimensions,
             unknowns;
             
     dim := Size(ProductList[1]);
@@ -2306,8 +2308,6 @@ InstallGlobalFunction(MAJORANA_MainSteps,
         count := count + 1;
 
                                 ## STEP 5: INNER PRODUCTS M1 ##
-                                
-        
                                     
         if falsecount[2] > 0 then 
             MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
@@ -2326,8 +2326,20 @@ InstallGlobalFunction(MAJORANA_MainSteps,
                                 
 
         # Use these eigenvectors and the fusion rules to find more
-
-        if ForAny(maindimensions, x -> x < dim - 1) then                
+        
+        dimensions := [];
+        
+        for j in ProductList[10] do
+            x := 0;
+        
+            for k in [1..3] do
+                x := x + Size(EigenVectors[j][k]);
+            od;
+            
+            Add(dimensions,x);
+        od;
+                
+        if ForAny(dimensions, x -> x < dim - 1) then                
         
             x := MAJORANA_FullFusion(AlgebraProducts,EigenVectors, GramMatrix, ProductList);
             
@@ -2400,7 +2412,7 @@ InstallGlobalFunction(MAJORANA_MainSteps,
             fi;
         fi;
         
-        ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
+                                ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
                     
         x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, ProductList);
         
@@ -3252,19 +3264,14 @@ function(G,T)
                     fi;
                 fi;
             od;
+            
+            for j in ProductList[10] do 
+                for k in [1..3] do
+                    EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
+                od;
+            od;
 
                                         ## STEP 4: MAIN LOOP ##
-            
-            maindimensions:=[];
-
-            for j in ProductList[10] do
-                for k in [1..3] do
-                    if Size(EigenVectors[j][k]) > 0 then
-                        EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
-                    fi;
-                od;
-                Add(maindimensions,Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])+1);
-            od;
             
             falsecount := [0,0];
             
@@ -3288,7 +3295,7 @@ function(G,T)
                 
                 count := count + 1;
                 
-                MAJORANA_MainSteps(i,GramMatrix,AlgebraProducts,EigenVectors,ProductList,Output,OutputList,maindimensions);
+                MAJORANA_MainSteps(i,GramMatrix,AlgebraProducts,EigenVectors,ProductList,Output,OutputList);
                 
                 if false in AlgebraProducts then 
                 
@@ -3311,46 +3318,29 @@ function(G,T)
                 
                 fi;
 
-                newdimensions := [];
-                
-                for j in ProductList[10] do 
-                    Add(newdimensions, Size(EigenVectors[j][1]) 
-                                        + Size(EigenVectors[j][2]) 
-                                        + Size(EigenVectors[j][3]) + 1);
-                od;
-                
-                newfalsecount := [0,0];
-                
-                if false in GramMatrix then
-                    newfalsecount[1] := Size(Positions(GramMatrix,false));
-                fi;
-                
-                if false in AlgebraProducts then
-                    newfalsecount[2] := Size(Positions(AlgebraProducts,false));
-                fi;
-                
-                if ForAll(newdimensions, x -> x = dim) and newfalsecount = [0,0] then
-                    break;
-                elif newdimensions = maindimensions and newfalsecount = falsecount then 
-
-                    Output[i] := StructuralCopy(["Fail"
-                                , "Missing values"
-                                ,
-                                , OutputList[1]
-                                , OutputList[2]
-                                , OutputList[3]
-                                , OutputList[4]
-                                , OutputList[5]]);
+                if not false in AlgebraProducts and not false in GramMatrix then
                     break;
                 else
-                    maindimensions := StructuralCopy(newdimensions);
-                    falsecount := StructuralCopy(newfalsecount);
+                    x := [0,0];
+                    
+                    x[1] := Size(Positions(AlgebraProducts,false));
+                    x[2] := Size(Positions(GramMatrix,false));
+                    
+                    if x = falsecount then 
+
+                        Output[i] := StructuralCopy(["Fail"
+                                    , "Missing values"
+                                    ,
+                                    , OutputList[1]
+                                    , OutputList[2]
+                                    , OutputList[3]
+                                    , OutputList[4]
+                                    , OutputList[5]]);
+                        break;
+                    else
+                        falsecount := StructuralCopy(x);
+                    fi;
                 fi;
-                
-                if count > 7 then 
-                    switchmain := 1;
-                fi;
-                
             od;
             
             if Output[i] <> [] then 
