@@ -202,7 +202,9 @@ InstallGlobalFunction(MAJORANA_FullFusion,
 
         for k in [1..3] do
             Append(EigenVectors[j][k],new[k]);
-            EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
+            if EigenVectors[j][k] <> [] then 
+                EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
+            fi; 
         od;        
         
     od;
@@ -2477,7 +2479,7 @@ function(G,T)
             
             vals, pos, OutputList, record, 
 
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
+            falsecount, switchmain; 
             
                                             ## STEP 0: SETUP ##
 
@@ -3267,7 +3269,9 @@ function(G,T)
             
             for j in ProductList[10] do 
                 for k in [1..3] do
-                    EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
+                    if EigenVectors[j][k] <> [] then 
+                        EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
+                    fi;
                 od;
             od;
 
@@ -3289,11 +3293,7 @@ function(G,T)
                 switchmain := 0;
             fi;
             
-            count := 1;
-            
             while switchmain = 0 do 
-                
-                count := count + 1;
                 
                 MAJORANA_MainSteps(i,GramMatrix,AlgebraProducts,EigenVectors,ProductList,Output,OutputList);
                 
