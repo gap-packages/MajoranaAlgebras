@@ -2418,7 +2418,7 @@ function(G,T)
             h, s, dim, 
 
             # Step 6 - More inner products
-            unknowns, mat, vec, 
+            unknowns, 
             
             vals, pos, OutputList, record, 
 
@@ -3258,7 +3258,7 @@ function(G,T)
                             
                     x := MAJORANA_FullResurrection(EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                     
-                    if mat <> [] then 
+                    if x[1] <> [] then 
                         y := MAJORANA_SolutionAlgProducts(x[1],x[2], unknowns, AlgebraProducts, ProductList);
                             
                         if not x[1] and ProductList[6] <> false then 
@@ -3348,7 +3348,7 @@ function(G,T)
                         if not y[1] then 
                             if Size(y[2]) <> 2 then 
                                 Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                            , [mat,vec]
+                                            , x
                                             , OutputList);
                             fi;
                             break;
