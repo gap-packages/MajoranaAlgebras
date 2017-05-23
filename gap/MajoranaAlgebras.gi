@@ -1113,12 +1113,15 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
                 od;
             od;
         od;
-    fi;
-    
-    x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, GramMatrix);
-            
-    if not x[1] then 
-        return [false, "Inconsistent system of unknown inner products", x];
+        
+        if mat <> [] then 
+            x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, GramMatrix);
+        fi;
+                
+        if not x[1] then 
+            return [false, "Inconsistent system of unknown inner products", x];
+        fi;
+        
     fi;
     
     return [true, mat, vec];
@@ -2399,7 +2402,7 @@ InstallGlobalFunction(MAJORANA_MainSteps,
         
         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
                     
-        x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
+        x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, ProductList);
         
         if not x[1] then 
             Output[i] := MAJORANA_OutputError( x[2]
@@ -3298,7 +3301,7 @@ function(G,T)
                     if x[1] <> [] then 
                         y := MAJORANA_SolutionAlgProducts(x[1],x[2], unknowns, AlgebraProducts, ProductList);
                             
-                        if not x[1] and ProductList[6] <> false then 
+                        if not y[1] and ProductList[6] <> false then 
                             Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 8"
                                             , [y[2],x[1],x[2],x[3]]
                                             , OutputList);
