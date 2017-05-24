@@ -1868,14 +1868,6 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     
         t := Size(EigenVectors);
         
-        if ProductList[6] <> [] and ProductList[6] <> false then
-            for j in ProductList[10] do 
-                for k in [1..3] do
-                    Append(EigenVectors[j][1],ProductList[6]);
-                od;
-            od;
-        fi;
-        
         # put eigenvectors into reversed echelon form 
         
         for j in ProductList[10] do 
@@ -2365,7 +2357,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                 fi;
             fi;
 
-            if ProductList[6] <> [] then
+            if ProductList[6] <> [] and ProductList[6] <> false then
 
                 # Change alg products to get rid of any axes not in the basis
                 
@@ -2381,8 +2373,11 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     for k in [1..3] do                        
                         for x in [1..Size(EigenVectors[j][k])] do
                             EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList[6]);
-                        od;                            
+                        od;                           
                     od;
+                    
+                    Append(EigenVectors[j][1],ProductList[6]); 
+                    
                 od;
             fi;
         fi;
@@ -2465,7 +2460,7 @@ function(G,T)
             ProductList, error, OrbitsT, 
 
             # indexing and temporary variables
-            i, j, k, x, y, b,
+            i, j, k, x, y, m,
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, 
@@ -2480,7 +2475,7 @@ function(G,T)
             GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
 
             # Step 4 - More products and evecs
-            h, s, dim, a,
+            h, s, dim,
 
             # Step 6 - More inner products
             unknowns, mat, vec, 
@@ -3387,7 +3382,7 @@ function(G,T)
                     fi;
                 fi;
                 
-                                ## STEP 8: RESURRECTION PRINCIPLE I ##
+                                    ## STEP 8: RESURRECTION PRINCIPLE I ##
 
                 # Check fusion and M1
 
@@ -3414,7 +3409,7 @@ function(G,T)
                                     , x[3]
                                     , OutputList);
                     break;
-                fi;
+                fi;                
                 
                                             ## STEP 9: MORE EVECS II ##
 
@@ -3441,7 +3436,7 @@ function(G,T)
                     break;
                 fi;
                 
-
+                                            
                 
                 newdimensions := [];
                 
