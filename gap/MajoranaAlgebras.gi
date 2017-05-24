@@ -1234,7 +1234,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
     
 InstallGlobalFunction(MAJORANA_FullOrthogonality,
 
-    function(unknowns,EigenVectors,GramMatrix, ProductList)
+    function(EigenVectors,GramMatrix, AlgebraProducts, ProductList)
     
     local   i,          # loop over T
             j,          # loop over eigenvalues
@@ -1242,35 +1242,66 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
             x,          # res of orthogonality
             mat,        # matrix of unknown values
             vec,        # vector of known values
-            ev;         # pair of eigenvalues          
+            ev,         # pair of eigenvalues     
+            unknowns;     
             
     mat := [];
     vec := [];
+    
+    unknowns:=[];
 
-    for i in ProductList[10] do
-        for j in [0..3] do 
-            for k in [j+1..3] do
-
-                x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
-                
-                if x[1] then 
-                    MAJORANA_Append(x[2],mat,vec);
-                else
-                    ev := [,];
-                
-                    ev[1] := MAJORANA_FusionTable[1][j + 1];
-                    ev[2] := MAJORANA_FusionTable[1][k + 1];
-                    
-                    return [false, 
-                            STRINGIFY( "Orthogonality of "
-                                , ev[1], ",", ev[2] 
-                                , " eigenvectors does not hold"),
-                            x[2]];
-                fi;
-            od;
-        od;
+    for j in [1..Size(ProductList[9])] do
+        if GramMatrix[j] = false then
+            Add(unknowns,j);
+        fi;
     od;
     
+    if Size(unknowns) > 0 then 
+        for i in ProductList[10] do
+            for j in [0..3] do 
+                for k in [j+1..3] do
+
+                    x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
+                    
+                    if x[1] then 
+                        MAJORANA_Append(x[2],mat,vec);
+                    else
+                        ev := [,];
+                    
+                        ev[1] := MAJORANA_FusionTable[1][j + 1];
+                        ev[2] := MAJORANA_FusionTable[1][k + 1];
+                        
+                        return [false, 
+                                STRINGIFY( "Orthogonality of "
+                                    , ev[1], ",", ev[2] 
+                                    , " eigenvectors does not hold"),
+                                x[2]];
+                    fi;
+                od;
+            od;
+        od;
+    fi;
+    
+
+    if mat <> [] then 
+            
+        x := MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
+        
+        if not x[1] then 
+            if Size(x[2]) <> 2 then 
+                return [false, "Inconsistent system of unknown inner products", x];
+            fi;
+        fi;
+    fi;
+    
+    if not false in GramMatrix then 
+        x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+        
+        if x = false then
+            return [false, "The inner product is not positive definite", []];  
+        fi;
+    fi;
+
     return [true, mat, vec];
     
     end );
@@ -1833,67 +1864,70 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
     vec := [];
     record := [];
     
-    t := Size(EigenVectors);
+    if false in AlgebraProducts then 
     
-    if ProductList[6] <> [] and ProductList[6] <> false then
-        for j in ProductList[10] do 
-            for k in [1..3] do
-                Append(EigenVectors[j][1],ProductList[6]);
-            od;
-        od;
-    fi;
-    
-    # put eigenvectors into reversed echelon form 
-    
-    for j in ProductList[10] do 
-        for k in [1..3] do 
-            if EigenVectors[j][k] <> [] then
-                MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
-            fi;
-        od;
-    od;
-    
-    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
-    
-    for j in ProductList[10] do 
-    
-        if EigenVectors[j][1] = false then 
+        t := Size(EigenVectors);
         
-            g := ProductList[12][j];
-            x := ProductList[13][j];
-            
-            k := ProductList[10][x];
-            
-            for l in [1..3] do 
-            
-                EigenVectors[j][l] := [];
-                
-                for x in EigenVectors[k][l] do
-                    Add(EigenVectors[j][l], MAJORANA_ConjugateVector(x,g,ProductList));
+        if ProductList[6] <> [] and ProductList[6] <> false then
+            for j in ProductList[10] do 
+                for k in [1..3] do
+                    Append(EigenVectors[j][1],ProductList[6]);
                 od;
             od;
         fi;
-    
-        for k in [1..3] do
-            for l in [1..2] do 
-                if [k,l] <> [2,2] then 
-            
-                    x := MAJORANA_Resurrection(j,k,l,EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
-                    
-                    if x[1] <> [] then 
-                        MAJORANA_Append(x,mat,vec);
-                        Append(record, x[3]);
-                    fi;
+        
+        # put eigenvectors into reversed echelon form 
+        
+        for j in ProductList[10] do 
+            for k in [1..3] do 
+                if EigenVectors[j][k] <> [] then
+                    MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
                 fi;
             od;
         od;
-    od;
-    
-    if ProductList[6] <> [] and ProductList[6] <> false then 
-                            
-        x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
         
-        MAJORANA_Append(x,mat,vec);
+        unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
+        
+        for j in ProductList[10] do 
+        
+            if EigenVectors[j][1] = false then 
+            
+                g := ProductList[12][j];
+                x := ProductList[13][j];
+                
+                k := ProductList[10][x];
+                
+                for l in [1..3] do 
+                
+                    EigenVectors[j][l] := [];
+                    
+                    for x in EigenVectors[k][l] do
+                        Add(EigenVectors[j][l], MAJORANA_ConjugateVector(x,g,ProductList));
+                    od;
+                od;
+            fi;
+        
+            for k in [1..3] do
+                for l in [1..2] do 
+                    if [k,l] <> [2,2] then 
+                
+                        x := MAJORANA_Resurrection(j,k,l,EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
+                        
+                        if x[1] <> [] then 
+                            MAJORANA_Append(x,mat,vec);
+                            Append(record, x[3]);
+                        fi;
+                    fi;
+                od;
+            od;
+        od;
+        
+        if ProductList[6] <> [] and ProductList[6] <> false then 
+                                
+            x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
+            
+            MAJORANA_Append(x,mat,vec);
+        fi;
     fi;
     
     if mat <> [] then 
@@ -1906,7 +1940,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             return [true];
         fi;
     else
-        return true;
+        return [true];
     fi;
     
     end);
@@ -3291,7 +3325,7 @@ function(G,T)
                                         , OutputList);                                     
                     break;
                 fi;
-                
+                                                            
                                             ## STEP 6: FUSION ##                                        
                                         
 
@@ -3353,7 +3387,7 @@ function(G,T)
                     fi;
                 fi;
                 
-                                                   ## STEP 8: RESURRECTION PRINCIPLE I ##
+                                ## STEP 8: RESURRECTION PRINCIPLE I ##
 
                 # Check fusion and M1
 
@@ -3392,6 +3426,22 @@ function(G,T)
                     Output[i] := MAJORANA_OutputError(x[2],[], OutputList);
                     break;
                 fi;
+                
+                                    ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
+                    
+                                            
+                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
+
+                x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, AlgebraProducts,ProductList);
+                
+                if not x[1] then 
+                    Output[i] := MAJORANA_OutputError( x[2]
+                                    , x[3]
+                                    , OutputList);
+                    break;
+                fi;
+                
+
                 
                 newdimensions := [];
                 
@@ -3438,56 +3488,7 @@ function(G,T)
             if Output[i] <> [] then 
                 break;
             fi;
-            
-                                    ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
-                    
-                                            
-                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
-                
-                unknowns:=[];
-
-                for j in [1..SizeOrbitals] do
-                    if GramMatrix[j] = false then
-                        Add(unknowns,j);
-                    fi;
-                od;
-            
-                if Size(unknowns) > 0 then
-
-                    x := MAJORANA_FullOrthogonality(unknowns,EigenVectors,GramMatrix, ProductList);
-                    
-                    if not x[1] then 
-                        Output[i] := MAJORANA_OutputError( x[2]
-                                        , x[3]
-                                        , OutputList);
-                        break;
-                    elif x[2] <> [] then 
-                    
-                        Error("Inner");
-                    
-                        y := MAJORANA_SolutionInnerProducts(x[2], x[3], unknowns, GramMatrix);
-                        
-                        if not y[1] then 
-                            if Size(y[2]) <> 2 then 
-                                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown inner products"
-                                            , [mat,vec]
-                                            , OutputList);
-                            fi;
-                            break;
-                        fi;
-                    fi;
-                fi;
-                
-                x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-                
-                if x = false then
-                    Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
-                                        , []
-                                        , OutputList);    
-                    break;
-                fi;
-
-
+ 
                                         ## STEP 11: CHECK ALGEBRA ##
                                     
             # Check bilinear form is positive definite

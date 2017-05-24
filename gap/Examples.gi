@@ -29,3 +29,19 @@ BindGlobal("A5",function()
     return([G,T]);
     end
     );
+    
+BindGlobal("A6",function()
+    local G, T;
+    G:=AlternatingGroup(6);
+    T:=Filtered(AsList(G),x->Order(x) = 2);
+    return([G,T]);
+    end
+    );
+    
+BindGlobal("S4",function()
+    local G, T;
+    G:=SymmetricGroup(4);
+    T := [ (1,2), (1,3), (1,4), (2,3), (2,4), (3,4), (1,2)(3,4), (1,3)(2,4), (1,4)(2,3) ];;
+    return([G,T]);
+    end
+    );
