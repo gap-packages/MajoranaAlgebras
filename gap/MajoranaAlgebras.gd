@@ -45,6 +45,7 @@ DeclareGlobalFunction( "MAJORANA_TestFusion" );
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
+DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct1" );
 
 DeclareGlobalFunction( "MAJORANA_Orthogonality" );
 
@@ -63,6 +64,7 @@ DeclareGlobalFunction( "MAJORANA_FullUnknownsAxiomM1" );
 DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
+DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct1" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
