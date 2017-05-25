@@ -244,7 +244,7 @@ InstallGlobalFunction(MAJORANA_AddSparseVectors,
         pos := Position(res[1],v[1][i]);
         
         if pos <> fail then 
-            res[2][pos] := res[2][pos] + scalar*v[2][pos];
+            res[2][pos] := res[2][pos] + scalar*v[2][i];
             
             if res[2][pos] = 0 then 
                 Remove(res[1],pos);
@@ -279,43 +279,49 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     
     # Put matrix A into row echelon form
     
-    m := Size(mat[1]);
+    m := Size(mat) - 1;
     
-    n := mat[3];
+    n := mat[Size(mat)];
     
     A := [1..n]*0;
-    B := NullMat(n,n);
+    B := [1..n]*0;
+    
+    sol := [1..n]*0;
+    unsolved := [];
     
     for i in [1..n] do A[i] := [[],[]]; od;
     
-    pos := 0;
-    
     for i in [1..n] do 
+    
+        pos := 0;
+        j := 1;
+        
         while j < m + 1 do
         
-            pos := Position(mat[j][1],1);
+            pos := Position(mat[j][1],i);
             
             if pos <> fail then 
                 
-                vec[j][2] := vec[j][2]/mat[j][2][pos];
+                vec[j] := vec[j]/mat[j][2][pos];
                 mat[j][2] := mat[j][2]/mat[j][2][pos];
             
                 A[i] := ShallowCopy(mat[j]);
                 B[i] := ShallowCopy(vec[j]);
+
                 
                 for k in [j + 1 .. m] do
                     pos := Position(mat[k][1],i);
                     
                     if pos <> fail then 
                         
-                        vec[k] := vec[j] - mat[k][2][pos]*vec[j];
+                        vec[k] := vec[k] - mat[k][2][pos]*vec[j];
                         MAJORANA_AddSparseVectors(mat[k],mat[j],-mat[k][2][pos]);
                         
                     fi;
                 od;
                 
-                mat := [[],[]];
-                vec := [1..n]*0;
+                mat[j] := [[],[]];
+                vec[j] := [1..n]*0;
                 
                 j := m + 1;
             
@@ -328,12 +334,13 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         
         if pos = 0 then 
             Add(unsolved,i);
-            sol[i] := [];
+            sol[i] := [];            
         fi;
         
     od;
     
     for i in Reversed([1..n]) do 
+    
         if i in unsolved then 
             for j in [1.. i-1] do 
                 if i in A[j][1] then 
@@ -362,8 +369,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
                 pos := Position(A[j][1],i);
                 
                 if pos <> fail then 
-                    B[j] := MAJORANA_AddSparseVectors(B[j],B[i],A[j][2][pos]);
-                    A[j] := MAJORANA_AddSparseVectors(A[j],A[i],A[j][2][pos]);                    
+                    B[j] := B[j] - B[i]*A[j][2][pos];
+                    A[j] := MAJORANA_AddSparseVectors(A[j],A[i],-A[j][2][pos]);                    
                 fi;
             od;
         fi;

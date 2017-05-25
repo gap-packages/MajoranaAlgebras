@@ -45,3 +45,11 @@ BindGlobal("S4",function()
     return([G,T]);
     end
     );
+    
+BindGlobal("MV",function()
+    local mat,vecs;
+    mat := [ [[1,2],[1,2]],[[],[]],[[1,2],[1,2/3]],5];
+    vecs := [[-1,3],[0,0],[1/3,5/3]];
+    return [mat,vecs];
+    end
+    );
