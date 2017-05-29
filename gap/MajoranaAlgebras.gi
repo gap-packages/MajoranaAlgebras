@@ -230,7 +230,7 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
         );
         
-InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
+InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
     function(mat,vec)
     
@@ -240,6 +240,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
             unsolved;
     
     Q := HomalgFieldOfRationals();
+    
+    Error("pause");
     
     mat := CreateHomalgMatrixFromList(mat,Q);
     vec := CreateHomalgMatrixFromList(vec,Q);
@@ -263,7 +265,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
     end );
     
         
-InstallGlobalFunction(MAJORANA_SolutionMatVecs,
+InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
     
     function(mat,vec)
     
