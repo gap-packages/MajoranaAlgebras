@@ -232,27 +232,35 @@ InstallGlobalFunction(MAJORANA_NullSpace,
         
 InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
     
-    function(mat)
+    function(mat,vec)
     
+    local   m,
+            n,
+            res,
+            sol,
+            unsolved,
+            i,
+            j;
+            
     m := Size(mat);
     n := Size(mat[1]);
     
     mat := SparseMatrix(mat,Rationals);
     
-    rec := EchelonMatTransformation(mat);
+    res := EchelonMatTransformation(mat);
     
-    vec := rec.coeffs*vec]
-    mat := ConvertSparseMatrixToMatrix(rec.vectors);
+    vec := res.coeffs*vec;
+    mat := ConvertSparseMatrixToMatrix(res.vectors);
     
     sol := [1..n]*0;
     unsolved := [];
     
     for i in [1..n] do
-        if rec.heads[i] = 0 then 
+        if res.heads[i] = 0 then 
             Add(unsolved,i);
             sol[i] := [];
             Remove(vec,i);
-        od;
+        fi;
     od;
     
     # solve system
@@ -280,7 +288,6 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
             od;
             
         else
-            list:=[];
             
             j:= i + 1;
             
