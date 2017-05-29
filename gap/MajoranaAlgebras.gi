@@ -239,28 +239,35 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
             i,
             sol,
             unsolved;
-    
+            
     m := Size(mat);
-    n := Size(mat[1]);
+        n := Size(mat[1]);
     
-    mat := mat{[1..n]};
-    
-    mat := Inverse(mat);
-    
-    if mat = fail then 
-        return [1..4];
-    fi;
-    
-    sol := mat*vec;
-    
-    for i in [1..n] do 
-        if ForAll(sol[i], x -> x = 0) then 
-            sol[i] := [];
-            Add(unsolved,i);
+    if m > n then 
+        return MAJORANA_SolutionMatVecs1(mat,vec);
+    else
+        
+        mat := mat{[1..n]};
+        
+        mat := Inverse(mat);
+        
+        if mat = fail then 
+            return [1..4];
         fi;
-    od;
-    
-    return [sol,unsolved];
+        
+        sol := mat*vec;
+        
+        unsolved := [];
+        
+        for i in [1..n] do 
+            if ForAll(sol[i], x -> x = 0) then 
+                sol[i] := [];
+                Add(unsolved,i);
+            fi;
+        od;
+        
+        return [sol,unsolved];
+    fi;
     
     end );
     
@@ -285,6 +292,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     
     m := Size(mat);
     n := Size(mat[1]);
+    
+    Error("Pause");
     
     dim := Size(vec[1]);
     
