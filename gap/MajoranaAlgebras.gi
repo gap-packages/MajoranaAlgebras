@@ -251,8 +251,6 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     m := Size(mat);
     n := Size(mat[1]);
     
-    Error("Pause");
-    
     dim := Size(vec[1]);
     
     A := NullMat(n,n);
