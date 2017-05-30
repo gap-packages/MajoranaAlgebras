@@ -1685,10 +1685,10 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             pos,        # position of unknown product 
             dim;        # dimension
     
-    row := [1..Size(UnknownAlgebraProducts)]*0;
-    sum := 0;
-    
     dim := Size(AlgebraProducts[1]);
+    
+    row := [1..Size(UnknownAlgebraProducts)]*0;
+    sum := [1..dim]*0;
     
     for i in [1..dim] do
         if u[i] <> 0 then
@@ -1903,7 +1903,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                         if row <> [] then 
                             if ForAll(row, x -> x = 0) then 
                                 if ForAny( sum, x -> x <> 0) then
-                                    Error("Resurrection error");
+                                    return [false,[alpha,beta,gamma]];
                                 fi;
                             else  
                             
@@ -1920,7 +1920,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
         od;
     od;
     
-    return [mat,vec,record];
+    return [true,[mat,vec,record]];
         
 end );
 
@@ -1989,9 +1989,14 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
                 
                         x := MAJORANA_Resurrection(j,k,l,EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                         
-                        if x[1] <> [] then 
-                            MAJORANA_Append(x,mat,vec);
-                            Append(record, x[3]);
+                        if x[1] then 
+                        
+                            if x[2][1] <> [] then 
+                                MAJORANA_Append(x[2],mat,vec);
+                                Append(record, x[2][3]);
+                            fi;
+                        else
+                            return [false, "Algebra does not obey resurrection principle",x[2]];
                         fi;
                     fi;
                 od;
