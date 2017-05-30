@@ -2036,6 +2036,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
                             if x[2][1] <> [] then 
                                 MAJORANA_Append(x[2],mat,vec);
                                 Append(record, x[2][3]);
+                                Display(Size(mat));
                             fi;
                         else
                             return [false, "Algebra does not obey resurrection principle",x[2]];
@@ -2052,6 +2053,8 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             MAJORANA_Append(x,mat,vec);
         fi;
     fi;
+    
+    Display(Size(mat));
     
     if mat <> [] then 
     
@@ -2588,6 +2591,114 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     return [true];
     
     end);
+    
+InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
+    
+    function(EigenVectors, AlgebraProducts, ProductList);
+    
+    local 
+    
+    representatives := ProductList[10];
+    conjelements    := ProductList[12];
+    orbitlist       := ProductList[13];
+    
+    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
+    
+    if unknowns <> [] then 
+    
+        # set up
+        
+        mat := [];
+        vec := [];
+        
+        g := 0;mat := [];
+        vec := [];
+        
+        g := 0;
+    
+        # put eigenvectors into reversed echelon form 
+        
+        for j in representatives do 
+            for k in [1..3] do 
+                if EigenVectors[j][k] <> [] then
+                    MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
+                fi;
+            od;
+        od;
+        
+        
+        
+        for i in ProductList[10];
+        
+            # unknowns from eigenvectors
+        
+            for ev in [1..3] do 
+            
+                u := [1..dim]*0; u[i] := 1;
+                
+                for v in EigenVectors[i][ev] do
+                    
+                    x := MAJORANA_SeparateAlgebraProduct(u,v,g,unknowns,AlgebraProducts,ProductList);
+                    
+                    if x <> false and ForAll(x[1], y -> y = 0) then 
+                        if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
+                            return [false,Error with eigenvectors,[i,ev,v,g]];
+                        fi;
+                    elif x <> false and not x[1] in mat then         
+                        Add(mat, x[1]);
+                        Add(vec, x[2] + table[ev]*v);       
+                    fi;
+                od;
+            od;
+            
+            # resurrection principle
+            
+            for k in [1..3] do
+                for l in [1..2] do 
+                    if [k,l] <> [2,2] then 
+                
+                        x := MAJORANA_Resurrection(j,k,l,g,EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
+                        
+                        if x[1] then 
+                        
+                            if x[2][1] <> [] then 
+                                MAJORANA_Append(x[2],mat,vec);
+                                Append(record, x[2][3]);
+                                Display(Size(mat));
+                            fi;
+                        else
+                            return [false, "Algebra does not obey resurrection principle",x[2]];
+                        fi;
+                    fi;
+                od;
+            od;
+        od;
+
+        # unknowns from nullspace
+        
+        if ProductList[6] <> [] and ProductList[6] <> false then 
+                                
+            x := MAJORANA_NullSpaceAlgebraProducts(unknowns, g, AlgebraProducts, ProductList);
+            
+            MAJORANA_Append(x,mat,vec);
+        fi;
+
+        
+        if mat <> [] then 
+    
+            y := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+            
+            if not y[1] then 
+                return [false, "Inconsistent system of unknown algebra products",y];
+            else
+                return [true];
+            fi;
+        else
+            return [true];
+        fi;
+    fi;
+    
+    end );    
         
 InstallGlobalFunction(MajoranaRepresentation,
 
@@ -2800,11 +2911,13 @@ function(G,T)
             for j in [1..Size(Unknowns3X)] do
                 k:=Unknowns3X[j];
                 if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3A";
-                else
                     Shape[k]:="3C";
+                else
+                    Shape[k]:="3A";
                 fi;
             od;
+            
+            Display(Shape);
 
             # Create lists of 3A, 4A and 5A axes
 
