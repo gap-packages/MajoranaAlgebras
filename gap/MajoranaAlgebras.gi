@@ -8,35 +8,11 @@
 
 BindGlobal( "MAJORANA_ExtractUnknownAlgebraProducts",
 
-function(AlgebraProducts, ProductList)
+    function(AlgebraProducts, ProductList)
 
-    local   unknowns,       # list of unknown algebra products
-            coordinates     # ProductList[1]
-            pairorbitlist   # ProductList[3]
-            i,              # loop over coordinates
-            j,              # loop over coordinates
-            k,              # pair orbit index
-            dim;            # size of coordinates
-            
-    coordinates := ProductList[1];
-    pairorbitlist := ProductList[3];
-    
-    unknowns := [];
-    dim := Size(coordinates);
-    
-    for i in [1..dim] do
-        for j in [i..dim] do 
-            
-            k := AbsInt(pairorbitlist[i][j]);
-        
-            if AlgebraProducts[k] = false then 
-                Add(unknowns,[i,j]);
-            fi;
-        od;
-    od;
+    return Positions(AlgebraProducts,false);
 
-    return AsSet(unknowns);
-end);
+    end );
 
 # Table of fusion rules
 
@@ -684,7 +660,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         if k > 0 then 
                             sign := 1;
                         else
-                            sign ::= -1;
+                            sign := -1;
                         fi;
                         
                         x := AlgebraProducts[AbsInt(k)];
@@ -1146,7 +1122,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             j,              # index for dim of v
             m,              # orbit of i,j
             pos,            # position of m in unknowns
-            sign            # correct sign of 5A axes
+            sign,           # correct sign of 5A axes
             pairorbitlist;  # 
             
     pairorbitlist := ProductList[3];
@@ -1356,8 +1332,6 @@ function(EigenVectors, AlgebraProducts, ProductList)
     for i in ProductList[10] do
     
         unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
-                
-        unknowns := Filtered( unknowns, x -> x[1] = i);
         
         if unknowns <> [] then
         
@@ -1372,11 +1346,11 @@ function(EigenVectors, AlgebraProducts, ProductList)
                     
                     x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
                     
-                    if ForAll(x[1], y -> y = 0) then 
+                    if x <> false and ForAll(x[1], y -> y = 0) then 
                         if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
                             return [false,1,v];
                         fi;
-                    elif not x[1] in mat then         
+                    elif x <> false and not x[1] in mat then         
                         Add(mat, x[1]);
                         Add(vec, x[2] + table[ev]*v);       
                     fi;
@@ -1436,7 +1410,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
             z,                      #
             u,                      # basis vectors
             v,                      #
-            w                       #
+            w,                       #
             coordinates,            #
             pairrepresentatives;    #
     
@@ -1705,6 +1679,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             i,          # index for dim of u
             j,          # index for dim of v
             l,          # ordered version of [i,j]
+            g,
             x,          # vector with 1 in the ith position
             y,          # vector with 1 in the jth position
             pos,        # position of unknown product 
@@ -1720,7 +1695,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             for j in [1..dim] do
                 if v[j] <> 0 then
                 
-                    l := [Minimum([i,j]),Maximum([i,j])];
+                    l := AbsInt(ProductList[3][i][j]);
+                    g := ProductList[4][i][j];
                     
                     if not l in UnknownAlgebraProducts then 
                         
@@ -1730,8 +1706,13 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                         sum := sum - u[i]*v[j]*MAJORANA_AlgebraProduct(x,y,AlgebraProducts,ProductList);
                     else
                         
-                        pos := Position(UnknownAlgebraProducts,l);
-                        row[pos] := row[pos] + u[i]*v[j]; 
+                        if g = () then 
+                            pos := Position(UnknownAlgebraProducts,l);
+                            row[pos] := row[pos] + u[i]*v[j]; 
+                        else
+                            return false;
+                        fi;
+                        
                     fi;
                 fi;
             od;
@@ -1807,30 +1788,28 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix)
     
-    local   a, 
-            b, 
-            sum, 
-            row, 
-            alpha, 
-            beta, 
-            gamma, 
-            mat, 
-            vec, 
-            bad, 
-            list, 
-            j, 
-            m, 
-            k, 
-            l, 
-            dim, 
-            u, 
-            v, 
-            x, 
-            y, 
-            z, 
-            g, 
-            sign, 
-            record;
+    local   a,          # loop over ev_a - eigenvectors
+            b,          # loop over ev_b - eigenvectors
+            sum,        # sum of known products
+            row,        # coeffs of unknown products
+            alpha,      # eigenvectors
+            beta,       #
+            gamma,      #
+            mat,        # matrix of vectors of unknown products
+            vec,        # vector of sums of known products
+            bad,        # indexes of basis vectors whose product with 
+            list,       # list of eigenvectors from which to constuct alpha
+            j,          # indexes  
+            k,          #
+            l,          # orbital of pair
+            dim,        # size of coordinates
+            u,          # vector with 1 in i th position
+            x,          # algebra products
+            y,          #
+            z,          #
+            g,          # conjugating element
+            sign,       # corrects sign of 5A axes 
+            record;     # record eigenvectors used
     
     dim := Size(AlgebraProducts[1]);
     
@@ -1854,85 +1833,87 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 
                 x := MAJORANA_SeparateAlgebraProduct(MAJORANA_FusionTable[ev_a + 1][ev_b + 1]*beta,gamma,UnknownAlgebraProducts,AlgebraProducts,ProductList);
                 
-                row := row + x[1];
-                sum := sum + x[2];
-                   
-                # find a suitable alpha   
-                   
-                for m in [1..dim] do
-                    for k in [1..dim] do 
-                        if gamma[k] <> 0 and [Minimum([m,k]),Maximum([m,k])] in UnknownAlgebraProducts then 
-                            Add(bad,m);
-                        fi;
-                    od;
-                od;
-                
-                bad := DuplicateFreeList(bad);
-                
-                Sort(bad);
-
-                for m in [1..Size(EigenVectors[i][ev_b])] do 
-                    Add(list, StructuralCopy(EigenVectors[i][ev_b][m]{bad}));
-                od;
-
-                if ev_a = ev_b then 
-                    list[a] := [1..Size(bad)]*0;
-                fi;
-                
-                x := SolutionMat(list,beta{bad});
-                
-                if x <> fail then 
-                    
-                    alpha := [];
-                    
-                    for m in [1..Size(x)] do
-                        if ev_a <> ev_b or m <> a then
-                            alpha := alpha + x[m]*EigenVectors[i][ev_b][m];
-                        fi;
-                    od;
-                
-                    y := MAJORANA_AlgebraProduct((alpha - beta),gamma,AlgebraProducts,ProductList);
-                    
-                    u := [1..dim]*0; u[i] := 1;
-                        
-                    z := MAJORANA_SeparateAlgebraProduct(u,y,UnknownAlgebraProducts,AlgebraProducts,ProductList);  
-                        
-                    row := row + z[1];
-                    sum := sum + z[2];
-                
-                    if ev_b = 2 then 
-                    
-                        u := [1..dim]*0; u[i] := 1; 
-                        x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList);
-                    
-                        if x <> false then 
-                            sum := sum + u*x/4;
-                        else
-                            row := [];
-                        fi;                            
-                    fi;
-                
-                    if row <> [] then 
-                        if ForAll(row, x -> x = 0) then 
-                            if ForAny( sum, x -> x <> 0) then
-                                Error("Resurrection error");
-                            fi;
-                        else
+                if x <> false then 
+                    row := row + x[1];
+                    sum := sum + x[2];
+                       
+                    # find a suitable alpha   
+                       
+                    for j in [1..dim] do
+                        for k in [1..dim] do 
                             
-                            for g in DuplicateFreeList(ProductList[12]) do
-                                if g <> false then 
-                                
-                                    if sum = [] then 
-                                        Error("empty");
-                                    fi;
-                                
-                                    Add(mat,MAJORANA_ConjugateRow(row,g,UnknownAlgebraProducts,ProductList));
-                                    Add(vec,MAJORANA_ConjugateVector(sum,g,ProductList));
-                                    
-                                    Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
+                            l := AbsInt(ProductList[3][j][k]);
+                        
+                            if gamma[k] <> 0 and l in UnknownAlgebraProducts then 
+                                Add(bad,j);
+                            fi;
+                        od;
+                    od;
+                    
+                    bad := DuplicateFreeList(bad);
+                    
+                    Sort(bad);
+
+                    for j in [1..Size(EigenVectors[i][ev_b])] do 
+                        Add(list, StructuralCopy(EigenVectors[i][ev_b][j]{bad}));
+                    od;
+
+                    if ev_a = ev_b then 
+                        list[a] := [1..Size(bad)]*0;
+                    fi;
+                    
+                    x := SolutionMat(list,beta{bad});
+                    
+                    if x <> fail then 
+                        
+                        alpha := [];
+                        
+                        for j in [1..Size(x)] do
+                            if ev_a <> ev_b or j <> a then
+                                alpha := alpha + x[j]*EigenVectors[i][ev_b][j];
+                            fi;
+                        od;
+                    
+                        y := MAJORANA_AlgebraProduct((alpha - beta),gamma,AlgebraProducts,ProductList);
+                        
+                        u := [1..dim]*0; u[i] := 1;
+                            
+                        z := MAJORANA_SeparateAlgebraProduct(u,y,UnknownAlgebraProducts,AlgebraProducts,ProductList);  
+                        
+                        if z <> false then 
+                            row := row + z[1];
+                            sum := sum + z[2];
+                        else
+                            row  := [];
+                        fi;
+                        
+                    
+                        if row <> [] and ev_b = 2 then 
+                        
+                            u := [1..dim]*0; u[i] := 1; 
+                            x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList);
+                        
+                            if x <> false then 
+                                sum := sum + u*x/4;
+                            else
+                                row := [];
+                            fi;                            
+                        fi;
+                    
+                        if row <> [] then 
+                            if ForAll(row, x -> x = 0) then 
+                                if ForAny( sum, x -> x <> 0) then
+                                    Error("Resurrection error");
                                 fi;
-                            od;
-                        fi;  
+                            else  
+                            
+                                Add(mat,row);
+                                Add(vec,sum);
+                                
+                                Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
+
+                            fi;  
+                        fi;
                     fi;
                 fi;
             fi;
@@ -1947,19 +1928,33 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
 
     function(EigenVectors,AlgebraProducts,ProductList,GramMatrix)
     
-    local mat, vec, record, j, k, l, x, g, t,unknowns,y;
+    local   mat,                # matrix of coeffs of unknown products  
+            vec,                # vector of sums of known products
+            record,             # record of eigenvectors used
+            j,                  # loop over representatives of orbits
+            k,                  # representative of orbit
+            l,                  # loop over eigenvalues
+            x,                  # eigenvector
+            y,                  # result of solutionalg
+            g,                  # conjugating element
+            unknowns,           # unknown algebra products
+            representatives,    #
+            conjelements,       #
+            orbitlist;          #
+    
+    representatives := ProductList[10];
+    conjelements    := ProductList[12];
+    orbitlist       := ProductList[13];
     
     mat := [];
     vec := [];
     record := [];
     
     if false in AlgebraProducts then 
-    
-        t := Size(EigenVectors);
         
         # put eigenvectors into reversed echelon form 
         
-        for j in ProductList[10] do 
+        for j in representatives do 
             for k in [1..3] do 
                 if EigenVectors[j][k] <> [] then
                     MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
@@ -1969,14 +1964,14 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
         
         unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
         
-        for j in ProductList[10] do 
+        for j in representatives do 
         
             if EigenVectors[j][1] = false then 
             
-                g := ProductList[12][j];
-                x := ProductList[13][j];
+                g := conjelements[j];
+                x := orbitlist[j];
                 
-                k := ProductList[10][x];
+                k := representatives[x];
                 
                 for l in [1..3] do 
                 
@@ -2040,7 +2035,9 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
     for m in [1..Size(UnknownAlgebraProducts)] do
     
-        j := UnknownAlgebraProducts[m][1];
+        k := UnknownAlgebraProducts[m];
+    
+        j := ProductList[7][k][1];
     
         a := [1..dim]*0; a[j] := 1;        
     
@@ -2051,11 +2048,11 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
             
             x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
 
-            if ForAll(x[1], x -> x = 0) then 
+            if x <> false and ForAll(x[1], x -> x = 0) then 
                 if ForAny( x[2] , y -> y <> 0) then 
                     Error("Nullspace"); 
                 fi;
-            else
+            elif x <> false then 
                 Add(mat,x[1]);
                 Add(vec,x[2]);
                 Add(record,[k,"n"]);
@@ -2301,6 +2298,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     if mat <> [] then
         
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
+        
+        Error("Pause 2");
 
         if Size(Solution) = 2 then
             for i in [1..Size(UnknownAlgebraProducts)] do
@@ -2325,6 +2324,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             return [false, Solution];
         fi;
     fi;
+    
+    
     
     end );
     
