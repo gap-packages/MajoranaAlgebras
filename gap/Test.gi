@@ -1,3 +1,11 @@
+# Table of fusion rules
+
+BindGlobal("MAJORANA_FusionTable",
+           [ [    1,    0,   1/4, 1/32]
+            ,[    0,    0,   1/4, 1/32]
+            ,[  1/4,  1/4,     0, 1/32]
+            ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
+
 # Checks if algebra obeys the fusion rules, outputs list which is empty if it does obey fusion rules
 
 InstallGlobalFunction(MAJORANA_TestFusion,

@@ -38,14 +38,6 @@ function(AlgebraProducts, ProductList)
     return AsSet(unknowns);
 end);
 
-# Table of fusion rules
-
-BindGlobal("MAJORANA_FusionTable",
-           [ [    1,    0,   1/4, 1/32]
-            ,[    0,    0,   1/4, 1/32]
-            ,[  1/4,  1/4,     0, 1/32]
-            ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
-
 # This creates new eigenvectors through fusion rules
 
 InstallGlobalFunction( MAJORANA_Fusion,
