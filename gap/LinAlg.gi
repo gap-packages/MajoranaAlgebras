@@ -49,8 +49,6 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
     
     dim := Size(vec[1]);
     
-    Error("Pause");
-    
     id := IdentityMat(m);
     
     A := NullMat(n,n);
@@ -189,6 +187,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         fi;
         
         Display([m,n]);
+
+        Error("Pause");
 
         res := SemiEchelonMatTransformation(mat);
         mat := List(res.vectors,ShallowCopy);
