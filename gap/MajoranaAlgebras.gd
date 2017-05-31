@@ -10,15 +10,7 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
-DeclareGlobalFunction( "MAJORANA_LDLTDecomposition" );
-
-DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
-
-DeclareGlobalFunction( "MAJORANA_SolutionMatVecs1" );
-
 DeclareGlobalFunction( "MAJORANA_Append" );
-
-DeclareGlobalFunction( "MAJORANA_NullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVector" );
 
@@ -29,8 +21,6 @@ DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 DeclareGlobalFunction( "MAJORANA_Fusion" );
 
 DeclareGlobalFunction( "MAJORANA_FullFusion" );
-
-DeclareGlobalFunction( "MAJORANA_PositiveDefinite" );
 
 DeclareGlobalFunction( "MAJORANA_AxiomM1" );
 

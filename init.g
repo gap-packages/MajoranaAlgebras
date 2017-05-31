@@ -4,4 +4,8 @@
 # Reading the declaration part of the package.
 #
 
+ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gd");
+
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
+
+
