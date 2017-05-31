@@ -11,23 +11,18 @@ BindGlobal( "MAJORANA_ExtractUnknownAlgebraProducts",
 function(AlgebraProducts, ProductList)
 
     local   unknowns,       # list of unknown algebra products
-            coordinates,    # ProductList[1]
-            pairorbitlist,  # ProductList[3]
             i,              # loop over coordinates
             j,              # loop over coordinates
             k,              # pair orbit index
             dim;            # size of coordinates
-            
-    coordinates := ProductList[1];
-    pairorbitlist := ProductList[3];
     
     unknowns := [];
-    dim := Size(coordinates);
+    dim := Size(ProductList[1]);
     
     for i in [1..dim] do
         for j in [i..dim] do 
             
-            k := AbsInt(pairorbitlist[i][j]);
+            k := AbsInt(ProductList[3][i][j]);
         
             if AlgebraProducts[k] = false then 
                 Add(unknowns,[i,j]);
@@ -228,36 +223,31 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
             dim,            # length of vector
             vec,            # output vector
             pos_1,          # position of conjugated element in longcoords
-            pos_2,          # position of conjugated element in coords
-            coordinates,
-            longcoordinates,
-            positionlist,
-            NullSp;
-            
-    coordinates := ProductList[1];
-    longcoordinates := ProductList[2];
-    positionlist := ProductList[5];
-    NullSp := ProductList[6];
-            
-    dim := Size(v);
+            pos_2;          # position of conjugated element in coords
     
-    vec := [1..dim]*0;
-    
-    for i in [1..dim] do 
+    if g <> () then 
+        dim := Size(v);
         
-        pos_1 := Position(longcoordinates,coordinates[i]^g);
-        pos_2 := positionlist[pos_1];
+        vec := [1..dim]*0;
         
-        if pos_2 > 0 then 
-            vec[pos_2] := v[i];
-        else
-            vec[-pos_2] := -v[i];
-        fi;
-    od;
-    
-    vec := MAJORANA_RemoveNullSpace(vec, NullSp);
-    
-    return vec;
+        for i in [1..dim] do 
+            
+            pos_1 := Position(ProductList[2],ProductList[1][i]^g);
+            pos_2 := ProductList[5][pos_1];
+            
+            if pos_2 > 0 then 
+                vec[pos_2] := v[i];
+            else
+                vec[-pos_2] := -v[i];
+            fi;
+        od;
+        
+        vec := MAJORANA_RemoveNullSpace(vec, ProductList[6]);
+        
+        return vec;
+    else
+        return v;
+    fi;
     
     end );
 
@@ -331,10 +321,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 j,              # loop over v
                 k,              # pair orbit index
                 sign,           # correct for 5A axes
-                sum,            # output value
-                pairorbitlist;    
-        
-        pairorbitlist := ProductList[3];
+                sum;            # output value
         
         sum := 0;
 
@@ -343,7 +330,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 for j in [1..Size(v)] do
                     if v[j] <> 0 then
                     
-                        k := pairorbitlist[i][j];
+                        k := ProductList[3][i][j];
                         
                         if k > 0 then 
                             sign := 1;
@@ -376,21 +363,16 @@ function(GramMatrix, ProductList)
             j,                  # loop over ProductList[1]
             k,                  # pair orbit index
             dim,                # size of ProductList[1]
-            coordinates,        #
-            pairorbitlist,      #
             GramMatrixFull;     # output matrix
     
-    coordinates := ProductList[1];
-    pairorbitlist := ProductList[3];
-    
-    dim := Size(coordinates);
+    dim := Size(ProductList[1]);
     
     GramMatrixFull := NullMat(dim,dim);
     
     for i in [1..dim] do 
         for j in [1..dim] do
             
-            k := pairorbitlist[i][j];
+            k := ProductList[3][i][j];
             
             if k > 0 then 
                 GramMatrixFull[i][j] := GramMatrix[k];
@@ -417,10 +399,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             j,              # index for dim of v
             m,              # orbit of i,j
             pos,            # position of m in unknowns
-            sign,           # correct sign of 5A axes
-            pairorbitlist;  # 
-            
-    pairorbitlist := ProductList[3];
+            sign;           # correct sign of 5A axes
             
     dim := Size(ProductList[1]);
             
@@ -432,7 +411,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             for j in [1..dim] do
                 if v[j] <> 0 then 
                 
-                    m := pairorbitlist[i][j];
+                    m := ProductList[3][i][j];
                     
                     if m > 0 then 
                         sign := 1;
@@ -694,22 +673,17 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
             z,                      #
             u,                      # basis vectors
             v,                      #
-            w,                      #
-            coordinates,            #
-            pairrepresentatives;    #
-    
-    coordinates         := ProductList[1];
-    pairrepresentatives := ProductList[7];
+            w;                      #
     
     i := 1;
     
-    dim := Size(coordinates);
+    dim := Size(ProductList[1]);
     
     res := false;
     
     while i < Size(AlgebraProducts) + 1 do 
     
-        pos := pairrepresentatives[i];
+        pos := ProductList[7][i];
     
         if AlgebraProducts[i] <> false and AlgebraProducts[i][j] <> 0 then 
         
@@ -806,14 +780,7 @@ function(GramMatrix,AlgebraProducts,ProductList)
             k,              # position of first element
             l,              # position of second element
             res,            # result of unknowns axiom M1
-            sign,           # correct sign of 5A axes
-            longcoordinates,
-            positionlist,
-            orbitals;
-            
-    longcoordinates := ProductList[2];
-    positionlist    := ProductList[5];
-    orbitals        := ProductList[9];
+            sign;           # correct sign of 5A axes
     
     switch := 1;
             
@@ -821,18 +788,18 @@ function(GramMatrix,AlgebraProducts,ProductList)
         
         count := 0;
 
-        for i in [1..Size(orbitals)] do
+        for i in [1..Size(ProductList[9])] do
             if GramMatrix[i] = false then
             
                 j := 1;
     
-                while j < Size(orbitals[i]) + 1 do 
+                while j < Size(ProductList[9][i]) + 1 do 
                 
-                    pos_1 := Position(longcoordinates,orbitals[i][j][1]);
-                    pos_2 := Position(longcoordinates,orbitals[i][j][2]);
+                    pos_1 := Position(ProductList[2],ProductList[9][i][j][1]);
+                    pos_2 := Position(ProductList[2],ProductList[9][i][j][2]);
                     
-                    k := positionlist[pos_1];
-                    l := positionlist[pos_2];
+                    k := ProductList[5][pos_1];
+                    l := ProductList[5][pos_2];
                     
                     if k*l > 0 then 
                         sign := 1;
@@ -848,7 +815,7 @@ function(GramMatrix,AlgebraProducts,ProductList)
                         GramMatrix[i] := sign*res;
                         count := count + 1;
                         
-                        j := Size(orbitals[i]) + 1;
+                        j := Size(ProductList[9][i]) + 1;
                     fi;        
                 od;
 
@@ -1013,51 +980,50 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             pos_1,      # position of first element conjugated
             pos_2,      # position of second element conjugated
             sign,       # corrects sign of 5A axis
-            pos,        # position of new product
-            coordinates,
-            longcoordinates,
-            positionlist;
-            
-    coordinates     := ProductList[1];
-    longcoordinates := ProductList[2];
-    positionlist    := ProductList[5];
+            pos;        # position of new product
     
+    if g <> () then 
     
-    len     := Size(row);
-    output  := [1..len]*0;
-    
-    for i in [1..Size(row)] do
-        if row[i] <> 0 then 
-    
-            j := unknowns[i][1];
-            k := unknowns[i][2];
-            
-            x := [0,0];
-            
-            pos_1 := Position(longcoordinates,(coordinates[j])^g);
-            pos_2 := Position(longcoordinates,(coordinates[k])^g);
-            
-            x[1] := positionlist[pos_1];
-            x[2] := positionlist[pos_2];
-            
-            if x[1]*x[2] < 0 then 
-                sign := -1;
-            else
-                sign := 1;
+        len     := Size(row);
+        output  := [1..len]*0;
+        
+        for i in [1..Size(row)] do
+            if row[i] <> 0 then 
+        
+                j := unknowns[i][1];
+                k := unknowns[i][2];
+                
+                x := [0,0];
+                
+                pos_1 := Position(ProductList[2],(ProductList[1][j])^g);
+                pos_2 := Position(ProductList[2],(ProductList[1][k])^g);
+                
+                x[1] := ProductList[5][pos_1];
+                x[2] := ProductList[5][pos_2];
+                
+                if x[1]*x[2] < 0 then 
+                    sign := -1;
+                else
+                    sign := 1;
+                fi;
+                
+                x[1] := AbsInt(x[1]);
+                x[2] := AbsInt(x[2]);
+                
+                Sort(x);
+                
+                pos := Position(unknowns,x);
+                output[pos] := sign*row[i];
+                
             fi;
-            
-            x[1] := AbsInt(x[1]);
-            x[2] := AbsInt(x[2]);
-            
-            Sort(x);
-            
-            pos := Position(unknowns,x);
-            output[pos] := sign*row[i];
-            
-        fi;
-    od;
+        od;
     
-    return output;
+        return output;
+    
+    else
+    
+        return row;
+    fi;
     
     end);     
     
