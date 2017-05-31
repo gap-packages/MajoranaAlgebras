@@ -11,8 +11,8 @@ BindGlobal( "MAJORANA_ExtractUnknownAlgebraProducts",
 function(AlgebraProducts, ProductList)
 
     local   unknowns,       # list of unknown algebra products
-            coordinates     # ProductList[1]
-            pairorbitlist   # ProductList[3]
+            coordinates,    # ProductList[1]
+            pairorbitlist,  # ProductList[3]
             i,              # loop over coordinates
             j,              # loop over coordinates
             k,              # pair orbit index
@@ -241,6 +241,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     
     local   A,
             B,
+            C,
+            id,
             error,
             m,
             n,
@@ -256,12 +258,15 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     m := Size(mat);
     n := Size(mat[1]);
     
-    Error("pause");
-    
     dim := Size(vec[1]);
+    
+    Error("Pause");
+    
+    id := IdentityMat(m);
     
     A := NullMat(n,n);
     B := NullMat(n,dim);
+    C := NullMat(n,m);
     
     # Put matrix A into row echelon form
     
@@ -279,24 +284,28 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         
             A[i] := ShallowCopy(mat[pos_1]);
             B[i] := ShallowCopy(vec[pos_1]);
+            C[i] := ShallowCopy(id[pos_1]);
                 
             for j in [pos_1 + 1 .. m] do 
                 if mat[j][i] <> 0 then 
                 
                     mat[j] := mat[j] - mat[pos_1];
                     vec[j] := vec[j] - vec[pos_1];
+                    id[j] := id[j] - id[pos_1];
                     
                     if ForAny(mat[j], x -> x <> 0) then 
                         pos_2 := PositionNonZero(mat[j]);
                         
                         vec[j] := vec[j]/mat[j][pos_2];
+                        id[j]  := id[j]/mat[j][pos_2]; 
                         mat[j] := mat[j]/mat[j][pos_2]; # change leading elt to 1
                     fi;
                 fi;
             od;   
             
             mat[pos_1] := [1..n]*0;
-            vec[pos_1] := [1..dim]*0;            
+            vec[pos_1] := [1..dim]*0; 
+            id[pos_1] := [1..m]*0;           
         fi;
     od;
     
@@ -312,16 +321,19 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     
     if Size(error) >0 then
         # no solutions
-        return [error,,A,B];
+        return [error,C,mat,vec];
     fi;
     
     Unbind(mat);
     Unbind(vec);
+    Unbind(C);
     
     # solve system
      
     sol := [1..n]*0;
     unsolved := [];
+    
+    Error("Pause 3");
 
     for i in Reversed([1..n]) do
         if i in unsolved then
@@ -368,173 +380,56 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     
 InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
 
-    function(mat,vecs) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
+    function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
 
-        local A, C, n, m, d, absd, B, i, j, k, x, imax, temp, tempv, tempi, sol, list, newmat, newvec, pos, p, unsolved, zeros, error;
+        local   m,
+                n,
+                sol,
+                unsolved,
+                heads,
+                i,
+                j,
+                pos;
+        
+        m := Size(mat);
+        n := Size(mat[1]);
 
-        A:=StructuralCopy(mat);
-        B:=StructuralCopy(vecs);
-
-        i:=1;
-
-        while i < Size(A) do
-            if ForAll(A[i], x-> x =0) and ForAll(B[i], x-> x = 0) then
-                Remove(A,i);
-                Remove(B,i);
+        mat := SemiEchelonMatTransformation(mat);
+        vec := mat.coeffs*vec;
+        
+        sol := [1..n]*0;
+        unsolved := [];
+        
+        heads := mat.heads;
+        
+        for i in Reversed([1 .. n]) do 
+        
+            pos := heads[i];
+            
+            if pos = 0 then 
+                Add(unsolved,i);   
+                sol[i] := [];             
             else
-                i:=i+1;
-            fi;
-        od;
-
-        n:=Size(A);
-        m:=Size(A[1]);
-
-        if n<m then
-            A{[n+1..m]} := NullMat(m-n,m);
-            B{[n+1..m]} := NullMat(m-n,Size(vecs[1]));
-        elif m<n then
-            for i in [1..n] do
-                A[i]{[m+1..n]} := NullMat(1,n-m)[1];
-            od;
-        fi;
-
-        p:=Maximum(n,m);
-
-        d:=NullMat(1,p)[1];
-
-        C:=IdentityMat(p);
-
-        # Put matrix in row echelon form
-
-        i:=1;
-
-        while i <= p do
-
-            for j in [i..p] do
-                d[j]:=A[j][i];
-            od;
-
-            absd:=List(d,x->AbsoluteValue(x));
-
-            imax:=Position(absd,Maximum(absd));
-
-            if d[imax] = 0 then
-
-                k:=i+1;
-
-                while k <= p do
-                    if A[i][k] <> 0 then
-                        C[i] := C[i]/A[i][k];
-                        B[i] := B[i]/A[i][k];
-                        A[i] := A[i]/A[i][k];
-
-
-                        k:=p+1;
-                    else
-                        k:=k+1;
-                    fi;
-                od;
-
-                i:=i+1;
-
-            else
-
-                # Swap rows i and imax
-
-                temp:=ShallowCopy(A[imax]); tempv:=ShallowCopy(B[imax]); tempi:=ShallowCopy(C[imax]);
-                A[imax]:=ShallowCopy(A[i]); A[i]:=ShallowCopy(temp);
-                B[imax]:=ShallowCopy(B[i]); B[i]:=ShallowCopy(tempv);
-                C[imax]:=ShallowCopy(C[i]); C[i]:=ShallowCopy(tempi);
-
-                for k in [i+1..p] do
-
-                    x:=A[k][i]/A[i][i];
-
-                    B[k]:=B[k] - x*B[i];
-                    C[k]:=C[k] - x*C[i];
-                    A[k]:=A[k] - x*A[i];
-
-                od;
-
-                C[i]:=C[i]/A[i][i];
-                B[i]:=B[i]/A[i][i];
-                A[i]:=A[i]/A[i][i];
-
-
-                d[i]:=0;
-
-                i:=i+1;
-
-            fi;
-
-        od;
-
-        # Check if we can solve the system of equations
-
-        newmat:=NullMat(p,p);
-        newvec:=NullMat((p),Size(vecs[1]));
-        error:=[];
-
-        for i in [1..p] do
-            if ForAll(A[i],x->x=0) then
-                if ForAny(B[i],x->x<> 0 ) then
-
-                    Append(error,[i]);
-
-                fi;
-            else
-                pos:=Position(A[i],1);
-                newmat[pos] := StructuralCopy(A[i]);
-                newvec[pos] := StructuralCopy(B[i]);
-            fi;
-        od;
-
-        if Size(error) >0 then
-            # no solutions
-            return [error,C,A,B];
-        fi;
-
-        zeros:=NullMat(1,p)[1];
-        sol:=NullMat(1,m)[1];
-        unsolved:=[];
-
-        if newmat[m] = zeros then
-            # sol[m] is unknown
-
-            sol[m]:=[];
-            Append(unsolved,[m]);
-
-        else
-            sol[m]:=newvec[m];
-        fi;
-
-        for i in [1..m-1] do
-            if newmat[m-i] = zeros then
-                sol[m-i] := [];
-                Append(unsolved,[m-i]);
-            else
-                list:=[];
-                j:=m-i+1;
-                while j<=m do
-                    if newmat[m-i][j] <> 0 then
-                        if not j in unsolved then
-                            Append(list,[newmat[m-i][j]*sol[j]]);
-                            j:=j+1;
+                for j in [i + 1 .. n] do
+                    if mat[pos][j] <> 0 then 
+                        if j in unsolved then
+                            Add(unsolved,i);
+                            break;
                         else
-                            sol[m-i] := [];
-                            Append(unsolved,[m-i]);
-                            j:=m+1;
+                            vec[pos] := vec[pos] - mat[pos][j]*sol[j];
+                            mat[pos][j] := 0;
                         fi;
-                    else
-                        j:=j+1;
                     fi;
-                od;
-                if not m-i in unsolved then
-                    sol[m-i]:=(newvec[m-i] - Sum(list))/newmat[m-i][m-i];
+                od; 
+                
+                if not i in unsolved then 
+                    sol[i] := vec[pos];
+                else
+                    sol[i] := [];
                 fi;
             fi;
         od;
-
+        
         return [sol,unsolved];
 
         end );
@@ -1146,7 +1041,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             j,              # index for dim of v
             m,              # orbit of i,j
             pos,            # position of m in unknowns
-            sign            # correct sign of 5A axes
+            sign,           # correct sign of 5A axes
             pairorbitlist;  # 
             
     pairorbitlist := ProductList[3];
@@ -1436,7 +1331,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
             z,                      #
             u,                      # basis vectors
             v,                      #
-            w                       #
+            w,                      #
             coordinates,            #
             pairrepresentatives;    #
     
@@ -2301,6 +2196,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     if mat <> [] then
         
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
+        
+        Error( "Pause 2");
 
         if Size(Solution) = 2 then
             for i in [1..Size(UnknownAlgebraProducts)] do
