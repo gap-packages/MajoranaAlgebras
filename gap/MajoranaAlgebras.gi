@@ -235,7 +235,7 @@ InstallGlobalFunction(MAJORANA_NullSpace,
 
         );
         
-InstallGlobalFunction(MAJORANA_SolutionMatVecs,
+InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
     
     function(mat,vec)
     
@@ -378,12 +378,13 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
     end );
     
     
-InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
+InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
     function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
 
         local   m,
                 n,
+                res,
                 sol,
                 unsolved,
                 heads,
@@ -393,14 +394,17 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
         
         m := Size(mat);
         n := Size(mat[1]);
+        
+        Display([m,n]);
 
-        mat := SemiEchelonMatTransformation(mat);
-        vec := mat.coeffs*vec;
+        res := SemiEchelonMatTransformation(mat);
+        mat := List(res.vectors,ShallowCopy);
+        vec := res.coeffs*vec;
         
         sol := [1..n]*0;
         unsolved := [];
         
-        heads := mat.heads;
+        heads := res.heads;
         
         for i in Reversed([1 .. n]) do 
         
@@ -2196,8 +2200,6 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     if mat <> [] then
         
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
-        
-        Error( "Pause 2");
 
         if Size(Solution) = 2 then
             for i in [1..Size(UnknownAlgebraProducts)] do
