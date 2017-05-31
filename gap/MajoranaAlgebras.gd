@@ -10,6 +10,8 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
+DeclareGlobalFunction( "ShapeOfMajoranaRepresentation" );
+
 DeclareGlobalFunction( "MAJORANA_LDLTDecomposition" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
