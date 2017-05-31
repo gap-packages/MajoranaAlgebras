@@ -242,8 +242,6 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
             fi;
         od;
         
-        vec := MAJORANA_RemoveNullSpace(vec, ProductList[6]);
-        
         return vec;
     else
         return v;
@@ -1149,9 +1147,11 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                     if sum = [] then 
                                         Error("empty");
                                     fi;
+                                    
+                                    y := MAJORANA_ConjugateVector(sum,g,ProductList);
                                 
                                     Add(mat,MAJORANA_ConjugateRow(row,g,UnknownAlgebraProducts,ProductList));
-                                    Add(vec,MAJORANA_ConjugateVector(sum,g,ProductList));
+                                    Add(vec,MAJORANA_RemoveNullSpace(y,ProductList[6]));
                                     
                                     Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
                                 fi;
@@ -1193,25 +1193,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
         
         unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
         
-        for j in ProductList[10] do 
-        
-            if EigenVectors[j][1] = false then 
-            
-                g := ProductList[12][j];
-                x := ProductList[13][j];
-                
-                k := ProductList[10][x];
-                
-                for l in [1..3] do 
-                
-                    EigenVectors[j][l] := [];
-                    
-                    for x in EigenVectors[k][l] do
-                        Add(EigenVectors[j][l], MAJORANA_ConjugateVector(x,g,ProductList));
-                    od;
-                od;
-            fi;
-        
+        for j in ProductList[10] do         
             for k in [1..3] do
                 for l in [1..2] do 
                     if [k,l] <> [2,2] then 
@@ -1540,6 +1522,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     function( mat, vec, UnknownAlgebraProducts, AlgebraProducts, ProductList)
     
     local   Solution,   # solution of system
+            sign,       # correct sign of 5A axes
             i,          # loop over <UnknownAlgebraProducts>
             x,          # element of <UnknownAlgebraProducts>
             y,          # orbit of x
@@ -1556,12 +1539,20 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     x := UnknownAlgebraProducts[i]; 
                     
                     y := ProductList[3][x[1]][x[2]];
-                    g := ProductList[4][x[1]][x[2]];
-                                                    
+                    
                     if y > 0 then 
-                        AlgebraProducts[y] := MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                        sign := 1;
                     else
-                        AlgebraProducts[-y] := -MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                        sign := -1;
+                        y := -y;
+                    fi;
+                    
+                    if AlgebraProducts[y] = false then 
+                    
+                        g := ProductList[4][x[1]][x[2]];
+
+                        AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                        AlgebraProducts[y] := MAJORANA_RemoveNullSpace(AlgebraProducts[y],ProductList[6]);
                     fi;
                 fi;
             od;
