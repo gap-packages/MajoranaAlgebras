@@ -23,18 +23,20 @@ BindGlobal("S5",function()
     );
  
 BindGlobal("A5",function()
-    local G, T;
+    local G, T,input;
     G:=AlternatingGroup(5);
     T:=Filtered(AsList(G),x->Order(x) = 2);
-    return([G,T]);
+    input := ShapesOfMajoranaRepresentation(G,T);
+    return(input);
     end
     );
     
 BindGlobal("A6",function()
-    local G, T;
-    G:=AlternatingGroup(6);
+    local G, T,input;
+    G:=AlternatingGroup(5);
     T:=Filtered(AsList(G),x->Order(x) = 2);
-    return([G,T]);
+    input := ShapesOfMajoranaRepresentation(G,T);
+    return(input);
     end
     );
     
