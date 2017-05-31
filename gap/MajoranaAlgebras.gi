@@ -42,7 +42,7 @@ end);
 
 InstallGlobalFunction( MAJORANA_Fusion,
 
-function(a, b, j, Shape, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
+function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
 
     local   u,                  # vector with 1 in the j th position
             x,                  # new eigenvector
@@ -156,7 +156,7 @@ end);
 
 InstallGlobalFunction(MAJORANA_FullFusion,
 
-    function(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList)
+    function(AlgebraProducts,EigenVectors, GramMatrix, ProductList)
     
     local   j,                  # loop over T
             k,                  # loop over pairs of eigenvalues
@@ -175,7 +175,7 @@ InstallGlobalFunction(MAJORANA_FullFusion,
             ev[1] := MAJORANA_FusionTable[1][k[1] + 1];
             ev[2] := MAJORANA_FusionTable[1][k[2] + 1];
 
-            x := MAJORANA_Fusion(k[1],k[2],j,Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+            x := MAJORANA_Fusion(k[1],k[2],j,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
             
             if x[1] then
                 Append(new[x[3]], x[2]);
@@ -1501,6 +1501,40 @@ InstallGlobalFunction(MAJORANA_PairRepresentatives,
     
     end);
     
+InstallGlobalFunction( MAJORANA_LongCoordinates,
+    
+    function(t,ProductList)
+    
+    local   i,      # loop over coordinates
+            dim,    # size of coordinates
+            x;      # coordinate;
+            
+    dim := Size(ProductList[1]);
+
+    for i in [t+1..dim] do
+        
+        x := ProductList[1][i];
+    
+        if Order(x) = 3 then 
+    
+            Append(ProductList[5],[i,i]);
+            Append(ProductList[2],[x,x^2]);
+            
+        elif Order(x) = 4 then 
+
+            Append(ProductList[5],[i,i]);
+            Append(ProductList[2],[x,x^3]);
+            
+        elif Order(x) = 5 then 
+            Append(ProductList[5],[i,-i,-i,i]);
+            Append(ProductList[2],[x,x^2,x^3,x^4]); 
+        fi;
+    od;
+    
+    ProductList[2] := Flat(ProductList[2]);
+    
+    end );
+    
 InstallGlobalFunction( MAJORANA_MakeVector,
 
     function( pos, vals, dim)
@@ -1604,13 +1638,20 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
 
     function(ProductList, OrbitalsT)
     
-    local   i,      # loop over orbitals
+    local   G,      # the group
+            i,      # loop over orbitals
             x,      # representative of orbital
             y,      # orders of representatives
             table,  # table of orders of axes
             j,      # loop over orders of first axis
             k,      # loop over orders of second axis
             l;      # loop over orbitals
+            
+    G := ProductList[8];
+            
+    x := Cartesian(ProductList[1],ProductList[1]);
+
+    ProductList[9] := List(Orbits(G,x,OnPairs),ShallowCopy);
 
     # This is a bit of a patch, ask Markus tomorrow
 
@@ -1713,6 +1754,51 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
     od;
         
     end );    
+    
+InstallGlobalFunction(MAJORANA_SetupOrbits,
+
+    function(T,ProductList)
+    
+    local   G,      # the group
+            x,      # orbit    
+            i,      # loop over T
+            j,      # loop over orbits 
+            k,      # representative
+            t;      # size of T
+    
+    # Construct orbits of G on T
+    
+    G := ProductList[8];
+    t := Size(T);
+    
+    ProductList[11] := OrbitsDomain(G,T);
+    
+    for x in ProductList[11] do
+        Add(ProductList[10], Position( T, Representative(x)));
+    od;
+    
+    for i in [1..t] do
+        
+        j := 1;
+        
+        while j < Size(ProductList[11]) + 1 do 
+            if T[i] in ProductList[11][j] then 
+            
+                ProductList[13][i] := j;
+                
+                k := ProductList[10][j];
+                
+                ProductList[12][i] := RepresentativeAction(G,T[k],T[i]);
+                
+                j := Size(ProductList[11]) + 1;;
+                
+            else
+                j := j + 1;
+            fi;
+        od;
+    od;
+    
+    end );
     
 InstallGlobalFunction(MAJORANA_CheckNullSpace,
 
@@ -1994,10 +2080,10 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(input,index)
 
     local   # Seress
-            ProductList, error, OrbitsT, 
+            ProductList, error,  
 
             # indexing and temporary variables
-            i, j, k, x, y, m,
+            i, j, k, x, y, 
 
             # Step 0 - Set Up
             Output, t, SizeOrbitals, OrbitalsT, G, T,
@@ -2010,16 +2096,11 @@ function(input,index)
 
             # Step 4 - More products and evecs
             h, s, dim,
-
-            # Step 6 - More inner products
-            unknowns, mat, vec, 
             
             vals, pos, OutputList, record, 
 
             
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
-            
- 
 
                                             ## STEP 0: SETUP ##
     
@@ -2073,87 +2154,35 @@ function(input,index)
         ProductList[1][j] := ProductList[1][j][1];
     od;
     
-    ProductList[2]:=StructuralCopy(T);
-    ProductList[3] := NullMat(dim,dim);
-    ProductList[4] := NullMat(dim,dim);
-    ProductList[5]:=[1..t];
-    ProductList[6] := false;
-    ProductList[7] := [];    
+    ProductList[2]  := StructuralCopy(T);
+    ProductList[3]  := NullMat(dim,dim);
+    ProductList[4]  := NullMat(dim,dim);
+    ProductList[5]  := [1..t];
+    ProductList[6]  := false;
+    ProductList[7]  := [];    
     ProductList[8]  := G;
     ProductList[10] := [];
     ProductList[12] := [1..t]*0;
     ProductList[13] := [1..t]*0;
     ProductList[14] := [];
 
-    # Construct orbits of G on T
-    
-    ProductList[11] := OrbitsDomain(G,T);
-    
-    for x in ProductList[11] do
-        Add(ProductList[10], Position( T, Representative(x)));
-    od;
-    
-    for i in [1..t] do
-        
-        j := 1;
-        
-        while j < Size(ProductList[11]) + 1 do 
-            if T[i] in ProductList[11][j] then 
-            
-                ProductList[13][i] := j;
-                
-                k := ProductList[10][j];
-                
-                ProductList[12][i] := RepresentativeAction(G,T[k],T[i]);
-                
-                j := Size(ProductList[11]) + 1;;
-                
-            else
-                j := j + 1;
-            fi;
-        od;
-    od;
+    MAJORANA_SetupOrbits(T, ProductList);
 
-    for j in [t+1..dim] do
-        
-        x := ProductList[1][j];
-    
-        if Order(x) = 3 then 
-    
-            Append(ProductList[5],[j,j]);
-            Append(ProductList[2],[x,x^2]);
-            
-        elif Order(x) = 4 then 
-
-            Append(ProductList[5],[j,j]);
-            Append(ProductList[2],[x,x^3]);
-            
-        elif Order(x) = 5 then 
-            Append(ProductList[5],[j,-j,-j,j]);
-            Append(ProductList[2],[x,x^2,x^3,x^4]); 
-        fi;
-    od;
-    
-    ProductList[2] := Flat(ProductList[2]);
-    
-    x := Cartesian(ProductList[1],ProductList[1]);
-
-    ProductList[9] := List(Orbits(G,x,OnPairs),ShallowCopy);
+    MAJORANA_LongCoordinates(t, ProductList);
     
     MAJORANA_SetupOrbitals(ProductList, OrbitalsT);
 
-    SizeOrbitals := Size(ProductList[9]);
-    
     MAJORANA_PairRepresentatives(ProductList);
+
     MAJORANA_PairOrbits(ProductList);
+
     MAJORANA_PairConjElements(ProductList);
     
                                 ## STEP 3: PRODUCTS AND EVECS I ##
-
+                                
+    SizeOrbitals := Size(ProductList[9]);
 
     # Set up algebra product and gram matrices
-    
-    OutputList := [0,0,0,0,0];
 
     AlgebraProducts := NullMat(1,SizeOrbitals)[1];
     GramMatrix := NullMat(1,SizeOrbitals)[1];
@@ -2178,6 +2207,8 @@ function(input,index)
             od;
         fi;
     od;
+    
+    OutputList := [0,0,0,0,0];
     
     OutputList[1] := Shape;
     OutputList[2] := GramMatrix;
@@ -2628,7 +2659,9 @@ function(input,index)
                 EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
             fi;
         od;
-        Add(maindimensions,Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])+1);
+        Add(maindimensions,   Size(EigenVectors[j][1])
+                            + Size(EigenVectors[j][2])
+                            + Size(EigenVectors[j][3])+1);
     od;
     
     falsecount := [0,0];
@@ -2672,7 +2705,7 @@ function(input,index)
 
         if ForAny(maindimensions, x -> x < dim - 1) then                
         
-            x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+            x := MAJORANA_FullFusion(AlgebraProducts,EigenVectors, GramMatrix, ProductList);
             
             if not x[1] and ProductList[6] <> false then 
                 Output[i] := MAJORANA_OutputError(x[2],
