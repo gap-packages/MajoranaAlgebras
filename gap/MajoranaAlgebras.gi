@@ -2086,7 +2086,7 @@ function(input,index)
             i, j, k, x, y, 
 
             # Step 0 - Set Up
-            Output, t, SizeOrbitals, OrbitalsT, G, T,
+            t, SizeOrbitals, OrbitalsT, G, T,
             
             # Step 1 - Shape
             Shape, 
@@ -2099,7 +2099,6 @@ function(input,index)
             
             vals, pos, OutputList, record, 
 
-            
             falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
 
                                             ## STEP 0: SETUP ##
@@ -2693,7 +2692,7 @@ function(input,index)
         x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
         
         if x = false then
-            Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
+            return  MAJORANA_OutputError("The inner product is not positive definite"
                                 , []
                                 , OutputList);                                     
         fi;
@@ -2708,7 +2707,7 @@ function(input,index)
             x := MAJORANA_FullFusion(AlgebraProducts,EigenVectors, GramMatrix, ProductList);
             
             if not x[1] and ProductList[6] <> false then 
-                Output[i] := MAJORANA_OutputError(x[2],
+                return MAJORANA_OutputError(x[2],
                                 x[3],
                                 OutputList);
             fi;
@@ -2720,7 +2719,7 @@ function(input,index)
         error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
         if Size(error) > 0 and ProductList[6] <> false then
-            Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+            return MAJORANA_OutputError("Algebra does not obey axiom M1"
                             , error
                             , OutputList);
         fi;
@@ -2728,7 +2727,7 @@ function(input,index)
         error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
 
         if Size(error) > 0 and ProductList[6] <> false then
-            Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+            return MAJORANA_OutputError("Algebra does not obey fusion rules"
                          , error
                          , OutputList);
         fi;
@@ -2739,11 +2738,11 @@ function(input,index)
         
         if not x[1] then 
             if x[2] = 1 then 
-                Output[i] := MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
+                return MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
                         , x[3]
                         , OutputList);
             elif x[2] = 2 then 
-                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                return MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
                         , x[3]
                         , OutputList);
             fi;
@@ -2756,7 +2755,7 @@ function(input,index)
         error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
         if Size(error) > 0 and ProductList[6] <> false then
-            Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+            return MAJORANA_OutputError("Algebra does not obey axiom M1"
                             , error
                             , OutputList);
         fi;
@@ -2764,7 +2763,7 @@ function(input,index)
         error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
 
         if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
-            Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+            return MAJORANA_OutputError("Algebra does not obey fusion rules"
                             , error
                             , OutputList);
         fi;
@@ -2778,7 +2777,7 @@ function(input,index)
         x := MAJORANA_MoreEigenvectors(AlgebraProducts,EigenVectors,ProductList);
         
         if not x[1] then 
-            Output[i] := MAJORANA_OutputError(x[2],[], OutputList);
+            return MAJORANA_OutputError(x[2],[], OutputList);
         fi;
         
                             ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
@@ -2789,7 +2788,7 @@ function(input,index)
         x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, AlgebraProducts,ProductList);
         
         if not x[1] then 
-            Output[i] := MAJORANA_OutputError( x[2]
+            return MAJORANA_OutputError( x[2]
                             , x[3]
                             , OutputList);
         fi;
@@ -2818,7 +2817,7 @@ function(input,index)
             break;
         elif newdimensions = maindimensions and newfalsecount = falsecount then 
 
-            Output[i] := StructuralCopy(["Fail"
+            return StructuralCopy(["Fail"
                         , "Missing values"
                         ,
                         , OutputList[1]
@@ -2845,7 +2844,7 @@ function(input,index)
     GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
 
     if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-        Output[i] := MAJORANA_OutputError("Gram Matrix is not positive definite"
+        return MAJORANA_OutputError("Gram Matrix is not positive definite"
                         , []
                         , OutputList);
                     
@@ -2856,7 +2855,7 @@ function(input,index)
     error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
     if Size(error)>0 then
-        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+        return MAJORANA_OutputError("Algebra does not obey axiom M1"
                             , error
                             , OutputList);
     fi;
@@ -2866,7 +2865,7 @@ function(input,index)
     error := MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
     if ForAny(error,x->Size(x)>0) then
-        Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+        return MAJORANA_OutputError("Algebra does not obey fusion rules"
                             , error
                             , OutputList);
     fi;
@@ -2876,7 +2875,7 @@ function(input,index)
     error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
 
     if Size(error) > 0 then
-        Output[i] := MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
+        return MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
                     , error
                     , OutputList);
     fi;
@@ -2886,7 +2885,7 @@ function(input,index)
     # error:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
 
     # if error = -1 then
-    #    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M2"
+    #    return MAJORANA_OutputError("Algebra does not obey axiom M2"
     #                        , error
     #                        , OutputList);
     #fi;
@@ -2899,7 +2898,5 @@ function(input,index)
                 , OutputList[3]
                 , OutputList[4]
                 , OutputList[5]]);
-
-    return Output;
 
 end );
