@@ -182,10 +182,6 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         m := Size(mat);
         n := Size(mat[1]);
         
-        if m < n then 
-            return false;
-        fi;
-        
         Display([m,n]);
 
         Error("Pause");

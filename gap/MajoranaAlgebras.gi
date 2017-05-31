@@ -1780,7 +1780,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     
     end);
     
-InstallGlobalFunction(ShapeOfMajoranaRepresentation,
+InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
     function(G,T)
     
@@ -2745,13 +2745,7 @@ function(input,index)
                             , OutputList);
         fi;
                 
-        x := MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);
-        
-        if not x[1] and ProductList[6] <> false then 
-            Output[i] := MAJORANA_OutputError(x[2]
-                            , x[3]
-                            , OutputList);
-        fi;                
+        MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);
         
                                     ## STEP 9: MORE EVECS II ##
 

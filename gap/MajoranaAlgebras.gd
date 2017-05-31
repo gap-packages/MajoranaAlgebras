@@ -10,7 +10,7 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
-DeclareGlobalFunction( "ShapeOfMajoranaRepresentation" );
+DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_Append" );
 
