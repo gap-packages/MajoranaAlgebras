@@ -10,6 +10,8 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
+DeclareGlobalFunction( "ShapeOfMajoranaRepresentation" );
+
 DeclareGlobalFunction( "MAJORANA_Append" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVector" );

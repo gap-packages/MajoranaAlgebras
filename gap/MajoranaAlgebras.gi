@@ -1779,47 +1779,25 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     return [true];
     
     end);
-        
-InstallGlobalFunction(MajoranaRepresentation,
-
-function(G,T)
-
-    local   # Seress
-            ProductList, error, OrbitsT, 
-
-            # indexing and temporary variables
-            i, j, k, x, y, m,
-
-            # Step 0 - Set Up
-            Output, t, SizeOrbitals, OrbitalsT, 
-            
-            # Step 1 - Shape
-            Shape, RepsSquares6A, Unknowns3X,
-
-            # Step 2 - Possible shapes
-            Binaries, master,
-
-            # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
-
-            # Step 4 - More products and evecs
-            h, s, dim,
-
-            # Step 6 - More inner products
-            unknowns, mat, vec, 
-            
-            vals, pos, OutputList, record, 
-
-            
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
-            
- 
-
-                                            ## STEP 0: SETUP ##
-
-    Output:=[];
-
-    t:=Size(T);
+    
+InstallGlobalFunction(ShapeOfMajoranaRepresentation,
+    
+    function(G,T)
+    
+    local   t,              # size of T
+            i,              # indexes
+            j,              #
+            k,              #
+            x,              # result of orbitals
+            OrbitalsT,      # orbitals on T
+            shape,          # one shape
+            RepsSquares6A,  # (ts)^2 where o(ts) = 6
+            Unknowns3X,     # orbitals which may be 3A or 3C
+            Binaries,       # used to loop through options for shapes
+            shapeslist,     # final list of shapes
+            result;         #
+    
+    t := Size(T);
 
     # Check that T obeys axiom M8
 
@@ -1831,44 +1809,6 @@ function(G,T)
         od;
     od;
     
-    # Set up ProductList
-    
-    ProductList := [1..13]*0;
-        
-    ProductList[8]  := G;
-    ProductList[10] := [];
-    ProductList[12] := [1..t]*0;
-    ProductList[13] := [1..t]*0;
-    
-    # Construct orbits of G on T
-    
-    ProductList[11] := OrbitsDomain(G,T);
-    
-    for x in ProductList[11] do
-        Add(ProductList[10], Position( T, Representative(x)));
-    od;
-    
-    for i in [1..t] do
-        
-        j := 1;
-        
-        while j < Size(ProductList[11]) + 1 do 
-            if T[i] in ProductList[11][j] then 
-            
-                ProductList[13][i] := j;
-                
-                k := ProductList[10][j];
-                
-                ProductList[12][i] := RepresentativeAction(G,T[k],T[i]);
-                
-                j := Size(ProductList[11]) + 1;;
-                
-            else
-                j := j + 1;
-            fi;
-        od;
-    od;
-
     # Construct orbitals of G on T x T
 
     x := OrbitsDomain(G,Cartesian(T,T),OnPairs);
@@ -1907,41 +1847,39 @@ function(G,T)
         
     od;
 
-                                        ## STEP 1: SHAPE ##
-
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    Shape:=NullMat(1,Size(OrbitalsT))[1];
+    shape := NullMat(1,Size(OrbitalsT))[1];
 
-    RepsSquares6A:=[];
+    RepsSquares6A := [];
 
     for i in [1..Size(OrbitalsT)] do
     
-        x:=Representative(OrbitalsT[i]);
+        x := Representative(OrbitalsT[i]);
         
         if Order(x[1]*x[2]) = 1 then
-            Shape[i]:="1A";
+            shape[i]:="1A";
         fi;
         if Order(x[1]*x[2]) = 2 and x[1]*x[2] in T then
-            Shape[i]:="2A";
+            shape[i]:="2A";
         fi;
         if Order(x[1]*x[2]) = 2 and not x[1]*x[2] in T then
-            Shape[i]:="2B";
+            shape[i]:="2B";
         fi;
         if Order(x[1]*x[2]) = 3 then
-            Shape[i]:="3X";
+            shape[i]:="3X";
         fi;
         if Order(x[1]*x[2]) = 4 and not (x[1]*x[2])^2 in T then
-            Shape[i]:="4A";
+            shape[i]:="4A";
         fi;
         if Order(x[1]*x[2]) = 4 and (x[1]*x[2])^2 in T then
-            Shape[i]:="4B";
+            shape[i]:="4B";
         fi;
         if Order(x[1]*x[2]) = 5 then
-            Shape[i]:="5A";
+            shape[i]:="5A";
         fi;
         if Order(x[1]*x[2])=6 then
-            Shape[i]:="6A";
+            shape[i]:="6A";
             Add(RepsSquares6A,(x[1]*x[2])^2);
         fi;
     od;
@@ -1949,12 +1887,12 @@ function(G,T)
     # Check for inclusions of 3A in 6A
 
     for i in [1..Size(OrbitalsT)] do
-        if Shape[i][1] = '3' then
+        if shape[i][1] = '3' then
             j := 0;
             while j < Size(OrbitalsT[i]) do
                 j := j + 1;
                 if OrbitalsT[i][j][1]*OrbitalsT[i][j][2] in RepsSquares6A then
-                    Shape[i]:="3A";;
+                    shape[i]:="3A";;
                     j:=Size(OrbitalsT[i])+1;;
                 fi;
             od;
@@ -1964,916 +1902,985 @@ function(G,T)
     Unknowns3X:=[];
 
     for i in [1..Size(OrbitalsT)] do
-        if Shape[i] = ['3','X'] then
+        if shape[i] = ['3','X'] then
             Add(Unknowns3X,i);
         fi;
     od;
-
-                                            ## STEP 2: POSSIBLE SHAPES ##
-
-    # Run through possibilities for unknowns
-
+    
     Binaries:=AsList(FullRowSpace(GF(2),Size(Unknowns3X)));
+    
+    shapeslist := [];
+
+    # Add new values in the shape
 
     for i in [1..Size(Binaries)] do
         
-        Output[i]:=[];
-
-        master:=1;
-        
-        ProductList[6] := false;
-        ProductList[1] := StructuralCopy(T);
-
-        while master = 1 do
-
-            # Add new values in the shape
-
-            for j in [1..Size(Unknowns3X)] do
-                k:=Unknowns3X[j];
-                if Binaries[i][j] = 1*Z(2) then
-                    Shape[k]:="3A";
-                else
-                    Shape[k]:="3C";
-                fi;
-            od;
-
-            # Create lists of 3A, 4A and 5A axes
-
-            for j in [1..Size(OrbitalsT)] do
-                if Shape[j]=['3','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-                        x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                        Add(ProductList[1],Set([x,x^2]));
-                    od;
-                fi;
-            od;
-            
-            for j in [1..Size(OrbitalsT)] do
-                if Shape[j]=['4','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-                        x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                        Add(ProductList[1],Set([x,x^3]));
-                    od;
-                fi;
-            od;
-            
-            for j in [1..Size(OrbitalsT)] do 
-                if Shape[j]=['5','A'] then
-                    for k in [1..Size(OrbitalsT[j])] do
-                        x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                        Add(ProductList[1],Set([x,x^2,x^3,x^4]));
-                    od;
-                fi;
-            od;
-
-            ProductList[1] := DuplicateFreeList(ProductList[1]);
-            
-            dim := Size(ProductList[1]);
-
-            for j in [t+1..dim] do
-                ProductList[1][j] := ProductList[1][j][1];
-            od;
-            
-            ProductList[2]:=StructuralCopy(T);
-            ProductList[5]:=[1..t];
-
-            for j in [t+1..dim] do
-                
-                x := ProductList[1][j];
-            
-                if Order(x) = 3 then 
-            
-                    Append(ProductList[5],[j,j]);
-                    Append(ProductList[2],[x,x^2]);
-                    
-                elif Order(x) = 4 then 
-
-                    Append(ProductList[5],[j,j]);
-                    Append(ProductList[2],[x,x^3]);
-                    
-                elif Order(x) = 5 then 
-                    Append(ProductList[5],[j,-j,-j,j]);
-                    Append(ProductList[2],[x,x^2,x^3,x^4]); 
-                fi;
-            od;
-            
-            ProductList[2] := Flat(ProductList[2]);
-
-            x:=Orbits(G,Cartesian(ProductList[1],ProductList[1]),OnPairs);
-            
-            ProductList[9] := [];
-    
-            for j in [1..Size(x)] do
-                Add(ProductList[9], ShallowCopy(x[j]));
-            od;
-
-            # This is a bit of a patch, ask Markus tomorrow
-
-            j:=1;
-
-            while j < Size(ProductList[9]) + 1 do
-                if Order(ProductList[9][j][1][1]) = 2 and Order(ProductList[9][j][1][2]) = 2 then
-                    Remove(ProductList[9],j);
-                else
-                    j := j+1;
-                fi;
-            od;
-
-            ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
-            
-            j := Size(OrbitalsT) + 1;
-            
-            while j < Size(ProductList[9]) + 1 do 
-                if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
-                    k := j + 1;
-                    
-                    while k < Size(ProductList[9]) +1 do
-                    
-                        if  [ProductList[9][j][1][2],ProductList[9][j][1][1]]  in ProductList[9][k] then
-                        
-                            if Order(ProductList[9][j][1][1]) < Order(ProductList[9][j][1][2]) then 
-                        
-                                Append(ProductList[9][j],ProductList[9][k]);
-                                Remove(ProductList[9],k);
-                            
-                            else 
-                            
-                                Append(ProductList[9][k],ProductList[9][j]);
-                                Remove(ProductList[9],j);
-                                
-                                j := j - 1;
-                                
-                            fi;
-                            
-                            k := Size(ProductList[9]) + 1;
-                            
-                        else
-                            
-                            k := k + 1;
-                        fi;
-                    od;
-                                        
-                fi;
-                
-                j := j + 1;
-                
-            od;
-            
-            ProductList[14] := [];
-            
-            MAJORANA_MergeOrbitalsAxes(ProductList, OrbitalsT);
-
-            SizeOrbitals:=Size(ProductList[9]);
-
-            ProductList[7] := [];
-            ProductList[4] := NullMat(dim,dim);
-            ProductList[3] := NullMat(dim,dim);
-            
-            MAJORANA_PairRepresentatives(ProductList);
-            MAJORANA_PairOrbits(ProductList);
-            MAJORANA_PairConjElements(ProductList);
-            
-                                        ## STEP 3: PRODUCTS AND EVECS I ##
-
-
-            # Set up algebra product and gram matrices
-            
-            OutputList := [0,0,0,0,0];
-
-            AlgebraProducts := NullMat(1,SizeOrbitals)[1];
-            GramMatrix := NullMat(1,SizeOrbitals)[1];
-
-            for j in [1..SizeOrbitals] do
-                AlgebraProducts[j]:=false;
-                GramMatrix[j]:=false;
-            od;
-
-            # Set up eigenvector matrix
-
-            EigenVectors:=NullMat(t,3);
-
-            for j in [1..t] do
-                if j in ProductList[10] then
-                    for k in [1..3] do
-                        EigenVectors[j][k] := [];
-                    od;
-                else
-                    for k in [1..3] do
-                        EigenVectors[j][k] := false;
-                    od;
-                fi;
-            od;
-            
-            OutputList[1] := Shape;
-            OutputList[2] := GramMatrix;
-            OutputList[3] := AlgebraProducts;
-            OutputList[4] := EigenVectors;
-            OutputList[5] := ProductList;
-            
-            # Start filling in values and products!
-
-            # (2,2) products and eigenvectors from IPSS10
-
-            # Add eigenvectors from IPSS10
-
-            for j in ProductList[10] do
-                for k in [1..t] do
-
-                    x := ProductList[3][j][k];
-
-                    if Shape[x] = ['2','A'] then
-                    
-                        pos := [j, k, 0];
-                        pos[3] := Position(T,T[j]*T[k]);
-                        
-                        vals := [-1/4, 1, 1];
-                        
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-                        
-                        vals := [0, 1, -1];
-
-                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
-
-                    elif Shape[x] = ['2','B'] then
-                    
-                        pos := [k];
-                        vals := [1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                    elif Shape[x] = ['3','A'] then
-                    
-                        pos := [j, k, 0, 0];
-
-                        pos[3] := Position(T, T[j]*T[k]*T[j]);
-                        pos[4] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
-
-                        vals := [-10/27, 32/27, 32/27, 1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-                        
-                        vals := [-8/45, -32/45, -32/45, 1];
-
-                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
-
-                        vals := [0, 1, -1, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-                    elif Shape[x] = ['3','C'] then
-                    
-                        pos := [j, k, 0];
-
-                        pos[3] := Position(T, T[j]*T[k]*T[j]);
-
-                        vals := [-1/32, 1, 1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                        vals := [0, 1, -1];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-                    elif Shape[x] = ['4','A'] then
-                        
-                        pos := [j, k, 0, 0, 0];
-                        pos[3] := Position(T, T[j]*T[k]*T[j]);
-                        pos[4] := Position(T, T[k]*T[j]*T[k]);
-                        pos[5] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
-
-                        vals := [-1/2, 2, 2, 1, 1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                        vals := [-1/3, -2/3, -2/3, -1/3, 1]; 
-
-                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
-
-                        vals := [0, 1, -1, 0, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-                    elif Shape[x] = ['4','B'] then
-                        
-                        pos := [j, k, 0, 0, 0];
-                        pos[3] := Position(T, T[j]*T[k]*T[j]);
-                        pos[4] := Position(T, T[k]*T[j]*T[k]);
-                        pos[5] := Position(T, (T[j]*T[k])^2);
-                        
-                        vals := [-1/32, 1, 1, 1/8, -1/8];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                        vals := [0, 1, -1, 0, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-                    elif Shape[x] = ['5','A'] then
-                    
-                        x := Position(ProductList[2],T[j]*T[k]);
-                    
-                        pos := [j, k, 0, 0, 0, 0];
-                        pos[3] := Position(T, T[j]*T[k]*T[j]);
-                        pos[4] := Position(T, T[k]*T[j]*T[k]);
-                        pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
-                        pos[6] := ProductList[5][x]; 
-
-                        if pos[6] < 0 then
-                            pos[6] := -pos[6];
-                            sign := -1;
-                        else
-                            sign := 1;
-                        fi;
-
-                        vals := [3/512, -15/128, -15/128, -1/128, -1/128, sign*1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-
-                        vals := [-3/512, 1/128, 1/128, 15/128, 15/128, sign*1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-                        
-                        vals := [0, 1/128, 1/128, -1/128, -1/128, sign*1];
-
-                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
-
-                        vals := [0, 1, -1, 0, 0, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-
-                        vals := [0, 0, 0, 1, -1, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-
-                    elif Shape[x] = ['6','A'] then
-
-                        pos := [j, k, 0, 0, 0, 0, 0, 0];
-                        pos[3] := Position(T, T[j]*T[k]*T[j]);
-                        pos[4] := Position(T, T[k]*T[j]*T[k]);
-                        pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
-                        pos[6] := Position(T, T[k]*T[j]*T[k]*T[j]*T[k]);
-                        pos[7] := Position(T, (T[j]*T[k])^3);
-                        pos[8] := ProductList[5][Position(ProductList[2],(T[j]*T[k])^2)];
-
-                        vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
-
-                        Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-
-                        vals := [-8/45, 0, 0, -32/45, -32/45, -32/45, 32/45, 1];
-
-                        Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
-                        
-                        vals := [0, 1, -1, 0, 0, 0, 0, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-
-                        vals := [0, 0, 0, 1, -1, 0, 0, 0];
-
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                        
-                        # put in products of 2A and 3A axes
-                        
-                        x := ProductList[3][pos[7]][pos[8]];
-                        
-                        AlgebraProducts[x] := [1..dim]*0;
-                        
-                        GramMatrix[x] := 0;
-                    fi;
-                od;
-                
-                # 1/32 eigenvectors from conjugation
-                
-                for k in [t+1..dim] do 
-                
-                    h := ProductList[1][k];
-                    
-                    if not h^T[j] in [h,h^2] then 
-                    
-                        pos := [k, 0];
-                        pos[2] := ProductList[5][Position(ProductList[2],h^T[j])];
-                        
-                        if pos[2] < 0 then
-                            pos[2] := -pos[2];
-                            sign := -1;
-                        else
-                            sign := 1;
-                        fi;
-                        
-                        vals := [1,-sign*1];
-                        
-                        Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                    fi;
-                od;
-            od;
-                
-            # Products from IPSS10
-
-            for j in [1..SizeOrbitals] do
-
-                x := ProductList[7][j][1];
-                y := ProductList[7][j][2];
-
-                if Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 2 then
-
-                    if Shape[j] = ['1','A'] then
-
-                        AlgebraProducts[j] := NullMat(1,dim)[1];
-
-                        AlgebraProducts[j][x] := 1;
-
-                        GramMatrix[j] := 1;
-
-                    elif Shape[j] = ['2','A'] then
-
-                        pos := [x, y, 0];
-                        pos[3] := Position(T,T[x]*T[y]);
-
-                        vals := [1/8, 1/8, -1/8];
-                        
-                        AlgebraProducts[j] := MAJORANA_MakeVector( pos, vals, dim);
-
-                        GramMatrix[j] := 1/8;
-
-                    elif Shape[j] = ['2','B'] then
-
-                        AlgebraProducts[j] := NullMat(1,dim)[1];
-
-                        GramMatrix[j] := 0;
-
-                    elif Shape[j] = ['3','A'] then
-                    
-                        pos := [x, y, 0, 0];
-                        pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        pos[4] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
-
-                        vals := [1/16, 1/16, 1/32, -135/2048];
-                        
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j] := 13/256;
-
-                    elif Shape[j] = ['3','C'] then
-                    
-                        pos := [x, y, 0];
-                        pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        
-                        vals := [1/64, 1/64, -1/64];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j]:=1/64;
-
-                    elif Shape[j] = ['4','A'] then
-
-                        pos := [x, y, 0, 0, 0];
-                        pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        pos[4] := Position(T,T[y]*T[x]*T[y]);
-                        pos[5] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
-
-                        vals := [3/64, 3/64, 1/64, 1/64, -3/64]; 
-    
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j] := 1/32;
-
-                    elif Shape[j] = ['4','B'] then
-                    
-                        pos := [x, y, 0, 0, 0];
-                        pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        pos[4] := Position(T,T[y]*T[x]*T[y]);
-                        pos[5] := Position(T,(T[x]*T[y])^2);
-
-                        vals := [1/64, 1/64, -1/64, -1/64, 1/64];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j]:=1/64;
-
-                    elif  Shape[j] = ['5','A'] then
-                    
-                        pos := [x, y, 0, 0, 0, 0];
-                        pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        pos[4] := Position(T,T[y]*T[x]*T[y]);
-                        pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
-                        pos[6] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
-
-                        if pos[6] < 0 then
-                            pos[6] := -pos[6];
-                            sign := -1;
-                        else
-                            sign := 1;
-                        fi;
-                        
-                        vals := [3/128, 3/128, -1/128, -1/128, -1/128, sign];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j]:=3/128;
-
-                    elif Shape[j] = ['6','A'] then
-                    
-                        pos := [x, y, 0, 0, 0, 0, 0, 0];
-                        pos[3] := Position(T,T[x]*T[y]*T[x]);
-                        pos[4] := Position(T,T[y]*T[x]*T[y]);
-                        pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
-                        pos[6] := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
-                        pos[7] := Position(T,(T[x]*T[y])^3);
-                        pos[8] := ProductList[5][Position(ProductList[2],(T[x]*T[y])^2)];
-                        
-                        vals := [1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j]:=5/256;
-                    fi;
-
-                # 2,3 products
-
-                elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 3 then
-                    if ProductList[1][x]*ProductList[1][y] in T then 
-
-                        s := ProductList[1][x]; h := ProductList[1][y];
-
-                        # Inside a 3A algebra
-                        
-                        pos := [x, 0, 0, y];
-                        pos[2] := Position(T,s*h);
-                        pos[3] := Position(T,s*h*h);
-                        
-                        vals := [2/9, -1/9, -1/9, 5/32];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j]:=1/4;
-                    fi;
-
-                # 2,4 products
-
-                elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 4 then
-
-                    s := ProductList[1][x];
-                    h := ProductList[1][y];
-
-                    if s*h in T then
-
-                        # Inside a 4A algebra
-                        
-                        pos := [x, 0, 0, 0, y];
-                        pos[2] := Position(T,s*h);
-                        pos[3] := Position(T,s*h*h*h);
-                        pos[4] := Position(T,s*h*h);
-                        
-                        vals := [5/16, -1/8, -1/8, -1/16, 3/16];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j] := 3/8;
-                    fi;
-
-                # (2,5) values
-
-                elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 5 then
-
-                    s := ProductList[1][x];
-                    h := ProductList[1][y];
-
-                    if s*h in T then
-
-                        # Inside a 5A algebra
-                        
-                        pos := [0, 0, 0, 0, y];
-                        pos[1] := Position(T,s*h);
-                        pos[2] := Position(T,s*h^4);
-                        pos[3] := Position(T,s*h^2);
-                        pos[4] := Position(T,s*h^3);
-                        
-                        vals := [7/4096, 7/4096, -7/4096, -7/4096, 7/32];
-
-                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                        GramMatrix[j] := 0;
-                    fi;
-                    
-                elif x = y then 
-                
-                    h := ProductList[1][x];
-                    
-                    if Order(h) = 3 then    # (3,3) values
-                        
-                        AlgebraProducts[j] := NullMat(1,dim)[1];
-                        AlgebraProducts[j][x] := 1;
-
-                        GramMatrix[j] := 8/5;
-                        
-                    elif Order(h) = 4 then  # (4,4) values
-                    
-                        AlgebraProducts[j] := NullMat(1,dim)[1];
-                        AlgebraProducts[j][x] := 1;
-
-                        GramMatrix[j] := 2;
-                        
-                    elif Order(h) = 5 then  # (5,5) values
-                    
-                        k := 1;
-
-                        while k < t+1 do
-
-                            if T[k]*h in T then
-
-                                s:=T[k]; 
-                                
-                                pos := [k, 0, 0, 0, 0];
-                                pos[2] := Position(T,s*h); 
-                                pos[3] := Position(T,s*h^2); 
-                                pos[4] := Position(T,s*h^3); 
-                                pos[5] := Position(T,s*h^4);
-                                
-                                vals := [1,1,1,1,1]*(175/524288);
-
-                                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
-
-                                k:=t+1;
-                            else
-                                k:=k+1;
-                            fi;
-                        od;
-
-                        GramMatrix[j] := 875/2^(19);
-                    fi;
-                fi;
-            od;
-
-                                        ## STEP 4: MAIN LOOP ##
-            
-            maindimensions:=[];
-
-            for j in ProductList[10] do
-                for k in [1..3] do
-                    if Size(EigenVectors[j][k]) > 0 then
-                        EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
-                    fi;
-                od;
-                Add(maindimensions,Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])+1);
-            od;
-            
-            falsecount := [0,0];
-            
-            if false in GramMatrix then
-                falsecount[1] := Size(Positions(GramMatrix,false));
-            fi;
-            
-            if false in AlgebraProducts then
-                falsecount[2] := Size(Positions(AlgebraProducts,false));
-            fi;
-            
-            if ForAll(maindimensions, x -> x = dim) and falsecount = [0,0] then 
-                switchmain := 1;
+        for j in [1..Size(Unknowns3X)] do
+            k:=Unknowns3X[j];
+            if Binaries[i][j] = 1*Z(2) then
+                shape[k]:="3A";
             else
-                switchmain := 0;
-            fi;
+                shape[k]:="3C";
+            fi;            
+        od;
+        
+        Add(shapeslist,ShallowCopy(shape));
+        
+    od;
+    
+    result := rec(  group := G,
+                    involutions := T,
+                    orbitals := OrbitalsT,
+                    shapes := shapeslist);
+    
+    return result;
+
+    end );
+        
+InstallGlobalFunction(MajoranaRepresentation,
+
+function(input,index)
+
+    local   # Seress
+            ProductList, error, OrbitsT, 
+
+            # indexing and temporary variables
+            i, j, k, x, y, m,
+
+            # Step 0 - Set Up
+            Output, t, SizeOrbitals, OrbitalsT, G, T,
             
-            count := 1;
+            # Step 1 - Shape
+            Shape, 
+
+            # Step 3 - Products and evecs I
+            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
+
+            # Step 4 - More products and evecs
+            h, s, dim,
+
+            # Step 6 - More inner products
+            unknowns, mat, vec, 
             
-            while switchmain = 0 do 
-                
-                count := count + 1;
+            vals, pos, OutputList, record, 
 
-                                            ## STEP 5: INNER PRODUCTS M1 ##
-                                            
-                MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
-                
-                x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-                
-                if x = false then
-                    Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
-                                        , []
-                                        , OutputList);                                     
-                    break;
-                fi;
-                                                            
-                                            ## STEP 6: FUSION ##                                        
-                                        
-
-                # Use these eigenvectors and the fusion rules to find more
-
-                if ForAny(maindimensions, x -> x < dim - 1) then                
-                
-                    x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
-                    
-                    if not x[1] and ProductList[6] <> false then 
-                        Output[i] := MAJORANA_OutputError(x[2],
-                                        x[3],
-                                        OutputList);
-                        break;
-                    fi;
-                fi;
-                
-                if Output[i] <> [] then
-                    break;
-                fi;
-                                            ## STEP 7: PRODUCTS FROM EIGENVECTORS ##
-
-                # Check fusion and M1
-
-                error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
-
-                if Size(error) > 0 and ProductList[6] <> false then
-                    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
-                                    , error
-                                    , OutputList);
-                    break;
-                fi;
-
-                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
-
-                if Size(error) > 0 and ProductList[6] <> false then
-                    Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
-                                 , error
-                                 , OutputList);
-                    break;
-                fi;
-
-                # Use eigenvectors to find more products
-                
-                x := MAJORANA_EigenvectorsAlgebraUnknowns(EigenVectors,AlgebraProducts,ProductList);
-                
-                if not x[1] then 
-                    if x[2] = 1 then 
-                        Output[i] := MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
-                                , x[3]
-                                , OutputList);
-                        break;
-                    elif x[2] = 2 then 
-                        Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                                , x[3]
-                                , OutputList);
-                        break;
-                    fi;
-                fi;
-                
-                                    ## STEP 8: RESURRECTION PRINCIPLE I ##
-
-                # Check fusion and M1
-
-                error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
-
-                if Size(error) > 0 and ProductList[6] <> false then
-                    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
-                                    , error
-                                    , OutputList);
-                fi;
-
-                error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
-
-                if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
-                    Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
-                                    , error
-                                    , OutputList);
-                fi;
-                        
-                MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);               
-                
-                                            ## STEP 9: MORE EVECS II ##
-
-                # Check if we have full espace decomp, if not find it
-
-                x := MAJORANA_MoreEigenvectors(AlgebraProducts,EigenVectors,ProductList);
-                
-                if not x[1] then 
-                    Output[i] := MAJORANA_OutputError(x[2],[], OutputList);
-                    break;
-                fi;
-                
-                                    ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
-                    
-                                            
-                # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
-
-                x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, AlgebraProducts,ProductList);
-                
-                if not x[1] then 
-                    Output[i] := MAJORANA_OutputError( x[2]
-                                    , x[3]
-                                    , OutputList);
-                    break;
-                fi;
-                
-                                            
-                
-                newdimensions := [];
-                
-                for j in ProductList[10] do 
-                    Add(newdimensions, Size(EigenVectors[j][1]) 
-                                        + Size(EigenVectors[j][2]) 
-                                        + Size(EigenVectors[j][3]) + 1);
-                od;
-                
-                newfalsecount := [0,0];
-                
-                if false in GramMatrix then
-                    newfalsecount[1] := Size(Positions(GramMatrix,false));
-                fi;
-                
-                if false in AlgebraProducts then
-                    newfalsecount[2] := Size(Positions(AlgebraProducts,false));
-                fi;
-                
-                if ForAll(newdimensions, x -> x = dim) and newfalsecount = [0,0] then
-                    break;
-                elif newdimensions = maindimensions and newfalsecount = falsecount then 
-
-                    Output[i] := StructuralCopy(["Fail"
-                                , "Missing values"
-                                ,
-                                , OutputList[1]
-                                , OutputList[2]
-                                , OutputList[3]
-                                , OutputList[4]
-                                , OutputList[5]]);
-                    break;
-                else
-                    maindimensions := StructuralCopy(newdimensions);
-                    falsecount := StructuralCopy(newfalsecount);
-                fi;
-                
-                if count > 7 then 
-                    switchmain := 1;
-                fi;
-                
-            od;
             
-            if Output[i] <> [] then 
-                break;
-            fi;
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
+            
  
-                                        ## STEP 11: CHECK ALGEBRA ##
-                                    
-            # Check bilinear form is positive definite
+
+                                            ## STEP 0: SETUP ##
+    
+    G           := input.group;
+    T           := input.involutions;
+    Shape       := input.shapes[index];
+    OrbitalsT   := input.orbitals;  
+    
+    t := Size(T);  
+    
+    # Set up ProductList
+    
+    ProductList := [1..13]*0;
+    
+    ProductList[1] := StructuralCopy(T);
+
+    # Create coordinates list
+
+    for j in [1..Size(OrbitalsT)] do
+        if Shape[j]=['3','A'] then
+            for k in [1..Size(OrbitalsT[j])] do
+                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                Add(ProductList[1],Set([x,x^2]));
+            od;
+        fi;
+    od;
+    
+    for j in [1..Size(OrbitalsT)] do
+        if Shape[j]=['4','A'] then
+            for k in [1..Size(OrbitalsT[j])] do
+                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                Add(ProductList[1],Set([x,x^3]));
+            od;
+        fi;
+    od;
+    
+    for j in [1..Size(OrbitalsT)] do 
+        if Shape[j]=['5','A'] then
+            for k in [1..Size(OrbitalsT[j])] do
+                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                Add(ProductList[1],Set([x,x^2,x^3,x^4]));
+            od;
+        fi;
+    od;
+
+    ProductList[1] := DuplicateFreeList(ProductList[1]);
+    
+    dim := Size(ProductList[1]);
+
+    for j in [t+1..dim] do
+        ProductList[1][j] := ProductList[1][j][1];
+    od;
+        
+    ProductList[8]  := G;
+    ProductList[10] := [];
+    ProductList[12] := [1..t]*0;
+    ProductList[13] := [1..t]*0;
+    
+    # Construct orbits of G on T
+    
+    ProductList[11] := OrbitsDomain(G,T);
+    
+    for x in ProductList[11] do
+        Add(ProductList[10], Position( T, Representative(x)));
+    od;
+    
+    for i in [1..t] do
+        
+        j := 1;
+        
+        while j < Size(ProductList[11]) + 1 do 
+            if T[i] in ProductList[11][j] then 
             
-            GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
+                ProductList[13][i] := j;
+                
+                k := ProductList[10][j];
+                
+                ProductList[12][i] := RepresentativeAction(G,T[k],T[i]);
+                
+                j := Size(ProductList[11]) + 1;;
+                
+            else
+                j := j + 1;
+            fi;
+        od;
+    od;
+    
+    ProductList[6] := false;
 
-            if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-                Output[i] := MAJORANA_OutputError("Gram Matrix is not positive definite"
+    
+    ProductList[2]:=StructuralCopy(T);
+    ProductList[5]:=[1..t];
+
+    for j in [t+1..dim] do
+        
+        x := ProductList[1][j];
+    
+        if Order(x) = 3 then 
+    
+            Append(ProductList[5],[j,j]);
+            Append(ProductList[2],[x,x^2]);
+            
+        elif Order(x) = 4 then 
+
+            Append(ProductList[5],[j,j]);
+            Append(ProductList[2],[x,x^3]);
+            
+        elif Order(x) = 5 then 
+            Append(ProductList[5],[j,-j,-j,j]);
+            Append(ProductList[2],[x,x^2,x^3,x^4]); 
+        fi;
+    od;
+    
+    ProductList[2] := Flat(ProductList[2]);
+
+    x:=Orbits(G,Cartesian(ProductList[1],ProductList[1]),OnPairs);
+    
+    ProductList[9] := [];
+
+    for j in [1..Size(x)] do
+        Add(ProductList[9], ShallowCopy(x[j]));
+    od;
+
+    # This is a bit of a patch, ask Markus tomorrow
+
+    j:=1;
+
+    while j < Size(ProductList[9]) + 1 do
+        if Order(ProductList[9][j][1][1]) = 2 and Order(ProductList[9][j][1][2]) = 2 then
+            Remove(ProductList[9],j);
+        else
+            j := j+1;
+        fi;
+    od;
+
+    ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
+    
+    j := Size(OrbitalsT) + 1;
+    
+    while j < Size(ProductList[9]) + 1 do 
+        if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
+            k := j + 1;
+            
+            while k < Size(ProductList[9]) +1 do
+            
+                if  [ProductList[9][j][1][2],ProductList[9][j][1][1]]  in ProductList[9][k] then
+                
+                    if Order(ProductList[9][j][1][1]) < Order(ProductList[9][j][1][2]) then 
+                
+                        Append(ProductList[9][j],ProductList[9][k]);
+                        Remove(ProductList[9],k);
+                    
+                    else 
+                    
+                        Append(ProductList[9][k],ProductList[9][j]);
+                        Remove(ProductList[9],j);
+                        
+                        j := j - 1;
+                        
+                    fi;
+                    
+                    k := Size(ProductList[9]) + 1;
+                    
+                else
+                    
+                    k := k + 1;
+                fi;
+            od;
+                                
+        fi;
+        
+        j := j + 1;
+        
+    od;
+    
+    ProductList[14] := [];
+    
+    MAJORANA_MergeOrbitalsAxes(ProductList, OrbitalsT);
+
+    SizeOrbitals:=Size(ProductList[9]);
+
+    ProductList[7] := [];
+    ProductList[4] := NullMat(dim,dim);
+    ProductList[3] := NullMat(dim,dim);
+    
+    MAJORANA_PairRepresentatives(ProductList);
+    MAJORANA_PairOrbits(ProductList);
+    MAJORANA_PairConjElements(ProductList);
+    
+                                ## STEP 3: PRODUCTS AND EVECS I ##
+
+
+    # Set up algebra product and gram matrices
+    
+    OutputList := [0,0,0,0,0];
+
+    AlgebraProducts := NullMat(1,SizeOrbitals)[1];
+    GramMatrix := NullMat(1,SizeOrbitals)[1];
+
+    for j in [1..SizeOrbitals] do
+        AlgebraProducts[j]:=false;
+        GramMatrix[j]:=false;
+    od;
+
+    # Set up eigenvector matrix
+
+    EigenVectors := NullMat(t,3);
+
+    for j in [1..t] do
+        if j in ProductList[10] then
+            for k in [1..3] do
+                EigenVectors[j][k] := [];
+            od;
+        else
+            for k in [1..3] do
+                EigenVectors[j][k] := false;
+            od;
+        fi;
+    od;
+    
+    OutputList[1] := Shape;
+    OutputList[2] := GramMatrix;
+    OutputList[3] := AlgebraProducts;
+    OutputList[4] := EigenVectors;
+    OutputList[5] := ProductList;
+    
+    # Start filling in values and products!
+
+    # (2,2) products and eigenvectors from IPSS10
+
+    # Add eigenvectors from IPSS10
+
+    for j in ProductList[10] do
+        for k in [1..t] do
+
+            x := ProductList[3][j][k];
+
+            if Shape[x] = ['2','A'] then
+            
+                pos := [j, k, 0];
+                pos[3] := Position(T,T[j]*T[k]);
+                
+                vals := [-1/4, 1, 1];
+                
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+                
+                vals := [0, 1, -1];
+
+                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
+
+            elif Shape[x] = ['2','B'] then
+            
+                pos := [k];
+                vals := [1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+
+            elif Shape[x] = ['3','A'] then
+            
+                pos := [j, k, 0, 0];
+
+                pos[3] := Position(T, T[j]*T[k]*T[j]);
+                pos[4] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
+
+                vals := [-10/27, 32/27, 32/27, 1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+                
+                vals := [-8/45, -32/45, -32/45, 1];
+
+                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
+
+                vals := [0, 1, -1, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
+
+            elif Shape[x] = ['3','C'] then
+            
+                pos := [j, k, 0];
+
+                pos[3] := Position(T, T[j]*T[k]*T[j]);
+
+                vals := [-1/32, 1, 1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+
+                vals := [0, 1, -1];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
+
+            elif Shape[x] = ['4','A'] then
+                
+                pos := [j, k, 0, 0, 0];
+                pos[3] := Position(T, T[j]*T[k]*T[j]);
+                pos[4] := Position(T, T[k]*T[j]*T[k]);
+                pos[5] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
+
+                vals := [-1/2, 2, 2, 1, 1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+
+                vals := [-1/3, -2/3, -2/3, -1/3, 1]; 
+
+                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
+
+                vals := [0, 1, -1, 0, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
+
+            elif Shape[x] = ['4','B'] then
+                
+                pos := [j, k, 0, 0, 0];
+                pos[3] := Position(T, T[j]*T[k]*T[j]);
+                pos[4] := Position(T, T[k]*T[j]*T[k]);
+                pos[5] := Position(T, (T[j]*T[k])^2);
+                
+                vals := [-1/32, 1, 1, 1/8, -1/8];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
+
+                vals := [0, 1, -1, 0, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
+
+            elif Shape[x] = ['5','A'] then
+            
+                x := Position(ProductList[2],T[j]*T[k]);
+            
+                pos := [j, k, 0, 0, 0, 0];
+                pos[3] := Position(T, T[j]*T[k]*T[j]);
+                pos[4] := Position(T, T[k]*T[j]*T[k]);
+                pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
+                pos[6] := ProductList[5][x]; 
+
+                if pos[6] < 0 then
+                    pos[6] := -pos[6];
+                    sign := -1;
+                else
+                    sign := 1;
+                fi;
+
+                vals := [3/512, -15/128, -15/128, -1/128, -1/128, sign*1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
+
+                vals := [-3/512, 1/128, 1/128, 15/128, 15/128, sign*1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                
+                vals := [0, 1/128, 1/128, -1/128, -1/128, sign*1];
+
+                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
+
+                vals := [0, 1, -1, 0, 0, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+
+                vals := [0, 0, 0, 1, -1, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+
+            elif Shape[x] = ['6','A'] then
+
+                pos := [j, k, 0, 0, 0, 0, 0, 0];
+                pos[3] := Position(T, T[j]*T[k]*T[j]);
+                pos[4] := Position(T, T[k]*T[j]*T[k]);
+                pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
+                pos[6] := Position(T, T[k]*T[j]*T[k]*T[j]*T[k]);
+                pos[7] := Position(T, (T[j]*T[k])^3);
+                pos[8] := ProductList[5][Position(ProductList[2],(T[j]*T[k])^2)];
+
+                vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
+
+                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
+
+                vals := [-8/45, 0, 0, -32/45, -32/45, -32/45, 32/45, 1];
+
+                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
+                
+                vals := [0, 1, -1, 0, 0, 0, 0, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+
+                vals := [0, 0, 0, 1, -1, 0, 0, 0];
+
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                
+                # put in products of 2A and 3A axes
+                
+                x := ProductList[3][pos[7]][pos[8]];
+                
+                AlgebraProducts[x] := [1..dim]*0;
+                
+                GramMatrix[x] := 0;
+            fi;
+        od;
+        
+        # 1/32 eigenvectors from conjugation
+        
+        for k in [t+1..dim] do 
+        
+            h := ProductList[1][k];
+            
+            if not h^T[j] in [h,h^2] then 
+            
+                pos := [k, 0];
+                pos[2] := ProductList[5][Position(ProductList[2],h^T[j])];
+                
+                if pos[2] < 0 then
+                    pos[2] := -pos[2];
+                    sign := -1;
+                else
+                    sign := 1;
+                fi;
+                
+                vals := [1,-sign*1];
+                
+                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
+            fi;
+        od;
+    od;
+        
+    # Products from IPSS10
+
+    for j in [1..SizeOrbitals] do
+
+        x := ProductList[7][j][1];
+        y := ProductList[7][j][2];
+
+        if Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 2 then
+
+            if Shape[j] = ['1','A'] then
+
+                AlgebraProducts[j] := NullMat(1,dim)[1];
+
+                AlgebraProducts[j][x] := 1;
+
+                GramMatrix[j] := 1;
+
+            elif Shape[j] = ['2','A'] then
+
+                pos := [x, y, 0];
+                pos[3] := Position(T,T[x]*T[y]);
+
+                vals := [1/8, 1/8, -1/8];
+                
+                AlgebraProducts[j] := MAJORANA_MakeVector( pos, vals, dim);
+
+                GramMatrix[j] := 1/8;
+
+            elif Shape[j] = ['2','B'] then
+
+                AlgebraProducts[j] := NullMat(1,dim)[1];
+
+                GramMatrix[j] := 0;
+
+            elif Shape[j] = ['3','A'] then
+            
+                pos := [x, y, 0, 0];
+                pos[3] := Position(T,T[x]*T[y]*T[x]);
+                pos[4] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
+
+                vals := [1/16, 1/16, 1/32, -135/2048];
+                
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j] := 13/256;
+
+            elif Shape[j] = ['3','C'] then
+            
+                pos := [x, y, 0];
+                pos[3] := Position(T,T[x]*T[y]*T[x]);
+                
+                vals := [1/64, 1/64, -1/64];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j]:=1/64;
+
+            elif Shape[j] = ['4','A'] then
+
+                pos := [x, y, 0, 0, 0];
+                pos[3] := Position(T,T[x]*T[y]*T[x]);
+                pos[4] := Position(T,T[y]*T[x]*T[y]);
+                pos[5] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
+
+                vals := [3/64, 3/64, 1/64, 1/64, -3/64]; 
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j] := 1/32;
+
+            elif Shape[j] = ['4','B'] then
+            
+                pos := [x, y, 0, 0, 0];
+                pos[3] := Position(T,T[x]*T[y]*T[x]);
+                pos[4] := Position(T,T[y]*T[x]*T[y]);
+                pos[5] := Position(T,(T[x]*T[y])^2);
+
+                vals := [1/64, 1/64, -1/64, -1/64, 1/64];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j]:=1/64;
+
+            elif  Shape[j] = ['5','A'] then
+            
+                pos := [x, y, 0, 0, 0, 0];
+                pos[3] := Position(T,T[x]*T[y]*T[x]);
+                pos[4] := Position(T,T[y]*T[x]*T[y]);
+                pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
+                pos[6] := ProductList[5][Position(ProductList[2],T[x]*T[y])];
+
+                if pos[6] < 0 then
+                    pos[6] := -pos[6];
+                    sign := -1;
+                else
+                    sign := 1;
+                fi;
+                
+                vals := [3/128, 3/128, -1/128, -1/128, -1/128, sign];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j]:=3/128;
+
+            elif Shape[j] = ['6','A'] then
+            
+                pos := [x, y, 0, 0, 0, 0, 0, 0];
+                pos[3] := Position(T,T[x]*T[y]*T[x]);
+                pos[4] := Position(T,T[y]*T[x]*T[y]);
+                pos[5] := Position(T,T[x]*T[y]*T[x]*T[y]*T[x]);
+                pos[6] := Position(T,T[y]*T[x]*T[y]*T[x]*T[y]);
+                pos[7] := Position(T,(T[x]*T[y])^3);
+                pos[8] := ProductList[5][Position(ProductList[2],(T[x]*T[y])^2)];
+                
+                vals := [1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j]:=5/256;
+            fi;
+
+        # 2,3 products
+
+        elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 3 then
+            if ProductList[1][x]*ProductList[1][y] in T then 
+
+                s := ProductList[1][x]; h := ProductList[1][y];
+
+                # Inside a 3A algebra
+                
+                pos := [x, 0, 0, y];
+                pos[2] := Position(T,s*h);
+                pos[3] := Position(T,s*h*h);
+                
+                vals := [2/9, -1/9, -1/9, 5/32];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j]:=1/4;
+            fi;
+
+        # 2,4 products
+
+        elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 4 then
+
+            s := ProductList[1][x];
+            h := ProductList[1][y];
+
+            if s*h in T then
+
+                # Inside a 4A algebra
+                
+                pos := [x, 0, 0, 0, y];
+                pos[2] := Position(T,s*h);
+                pos[3] := Position(T,s*h*h*h);
+                pos[4] := Position(T,s*h*h);
+                
+                vals := [5/16, -1/8, -1/8, -1/16, 3/16];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j] := 3/8;
+            fi;
+
+        # (2,5) values
+
+        elif Order(ProductList[1][x]) = 2 and Order(ProductList[1][y]) = 5 then
+
+            s := ProductList[1][x];
+            h := ProductList[1][y];
+
+            if s*h in T then
+
+                # Inside a 5A algebra
+                
+                pos := [0, 0, 0, 0, y];
+                pos[1] := Position(T,s*h);
+                pos[2] := Position(T,s*h^4);
+                pos[3] := Position(T,s*h^2);
+                pos[4] := Position(T,s*h^3);
+                
+                vals := [7/4096, 7/4096, -7/4096, -7/4096, 7/32];
+
+                AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                GramMatrix[j] := 0;
+            fi;
+            
+        elif x = y then 
+        
+            h := ProductList[1][x];
+            
+            if Order(h) = 3 then    # (3,3) values
+                
+                AlgebraProducts[j] := NullMat(1,dim)[1];
+                AlgebraProducts[j][x] := 1;
+
+                GramMatrix[j] := 8/5;
+                
+            elif Order(h) = 4 then  # (4,4) values
+            
+                AlgebraProducts[j] := NullMat(1,dim)[1];
+                AlgebraProducts[j][x] := 1;
+
+                GramMatrix[j] := 2;
+                
+            elif Order(h) = 5 then  # (5,5) values
+            
+                k := 1;
+
+                while k < t+1 do
+
+                    if T[k]*h in T then
+
+                        s:=T[k]; 
+                        
+                        pos := [k, 0, 0, 0, 0];
+                        pos[2] := Position(T,s*h); 
+                        pos[3] := Position(T,s*h^2); 
+                        pos[4] := Position(T,s*h^3); 
+                        pos[5] := Position(T,s*h^4);
+                        
+                        vals := [1,1,1,1,1]*(175/524288);
+
+                        AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
+
+                        k:=t+1;
+                    else
+                        k:=k+1;
+                    fi;
+                od;
+
+                GramMatrix[j] := 875/2^(19);
+            fi;
+        fi;
+    od;
+
+                                ## STEP 4: MAIN LOOP ##
+    
+    maindimensions:=[];
+
+    for j in ProductList[10] do
+        for k in [1..3] do
+            if Size(EigenVectors[j][k]) > 0 then
+                EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
+            fi;
+        od;
+        Add(maindimensions,Size(EigenVectors[j][1])+Size(EigenVectors[j][2])+Size(EigenVectors[j][3])+1);
+    od;
+    
+    falsecount := [0,0];
+    
+    if false in GramMatrix then
+        falsecount[1] := Size(Positions(GramMatrix,false));
+    fi;
+    
+    if false in AlgebraProducts then
+        falsecount[2] := Size(Positions(AlgebraProducts,false));
+    fi;
+    
+    if ForAll(maindimensions, x -> x = dim) and falsecount = [0,0] then 
+        switchmain := 1;
+    else
+        switchmain := 0;
+    fi;
+    
+    count := 1;
+    
+    while switchmain = 0 do 
+        
+        count := count + 1;
+
+                                    ## STEP 5: INNER PRODUCTS M1 ##
+                                    
+        MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
+        
+        x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+        
+        if x = false then
+            Output[i] := MAJORANA_OutputError("The inner product is not positive definite"
                                 , []
-                                , OutputList);
-                            
+                                , OutputList);                                     
+        fi;
+                                                    
+                                    ## STEP 6: FUSION ##                                        
+                                
+
+        # Use these eigenvectors and the fusion rules to find more
+
+        if ForAny(maindimensions, x -> x < dim - 1) then                
+        
+            x := MAJORANA_FullFusion(Shape,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+            
+            if not x[1] and ProductList[6] <> false then 
+                Output[i] := MAJORANA_OutputError(x[2],
+                                x[3],
+                                OutputList);
             fi;
+        fi;
+                                    ## STEP 7: PRODUCTS FROM EIGENVECTORS ##
 
-            # Check that all triples obey axiom M1
+        # Check fusion and M1
 
-            error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
+        error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-            if Size(error)>0 then
-                Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
-                                    , error
-                                    , OutputList);
-            fi;
-
-            # Check that eigenvectors obey the fusion rules
-
-            error := MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-
-            if ForAny(error,x->Size(x)>0) then
-                Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
-                                    , error
-                                    , OutputList);
-                break;
-            fi;
-
-            # Check that the eigenspaces are orthogonal
-
-            error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-
-            if Size(error) > 0 then
-                Output[i] := MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
+        if Size(error) > 0 and ProductList[6] <> false then
+            Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
                             , error
                             , OutputList);
-                break;
+        fi;
+
+        error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
+
+        if Size(error) > 0 and ProductList[6] <> false then
+            Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+                         , error
+                         , OutputList);
+        fi;
+
+        # Use eigenvectors to find more products
+        
+        x := MAJORANA_EigenvectorsAlgebraUnknowns(EigenVectors,AlgebraProducts,ProductList);
+        
+        if not x[1] then 
+            if x[2] = 1 then 
+                Output[i] := MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
+                        , x[3]
+                        , OutputList);
+            elif x[2] = 2 then 
+                Output[i] := MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                        , x[3]
+                        , OutputList);
             fi;
+        fi;
+        
+                            ## STEP 8: RESURRECTION PRINCIPLE I ##
 
-            # Check M2
+        # Check fusion and M1
 
-            # error:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
+        error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
 
-            # if error = -1 then
-            #    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M2"
-            #                        , error
-            #                        , OutputList);
-            #   break;
-            #fi;
+        if Size(error) > 0 and ProductList[6] <> false then
+            Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+                            , error
+                            , OutputList);
+        fi;
 
-            Output[i] := StructuralCopy(["Success"
-                        ,
+        error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+
+        if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
+            Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+                            , error
+                            , OutputList);
+        fi;
+                
+        x := MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);
+        
+        if not x[1] and ProductList[6] <> false then 
+            Output[i] := MAJORANA_OutputError(x[2]
+                            , x[3]
+                            , OutputList);
+        fi;                
+        
+                                    ## STEP 9: MORE EVECS II ##
+
+        # Check if we have full espace decomp, if not find it
+
+        x := MAJORANA_MoreEigenvectors(AlgebraProducts,EigenVectors,ProductList);
+        
+        if not x[1] then 
+            Output[i] := MAJORANA_OutputError(x[2],[], OutputList);
+        fi;
+        
+                            ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
+            
+                                    
+        # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
+
+        x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, AlgebraProducts,ProductList);
+        
+        if not x[1] then 
+            Output[i] := MAJORANA_OutputError( x[2]
+                            , x[3]
+                            , OutputList);
+        fi;
+        
+                                    
+        
+        newdimensions := [];
+        
+        for j in ProductList[10] do 
+            Add(newdimensions, Size(EigenVectors[j][1]) 
+                                + Size(EigenVectors[j][2]) 
+                                + Size(EigenVectors[j][3]) + 1);
+        od;
+        
+        newfalsecount := [0,0];
+        
+        if false in GramMatrix then
+            newfalsecount[1] := Size(Positions(GramMatrix,false));
+        fi;
+        
+        if false in AlgebraProducts then
+            newfalsecount[2] := Size(Positions(AlgebraProducts,false));
+        fi;
+        
+        if ForAll(newdimensions, x -> x = dim) and newfalsecount = [0,0] then
+            break;
+        elif newdimensions = maindimensions and newfalsecount = falsecount then 
+
+            Output[i] := StructuralCopy(["Fail"
+                        , "Missing values"
                         ,
                         , OutputList[1]
                         , OutputList[2]
                         , OutputList[3]
                         , OutputList[4]
                         , OutputList[5]]);
-            master:=0;
-        od;
+            break;
+        else
+            maindimensions := StructuralCopy(newdimensions);
+            falsecount := StructuralCopy(newfalsecount);
+        fi;
         
-    od;    
+        if count > 7 then 
+            switchmain := 1;
+        fi;
+        
+    od;
+
+                                ## STEP 11: CHECK ALGEBRA ##
+                            
+    # Check bilinear form is positive definite
+    
+    GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
+
+    if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
+        Output[i] := MAJORANA_OutputError("Gram Matrix is not positive definite"
+                        , []
+                        , OutputList);
+                    
+    fi;
+
+    # Check that all triples obey axiom M1
+
+    error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
+
+    if Size(error)>0 then
+        Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M1"
+                            , error
+                            , OutputList);
+    fi;
+
+    # Check that eigenvectors obey the fusion rules
+
+    error := MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+
+    if ForAny(error,x->Size(x)>0) then
+        Output[i] := MAJORANA_OutputError("Algebra does not obey fusion rules"
+                            , error
+                            , OutputList);
+    fi;
+
+    # Check that the eigenspaces are orthogonal
+
+    error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+
+    if Size(error) > 0 then
+        Output[i] := MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
+                    , error
+                    , OutputList);
+    fi;
+
+    # Check M2
+
+    # error:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
+
+    # if error = -1 then
+    #    Output[i] := MAJORANA_OutputError("Algebra does not obey axiom M2"
+    #                        , error
+    #                        , OutputList);
+    #fi;
+
+    return StructuralCopy(["Success"
+                ,
+                ,
+                , OutputList[1]
+                , OutputList[2]
+                , OutputList[3]
+                , OutputList[4]
+                , OutputList[5]]);
 
     return Output;
 
