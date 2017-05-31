@@ -231,14 +231,17 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
         vec := [1..dim]*0;
         
         for i in [1..dim] do 
+        
+            if v[i] <> 0 then 
             
-            pos_1 := Position(ProductList[2],ProductList[1][i]^g);
-            pos_2 := ProductList[5][pos_1];
-            
-            if pos_2 > 0 then 
-                vec[pos_2] := v[i];
-            else
-                vec[-pos_2] := -v[i];
+                pos_1 := Position(ProductList[2],ProductList[1][i]^g);
+                pos_2 := ProductList[5][pos_1];
+                
+                if pos_2 > 0 then 
+                    vec[pos_2] := v[i];
+                else
+                    vec[-pos_2] := -v[i];
+                fi;
             fi;
         od;
         
