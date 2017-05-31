@@ -1600,7 +1600,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     
     end );
     
-InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
+InstallGlobalFunction( MAJORANA_SetupOrbitals,
 
     function(ProductList, OrbitalsT)
     
@@ -1611,6 +1611,58 @@ InstallGlobalFunction( MAJORANA_MergeOrbitalsAxes,
             j,      # loop over orders of first axis
             k,      # loop over orders of second axis
             l;      # loop over orbitals
+
+    # This is a bit of a patch, ask Markus tomorrow
+
+    j:=1;
+
+    while j < Size(ProductList[9]) + 1 do
+        if Order(ProductList[9][j][1][1]) = 2 and Order(ProductList[9][j][1][2]) = 2 then
+            Remove(ProductList[9],j);
+        else
+            j := j+1;
+        fi;
+    od;
+
+    ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
+    
+    j := Size(OrbitalsT) + 1;
+    
+    while j < Size(ProductList[9]) + 1 do 
+        if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
+            k := j + 1;
+            
+            while k < Size(ProductList[9]) +1 do
+            
+                if  [ProductList[9][j][1][2],ProductList[9][j][1][1]]  in ProductList[9][k] then
+                
+                    if Order(ProductList[9][j][1][1]) < Order(ProductList[9][j][1][2]) then 
+                
+                        Append(ProductList[9][j],ProductList[9][k]);
+                        Remove(ProductList[9],k);
+                    
+                    else 
+                    
+                        Append(ProductList[9][k],ProductList[9][j]);
+                        Remove(ProductList[9],j);
+                        
+                        j := j - 1;
+                        
+                    fi;
+                    
+                    k := Size(ProductList[9]) + 1;
+                    
+                else
+                    
+                    k := k + 1;
+                fi;
+            od;
+                                
+        fi;
+        
+        j := j + 1;
+        
+    od;
     
     i := Size(OrbitalsT) + 1;
             
@@ -2020,12 +2072,19 @@ function(input,index)
     for j in [t+1..dim] do
         ProductList[1][j] := ProductList[1][j][1];
     od;
-        
+    
+    ProductList[2]:=StructuralCopy(T);
+    ProductList[3] := NullMat(dim,dim);
+    ProductList[4] := NullMat(dim,dim);
+    ProductList[5]:=[1..t];
+    ProductList[6] := false;
+    ProductList[7] := [];    
     ProductList[8]  := G;
     ProductList[10] := [];
     ProductList[12] := [1..t]*0;
     ProductList[13] := [1..t]*0;
-    
+    ProductList[14] := [];
+
     # Construct orbits of G on T
     
     ProductList[11] := OrbitsDomain(G,T);
@@ -2054,12 +2113,6 @@ function(input,index)
             fi;
         od;
     od;
-    
-    ProductList[6] := false;
-
-    
-    ProductList[2]:=StructuralCopy(T);
-    ProductList[5]:=[1..t];
 
     for j in [t+1..dim] do
         
@@ -2082,76 +2135,14 @@ function(input,index)
     od;
     
     ProductList[2] := Flat(ProductList[2]);
-
-    x:=Orbits(G,Cartesian(ProductList[1],ProductList[1]),OnPairs);
     
-    ProductList[9] := [];
+    x := Cartesian(ProductList[1],ProductList[1]);
 
-    for j in [1..Size(x)] do
-        Add(ProductList[9], ShallowCopy(x[j]));
-    od;
-
-    # This is a bit of a patch, ask Markus tomorrow
-
-    j:=1;
-
-    while j < Size(ProductList[9]) + 1 do
-        if Order(ProductList[9][j][1][1]) = 2 and Order(ProductList[9][j][1][2]) = 2 then
-            Remove(ProductList[9],j);
-        else
-            j := j+1;
-        fi;
-    od;
-
-    ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
+    ProductList[9] := List(Orbits(G,x,OnPairs),ShallowCopy);
     
-    j := Size(OrbitalsT) + 1;
-    
-    while j < Size(ProductList[9]) + 1 do 
-        if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
-            k := j + 1;
-            
-            while k < Size(ProductList[9]) +1 do
-            
-                if  [ProductList[9][j][1][2],ProductList[9][j][1][1]]  in ProductList[9][k] then
-                
-                    if Order(ProductList[9][j][1][1]) < Order(ProductList[9][j][1][2]) then 
-                
-                        Append(ProductList[9][j],ProductList[9][k]);
-                        Remove(ProductList[9],k);
-                    
-                    else 
-                    
-                        Append(ProductList[9][k],ProductList[9][j]);
-                        Remove(ProductList[9],j);
-                        
-                        j := j - 1;
-                        
-                    fi;
-                    
-                    k := Size(ProductList[9]) + 1;
-                    
-                else
-                    
-                    k := k + 1;
-                fi;
-            od;
-                                
-        fi;
-        
-        j := j + 1;
-        
-    od;
-    
-    ProductList[14] := [];
-    
-    MAJORANA_MergeOrbitalsAxes(ProductList, OrbitalsT);
+    MAJORANA_SetupOrbitals(ProductList, OrbitalsT);
 
-    SizeOrbitals:=Size(ProductList[9]);
-
-    ProductList[7] := [];
-    ProductList[4] := NullMat(dim,dim);
-    ProductList[3] := NullMat(dim,dim);
+    SizeOrbitals := Size(ProductList[9]);
     
     MAJORANA_PairRepresentatives(ProductList);
     MAJORANA_PairOrbits(ProductList);

@@ -70,7 +70,7 @@ DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
-DeclareGlobalFunction( "MAJORANA_MergeOrbitalsAxes" );
+DeclareGlobalFunction( "MAJORANA_SetupOrbitals" );
 
 DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
 
