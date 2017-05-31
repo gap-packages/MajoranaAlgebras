@@ -6,6 +6,8 @@
 
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gd");
 
+ReadPackage( "MajoranaAlgebras", "gap/Test.gd");
+
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
 
 

@@ -7,6 +7,8 @@
 
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gi");
 
+ReadPackage( "MajoranaAlgebras", "gap/Test.gi");
+
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Examples.gi");
