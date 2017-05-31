@@ -582,14 +582,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
 
     if mat <> [] then 
-            
-        x := MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
-        
-        if not x[1] then 
-            if Size(x[2]) <> 2 then 
-                return [false, "Inconsistent system of unknown inner products", x];
-            fi;
-        fi;
+        MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
     fi;
     
     if not false in GramMatrix then 
@@ -653,14 +646,8 @@ function(EigenVectors, AlgebraProducts, ProductList)
                     fi;
                 od;
             od;
-        
-            if mat <> [] then 
-                x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
-                
-                if not x[1] and ProductList[6] <> false then 
-                    return [false,2,x];
-                fi;
-            fi;
+
+            MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
         fi;
     od;
             
@@ -1282,20 +1269,9 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
         fi;
     fi;
     
-    if mat <> [] then 
-    
-        y := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
-        
-        if not y[1] then 
-            return [false, "Inconsistent system of unknown algebra products step 8",y];
-        else
-            return [true];
-        fi;
-    else
-        return [true];
-    fi;
-    
-    end);
+    MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+
+    end );
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
@@ -1573,7 +1549,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
-        if Size(Solution) = 2 then
+        if Solution <> false then
             for i in [1..Size(UnknownAlgebraProducts)] do
                 if not i in Solution[2] then 
                 
@@ -1589,11 +1565,6 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     fi;
                 fi;
             od;
-            
-            return [true];
-            
-        else
-            return [false, Solution];
         fi;
     fi;
     
@@ -1609,7 +1580,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     
     Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
-    if Size(Solution) = 2 then                    
+    if Solution <> false then                    
         
         for i in [1..Size(Solution[1])] do
             if not i in Solution[2] then
@@ -1625,9 +1596,6 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
         fi;
         
         return [true];
-    else
-    
-        return [false, Solution];
     fi;
     
     end );
@@ -2763,14 +2731,7 @@ function(G,T)
                                     , OutputList);
                 fi;
                         
-                x := MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);
-                
-                if not x[1] and ProductList[6] <> false then 
-                    Output[i] := MAJORANA_OutputError(x[2]
-                                    , x[3]
-                                    , OutputList);
-                    break;
-                fi;                
+                MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);               
                 
                                             ## STEP 9: MORE EVECS II ##
 
