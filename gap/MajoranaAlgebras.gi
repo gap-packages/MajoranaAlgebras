@@ -43,6 +43,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
             x,                  # new eigenvector
             y,                  # inner product of u and x
             z,                  # algebra product of u and x
+            w,                  # further product in 1/32, 1/32 case
             NewEigenVectors,    # list of new eigenvectors
             k,                  # run through ev_a-eigenvectors
             l,                  # run through ev_b-eigenvectors
@@ -89,7 +90,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
             od;
         od;
     # the 1/32, 1/32 case is even more special    
-    elif (a=3) and (b=3) and 1 = 0 then
+    elif (a=3) and (b=3) then
         for k in [1..Size(ev_a)] do
             for l in [1..Size(ev_b)] do
                 
@@ -101,17 +102,17 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                     
                     if y <> false then
                         
-                        x := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
+                        z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList );
                         
-                        if x <> false then 
-                            x := x - y*u;
+                        if z <> false then 
+                            z := z - y*u;
                             
-                            z := MAJORANA_AlgebraProduct( u, x, AlgebraProducts, ProductList);
+                            w := MAJORANA_AlgebraProduct( u, z, AlgebraProducts, ProductList);
                         
-                            if (z <> false) and ( z <> x/4) then
+                            if (w <> false) and ( w <> z/4) then
                                 Add(FusionError,[j,k,l]);
                             else
-                                Add(NewEigenVectors,x);
+                                Add(NewEigenVectors,z);
                             fi;
                         fi;
                     fi;

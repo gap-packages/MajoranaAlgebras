@@ -40,6 +40,16 @@ BindGlobal("A6",function()
     end
     );
     
+BindGlobal("A7",function()
+    local G, T,input;
+    G:=AlternatingGroup(7);
+    T:=Filtered(AsList(G),x->Order(x) = 2);
+    input := ShapesOfMajoranaRepresentation(G,T);
+    return(input);
+    end
+    );
+    
+    
 BindGlobal("S4",function()
     local G, T;
     G:=SymmetricGroup(4);
