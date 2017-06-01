@@ -2823,59 +2823,6 @@ function(input,index)
         
     od;
 
-                                ## STEP 11: CHECK ALGEBRA ##
-                            
-    # Check bilinear form is positive definite
-    
-    GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
-
-    if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-        return MAJORANA_OutputError("Gram Matrix is not positive definite"
-                        , []
-                        , OutputList);
-                    
-    fi;
-
-    # Check that all triples obey axiom M1
-
-    error:=MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
-
-    if Size(error)>0 then
-        return MAJORANA_OutputError("Algebra does not obey axiom M1"
-                            , error
-                            , OutputList);
-    fi;
-
-    # Check that eigenvectors obey the fusion rules
-
-    error := MAJORANA_TestFusion(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-
-    if ForAny(error,x->Size(x)>0) then
-        return MAJORANA_OutputError("Algebra does not obey fusion rules"
-                            , error
-                            , OutputList);
-    fi;
-
-    # Check that the eigenspaces are orthogonal
-
-    error := MAJORANA_TestOrthogonality(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-
-    if Size(error) > 0 then
-        return MAJORANA_OutputError("Eigenspaces are not orthogonal with respect to the inner product"
-                    , error
-                    , OutputList);
-    fi;
-
-    # Check M2
-
-    # error:=MAJORANA_AxiomM2(GramMatrix,AlgebraProducts,ProductList);
-
-    # if error = -1 then
-    #    return MAJORANA_OutputError("Algebra does not obey axiom M2"
-    #                        , error
-    #                        , OutputList);
-    #fi;
-
     x := StructuralCopy(["Success"
                 ,
                 ,
@@ -2888,3 +2835,54 @@ function(input,index)
     return x;
 
 end );
+
+InstallGlobalFunction(MajoranaAlgebraTest,
+    
+    function(res)
+    
+    local   error,
+            GramMatrixFull;
+                            
+    # Check bilinear form is positive definite
+    
+    GramMatrixFull := MAJORANA_FillGramMatrix(res[5], res[8]);
+
+    if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
+        return "Gram Matrix is not positive definite";
+    fi;
+
+    # Check that all triples obey axiom M1
+
+    error := MAJORANA_AxiomM1(res[5],res[6],res[8]);
+
+    if Size(error)>0 then
+        return ["Algebra does not obey axiom M1", error];
+    fi;
+
+    # Check that eigenvectors obey the fusion rules
+
+    error := MAJORANA_TestFusion(res[5],res[6],res[7],res[8]);
+
+    if ForAny(error,x->Size(x)>0) then
+        return ["Algebra does not obey fusion rules", error];
+    fi;
+
+    # Check that the eigenspaces are orthogonal
+
+    error := MAJORANA_TestOrthogonality(res[5],res[6],res[7],res[8]);
+
+    if Size(error) > 0 then
+        return ["Eigenspaces are not orthogonal with respect to the inner product", error];
+    fi;
+
+    # Check M2
+
+    # error := MAJORANA_AxiomM2(res[5],res[6],res[8]);
+
+    # if error = -1 then
+    #    return "Algebra does not obey axiom M2";
+    #fi;
+    
+    return true;
+    
+    end );
