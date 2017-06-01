@@ -33,7 +33,7 @@ BindGlobal("A5",function()
     
 BindGlobal("A6",function()
     local G, T,input;
-    G:=AlternatingGroup(5);
+    G:=AlternatingGroup(6);
     T:=Filtered(AsList(G),x->Order(x) = 2);
     input := ShapesOfMajoranaRepresentation(G,T);
     return(input);

@@ -66,7 +66,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
     ev_b := EigenVectors[j][b];
 
     # the 1/4,1/4 case is special
-    if (a=2) and (b=2) and 1 = 0 then 
+    if (a=2) and (b=2) then 
         for k in [1..Size(ev_a)] do
             for l in [1..Size(ev_b)] do
 
@@ -271,7 +271,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         dim:=Size(u);
         vec:=[1..dim]*0;
 
-        if ForAll(u,x-> x= 0 ) or ForAll(v,x->x=0) then
+        if u = vec or v = vec then
             return u*0;
         fi;
 
@@ -646,9 +646,11 @@ function(v,NullSp)
     dim := Size(v);
 
 
-    if NullSp <> [] and NullSp <> false then 
+    if NullSp <> false then 
         for i in [1..Size(NullSp)] do
+        
             j := Position(Reversed(NullSp[i]),1);
+            
             if v[dim - j + 1] <> 0 then 
                 v := v - v[dim - j + 1]*NullSp[i];
             fi;
@@ -1085,11 +1087,18 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 # find a suitable alpha   
                    
                 for m in [1..dim] do
-                    for k in [1..dim] do 
-                        if gamma[k] <> 0 and [Minimum([m,k]),Maximum([m,k])] in UnknownAlgebraProducts then 
-                            Add(bad,m);
-                        fi;
-                    od;
+                    if gamma[m] <> 0 then 
+                        for k in [1 .. m - 1] do 
+                            if [k,m] in UnknownAlgebraProducts then 
+                                Add(bad,k);
+                            fi;
+                        od;
+                        for k in [m + 1 .. dim] do 
+                            if [m,k] in UnknownAlgebraProducts then 
+                                Add(bad,k);
+                            fi;
+                        od;
+                    fi;
                 od;
                 
                 bad := DuplicateFreeList(bad);
@@ -1218,9 +1227,10 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             
             MAJORANA_Append(x,mat,vec);
         fi;
-    fi;
-    
+        
     MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+    
+    fi;
 
     end );
     
@@ -2850,7 +2860,7 @@ function(input,index)
     #                        , OutputList);
     #fi;
 
-    return StructuralCopy(["Success"
+    x := StructuralCopy(["Success"
                 ,
                 ,
                 , OutputList[1]
@@ -2858,5 +2868,7 @@ function(input,index)
                 , OutputList[3]
                 , OutputList[4]
                 , OutputList[5]]);
+    
+    return x;
 
 end );
