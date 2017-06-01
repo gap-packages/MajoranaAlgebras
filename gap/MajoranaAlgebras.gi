@@ -22,7 +22,11 @@ function(AlgebraProducts, ProductList)
     for i in [1..dim] do
         for j in [i..dim] do 
             
-            k := AbsInt(ProductList[3][i][j]);
+            k := ProductList[3][i][j];
+        
+            if k < 0 then 
+                k := -k;
+            fi;
         
             if AlgebraProducts[k] = false then 
                 Add(unknowns,[i,j]);
@@ -286,10 +290,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         if k > 0 then 
                             sign := 1;
                         else
-                            sign ::= -1;
+                            sign := -1;
+                            k := -k;
                         fi;
-                        
-                        x := AlgebraProducts[AbsInt(k)];
+
+                        x := AlgebraProducts[k];
                         
                         if x <> false then
                             
@@ -338,10 +343,11 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                             sign := 1;
                         else
                             sign := -1;
+                            k := -k;
                         fi;
                         
-                        if GramMatrix[AbsInt(k)] <> false then
-                            sum := sum + sign*u[i]*v[j]*GramMatrix[AbsInt(k)];
+                        if GramMatrix[k] <> false then
+                            sum := sum + sign*u[i]*v[j]*GramMatrix[k];
                         else
                             # cannot calculate product
                             return false;
@@ -419,9 +425,8 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
                         sign := 1;
                     else
                         sign := -1;
+                        m := -m;
                     fi;
-                    
-                    m := AbsInt(m);
 
                     if GramMatrix[m] <> false then
                         sum := sum - sign*u[i]*v[j]*GramMatrix[m];
@@ -807,11 +812,23 @@ function(GramMatrix,AlgebraProducts,ProductList)
                     
                     if k*l > 0 then 
                         sign := 1;
+                        
+                        if k < 0 then 
+                            k := -k;
+                            l := -l;
+                        fi;
+                        
                     else
                         sign := -1;
+                        
+                        if k < 0 then 
+                            k := -k;
+                        else
+                            l := -l;
+                        fi;
                     fi;
                     
-                    res := MAJORANA_UnknownsAxiomM1(AbsInt(k),AbsInt(l),GramMatrix,AlgebraProducts,ProductList);
+                    res := MAJORANA_UnknownsAxiomM1(k,l,GramMatrix,AlgebraProducts,ProductList);
                     
                     if res = false then 
                         j := j + 1;
@@ -1007,12 +1024,17 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
                 
                 if x[1]*x[2] < 0 then 
                     sign := -1;
+                    if x[1] < 0 then 
+                        x[1] := -x[1];
+                    else
+                        x[2] := -x[2];
+                    fi;
                 else
                     sign := 1;
+                    if x[1] < 0 then 
+                        x := -x;
+                    fi;
                 fi;
-                
-                x[1] := AbsInt(x[1]);
-                x[2] := AbsInt(x[2]);
                 
                 Sort(x);
                 
@@ -1315,7 +1337,11 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                     od;
                 od;
                 
-                k := AbsInt(ProductList[3][i][j]);
+                k := ProductList[3][i][j];
+            
+                if k < 0 then 
+                    k := -k;
+                fi; 
             
                 y := ProductList[9][k][1];
                 
@@ -1329,8 +1355,16 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                     
                         for z in list do
                             
-                            pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
-                            pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+                            pos_1 := ProductList[5][Position(ProductList[2],z[1])];
+                            pos_2 := ProductList[5][Position(ProductList[2],z[2])];
+                            
+                            if pos_1 < 0 then 
+                                pos_1 := -pos_1;
+                            fi;
+                            
+                            if pos_2 < 0 then 
+                                pos_2 := -pos_2;
+                            fi;
                             
                             ProductList[4][pos_1][pos_2] := g;
                             ProductList[4][pos_2][pos_1] := g;
@@ -1346,8 +1380,16 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                         
                             for z in list do
                             
-                                pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
-                                pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+                                pos_1 := ProductList[5][Position(ProductList[2],z[1])];
+                                pos_2 := ProductList[5][Position(ProductList[2],z[2])];
+                                
+                                if pos_1 < 0 then 
+                                    pos_1 := -pos_1;
+                                fi;
+                                
+                                if pos_2 < 0 then 
+                                    pos_2 := -pos_2;
+                                fi;
                                 
                                 ProductList[4][pos_1][pos_2] := g;
                                 ProductList[4][pos_2][pos_1] := g;
@@ -1450,8 +1492,17 @@ InstallGlobalFunction(MAJORANA_PairRepresentatives,
         
         for z in list do
                             
-            pos_1 := AbsInt(ProductList[5][Position(ProductList[2],z[1])]);
-            pos_2 := AbsInt(ProductList[5][Position(ProductList[2],z[2])]);
+            pos_1 := ProductList[5][Position(ProductList[2],z[1])];
+            pos_2 := ProductList[5][Position(ProductList[2],z[2])];
+            
+            if pos_1 < 0 then 
+                pos_1 := -pos_1;
+            fi;
+            
+            if pos_2 < 0 then 
+                pos_2 := -pos_2;
+            fi;
+                            
             
             ProductList[4][pos_1][pos_2] := ();
             ProductList[4][pos_2][pos_1] := ();
