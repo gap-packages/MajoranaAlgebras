@@ -16,6 +16,8 @@ DeclareGlobalFunction( "MajoranaAlgebraTest" );
 
 DeclareGlobalFunction( "MAJORANA_Append" );
 
+DeclareGlobalFunction( "MAJORANA_FindVectorPermutations" );
+
 DeclareGlobalFunction( "MAJORANA_ConjugateVector" );
 
 DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );

@@ -220,6 +220,61 @@ InstallGlobalFunction(MAJORANA_Append,
     
     end);
     
+InstallGlobalFunction( MAJORANA_FindVectorPermutations,
+    
+    function(ProductList)
+    
+    local   dim,        # size of coordinates
+            len,        # number of unique group elements (before adding inverse)
+            i,          # loop over group elements
+            g,          # group element
+            j,          # loop over coordinates
+            list,       # list to build permutation
+            pos_1,      # position of conjugated element in longcoordinates
+            pos_2;      # corresponding position in coordinates
+    
+    dim := Size(ProductList[1]);
+    
+    ProductList[15] := Concatenation(ProductList[4]);
+    
+    Append(ProductList[15],ProductList[12]);
+    
+    ProductList[15] := DuplicateFreeList(ProductList[15]);
+    
+    len := Size(ProductList[15]);
+    
+    ProductList[16] := [1..len]*0;
+    
+    for i in [1..len] do
+    
+        g := ProductList[15][i];
+    
+        list := [1..dim]*0;
+        
+        for j in [1..dim] do 
+        
+            pos_1 := Position(ProductList[2],ProductList[1][j]^g);
+            pos_2 := ProductList[5][pos_1];
+            
+            if pos_2 > 0 then 
+                list[j] := pos_2;
+            else
+                list[j] := -pos_2;
+            fi;
+        od;
+        
+        ProductList[16][i] := PermList(list);
+        
+        if not Inverse(g) in ProductList[15] then 
+            Add(ProductList[15],Inverse(g));
+            Add(ProductList[16],Inverse(ProductList[16][i]));
+        fi;
+        
+    od;
+    
+    end);
+ 
+    
 InstallGlobalFunction( MAJORANA_ConjugateVector,
 
     function(v,g,ProductList)
@@ -227,10 +282,17 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
     local   i,              # loop over vector
             dim,            # length of vector
             vec,            # output vector
+            pos,
+            p,
             pos_1,          # position of conjugated element in longcoords
             pos_2;          # position of conjugated element in coords
     
     if g <> () then 
+    
+        pos := Position(ProductList[15],g);
+        
+        p := ProductList[16][pos];
+        
         dim := Size(v);
         
         vec := [1..dim]*0;
@@ -239,14 +301,8 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
         
             if v[i] <> 0 then 
             
-                pos_1 := Position(ProductList[2],ProductList[1][i]^g);
-                pos_2 := ProductList[5][pos_1];
+                v[i^p] := v[i];
                 
-                if pos_2 > 0 then 
-                    vec[pos_2] := v[i];
-                else
-                    vec[-pos_2] := -v[i];
-                fi;
             fi;
         od;
         
@@ -2186,6 +2242,7 @@ function(input,index)
     ProductList[12] := [1..t]*0;
     ProductList[13] := [1..t]*0;
     ProductList[14] := [];
+    ProductList[15] := [];
 
     MAJORANA_SetupOrbits(T, ProductList);
 
@@ -2198,6 +2255,8 @@ function(input,index)
     MAJORANA_PairOrbits(ProductList);
 
     MAJORANA_PairConjElements(ProductList);
+    
+    MAJORANA_FindVectorPermutations(ProductList);
     
                                 ## STEP 3: PRODUCTS AND EVECS I ##
                                 
