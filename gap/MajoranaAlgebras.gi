@@ -2102,7 +2102,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 function(input,index)
 
     local   # Seress
-            ProductList, error,  
+            ProductList,  
 
             # indexing and temporary variables
             i, j, k, x, y, 
@@ -2121,7 +2121,7 @@ function(input,index)
             
             vals, pos, OutputList, record, 
 
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain, count;     
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain;     
 
                                             ## STEP 0: SETUP ##
     
@@ -2701,11 +2701,7 @@ function(input,index)
         switchmain := 0;
     fi;
     
-    count := 1;
-    
     while switchmain = 0 do 
-        
-        count := count + 1;
 
                                     ## STEP 5: INNER PRODUCTS M1 ##
                                     
@@ -2816,11 +2812,6 @@ function(input,index)
             maindimensions := StructuralCopy(newdimensions);
             falsecount := StructuralCopy(newfalsecount);
         fi;
-        
-        if count > 7 then 
-            switchmain := 1;
-        fi;
-        
     od;
 
     x := StructuralCopy(["Success"
