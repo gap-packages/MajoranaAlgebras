@@ -2736,24 +2736,6 @@ function(input,index)
         fi;
                                     ## STEP 7: PRODUCTS FROM EIGENVECTORS ##
 
-        # Check fusion and M1
-
-        error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
-
-        if Size(error) > 0 and ProductList[6] <> false then
-            return MAJORANA_OutputError("Algebra does not obey axiom M1"
-                            , error
-                            , OutputList);
-        fi;
-
-        error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts, EigenVectors,ProductList);
-
-        if Size(error) > 0 and ProductList[6] <> false then
-            return MAJORANA_OutputError("Algebra does not obey fusion rules"
-                         , error
-                         , OutputList);
-        fi;
-
         # Use eigenvectors to find more products
         
         x := MAJORANA_EigenvectorsAlgebraUnknowns(EigenVectors,AlgebraProducts,ProductList);
@@ -2771,24 +2753,6 @@ function(input,index)
         fi;
         
                             ## STEP 8: RESURRECTION PRINCIPLE I ##
-
-        # Check fusion and M1
-
-        error := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);
-
-        if Size(error) > 0 and ProductList[6] <> false then
-            return MAJORANA_OutputError("Algebra does not obey axiom M1"
-                            , error
-                            , OutputList);
-        fi;
-
-        error := MAJORANA_TestFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
-
-        if ForAny(error, x->Size(x) > 0) and ProductList[6] <> false then
-            return MAJORANA_OutputError("Algebra does not obey fusion rules"
-                            , error
-                            , OutputList);
-        fi;
                 
         MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);
         
