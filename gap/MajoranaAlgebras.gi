@@ -230,49 +230,53 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
             g,          # group element
             j,          # loop over coordinates
             list,       # list to build permutation
+            p,          # the permutation
             signlist,   # corrects signs of 5A axes
             pos_1,      # position of conjugated element in longcoordinates
             pos_2;      # corresponding position in coordinates
     
     dim := Size(ProductList[1]);
     
-    ProductList[15] := Concatenation(ProductList[4]);
+    ProductList[15] := AsSet(ProductList[8]);
     
-    Append(ProductList[15],ProductList[12]);
-    
-    ProductList[15] := DuplicateFreeList(ProductList[15]);
+    RemoveSet(ProductList[15],());
     
     len := Size(ProductList[15]);
     
-    ProductList[16] := [1..len]*0; 
-    
+    ProductList[16] := [1..len]*0;
+
     for i in [1..len] do
     
-        g := ProductList[15][i];
+        if ProductList[16][i] <> 0 then 
     
-        list := [1..dim]*0;
-        signlist := ListWithIdenticalEntries(dim,1);
+            g := ProductList[15][i];
         
-        for j in [1..dim] do 
-        
-            pos_1 := Position(ProductList[2],ProductList[1][j]^g);
-            pos_2 := ProductList[5][pos_1];
+            list := [1..dim]*0;
+            signlist := ListWithIdenticalEntries(dim,1);
             
-            if pos_2 > 0 then 
-                list[j] := pos_2;
-            else
-                list[j] := -pos_2;
-                signlist[-pos_2] := -1;
-            fi;
-        od;
-        
-        ProductList[16][i] := [PermList(list),signlist];
-        
-        if not Inverse(g) in ProductList[15] then 
-            Add(ProductList[15],Inverse(g));
-            Add(ProductList[16],[Inverse(ProductList[16][i][1]),signlist]);
-        fi;
-        
+            for j in [1..dim] do 
+            
+                pos_1 := Position(ProductList[2],ProductList[1][j]^g);
+                pos_2 := ProductList[5][pos_1];
+                
+                if pos_2 > 0 then 
+                    list[j] := pos_2;
+                else
+                    list[j] := -pos_2;
+                    signlist[-pos_2] := -1;
+                fi;
+            od;
+            
+            p := PermList(list);
+            
+            ProductList[16][i] := [p,signlist];
+            
+            for j in [2..Order(g)] do 
+                pos_1 := Position(ProductList[15],g^j);
+                ProductList[16][pos_1] := [p^j,signlist];
+            od;
+            
+        fi;        
     od;
     
     end);
