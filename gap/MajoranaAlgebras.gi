@@ -237,17 +237,15 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
     
     dim := Size(ProductList[1]);
     
-    ProductList[15] := AsSet(ProductList[8]);
+    ProductList[15] := Enumerator(ProductList[8]);
     
-    RemoveSet(ProductList[15],());
-    
-    len := Size(ProductList[15]);
+    len := Length(ProductList[15]);
     
     ProductList[16] := [1..len]*0;
 
     for i in [1..len] do
     
-        if ProductList[16][i] <> 0 then 
+        if ProductList[16][i] = 0 then 
     
             g := ProductList[15][i];
         
@@ -270,11 +268,6 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
             p := PermList(list);
             
             ProductList[16][i] := [p,signlist];
-            
-            for j in [2..Order(g)] do 
-                pos_1 := Position(ProductList[15],g^j);
-                ProductList[16][pos_1] := [p^j,signlist];
-            od;
             
         fi;        
     od;
