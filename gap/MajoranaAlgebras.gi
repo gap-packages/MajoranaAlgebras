@@ -230,6 +230,7 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
             g,          # group element
             j,          # loop over coordinates
             list,       # list to build permutation
+            signlist,   # corrects signs of 5A axes
             pos_1,      # position of conjugated element in longcoordinates
             pos_2;      # corresponding position in coordinates
     
@@ -243,13 +244,14 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
     
     len := Size(ProductList[15]);
     
-    ProductList[16] := [1..len]*0;
+    ProductList[16] := [1..len]*0; 
     
     for i in [1..len] do
     
         g := ProductList[15][i];
     
         list := [1..dim]*0;
+        signlist := ListWithIdenticalEntries(dim,1);
         
         for j in [1..dim] do 
         
@@ -260,14 +262,15 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
                 list[j] := pos_2;
             else
                 list[j] := -pos_2;
+                signlist[-pos_2] := -1;
             fi;
         od;
         
-        ProductList[16][i] := PermList(list);
+        ProductList[16][i] := [PermList(list),signlist];
         
         if not Inverse(g) in ProductList[15] then 
             Add(ProductList[15],Inverse(g));
-            Add(ProductList[16],Inverse(ProductList[16][i]));
+            Add(ProductList[16],[Inverse(ProductList[16][i][1]),signlist]);
         fi;
         
     od;
@@ -284,14 +287,16 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
             vec,            # output vector
             pos,
             p,
+            sign,           # corrects sign of 5A axes 
             pos_1,          # position of conjugated element in longcoords
             pos_2;          # position of conjugated element in coords
     
     if g <> () then 
-    
+        
         pos := Position(ProductList[15],g);
         
-        p := ProductList[16][pos];
+        p := ProductList[16][pos][1];
+        sign := ProductList[16][pos][2];
         
         dim := Size(v);
         
@@ -301,7 +306,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
         
             if v[i] <> 0 then 
             
-                v[i^p] := v[i];
+                vec[i^p] := sign[i^p]*v[i];
                 
             fi;
         od;
