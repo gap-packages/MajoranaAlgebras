@@ -16,9 +16,12 @@ InstallGlobalFunction(MAJORANA_NullSpace,
             B := List( A, ShallowCopy );
         
             MAJORANA_ReversedEchelonForm(B);
+            
+            return [[],B];
+            
+        else
+            return [[],[]];            
         fi;
-        
-        return B;
 
         end
 

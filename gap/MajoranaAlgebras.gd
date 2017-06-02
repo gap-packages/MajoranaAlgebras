@@ -40,6 +40,8 @@ DeclareGlobalFunction( "MAJORANA_MoreEigenvectors" );
 
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
+DeclareGlobalFunction( "MAJORANA_PositionLastOne");
+
 DeclareGlobalFunction( "MAJORANA_RemoveNullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );

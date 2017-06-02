@@ -339,11 +339,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         fi;
 
         for i in [1..dim] do
-            if u[i] <> 0 then 
+            if u[dim - i + 1] <> 0 then 
                 for j in [1..dim] do
-                    if v[j] <> 0 then 
+                    if v[dim - j + 1] <> 0 then 
                     
-                        k := list[3][i][j];
+                        k := list[3][dim - i + 1][dim - j + 1];
                         
                         if k > 0 then 
                             sign := 1;
@@ -356,11 +356,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         
                         if x <> false then
                             
-                            g := list[4][i][j];
+                            g := list[4][dim - i + 1][dim - j + 1];
                             
-                            vec := vec + sign*u[i]*v[j]*MAJORANA_ConjugateVector(x,g,list);
+                            vec := vec + sign*u[dim - i + 1]*v[dim - j + 1]*MAJORANA_ConjugateVector(x,g,list);
                         else
-                            if u[i] <> 0 and v[j] <> 0 then
+                            if u[dim - i + 1] <> 0 and v[dim - j + 1] <> 0 then
                                 # cannot calculate product
                                 return false;
                             fi;
@@ -699,24 +699,39 @@ function(EigenVectors, AlgebraProducts, ProductList)
     
     end);
     
+InstallGlobalFunction(MAJORANA_PositionLastOne,
+
+function(list)
+
+    local   len,    # length of list
+            i;      # loop over list
+
+    len := Size(list);
+
+    for i in [1..len] do 
+        if list[len - i + 1] = 1 then 
+            return len - i + 1;
+        fi;
+    od;
+    
+    return false;
+    
+    end );
+    
 InstallGlobalFunction(MAJORANA_RemoveNullSpace,
 
 function(v,NullSp) 
 
     local   i,      # loop over nullspace
-            j,      # leading coefficient (from rhs)
-            dim;    # size of coefficients
+            j;      # leading coefficient (from rhs)
     
-    dim := Size(v);
-
-
     if NullSp <> false then 
-        for i in [1..Size(NullSp)] do
-        
-            j := Position(Reversed(NullSp[i]),1);
+        for i in [1..Size(NullSp[2])] do
             
-            if v[dim - j + 1] <> 0 then 
-                v := v - v[dim - j + 1]*NullSp[i];
+            j := NullSp[1][i];
+            
+            if v[j] <> 0 then 
+                v := v - v[j]*NullSp[2][i];
             fi;
         od;
     fi;
@@ -1321,7 +1336,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
     local i, m, j, k, row, sum, dim, y, mat, vec, a, x, record;
     
-    dim := Size(ProductList[6][1]);
+    dim := Size(ProductList[1]);
     
     mat := [];
     vec := [];
@@ -1333,12 +1348,12 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     
         a := [1..dim]*0; a[j] := 1;        
     
-        for k in [1..Size(ProductList[6])] do
+        for k in [1..Size(ProductList[6][2])] do
         
             row := [1..Size(UnknownAlgebraProducts)]*0;
             sum := [];
             
-            x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
+            x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][2][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
 
             if ForAll(x[1], x -> x = 0) then 
                 if ForAny( x[2] , y -> y <> 0) then 
@@ -1900,10 +1915,15 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     return false;
                 elif x = 0 then
                     ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
-                fi;
+                fi; 
+                
+                for i in [1..Size(ProductList[6][2])] do
+                    Add(ProductList[6][1], MAJORANA_PositionLastOne(ProductList[6][2][i]));
+                od;
+                              
             fi;
 
-            if ProductList[6] <> [] and ProductList[6] <> false then
+            if ProductList[6] <> false and ProductList[6][2] <> [] then
 
                 # Change alg products to get rid of any axes not in the basis
                 
@@ -1922,7 +1942,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                         od;                           
                     od;
                     
-                    Append(EigenVectors[j][1],ProductList[6]); 
+                    # Append(EigenVectors[j][1],ProductList[6][2]); 
                     
                 od;
             fi;
@@ -1975,7 +1995,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 EigenVectors[i][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
                 EigenVectors[i][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
 
-                if ProductList[6] <> [] and ProductList[6] <> false then 
+                if ProductList[6] <> false and ProductList[6][2] <> [] then 
                     for j in [1..4] do 
                         for x in EigenVectors[i][j] do
                             x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
