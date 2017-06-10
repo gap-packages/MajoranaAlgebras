@@ -5,6 +5,13 @@ BindGlobal("MAJORANA_FusionTable",
             ,[    0,    0,   1/4, 1/32]
             ,[  1/4,  1/4,     0, 1/32]
             ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
+            
+BindGlobal("MAJORANA_FusionTable3A",
+            [ [    1,    0,   1/5,  1/3, 1/30]
+             ,[    0,    0,   1/5,  1/3, 1/30]
+             ,[  1/5,  1/5,     0, 1/30,     ]
+             ,[  1/3,  1/3,  1/30,  1/3,     ]
+             ,[ 1/30, 1/30,      ,     ,     ] ]);  
 
 # Checks if algebra obeys the fusion rules, outputs list which is empty if it does obey fusion rules
 

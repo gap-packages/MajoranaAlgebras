@@ -35,13 +35,13 @@ function(AlgebraProducts, ProductList)
     od;
 
     return AsSet(unknowns);
-end);
-
+end); 
+    
 # This creates new eigenvectors through fusion rules
 
 InstallGlobalFunction( MAJORANA_Fusion,
 
-function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
+function(type, a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
 
     local   u,                  # vector with 1 in the j th position
             x,                  # new eigenvector
@@ -59,8 +59,12 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
             FusionError;        # list of indexes which do not obey fusion
             
     dim := Size(ProductList[1]);
-
-    ev := MAJORANA_FusionTable[a+1][b+1];
+    
+    if type = 2 then 
+        ev := MAJORANA_FusionTable[a + 1][b + 1];
+    else
+        ev := MAJORANA_FusionTable3A[a + 1][b + 1];
+    fi;
     
     NewEigenVectors := [];
     FusionError := [];
@@ -69,8 +73,8 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
 
     ev_a := EigenVectors[j][a];
     ev_b := EigenVectors[j][b];
-
-    # the 1/4,1/4 case is special
+    
+    # the 2A,1/4,1/4 and 3A, 1/5, 1/5 cases are special
     if (a=2) and (b=2) then 
         for k in [1..Size(ev_a)] do
             for l in [1..Size(ev_b)] do
@@ -93,8 +97,8 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                 fi;
             od;
         od;
-    # the 1/32, 1/32 case is even more special    
-    elif (a=3) and (b=3) then
+    # the 2A, 1/32, 1/32 and 3A, 1/3, 1/3 cases are even more special    
+    elif (type = 2) and (a=3) and (b=3) then
         for k in [1..Size(ev_a)] do
             for l in [1..Size(ev_b)] do
                 
@@ -125,7 +129,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                 
             od;
         od;
-    elif not [a,b] in [[2,2],[3,3]] then 
+    elif not [a,b] in [[2,2],[3,3],[4,4],[2,4],[3,4],[4,2],[4,3]] then 
         for k in [1..Size(ev_a)] do
             for l in [1..Size(ev_b)] do
 
@@ -148,7 +152,12 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
     if Size(FusionError) > 0 then
         return [false, FusionError];
     else
-        pos := Position(MAJORANA_FusionTable[1],ev) - 1;
+        if type = 2 then 
+            pos := Position(MAJORANA_FusionTable[1],ev) - 1;
+        else
+            pos := Position(MAJORANA_FusionTable3A[1],ev) - 1;
+        fi;
+        
         return [true, NewEigenVectors, pos];
     fi;
 end);        
@@ -156,26 +165,38 @@ end);
 
 InstallGlobalFunction(MAJORANA_FullFusion,
 
-    function(AlgebraProducts,EigenVectors, GramMatrix, ProductList)
+    function(type, AlgebraProducts,EigenVectors, GramMatrix, ProductList)
     
     local   j,                  # loop over T
             k,                  # loop over pairs of eigenvalues
             ev,                 # a pair of eigenvalues
             x,                  # result of fusion
-            new;                # new eigenvectors
+            new,                # new eigenvectors
+            list;               # list of representatives
+            
+    if type = 2 then 
+        list := ProductList[10];
+    else
+        list := ProductList[17];
+    fi;
 
-    for j in ProductList[10] do
+    for j in list do
         
-        new := [ [], [], [] ];
+        new := [ [], [], [], [] ];
         
         for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
         
             ev := [,];
         
-            ev[1] := MAJORANA_FusionTable[1][k[1] + 1];
-            ev[2] := MAJORANA_FusionTable[1][k[2] + 1];
+            if type = 2 then 
+                ev[1] := MAJORANA_FusionTable[1][k[1] + 1];
+                ev[2] := MAJORANA_FusionTable[1][k[2] + 1];
+            else
+                ev[1] := MAJORANA_FusionTable3A[1][k[1] + 1];
+                ev[2] := MAJORANA_FusionTable3A[1][k[2] + 1];
+            fi;
 
-            x := MAJORANA_Fusion(k[1],k[2],j,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+            x := MAJORANA_Fusion(type,k[1],k[2],j,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
             
             if x[1] then
                 Append(new[x[3]], x[2]);
@@ -188,13 +209,12 @@ InstallGlobalFunction(MAJORANA_FullFusion,
             fi;
         od;
         
-        for k in [1..3] do
+        for k in [1.. type + 1] do
             Append(EigenVectors[j][k],new[k]);
             if Size(EigenVectors[j][k]) > 0 then
                 EigenVectors[j][k]:=ShallowCopy(BaseMat(EigenVectors[j][k]));
             fi;
         od;
-
     od;
     
     return [true];
@@ -644,7 +664,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(EigenVectors, AlgebraProducts, ProductList)
+function(type,EigenVectors, AlgebraProducts, ProductList)
 
     local   i,          # loop over representatives
             ev,         # loop over eigenvalues
@@ -655,24 +675,31 @@ function(EigenVectors, AlgebraProducts, ProductList)
             u,          # vector with 1 in j th position
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
-            dim;        # size of ProductList[1]
+            dim,        # size of ProductList[1]
+            list;       # list of representatives
     
-    table := [0, 1/4, 1/32];
+    if type = 2 then     
+        table := [0, 1/4, 1/32];
+        list  := ProductList[10];
+    else
+        table := [0, 1/5, 1/3, 1/30];
+        list  := ProductList[17];
+    fi;
     
     dim := Size(AlgebraProducts[1]);
     
-    for i in ProductList[10] do
+    for i in list do
     
         unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
                 
-        unknowns := Filtered( unknowns, x -> x[1] = i);
+        unknowns := Filtered( unknowns, x -> i in x);
         
         if unknowns <> [] then
         
             mat := [];
             vec := [];
         
-            for ev in [1..3] do 
+            for ev in [1..type + 1] do 
             
                 u := [1..dim]*0; u[i] := 1;
                 
@@ -2255,8 +2282,6 @@ function(input,index)
         ProductList[1][j] := ProductList[1][j][1];
     od;
     
-    Orbits3A := Orbits(G, Filtered(ProductList[1], x -> Order(x) = 3));
-    
     ProductList[2]  := StructuralCopy(T);
     ProductList[3]  := NullMat(dim,dim);
     ProductList[4]  := NullMat(dim,dim);
@@ -2269,6 +2294,13 @@ function(input,index)
     ProductList[13] := [1..t]*0;
     ProductList[14] := [];
     ProductList[15] := [];
+    ProductList[17] := [];
+    
+    Orbits3A := Orbits(G, Filtered(ProductList[1], x -> Order(x) = 3));
+    
+    for x in Orbits3A do 
+        Add(ProductList[17], Position(ProductList[1], x[1]));
+    od;
 
     MAJORANA_SetupOrbits(T, ProductList);
 
@@ -2300,21 +2332,19 @@ function(input,index)
 
     # Set up eigenvector matrice
 
-    EigenVectors := NullMat(t,3);
+    EigenVectors := NullMat(dim,4);
 
-    for j in [1..t] do
-        if j in ProductList[10] then
-            for k in [1..3] do
+    for j in [1..dim] do
+        if j in ProductList[10] or j in ProductList[17] then
+            for k in [1..4] do
                 EigenVectors[j][k] := [];
             od;
         else
-            for k in [1..3] do
+            for k in [1..4] do
                 EigenVectors[j][k] := false;
             od;
         fi;
     od;
-
-    EigenVectors3A := ListWithIdenticalEntries(Size(Orbits3A), [[],[],[],[],[]]);
     
     OutputList := [0,0,0,0,0];
     
@@ -2522,9 +2552,9 @@ function(input,index)
     
     # EigenVectors of 3A axes from Lim 17
     
-    for j in [1..Size(Orbits3A)] do 
+    for j in ProductList[17] do 
         
-        h := Orbits3A[j][1];
+        h := ProductList[1][j];
         
         for k in [1..Size(OrbitalsT)] do 
             if Shape[k] = ['3','A'] then 
@@ -2539,15 +2569,15 @@ function(input,index)
                     
                     vals := [ -32/15, -32/15, -32/15, 1 ];
                     
-                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [-1,1,0,0];
                 
-                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals,dim));
+                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals,dim));
 
                     vals := [-1,0,1,0];
                     
-                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals,dim));                   
+                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals,dim));                   
                     
                 fi;
             elif Shape[k] = ['6','A'] then 
@@ -2566,31 +2596,31 @@ function(input,index)
                     
                     vals := [ 0, 0, 0, 0, 1, 0, 0, 0 ];
                     
-                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [ 1, 0, 1, 0, 0, 1, 0, 0 ];
                     
-                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [ 0, 1, 0, 1, 0, 0, 1, 0 ];
                     
-                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [ -1, 0, 1, 0, 0, 0, 0, 0 ];
                     
-                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [ 0, -1, 0, 1, 0, 0, 0, 0 ];
                     
-                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [ -1, 0, 0, 0, 0, 1, 0, 0 ];
                     
-                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [ 0, -1, 0, 0, 0, 0, 1, 0 ];
                     
-                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
                 fi;
             fi;
         od;    
@@ -2884,32 +2914,34 @@ function(input,index)
         # Use these eigenvectors and the fusion rules to find more
 
         if ForAny(maindimensions, x -> x < dim - 1) then                
-        
-            x := MAJORANA_FullFusion(AlgebraProducts,EigenVectors, GramMatrix, ProductList);
-            
-            if not x[1] and ProductList[6] <> false then 
-                return MAJORANA_OutputError(x[2],
-                                x[3],
-                                OutputList);
-            fi;
+            for j in [2,3] do 
+                x := MAJORANA_FullFusion(j,AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+                
+                if not x[1] and ProductList[6] <> false then 
+                    return MAJORANA_OutputError(x[2],
+                                    x[3],
+                                    OutputList);
+                fi;
+            od;
         fi;
                                     ## STEP 7: PRODUCTS FROM EIGENVECTORS ##
 
         # Use eigenvectors to find more products
-        
-        x := MAJORANA_EigenvectorsAlgebraUnknowns(EigenVectors,AlgebraProducts,ProductList);
-        
-        if not x[1] then 
-            if x[2] = 1 then 
-                return MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
-                        , x[3]
-                        , OutputList);
-            elif x[2] = 2 then 
-                return MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
-                        , x[3]
-                        , OutputList);
+        for j in [2,3] do 
+            x := MAJORANA_EigenvectorsAlgebraUnknowns(j, EigenVectors,AlgebraProducts,ProductList);
+            
+            if not x[1] then 
+                if x[2] = 1 then 
+                    return MAJORANA_OutputError( "Error eigenvectors algebra unknowns"
+                            , x[3]
+                            , OutputList);
+                elif x[2] = 2 then 
+                    return MAJORANA_OutputError("Inconsistent system of unknown algebra products step 7"
+                            , x[3]
+                            , OutputList);
+                fi;
             fi;
-        fi;
+        od;
         
                             ## STEP 8: RESURRECTION PRINCIPLE I ##
                 
