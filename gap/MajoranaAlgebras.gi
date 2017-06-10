@@ -1915,6 +1915,8 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     return false;
                 elif x = 0 then
                     ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
+                else
+                    ProductList[6] := [[],[]];
                 fi; 
                 
                 for i in [1..Size(ProductList[6][2])] do
@@ -2186,13 +2188,13 @@ function(input,index)
             i, j, k, x, y, 
 
             # Step 0 - Set Up
-            t, SizeOrbitals, OrbitalsT, G, T,
+            t, SizeOrbitals, OrbitalsT, G, T, Orbits3A,
             
             # Step 1 - Shape
             Shape, 
 
             # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
+            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign, EigenVectors3A,
 
             # Step 4 - More products and evecs
             h, s, dim,
@@ -2253,6 +2255,8 @@ function(input,index)
         ProductList[1][j] := ProductList[1][j][1];
     od;
     
+    Orbits3A := Orbits(G, Filtered(ProductList[1], x -> Order(x) = 3));
+    
     ProductList[2]  := StructuralCopy(T);
     ProductList[3]  := NullMat(dim,dim);
     ProductList[4]  := NullMat(dim,dim);
@@ -2294,7 +2298,7 @@ function(input,index)
         GramMatrix[j]:=false;
     od;
 
-    # Set up eigenvector matrix
+    # Set up eigenvector matrice
 
     EigenVectors := NullMat(t,3);
 
@@ -2309,6 +2313,8 @@ function(input,index)
             od;
         fi;
     od;
+
+    EigenVectors3A := ListWithIdenticalEntries(Size(Orbits3A), [[],[],[],[],[]]);
     
     OutputList := [0,0,0,0,0];
     
@@ -2513,6 +2519,82 @@ function(input,index)
             fi;
         od;
     od;
+    
+    # EigenVectors of 3A axes from Lim 17
+    
+    for j in [1..Size(Orbits3A)] do 
+        
+        h := Orbits3A[j][1];
+        
+        for k in [1..Size(OrbitalsT)] do 
+            if Shape[k] = ['3','A'] then 
+                if OrbitalsT[k][1][1]*OrbitalsT[k][1][2] in [h,h^2] then 
+                    
+                    pos := [1..4]*0;
+                    
+                    pos[1] := Position(T, OrbitalsT[k][1][1]);
+                    pos[2] := Position(T, OrbitalsT[k][1][2]);
+                    pos[3] := Position(T, OrbitalsT[k][1][1]*h^2);
+                    pos[4] := Position(ProductList[1], h);
+                    
+                    vals := [ -32/15, -32/15, -32/15, 1 ];
+                    
+                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [-1,1,0,0];
+                
+                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals,dim));
+
+                    vals := [-1,0,1,0];
+                    
+                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals,dim));                   
+                    
+                fi;
+            elif Shape[k] = ['6','A'] then 
+                if (OrbitalsT[k][1][1]*OrbitalsT[k][1][2])^2 in [h,h^2] then 
+                
+                    pos := [1..8]*0;
+                    
+                    pos[1] := Position(T, OrbitalsT[k][1][1]);
+                    pos[2] := Position(T, OrbitalsT[k][1][2]);
+                    pos[3] := Position(T, OrbitalsT[k][1][1]*h^2);
+                    pos[4] := Position(T, OrbitalsT[k][1][1]*h^3);
+                    pos[5] := Position(T, h^3);
+                    pos[6] := Position(T, OrbitalsT[k][1][1]*h^4);
+                    pos[7] := Position(T, OrbitalsT[k][1][1]*h^5);
+                    pos[8] := Position(ProductList[1], h);
+                    
+                    vals := [ 0, 0, 0, 0, 1, 0, 0, 0 ];
+                    
+                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [ 1, 0, 1, 0, 0, 1, 0, 0 ];
+                    
+                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [ 0, 1, 0, 1, 0, 0, 1, 0 ];
+                    
+                    Add(EigenVectors3A[j][1], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [ -1, 0, 1, 0, 0, 0, 0, 0 ];
+                    
+                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [ 0, -1, 0, 1, 0, 0, 0, 0 ];
+                    
+                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [ -1, 0, 0, 0, 0, 1, 0, 0 ];
+                    
+                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                    
+                    vals := [ 0, -1, 0, 0, 0, 0, 1, 0 ];
+                    
+                    Add(EigenVectors3A[j][3], MAJORANA_MakeVector(pos, vals, dim));
+                fi;
+            fi;
+        od;    
+    od; 
         
     # Products from IPSS10
 
