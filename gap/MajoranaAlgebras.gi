@@ -709,6 +709,7 @@ function(type,EigenVectors, AlgebraProducts, ProductList)
                     
                     if ForAll(x[1], y -> y = 0) then 
                         if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
+                            Error("alg unknowns");
                             return [false,1,v];
                         fi;
                     elif not x[1] in mat then         
@@ -1983,25 +1984,39 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
         
 InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
-    function(AlgebraProducts,EigenVectors,ProductList)
+    function(type,AlgebraProducts,EigenVectors,ProductList)
     
     local   i,
             j,
+            k,
             dim,
             a,
             b,
             mat,
-            x;
+            x,
+            list,
+            ev;
             
     dim := Size(ProductList[1]);
+    
+    if type = 2 then 
+        list := ProductList[10];
+        ev   := [0,1/4,1/32,1];
+    else
+        list := ProductList[17];
+        ev   := [0,1/5,1/3,1/30,1];
+    fi;
 
-    for i in ProductList[10] do
+    for i in list do
                     
         a := [1..dim]*0; a[i] := 1;
     
         if Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1 <> dim then
         
-            mat:=[];
+            Display(Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1);
+        
+            mat  := [];
+            list := [];
 
             for j in [1..dim] do
             
@@ -2010,19 +2025,31 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
                 
                 if x <> false then
-                    Add(mat,x);
+                    Add(mat, x);
                 else
-                    mat := [];
-                    break;
+                    Add(mat, [1..dim]*0);
+                    Add(list, j);
                 fi;
             od;
 
             if mat <> [] then 
-
-                EigenVectors[i][1]:=ShallowCopy(NullspaceMat(mat));
-                EigenVectors[i][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
-                EigenVectors[i][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
-                EigenVectors[i][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
+            
+                for j in [1..Size(ev)] do 
+                
+                    EigenVectors[i][j] := ShallowCopy(NullspaceMat(mat - IdentityMat(dim)*ev[j]));
+                    
+                    k := 1;
+                    
+                    if list <> [] then 
+                        while k < Size(EigenVectors[i][j]) + 1 do 
+                            if Position(EigenVectors[i][j][k],1) in list then
+                                Remove(EigenVectors[i][j],k);
+                            else
+                                k := k + 1;
+                            fi;
+                        od;
+                    fi;
+                od;
 
                 if ProductList[6] <> false and ProductList[6][2] <> [] then 
                     for j in [1..4] do 
@@ -2040,6 +2067,9 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                     return [false,"Algebra does not obey axiom M4"];
                 fi;
             fi;
+            
+            Display(Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1);
+            
         fi; 
     od;
     
@@ -2356,276 +2386,8 @@ function(input,index)
     
     # Start filling in values and products!
 
-    # (2,2) products and eigenvectors from IPSS10
+    # (2,2) products from IPSS10
 
-    # Add eigenvectors from IPSS10
-
-    for j in ProductList[10] do
-        for k in [1..t] do
-
-            x := ProductList[3][j][k];
-
-            if Shape[x] = ['2','A'] then
-            
-                pos := [j, k, 0];
-                pos[3] := Position(T,T[j]*T[k]);
-                
-                vals := [-1/4, 1, 1];
-                
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-                
-                vals := [0, 1, -1];
-
-                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
-
-            elif Shape[x] = ['2','B'] then
-            
-                pos := [k];
-                vals := [1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-            elif Shape[x] = ['3','A'] then
-            
-                pos := [j, k, 0, 0];
-
-                pos[3] := Position(T, T[j]*T[k]*T[j]);
-                pos[4] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
-
-                vals := [-10/27, 32/27, 32/27, 1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-                
-                vals := [-8/45, -32/45, -32/45, 1];
-
-                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
-
-                vals := [0, 1, -1, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-            elif Shape[x] = ['3','C'] then
-            
-                pos := [j, k, 0];
-
-                pos[3] := Position(T, T[j]*T[k]*T[j]);
-
-                vals := [-1/32, 1, 1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                vals := [0, 1, -1];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-            elif Shape[x] = ['4','A'] then
-                
-                pos := [j, k, 0, 0, 0];
-                pos[3] := Position(T, T[j]*T[k]*T[j]);
-                pos[4] := Position(T, T[k]*T[j]*T[k]);
-                pos[5] := ProductList[5][Position(ProductList[2],T[j]*T[k])];
-
-                vals := [-1/2, 2, 2, 1, 1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                vals := [-1/3, -2/3, -2/3, -1/3, 1]; 
-
-                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos,vals,dim));
-
-                vals := [0, 1, -1, 0, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-            elif Shape[x] = ['4','B'] then
-                
-                pos := [j, k, 0, 0, 0];
-                pos[3] := Position(T, T[j]*T[k]*T[j]);
-                pos[4] := Position(T, T[k]*T[j]*T[k]);
-                pos[5] := Position(T, (T[j]*T[k])^2);
-                
-                vals := [-1/32, 1, 1, 1/8, -1/8];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos,vals,dim));
-
-                vals := [0, 1, -1, 0, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos,vals,dim));
-
-            elif Shape[x] = ['5','A'] then
-            
-                x := Position(ProductList[2],T[j]*T[k]);
-            
-                pos := [j, k, 0, 0, 0, 0];
-                pos[3] := Position(T, T[j]*T[k]*T[j]);
-                pos[4] := Position(T, T[k]*T[j]*T[k]);
-                pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
-                pos[6] := ProductList[5][x]; 
-
-                if pos[6] < 0 then
-                    pos[6] := -pos[6];
-                    sign := -1;
-                else
-                    sign := 1;
-                fi;
-
-                vals := [3/512, -15/128, -15/128, -1/128, -1/128, sign*1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-
-                vals := [-3/512, 1/128, 1/128, 15/128, 15/128, sign*1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-                
-                vals := [0, 1/128, 1/128, -1/128, -1/128, sign*1];
-
-                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
-
-                vals := [0, 1, -1, 0, 0, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-
-                vals := [0, 0, 0, 1, -1, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-
-            elif Shape[x] = ['6','A'] then
-
-                pos := [j, k, 0, 0, 0, 0, 0, 0];
-                pos[3] := Position(T, T[j]*T[k]*T[j]);
-                pos[4] := Position(T, T[k]*T[j]*T[k]);
-                pos[5] := Position(T, T[j]*T[k]*T[j]*T[k]*T[j]);
-                pos[6] := Position(T, T[k]*T[j]*T[k]*T[j]*T[k]);
-                pos[7] := Position(T, (T[j]*T[k])^3);
-                pos[8] := ProductList[5][Position(ProductList[2],(T[j]*T[k])^2)];
-
-                vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
-
-                Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-
-                vals := [-8/45, 0, 0, -32/45, -32/45, -32/45, 32/45, 1];
-
-                Add(EigenVectors[j][2], MAJORANA_MakeVector(pos, vals, dim));
-                
-                vals := [0, 1, -1, 0, 0, 0, 0, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-
-                vals := [0, 0, 0, 1, -1, 0, 0, 0];
-
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                
-                # put in products of 2A and 3A axes
-                
-                x := ProductList[3][pos[7]][pos[8]];
-                
-                AlgebraProducts[x] := [1..dim]*0;
-                
-                GramMatrix[x] := 0;
-            fi;
-        od;
-        
-        # 1/32 eigenvectors from conjugation
-        
-        for k in [t+1..dim] do 
-        
-            h := ProductList[1][k];
-            
-            if not h^T[j] in [h,h^2] then 
-            
-                pos := [k, 0];
-                pos[2] := ProductList[5][Position(ProductList[2],h^T[j])];
-                
-                if pos[2] < 0 then
-                    pos[2] := -pos[2];
-                    sign := -1;
-                else
-                    sign := 1;
-                fi;
-                
-                vals := [1,-sign*1];
-                
-                Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-            fi;
-        od;
-    od;
-    
-    # EigenVectors of 3A axes from Lim 17
-    
-    for j in ProductList[17] do 
-        
-        h := ProductList[1][j];
-        
-        for k in [1..Size(OrbitalsT)] do 
-            if Shape[k] = ['3','A'] then 
-                if OrbitalsT[k][1][1]*OrbitalsT[k][1][2] in [h,h^2] then 
-                    
-                    pos := [1..4]*0;
-                    
-                    pos[1] := Position(T, OrbitalsT[k][1][1]);
-                    pos[2] := Position(T, OrbitalsT[k][1][2]);
-                    pos[3] := Position(T, OrbitalsT[k][1][1]*h^2);
-                    pos[4] := Position(ProductList[1], h);
-                    
-                    vals := [ -32/15, -32/15, -32/15, 1 ];
-                    
-                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [-1,1,0,0];
-                
-                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals,dim));
-
-                    vals := [-1,0,1,0];
-                    
-                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals,dim));                   
-                    
-                fi;
-            elif Shape[k] = ['6','A'] then 
-                if (OrbitalsT[k][1][1]*OrbitalsT[k][1][2])^2 in [h,h^2] then 
-                
-                    pos := [1..8]*0;
-                    
-                    pos[1] := Position(T, OrbitalsT[k][1][1]);
-                    pos[2] := Position(T, OrbitalsT[k][1][2]);
-                    pos[3] := Position(T, OrbitalsT[k][1][1]*h^2);
-                    pos[4] := Position(T, OrbitalsT[k][1][1]*h^3);
-                    pos[5] := Position(T, h^3);
-                    pos[6] := Position(T, OrbitalsT[k][1][1]*h^4);
-                    pos[7] := Position(T, OrbitalsT[k][1][1]*h^5);
-                    pos[8] := Position(ProductList[1], h);
-                    
-                    vals := [ 0, 0, 0, 0, 1, 0, 0, 0 ];
-                    
-                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [ 1, 0, 1, 0, 0, 1, 0, 0 ];
-                    
-                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [ 0, 1, 0, 1, 0, 0, 1, 0 ];
-                    
-                    Add(EigenVectors[j][1], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [ -1, 0, 1, 0, 0, 0, 0, 0 ];
-                    
-                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [ 0, -1, 0, 1, 0, 0, 0, 0 ];
-                    
-                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [ -1, 0, 0, 0, 0, 1, 0, 0 ];
-                    
-                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                    
-                    vals := [ 0, -1, 0, 0, 0, 0, 1, 0 ];
-                    
-                    Add(EigenVectors[j][3], MAJORANA_MakeVector(pos, vals, dim));
-                fi;
-            fi;
-        od;    
-    od; 
-        
     # Products from IPSS10
 
     for j in [1..SizeOrbitals] do
@@ -2745,6 +2507,13 @@ function(input,index)
                 AlgebraProducts[j] := MAJORANA_MakeVector(pos, vals, dim);
 
                 GramMatrix[j]:=5/256;
+                
+                x := ProductList[3][pos[7]][pos[8]];
+                
+                AlgebraProducts[x] := [1..dim]*0;
+                
+                GramMatrix[x] := 0;
+                
             fi;
 
         # 2,3 products
@@ -2895,6 +2664,18 @@ function(input,index)
     fi;
     
     while switchmain = 0 do 
+    
+                                    ## STEP 9: MORE EVECS II ##
+
+        # Check if we have full espace decomp, if not find it
+        
+        for j in [2,3] do 
+            x := MAJORANA_MoreEigenvectors(j,AlgebraProducts,EigenVectors,ProductList);
+            
+            if not x[1] then 
+                return MAJORANA_OutputError(x[2],[], OutputList);
+            fi;
+        od;
 
                                     ## STEP 5: INNER PRODUCTS M1 ##
                                     
@@ -2947,15 +2728,7 @@ function(input,index)
                 
         MAJORANA_FullResurrection(EigenVectors,AlgebraProducts,ProductList,GramMatrix);
         
-                                    ## STEP 9: MORE EVECS II ##
-
-        # Check if we have full espace decomp, if not find it
-
-        x := MAJORANA_MoreEigenvectors(AlgebraProducts,EigenVectors,ProductList);
-        
-        if not x[1] then 
-            return MAJORANA_OutputError(x[2],[], OutputList);
-        fi;
+                                    
         
                             ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
             
