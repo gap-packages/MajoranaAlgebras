@@ -168,7 +168,7 @@ InstallGlobalFunction(MAJORANA_FullFusion,
         
         new := [ [], [], [] ];
         
-        for k in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
+        for k in [[1,2],[1,3],[2,3]] do
         
             ev := [,];
         
@@ -1245,7 +1245,9 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                     if row <> [] then 
                         if ForAll(row, x -> x = 0) then 
                             if ForAny( sum, x -> x <> 0) then
-                                Error("Resurrection error");
+                                if ProductList[6] <> false then 
+                                    Error("Resurrection error");
+                                fi;
                             fi;
                         else
                             
@@ -1688,8 +1690,13 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     if AlgebraProducts[y] = false then 
                     
                         g := ProductList[4][x[1]][x[2]];
+                        
+                        
 
                         AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                        
+                        
+                        
                         AlgebraProducts[y] := MAJORANA_RemoveNullSpace(AlgebraProducts[y],ProductList[6]);
                     fi;
                 fi;
@@ -1915,6 +1922,8 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     return false;
                 elif x = 0 then
                     ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
+                elif x > 0 then
+                    ProductList[6] := [[],[]];
                 fi; 
                 
                 for i in [1..Size(ProductList[6][2])] do
