@@ -86,3 +86,5 @@ DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_MainSteps" );
 
+DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
+

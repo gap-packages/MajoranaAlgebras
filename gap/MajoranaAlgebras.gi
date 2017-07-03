@@ -1306,7 +1306,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
         for j in ProductList[10] do         
             for k in [1..3] do
                 for l in [1..2] do 
-                    if [k,l] <> [2,2] then 
+                    if not [k,l] in [[2,2]] then 
                 
                         x := MAJORANA_Resurrection(j,k,l,EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                         
@@ -1669,6 +1669,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             g;          # conj element of x
     
     if mat <> [] then
+    
+        Error("pause");
         
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
@@ -2183,152 +2185,26 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     return result;
 
     end );
-        
-InstallGlobalFunction(MajoranaRepresentation,
+    
+InstallGlobalFunction(MAJORANA_DihedralProducts,
 
-function(input,index)
+function(T,Shape, GramMatrix, AlgebraProducts, EigenVectors, ProductList)
 
-    local   # Seress
-            ProductList,  
-
-            # indexing and temporary variables
-            i, j, k, x, y, 
-
-            # Step 0 - Set Up
-            t, SizeOrbitals, OrbitalsT, G, T,
+    local   j,      # loop over reps of T
+            k,      # loop over T
+            x,      # orbital of i,j
+            y,      #
+            pos,    # position 
+            vals,   # values    
+            dim,    # size of coordinates
+            s,      # elt of T
+            h,      # axis
+            t,      # size of T
+            sign;   # corrects sign of 5A axes
             
-            # Step 1 - Shape
-            Shape, 
-
-            # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
-
-            # Step 4 - More products and evecs
-            h, s, dim,
-            
-            vals, pos, OutputList, record, 
-
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain;     
-
-                                            ## STEP 0: SETUP ##
-    
-    G           := input.group;
-    T           := input.involutions;
-    Shape       := input.shapes[index];
-    OrbitalsT   := input.orbitals;  
-    
-    t := Size(T);  
-    
-    # Set up ProductList
-    
-    ProductList := [1..13]*0;
-    
-    ProductList[1] := StructuralCopy(T);
-
-    # Create coordinates list
-
-    for j in [1..Size(OrbitalsT)] do
-        if Shape[j]=['3','A'] then
-            for k in [1..Size(OrbitalsT[j])] do
-                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                Add(ProductList[1],Set([x,x^2]));
-            od;
-        fi;
-    od;
-    
-    for j in [1..Size(OrbitalsT)] do
-        if Shape[j]=['4','A'] then
-            for k in [1..Size(OrbitalsT[j])] do
-                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                Add(ProductList[1],Set([x,x^3]));
-            od;
-        fi;
-    od;
-    
-    for j in [1..Size(OrbitalsT)] do 
-        if Shape[j]=['5','A'] then
-            for k in [1..Size(OrbitalsT[j])] do
-                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
-                Add(ProductList[1],Set([x,x^2,x^3,x^4]));
-            od;
-        fi;
-    od;
-
-    ProductList[1] := DuplicateFreeList(ProductList[1]);
-    
     dim := Size(ProductList[1]);
-
-    for j in [t+1..dim] do
-        ProductList[1][j] := ProductList[1][j][1];
-    od;
+    t   := Size(T);
     
-    ProductList[2]  := StructuralCopy(T);
-    ProductList[3]  := NullMat(dim,dim);
-    ProductList[4]  := NullMat(dim,dim);
-    ProductList[5]  := [1..t];
-    ProductList[6]  := false;
-    ProductList[7]  := [];    
-    ProductList[8]  := G;
-    ProductList[10] := [];
-    ProductList[12] := [1..t]*0;
-    ProductList[13] := [1..t]*0;
-    ProductList[14] := [];
-    ProductList[15] := [];
-
-    MAJORANA_SetupOrbits(T, ProductList);
-
-    MAJORANA_LongCoordinates(t, ProductList);
-    
-    MAJORANA_SetupOrbitals(ProductList, OrbitalsT);
-
-    MAJORANA_PairRepresentatives(ProductList);
-
-    MAJORANA_PairOrbits(ProductList);
-
-    MAJORANA_PairConjElements(ProductList);
-    
-    MAJORANA_FindVectorPermutations(ProductList);
-    
-                                ## STEP 3: PRODUCTS AND EVECS I ##
-                                
-    SizeOrbitals := Size(ProductList[9]);
-
-    # Set up algebra product and gram matrices
-
-    AlgebraProducts := NullMat(1,SizeOrbitals)[1];
-    GramMatrix := NullMat(1,SizeOrbitals)[1];
-
-    for j in [1..SizeOrbitals] do
-        AlgebraProducts[j]:=false;
-        GramMatrix[j]:=false;
-    od;
-
-    # Set up eigenvector matrix
-
-    EigenVectors := NullMat(t,3);
-
-    for j in [1..t] do
-        if j in ProductList[10] then
-            for k in [1..3] do
-                EigenVectors[j][k] := [];
-            od;
-        else
-            for k in [1..3] do
-                EigenVectors[j][k] := false;
-            od;
-        fi;
-    od;
-    
-    OutputList := [0,0,0,0,0];
-    
-    OutputList[1] := Shape;
-    OutputList[2] := GramMatrix;
-    OutputList[3] := AlgebraProducts;
-    OutputList[4] := EigenVectors;
-    OutputList[5] := ProductList;
-    
-    # Start filling in values and products!
-
     # (2,2) products and eigenvectors from IPSS10
 
     # Add eigenvectors from IPSS10
@@ -2525,7 +2401,7 @@ function(input,index)
         
     # Products from IPSS10
 
-    for j in [1..SizeOrbitals] do
+    for j in [1..Size(ProductList[9])] do
 
         x := ProductList[7][j][1];
         y := ProductList[7][j][2];
@@ -2759,6 +2635,155 @@ function(input,index)
             fi;
         fi;
     od;
+    
+    end );
+        
+InstallGlobalFunction(MajoranaRepresentation,
+
+function(input,index)
+
+    local   # Seress
+            ProductList,  
+
+            # indexing and temporary variables
+            i, j, k, x, y, 
+
+            # Step 0 - Set Up
+            t, SizeOrbitals, OrbitalsT, G, T,
+            
+            # Step 1 - Shape
+            Shape, 
+
+            # Step 3 - Products and evecs I
+            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
+
+            # Step 4 - More products and evecs
+            h, s, dim,
+            
+            vals, pos, OutputList, record, 
+
+            falsecount, newfalsecount, maindimensions, newdimensions, switchmain;     
+
+                                            ## STEP 0: SETUP ##
+    
+    G           := input.group;
+    T           := input.involutions;
+    Shape       := input.shapes[index];
+    OrbitalsT   := input.orbitals;  
+    
+    t := Size(T);  
+    
+    # Set up ProductList
+    
+    ProductList := [1..13]*0;
+    
+    ProductList[1] := StructuralCopy(T);
+
+    # Create coordinates list
+
+    for j in [1..Size(OrbitalsT)] do
+        if Shape[j]=['3','A'] then
+            for k in [1..Size(OrbitalsT[j])] do
+                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                Add(ProductList[1],Set([x,x^2]));
+            od;
+        fi;
+    od;
+    
+    for j in [1..Size(OrbitalsT)] do
+        if Shape[j]=['4','A'] then
+            for k in [1..Size(OrbitalsT[j])] do
+                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                Add(ProductList[1],Set([x,x^3]));
+            od;
+        fi;
+    od;
+    
+    for j in [1..Size(OrbitalsT)] do 
+        if Shape[j]=['5','A'] then
+            for k in [1..Size(OrbitalsT[j])] do
+                x := OrbitalsT[j][k][1]*OrbitalsT[j][k][2];
+                Add(ProductList[1],Set([x,x^2,x^3,x^4]));
+            od;
+        fi;
+    od;
+
+    ProductList[1] := DuplicateFreeList(ProductList[1]);
+    
+    dim := Size(ProductList[1]);
+
+    for j in [t+1..dim] do
+        ProductList[1][j] := ProductList[1][j][1];
+    od;
+    
+    ProductList[2]  := StructuralCopy(T);
+    ProductList[3]  := NullMat(dim,dim);
+    ProductList[4]  := NullMat(dim,dim);
+    ProductList[5]  := [1..t];
+    ProductList[6]  := false;
+    ProductList[7]  := [];    
+    ProductList[8]  := G;
+    ProductList[10] := [];
+    ProductList[12] := [1..t]*0;
+    ProductList[13] := [1..t]*0;
+    ProductList[14] := [];
+    ProductList[15] := [];
+
+    MAJORANA_SetupOrbits(T, ProductList);
+
+    MAJORANA_LongCoordinates(t, ProductList);
+    
+    MAJORANA_SetupOrbitals(ProductList, OrbitalsT);
+
+    MAJORANA_PairRepresentatives(ProductList);
+
+    MAJORANA_PairOrbits(ProductList);
+
+    MAJORANA_PairConjElements(ProductList);
+    
+    MAJORANA_FindVectorPermutations(ProductList);
+    
+                                ## STEP 3: PRODUCTS AND EVECS I ##
+                                
+    SizeOrbitals := Size(ProductList[9]);
+
+    # Set up algebra product and gram matrices
+
+    AlgebraProducts := NullMat(1,SizeOrbitals)[1];
+    GramMatrix := NullMat(1,SizeOrbitals)[1];
+
+    for j in [1..SizeOrbitals] do
+        AlgebraProducts[j]:=false;
+        GramMatrix[j]:=false;
+    od;
+
+    # Set up eigenvector matrix
+
+    EigenVectors := NullMat(t,3);
+
+    for j in [1..t] do
+        if j in ProductList[10] then
+            for k in [1..3] do
+                EigenVectors[j][k] := [];
+            od;
+        else
+            for k in [1..3] do
+                EigenVectors[j][k] := false;
+            od;
+        fi;
+    od;
+    
+    OutputList := [0,0,0,0,0];
+    
+    OutputList[1] := Shape;
+    OutputList[2] := GramMatrix;
+    OutputList[3] := AlgebraProducts;
+    OutputList[4] := EigenVectors;
+    OutputList[5] := ProductList;
+    
+    # Start filling in values and products!
+
+    MAJORANA_DihedralProducts(T,Shape, GramMatrix, AlgebraProducts, EigenVectors, ProductList);
 
                                 ## STEP 4: MAIN LOOP ##
     
