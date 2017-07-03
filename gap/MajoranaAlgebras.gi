@@ -1670,8 +1670,6 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
     if mat <> [] then
     
-        Error("pause");
-        
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
         if Solution <> false then
