@@ -2886,9 +2886,7 @@ function(input,index)
             return MAJORANA_OutputError( x[2]
                             , x[3]
                             , OutputList);
-        fi;
-        
-                                    
+        fi;                           
         
         newdimensions := [];
         
