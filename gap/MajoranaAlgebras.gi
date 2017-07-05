@@ -924,6 +924,104 @@ function(GramMatrix,AlgebraProducts,ProductList)
 
     end );
     
+InstallGlobalFunction(MAJORANA_UnknownAlgebraProductsAxiomM1, ## This doesn't work!
+
+    function(T,GramMatrix,AlgebraProducts,ProductList)
+    
+    local   unknowns,           # unknown alg products
+            dim,                # size of coordinates
+            t,                  # size of T 
+            mat,                # matrix of inner product values
+            vec,                # vector of inner product values
+            u,                  # basis vectors
+            v,                  #
+            w,                  #
+            x,                  # unknown algebra product
+            GramMatrixFull,     # part of the full gram matrix
+            i,                  # loop over coordinates
+            j,                  # 1st product vector
+            k,                  # 2nd product vector
+            prod,               # final product
+            y,                  # intermediate products
+            z;                  #
+            
+    t := Size(T);
+    dim := Size(ProductList[1]);
+    
+    if not false in GramMatrix then 
+    
+        # Find unknowns of the form a \cdot v
+        
+        unknowns := Positions(AlgebraProducts, false);
+        unknowns := Filtered(unknowns, x -> ProductList[7][x][1] < t);
+        
+        # make part of the Gram matrix
+        
+        if Size(unknowns) > 0 then 
+            GramMatrixFull := NullMat(dim, dim - t);
+            
+            for i in [1..dim] do 
+                for j in [1..dim - t] do 
+                    u := [1..dim]*0; u[i] := 1;
+                    v := [1..dim]*0; v[j] := 1;
+                    GramMatrixFull[i][j] := MAJORANA_InnerProduct(u,v,GramMatrix,ProductList);
+                od;
+            od;
+        fi;
+            
+        for x in unknowns do 
+            
+            j := ProductList[7][x][1];
+            k := ProductList[7][x][2];
+            
+            prod := [1..dim]*0;
+            mat := [];
+            vec := [];
+            
+            # put in values from the projections onto 2A axes
+            
+            v := [1..dim]*0; v[j] := 1;
+            w := [1..dim]*0; w[k] := 1;
+            
+            for i in [1..t] do 
+                u := [1..dim]*0; u[i] := 1;
+                
+                y := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+                
+                prod[i] := MAJORANA_InnerProduct(y,w,GramMatrix,ProductList);
+            od;
+            
+            for i in [1..dim] do 
+            
+                u := [1..dim]*0; u[i] := 1;
+                
+                y := MAJORANA_AlgebraProduct(u,v,AlgebraProducts,ProductList);
+                
+                if y <> false then 
+                    z := MAJORANA_InnerProduct(y,w,GramMatrix,ProductList);
+                    
+                    z := z - MAJORANA_InnerProduct(u,prod,GramMatrix,ProductList);
+                    
+                    Add(mat,GramMatrixFull[i]);
+                    Add(vec,z);
+                fi;
+            od;
+            
+            mat := TransposedMat(mat);
+            
+            y := SolutionMat(mat,vec);
+            
+            if y <> fail then 
+                prod{[t + 1..dim]} := y;
+                
+                AlgebraProducts[x] := prod;
+            fi; 
+            
+        od;
+    fi;
+    
+    end );
+    
 InstallGlobalFunction(MAJORANA_ReversedEchelonForm,
 function( mat )
     local nrows,     # number of rows in <mat>
@@ -2887,8 +2985,6 @@ function(input,index)
                             , x[3]
                             , OutputList);
         fi;
-        
-                                    
         
         newdimensions := [];
         
