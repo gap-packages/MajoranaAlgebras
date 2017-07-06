@@ -1788,13 +1788,9 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     if AlgebraProducts[y] = false then 
                     
                         g := ProductList[4][x[1]][x[2]];
-                        
-                        
 
                         AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
-                        
-                        
-                        
+
                         AlgebraProducts[y] := MAJORANA_RemoveNullSpace(AlgebraProducts[y],ProductList[6]);
                     fi;
                 fi;
@@ -2125,6 +2121,32 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     
     end);
     
+InstallGlobalFunction(MAJORANA_ConnectedComponents,
+
+    function(T)
+    
+    local   graph,      # graph with vertices elements of T
+            t,          # size of T
+            i,          # loop over T
+            j;          # loop over T
+            
+    LoadPackage("automata");
+    
+    t := Size(T);
+    graph := NullMat(t,0);
+    
+    for i in [1..t] do 
+        for j in [1..t] do 
+            if Order(T[i]*T[j]) <> 2 or not T[i]*T[j] in T then 
+                Add(graph[i],j);
+            fi;
+        od;
+    od;
+    
+    return AutoConnectedComponents(graph);
+    
+    end);
+
 InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
     function(G,T)

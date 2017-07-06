@@ -86,6 +86,8 @@ DeclareGlobalFunction( "MAJORANA_SetupOrbits" );
 
 DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
 
+DeclareGlobalFunction( "MAJORANA_ConnectedComponents" );
+
 DeclareGlobalFunction( "MAJORANA_MainSteps" );
 
 DeclareGlobalFunction( "MAJORANA_DihedralProducts" );

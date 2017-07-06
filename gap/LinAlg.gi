@@ -180,7 +180,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
                 heads,
                 i,
                 j,
-                pos;
+                pos,
+                relations;
         
         m := Size(mat);
         n := Size(mat[1]);
@@ -191,6 +192,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         
         sol := [1..n]*0;
         unsolved := [];
+        relations := [[],[]];
         
         heads := res.heads;
         
@@ -205,6 +207,8 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
                 for j in [i + 1 .. n] do
                     if mat[pos][j] <> 0 then 
                         if j in unsolved then
+                            Add(relations[1],mat[pos]);
+                            Add(relations[2],vec[pos]);
                             Add(unsolved,i);
                             break;
                         else
@@ -222,7 +226,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
             fi;
         od;
         
-        return [sol,unsolved];
+        return [sol,unsolved,relations];
 
         end );
     
