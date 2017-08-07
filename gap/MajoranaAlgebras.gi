@@ -209,12 +209,14 @@ InstallGlobalFunction(MAJORANA_Append,
             pos;        # position of first non zero elt of row
     
     for i in [1..Size(x[1])] do
-        if not x[1][i] in mat then 
-            pos := PositionNonZero(x[1][i]);
-            
-            Add(mat,x[1][i]/x[1][i][pos]);
-            Add(vec,x[2][i]/x[1][i][pos]);
-            
+    
+    pos := PositionNonZero(x[1][i]);
+        x[2][i] := x[2][i]/x[1][i][pos];
+        x[1][i] := x[1][i]/x[1][i][pos];
+    
+        if not x[1][i] in mat then             
+            Add(mat,x[1][i]);
+            Add(vec,x[2][i]);
         fi;
     od;
     
@@ -1716,6 +1718,10 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             g;          # conj element of x
     
     if mat <> [] then
+    
+        Display([Size(mat),Size(mat[1])]);
+        
+        Error("Matrix");
     
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
