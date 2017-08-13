@@ -163,6 +163,14 @@ InstallGlobalFunction(MAJORANA_FullFusion,
             ev,                 # a pair of eigenvalues
             x,                  # result of fusion
             new;                # new eigenvectors
+            
+    for j in ProductList[10] do 
+        for k in [1..3] do 
+            if EigenVectors[j][k] <> [] then
+                MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
+            fi;
+        od;
+    od;
 
     for j in ProductList[10] do
         
@@ -332,7 +340,6 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 vec,    # output vec
                 dim;    # size of vectors 
 
-        vec:=[];
         dim:=Size(u);
         vec:=[1..dim]*0;
 
@@ -388,7 +395,9 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 j,              # loop over v
                 k,              # pair orbit index
                 sign,           # correct for 5A axes
-                sum;            # output value
+                sum,            # output value
+                unknowns,
+                x;
         
         sum := 0;
 
@@ -410,7 +419,17 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                             sum := sum + sign*u[i]*v[j]*GramMatrix[k];
                         else
                             # cannot calculate product
-                            return false;
+                            
+                            unknowns := Positions(GramMatrix, false);
+                            
+                            x := MAJORANA_SeparateInnerProduct(u,v,unknowns,GramMatrix,ProductList);
+                            
+                            if ForAll(x[1], y -> y = 0) then 
+                                return x[2]; 
+                            else
+                                return false;
+                            fi;
+                            
                         fi;
                     fi;
                 od;
@@ -853,7 +872,46 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
 InstallGlobalFunction(MAJORANA_FullUnknownsAxiomM1,
 
-function(GramMatrix,AlgebraProducts,ProductList)
+    function(GramMatrix,AlgebraProducts,ProductList)
+
+    local   dim,            # 
+            i,              # loop over orbitals
+            j,              # loop over an orbital 
+            k,              # position of first elementz
+            l,              # position of second element
+            res,            # result of unknowns axiom M1
+            sign;           # correct sign of 5A axes
+        
+    dim := Size(ProductList[1]);
+        
+    for i in [1..dim] do 
+        for j in [1..dim] do 
+        
+            k := ProductList[3][i][j];
+            
+            if k < 0 then 
+                sign := -1; 
+            else
+                sign := 1;
+            fi;
+            
+            if GramMatrix[sign*k] = false then 
+            
+                res := MAJORANA_UnknownsAxiomM1(i,j, GramMatrix, AlgebraProducts, ProductList);
+                
+                if res <> false then 
+                    GramMatrix[sign*k] := sign*res;
+                fi;
+            fi;
+        od;
+    od;
+    
+    end );
+    
+    
+InstallGlobalFunction(MAJORANA_FullUnknownsAxiomM1Old,
+
+    function(GramMatrix,AlgebraProducts,ProductList)
 
     local   switch,         # switch for while loop
             count,          # counts any newly found products
@@ -861,7 +919,7 @@ function(GramMatrix,AlgebraProducts,ProductList)
             pos_2,          # 
             i,              # loop over orbitals
             j,              # loop over an orbital 
-            k,              # position of first element
+            k,              # position of first elementz
             l,              # position of second element
             res,            # result of unknowns axiom M1
             sign;           # correct sign of 5A axes
@@ -1073,15 +1131,18 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             i,          # index for dim of u
             j,          # index for dim of v
             l,          # ordered version of [i,j]
+            k,
+            g,
+            sign,
             x,          # vector with 1 in the ith position
-            y,          # vector with 1 in the jth position
+            y,
             pos,        # position of unknown product 
             dim;        # dimension
     
-    row := [1..Size(UnknownAlgebraProducts)]*0;
-    sum := 0;
-    
     dim := Size(AlgebraProducts[1]);
+    
+    row := [1..Size(UnknownAlgebraProducts)]*0;
+    sum := [1..dim]*0;
     
     for i in [1..dim] do
         if u[i] <> 0 then
@@ -1091,11 +1152,31 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                     l := [Minimum([i,j]),Maximum([i,j])];
                     
                     if not l in UnknownAlgebraProducts then 
+                    
+                        if true then 
                         
-                        x := [1..dim]*0; x[i] := 1;
-                        y := [1..dim]*0; y[j] := 1;
+                            k := ProductList[3][i][j];
+                            g := ProductList[4][i][j];
+                            
+                            if k > 0 then 
+                                sign := 1;
+                            else
+                                sign := -1;
+                                k := -k;
+                            fi;
+                            
+                            x := AlgebraProducts[k];
+
+                            sum := sum - sign*u[i]*v[j]*MAJORANA_ConjugateVector(x,g,ProductList);
+                        else
                         
-                        sum := sum - u[i]*v[j]*MAJORANA_AlgebraProduct(x,y,AlgebraProducts,ProductList);
+                            x := [1..dim]*0; x[i] := 1;
+                            y := [1..dim]*0; y[j] := 1;
+                            
+                            sum := sum - u[i]*v[j]*MAJORANA_AlgebraProduct(x,y,AlgebraProducts,ProductList);
+                        fi;
+                        
+                        
                     else
                         
                         pos := Position(UnknownAlgebraProducts,l);
@@ -1105,6 +1186,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             od;
         fi;
     od;
+    
+    sum := MAJORANA_RemoveNullSpace(sum,ProductList[6]);
        
     return [row,sum];
     
@@ -1721,7 +1804,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
         Display([Size(mat),Size(mat[1])]);
         
-        Error("Matrix");
+        # Error("Matrix");
     
         Solution := MAJORANA_SolutionMatVecs(mat,vec);
 
@@ -2020,9 +2103,12 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
             a,
             b,
             mat,
-            x;
+            x,
+            table;
             
     dim := Size(ProductList[1]);
+    
+    table := [0,1/4,1/32];
 
     for i in ProductList[10] do
                     
@@ -2048,25 +2134,17 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
             if mat <> [] then 
 
-                EigenVectors[i][1]:=ShallowCopy(NullspaceMat(mat));
-                EigenVectors[i][2]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/4));
-                EigenVectors[i][3]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim)/32));
-                EigenVectors[i][4]:=ShallowCopy(NullspaceMat(mat - IdentityMat(dim) ));
+                for j in [1..3] do 
+                    Append(EigenVectors[i][j], ShallowCopy(NullspaceMat(mat - IdentityMat(dim)*table[j])));
+                    EigenVectors[i][j] := ShallowCopy(BaseMat(EigenVectors[i][j]));
+                od;
 
                 if ProductList[6] <> false and ProductList[6][2] <> [] then 
-                    for j in [1..4] do 
+                    for j in [1..3] do 
                         for x in EigenVectors[i][j] do
                             x := MAJORANA_RemoveNullSpace(x,ProductList[6]);
                         od;
                     od;
-                fi;
-                                       
-                if Size(EigenVectors[i][4]) <> 1 and ProductList[6] <> false then
-                    return [false, "Algebra does not obey axiom M5"];
-                elif Size(EigenVectors[i][1]) + Size(EigenVectors[i][2]) + Size(EigenVectors[i][3]) + Size(EigenVectors[i][4]) > dim 
-                    and ProductList[6] <> false then
-                    
-                    return [false,"Algebra does not obey axiom M4"];
                 fi;
             fi;
         fi; 
