@@ -48,6 +48,8 @@ DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_FullUnknownsAxiomM1" );
 
+DeclareGlobalFunction( "MAJORANA_FullUnknownsAxiomM1Old" );
+
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProductsAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
@@ -55,6 +57,8 @@ DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
+
+DeclareGlobalFunction( "MAJORANA_FindAlpha" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
