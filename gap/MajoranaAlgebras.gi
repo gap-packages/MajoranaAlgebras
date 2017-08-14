@@ -176,7 +176,7 @@ InstallGlobalFunction(MAJORANA_FullFusion,
         
         new := [ [], [], [] ];
         
-        for k in [[1,2],[1,3],[2,3]] do
+        for k in [[1,1],[1,2],[1,3],[2,3],[2,2],[3,3]] do
         
             ev := [,];
         
@@ -218,7 +218,7 @@ InstallGlobalFunction(MAJORANA_Append,
     
     for i in [1..Size(x[1])] do
     
-    pos := PositionNonZero(x[1][i]);
+        pos := PositionNonZero(x[1][i]);
         x[2][i] := x[2][i]/x[1][i][pos];
         x[1][i] := x[1][i]/x[1][i][pos];
     
@@ -229,8 +229,8 @@ InstallGlobalFunction(MAJORANA_Append,
     od;
     
     end);
-    
-InstallGlobalFunction( MAJORANA_FindVectorPermutations,
+
+InstallGlobalFunction( MAJORANA_FindVectorPermutations, # not checked
     
     function(ProductList)
     
@@ -285,7 +285,7 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutations,
     end);
  
     
-InstallGlobalFunction( MAJORANA_ConjugateVector,
+InstallGlobalFunction( MAJORANA_ConjugateVector, # can we store this instead of g?
 
     function(v,g,ProductList)
     
@@ -620,7 +620,8 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     od;
     
     if Size(unknowns) > 0 then 
-        for i in ProductList[10] do
+    
+        for i in ProductList[10] do        
             for j in [0..3] do 
                 for k in [j+1..3] do
 
@@ -1258,6 +1259,75 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
     end);     
     
+InstallGlobalFunction(MAJORANA_FindAlpha,
+
+    function(i,ev_a,ev_b,beta,gamma,UnknownAlgebraProducts,EigenVectors,ProductList)
+    
+    local   j, 
+            k,
+            dim,
+            bad,
+            list,
+            x,
+            alpha,
+            pos;
+        
+    dim := Size(ProductList[1]);
+            
+    list := [];
+    bad := [];
+                   
+    for j in [1..dim] do
+        if gamma[j] <> 0 then 
+            for k in [1 .. j - 1] do 
+                if [k,j] in UnknownAlgebraProducts then 
+                    Add(bad,k);
+                fi;
+            od;
+            for k in [j + 1 .. dim] do 
+                if [j,k] in UnknownAlgebraProducts then 
+                    Add(bad,k);
+                fi;
+            od;
+        fi;
+    od;
+    
+    bad := DuplicateFreeList(bad);
+    
+    Sort(bad);
+
+    for j in [1..Size(EigenVectors[i][ev_b])] do 
+        Add(list, StructuralCopy(EigenVectors[i][ev_b][j]{bad}));
+    od;
+
+    if ev_a = ev_b and beta in list then 
+        pos := Position(list,beta);
+        list[pos] := [1..Size(bad)]*0;
+    else
+        pos := 0;
+    fi;
+    
+    x := SolutionMat(list,beta{bad});
+    
+    if x <> fail then 
+    
+        alpha := [];
+    
+        for j in [1..Size(x)] do
+            if ev_a <> ev_b or j <> pos then
+                alpha := alpha + x[j]*EigenVectors[i][ev_b][j];
+            fi;
+        od;
+        
+        return alpha;
+        
+    else
+        return fail;
+    fi;
+    
+    end );   
+        
+    
 InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(i,ev_a, ev_b, EigenVectors,UnknownAlgebraProducts,AlgebraProducts,ProductList,GramMatrix)
@@ -1312,46 +1382,9 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 row := row + x[1];
                 sum := sum + x[2];
                    
-                # find a suitable alpha   
-                   
-                for m in [1..dim] do
-                    if gamma[m] <> 0 then 
-                        for k in [1 .. m - 1] do 
-                            if [k,m] in UnknownAlgebraProducts then 
-                                Add(bad,k);
-                            fi;
-                        od;
-                        for k in [m + 1 .. dim] do 
-                            if [m,k] in UnknownAlgebraProducts then 
-                                Add(bad,k);
-                            fi;
-                        od;
-                    fi;
-                od;
+                alpha := MAJORANA_FindAlpha(i,ev_a,ev_b,beta,gamma,UnknownAlgebraProducts,EigenVectors,ProductList);
                 
-                bad := DuplicateFreeList(bad);
-                
-                Sort(bad);
-
-                for m in [1..Size(EigenVectors[i][ev_b])] do 
-                    Add(list, StructuralCopy(EigenVectors[i][ev_b][m]{bad}));
-                od;
-
-                if ev_a = ev_b then 
-                    list[a] := [1..Size(bad)]*0;
-                fi;
-                
-                x := SolutionMat(list,beta{bad});
-                
-                if x <> fail then 
-                    
-                    alpha := [];
-                    
-                    for m in [1..Size(x)] do
-                        if ev_a <> ev_b or m <> a then
-                            alpha := alpha + x[m]*EigenVectors[i][ev_b][m];
-                        fi;
-                    od;
+                if alpha <> fail then 
                 
                     y := MAJORANA_AlgebraProduct((alpha - beta),gamma,AlgebraProducts,ProductList);
                     
