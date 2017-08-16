@@ -258,57 +258,44 @@ InstallGlobalFunction(MAJORANA_Append,
     
     end);
 
-InstallGlobalFunction( MAJORANA_FindVectorPermutations, # not checked
+InstallGlobalFunction( MAJORANA_FindVectorPermutation, 
     
-    function(ProductList)
+    function(g,ProductList)
     
     local   dim,        # size of coordinates
-            len,        # number of unique group elements (before adding inverse)
             i,          # loop over group elements
-            g,          # group element
             j,          # loop over coordinates
             list,       # list to build permutation
-            p,          # the permutation
+            perm,       # the permutation
             signlist,   # corrects signs of 5A axes
             pos_1,      # position of conjugated element in longcoordinates
             pos_2;      # corresponding position in coordinates
     
     dim := Size(ProductList[1]);
     
-    ProductList[15] := Enumerator(ProductList[8]);
+    signlist := ListWithIdenticalEntries(dim,1);
     
-    len := Length(ProductList[15]);
-    
-    ProductList[16] := [1..len]*0;
-
-    for i in [1..len] do
-    
-        if ProductList[16][i] = 0 then 
-    
-            g := ProductList[15][i];
+    if g = () then 
+        return [(),signlist];
+    else
+        list := [1..dim]*0;
+        for j in [1..dim] do 
         
-            list := [1..dim]*0;
-            signlist := ListWithIdenticalEntries(dim,1);
+            pos_1 := Position(ProductList[2],ProductList[1][j]^g);
+            pos_2 := ProductList[5][pos_1];
             
-            for j in [1..dim] do 
-            
-                pos_1 := Position(ProductList[2],ProductList[1][j]^g);
-                pos_2 := ProductList[5][pos_1];
-                
-                if pos_2 > 0 then 
-                    list[j] := pos_2;
-                else
-                    list[j] := -pos_2;
-                    signlist[-pos_2] := -1;
-                fi;
-            od;
-            
-            p := PermList(list);
-            
-            ProductList[16][i] := [p,signlist];
-            
-        fi;        
-    od;
+            if pos_2 > 0 then 
+                list[j] := pos_2;
+            else
+                list[j] := -pos_2;
+                signlist[-pos_2] := -1;
+            fi;
+        od;
+        
+        perm := PermList(list);
+    
+        return [perm,signlist];
+    fi;
     
     end);
  
@@ -320,18 +307,15 @@ InstallGlobalFunction( MAJORANA_ConjugateVector, # can we store this instead of 
     local   i,              # loop over vector
             dim,            # length of vector
             vec,            # output vector
-            pos,
-            p,
+            perm,
             sign,           # corrects sign of 5A axes 
             pos_1,          # position of conjugated element in longcoords
             pos_2;          # position of conjugated element in coords
     
-    if g <> () then 
+    if g[1] <> () then 
         
-        pos := Position(ProductList[15],g);
-        
-        p := ProductList[16][pos][1];
-        sign := ProductList[16][pos][2];
+        perm := g[1];
+        sign := g[2];
         
         dim := Size(v);
         
@@ -341,7 +325,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVector, # can we store this instead of 
         
             if v[i] <> 0 then 
             
-                vec[i^p] := sign[i^p]*v[i];
+                vec[i^perm] := sign[i^perm]*v[i];
                 
             fi;
         od;
@@ -371,7 +355,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         dim:=Size(u);
         vec:=[1..dim]*0;
 
-        if u = vec or v = vec then
+        if ForAll(u, x -> x = 0) or ForAll(v, x -> x = 0) then
             return u*0;
         fi;
 
@@ -397,10 +381,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                             
                             vec := vec + sign*u[dim - i + 1]*v[dim - j + 1]*MAJORANA_ConjugateVector(x,g,list);
                         else
-                            if u[dim - i + 1] <> 0 and v[dim - j + 1] <> 0 then
-                                # cannot calculate product
-                                return false;
-                            fi;
+                            # cannot calculate product
+                            return false;
                         fi;
                     fi;
                 od;
@@ -1178,7 +1160,11 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             for j in [1..dim] do
                 if v[j] <> 0 then
                 
-                    l := [Minimum([i,j]),Maximum([i,j])];
+                    if i < j then 
+                        l := [i,j];
+                    else
+                        l := [j,i];
+                    fi;
                     
                     if not l in UnknownAlgebraProducts then 
                     
@@ -1451,9 +1437,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                                         Error("empty");
                                     fi;
                                     
-                                    y := MAJORANA_ConjugateVector(sum,g,ProductList);
-                                
-                                    Add(mat,MAJORANA_ConjugateRow(row,g,UnknownAlgebraProducts,ProductList));
+                                    y := MAJORANA_ConjugateVector(sum,g[2],ProductList);
+                                    Add(mat,MAJORANA_ConjugateRow(row,g[1],UnknownAlgebraProducts,ProductList));
                                     Add(vec,MAJORANA_RemoveNullSpace(y,ProductList[6]));
                                     
                                     Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
@@ -1581,6 +1566,7 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
             table,
             pos_1,
             pos_2,
+            perm,
             dim,    # size of coordinates
             g;      # conjugating element
             
@@ -1593,7 +1579,6 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
             if ProductList[4][i][j] = 0 then 
             
                 x := [ProductList[1][i],ProductList[1][j]];
-                y := [0,0];
                 
                 # create list of other indices which are going to have this elt
                 
@@ -1605,21 +1590,27 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                     od;
                 od;
                 
+                # find orbit
+                
                 k := ProductList[3][i][j];
             
                 if k < 0 then 
                     k := -k;
                 fi; 
             
+                # find rep of orbit
+            
                 y := ProductList[9][k][1];
                 
                 l := 1;
                 
-                while l  < Size(list) + 1 do 
+                while l < Size(list) + 1 do 
             
                     g := RepresentativeAction(ProductList[8],y,list[l],OnPairs);
                 
                     if g <> fail then
+                    
+                        perm := MAJORANA_FindVectorPermutation(g,ProductList);
                     
                         for z in list do
                             
@@ -1634,8 +1625,8 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                                 pos_2 := -pos_2;
                             fi;
                             
-                            ProductList[4][pos_1][pos_2] := g;
-                            ProductList[4][pos_2][pos_1] := g;
+                            ProductList[4][pos_1][pos_2] := perm;
+                            ProductList[4][pos_2][pos_1] := perm;
                         od;
                         
                         l := Size(list) + 1;
@@ -1645,6 +1636,8 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                         g := RepresentativeAction(ProductList[8],y,Reversed(list[l]),OnPairs);
                     
                         if g <> fail then 
+                        
+                            perm := MAJORANA_FindVectorPermutation(g,ProductList);
                         
                             for z in list do
                             
@@ -1659,8 +1652,8 @@ InstallGlobalFunction( MAJORANA_PairConjElements,
                                     pos_2 := -pos_2;
                                 fi;
                                 
-                                ProductList[4][pos_1][pos_2] := g;
-                                ProductList[4][pos_2][pos_1] := g;
+                                ProductList[4][pos_1][pos_2] := perm;
+                                ProductList[4][pos_2][pos_1] := perm;
                             od;
                             
                             l := Size(list) + 1;
@@ -1772,8 +1765,8 @@ InstallGlobalFunction(MAJORANA_PairRepresentatives,
             fi;
                             
             
-            ProductList[4][pos_1][pos_2] := ();
-            ProductList[4][pos_2][pos_1] := ();
+            ProductList[4][pos_1][pos_2] := [(),[]];
+            ProductList[4][pos_2][pos_1] := [(),[]];
             
             ProductList[3][pos_1][pos_2] := i;
             ProductList[3][pos_2][pos_1] := i;
@@ -1888,7 +1881,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                     
                         g := ProductList[4][x[1]][x[2]];
 
-                        AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(Solution[1][i],Inverse(g),ProductList);
+                        AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(Solution[1][i],[Inverse(g[1]),g[2]],ProductList);
 
                         AlgebraProducts[y] := MAJORANA_RemoveNullSpace(AlgebraProducts[y],ProductList[6]);
                     fi;
@@ -2083,7 +2076,8 @@ InstallGlobalFunction(MAJORANA_SetupOrbits,
                 
                 k := ProductList[10][j];
                 
-                ProductList[12][i] := RepresentativeAction(G,T[k],T[i]);
+                ProductList[12][i][1] := RepresentativeAction(G,T[k],T[i]);
+                ProductList[12][i][2] := MAJORANA_FindVectorPermutation(ProductList[12][i][1],ProductList);
                 
                 j := Size(ProductList[11]) + 1;;
                 
@@ -2936,14 +2930,13 @@ function(input,index)
     ProductList[7]  := [];    
     ProductList[8]  := G;
     ProductList[10] := [];
-    ProductList[12] := [1..t]*0;
+    ProductList[12] := NullMat(t,2);
     ProductList[13] := [1..t]*0;
     ProductList[14] := [];
-    ProductList[15] := [];
-
-    MAJORANA_SetupOrbits(T, ProductList);
 
     MAJORANA_LongCoordinates(t, ProductList);
+    
+    MAJORANA_SetupOrbits(T, ProductList);
     
     MAJORANA_SetupOrbitals(ProductList, OrbitalsT);
 
@@ -2952,8 +2945,6 @@ function(input,index)
     MAJORANA_PairOrbits(ProductList);
 
     MAJORANA_PairConjElements(ProductList);
-    
-    MAJORANA_FindVectorPermutations(ProductList);
     
                                 ## STEP 3: PRODUCTS AND EVECS I ##
                                 
