@@ -1,8 +1,9 @@
 BindGlobal("PSL211",function() 
-    local G, T; 
+    local G, T, input; 
     G:=PSL(2,11); 
     T:=Filtered(AsList(G),x->Order(x) = 2); 
-    return([G,T]); 
+    input := ShapesOfMajoranaRepresentation(G,T);
+    return(input); 
     end
     );
     

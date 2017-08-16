@@ -56,7 +56,9 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
             ev,                 # new eigenvector
             pos,                # index of new eigenvector
             dim,                # size of coordinates              
-            FusionError;        # list of indexes which do not obey fusion
+            FusionError,        # list of indexes which do not obey fusion
+            unknowns,
+            alpha;
             
     dim := Size(ProductList[1]);
 
@@ -64,6 +66,8 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
     
     NewEigenVectors := [];
     FusionError := [];
+
+    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
 
     u := [1..dim]*0;; u[j] := 1;
 
@@ -77,7 +81,15 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
-                if x <> false then
+                if x = false then 
+                    alpha := MAJORANA_FindAlpha(j,a,b,ev_a[k],ev_b[l],unknowns,EigenVectors,ProductList);
+                    
+                    if alpha <> fail then 
+                        x := MAJORANA_AlgebraProduct(alpha - ev_a[k],ev_b[l],AlgebraProducts,ProductList);
+                    fi;
+                fi;
+                
+                if x <> false then 
                     y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList);
                     if y <> false then
                         x := x - y*u;
@@ -100,7 +112,15 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
-                if x <> false then
+                if x = false then 
+                    alpha := MAJORANA_FindAlpha(j,a,b,ev_a[k],ev_b[l],unknowns,EigenVectors,ProductList);
+                    
+                    if alpha <> fail then 
+                        x := MAJORANA_AlgebraProduct(alpha - ev_a[k],ev_b[l],AlgebraProducts,ProductList);
+                    fi;
+                fi;
+                
+                if x <> false then 
                     
                     y := MAJORANA_InnerProduct(u, x, GramMatrix, ProductList);
                     
@@ -130,6 +150,14 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
             for l in [1..Size(ev_b)] do
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
+                
+                if x = false then 
+                    alpha := MAJORANA_FindAlpha(j,b,a,ev_a[k],ev_b[l],unknowns,EigenVectors,ProductList);
+                    
+                    if alpha <> fail then 
+                        x := MAJORANA_AlgebraProduct(alpha - ev_a[k],ev_b[l],AlgebraProducts,ProductList);
+                    fi;
+                fi;                
                 
                 if x <> false then 
                 
@@ -3165,11 +3193,11 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     # Check M2
 
-    # error := MAJORANA_AxiomM2(res[5],res[6],res[8]);
+     error := MAJORANA_AxiomM2(res[5],res[6],res[8]);
 
-    # if error = -1 then
-    #    return "Algebra does not obey axiom M2";
-    #fi;
+    if error = -1 then
+        return "Algebra does not obey axiom M2";
+    fi;
     
     return true;
     
