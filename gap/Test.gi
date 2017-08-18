@@ -54,6 +54,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                 
                                 if x <> false then
                                 
+                                    Error("Pause");
                                     y:=MAJORANA_AlgebraProduct(u,x,AlgebraProducts,ProductList);
                                     
                                     if y <> false and y <> ev * x then 
