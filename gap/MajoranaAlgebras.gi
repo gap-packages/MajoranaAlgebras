@@ -1523,7 +1523,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             for k in [1..3] do
             
                 for l in [1..2] do 
-                    if not [k,l] in [[2,2]] then 
+                    if not [k,l] in [[1,1],[2,2]] then 
                 
                         x := MAJORANA_Resurrection(j,k,l,EigenVectors,unknowns,AlgebraProducts,ProductList,GramMatrix);
                         
