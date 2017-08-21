@@ -58,7 +58,8 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
             dim,                # size of coordinates              
             FusionError,        # list of indexes which do not obey fusion
             unknowns,
-            alpha;
+            alpha,
+            list;
             
     dim := Size(ProductList[1]);
 
@@ -77,7 +78,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
     # the 1/4,1/4 case is special
     if (a=2) and (b=2) then 
         for k in [1..Size(ev_a)] do
-            for l in [1..Size(ev_b)] do
+            for l in [k..Size(ev_b)] do
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
@@ -108,7 +109,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
     # the 1/32, 1/32 case is even more special    
     elif (a=3) and (b=3) then
         for k in [1..Size(ev_a)] do
-            for l in [1..Size(ev_b)] do
+            for l in [k..Size(ev_b)] do
                 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
@@ -147,7 +148,14 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
         od;
     elif not [a,b] in [[2,2],[3,3]] then 
         for k in [1..Size(ev_a)] do
-            for l in [1..Size(ev_b)] do
+            
+            if a = b then 
+                list := [k..Size(ev_b)];
+            else
+                list := [1..Size(ev_b)];
+            fi;
+            
+            for l in list do
 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
                 
