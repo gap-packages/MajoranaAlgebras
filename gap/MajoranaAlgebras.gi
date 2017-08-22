@@ -1568,16 +1568,11 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     vec := [];
     record := [];
     
-    for m in [1..Size(UnknownAlgebraProducts)] do
-    
-        j := UnknownAlgebraProducts[m][1];
+    for j in [1..dim] do
     
         a := [1..dim]*0; a[j] := 1;        
     
         for k in [1..Size(ProductList[6][2])] do
-        
-            row := [1..Size(UnknownAlgebraProducts)]*0;
-            sum := [];
             
             x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][2][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
 
