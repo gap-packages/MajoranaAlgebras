@@ -1543,14 +1543,15 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             od;
         od;
         
-        if ProductList[6] <> [] and ProductList[6] <> false then 
+        if ProductList[6] <> [] and ProductList[6] <> false then                  
                                 
             x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
             
             MAJORANA_Append(x,mat,vec);
             
-            MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
-            
+            if mat <> [] then 
+                MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+            fi;            
         fi;
     fi;
 
@@ -1560,7 +1561,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
     function(UnknownAlgebraProducts, AlgebraProducts, ProductList)
     
-    local i, m, j, k, row, sum, dim, y, mat, vec, a, x, record;
+    local i, j, m, k, row, sum, dim, y, mat, vec, a, x, record;
     
     dim := Size(ProductList[1]);
     
@@ -1568,10 +1569,9 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     vec := [];
     record := [];
     
-    for j in [1..dim] do
-    
+    for j in [1..dim] do 
         a := [1..dim]*0; a[j] := 1;        
-    
+
         for k in [1..Size(ProductList[6][2])] do
             
             x := MAJORANA_SeparateAlgebraProduct(a,ProductList[6][2][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
@@ -1902,6 +1902,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             unsolved,
             prod,
             perm,
+            nonzero,
             j;
     
     if mat <> [] then
@@ -1969,11 +1970,19 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             fi;
         od;
            
+        nonzero := [];
                             
         for j in [1..Size(sol[3][1])] do  
             sol[3][1][j] := sol[3][1][j]{unsolved};
-            sol[3][2][j] := MAJORANA_RemoveNullSpace(sol[3][2][j],ProductList[6]);
+            
+            if ForAny(sol[3][1][j], x -> x <> 0) then 
+                sol[3][2][j] := MAJORANA_RemoveNullSpace(sol[3][2][j],ProductList[6]);
+                Add(nonzero,j);
+            fi;
         od;
+        
+        sol[3][1] := sol[3][1]{nonzero};
+        sol[3][2] := sol[3][2]{nonzero};
         
         return [sol[3][1],sol[3][2],UnknownAlgebraProducts{unsolved}];
     else
@@ -3101,8 +3110,8 @@ function(input,index)
         switchmain := 0;
     fi;
     
-    while switchmain = 0 do 
-
+    while switchmain = 0 do
+        
                                     ## STEP 5: INNER PRODUCTS M1 ##
                                     
         MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
