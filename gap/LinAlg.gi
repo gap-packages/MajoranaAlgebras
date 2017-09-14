@@ -226,7 +226,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
             fi;
         od;
         
-        Display("Solved it!");
+        # Display("Solved it!");
         
         return [sol,unsolved,relations];
 
