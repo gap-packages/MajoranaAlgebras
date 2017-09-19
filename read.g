@@ -12,3 +12,6 @@ ReadPackage( "MajoranaAlgebras", "gap/Test.gi");
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Examples.gi");
+
+ReadPackage( "MajoranaAlgebras", "gap/ThreeClosed.gi");
+

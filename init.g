@@ -10,4 +10,4 @@ ReadPackage( "MajoranaAlgebras", "gap/Test.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
 
-
+ReadPackage( "MajoranaAlgebras", "gap/ThreeClosed.gd");
