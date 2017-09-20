@@ -699,7 +699,7 @@ function(EigenVectors, AlgebraProducts, ProductList)
     
     table := [0, 1/4, 1/32];
     
-    dim := Size(AlgebraProducts[1]);
+    dim := Size(ProductList[1]);
     
     for i in ProductList[10][1] do
     
@@ -1158,7 +1158,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             pos,        # position of unknown product 
             dim;        # dimension
     
-    dim := Size(AlgebraProducts[1]);
+    dim := Size(ProductList[1]);
     
     row := [1..Size(UnknownAlgebraProducts)]*0;
     sum := [1..dim]*0;
@@ -1379,7 +1379,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
             sign, 
             record;
     
-    dim := Size(AlgebraProducts[1]);
+    dim := Size(ProductList[1]);
     
     mat := [];
     vec := [];
