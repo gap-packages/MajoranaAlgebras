@@ -1404,55 +1404,60 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 row := row + x[1];
                 sum := sum + x[2];
                    
-                alpha := MAJORANA_FindAlpha(i,ev_a,ev_b,beta,gamma,UnknownAlgebraProducts,EigenVectors,ProductList);
+                # alpha := MAJORANA_FindAlpha(i,ev_a,ev_b,beta,gamma,UnknownAlgebraProducts,EigenVectors,ProductList);
                 
-                if alpha <> fail then 
+                # if alpha <> fail then 
+                
+                for alpha in EigenVectors[i][ev_b] do 
                 
                     y := MAJORANA_AlgebraProduct((alpha - beta),gamma,AlgebraProducts,ProductList);
                     
-                    u := [1..dim]*0; u[i] := 1;
-                        
-                    z := MAJORANA_SeparateAlgebraProduct(u,y,UnknownAlgebraProducts,AlgebraProducts,ProductList);  
-                        
-                    row := row + z[1];
-                    sum := sum + z[2];
-                
-                    if ev_b = 2 then 
+                    if y <> false then 
                     
-                        u := [1..dim]*0; u[i] := 1; 
-                        x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList);
-                    
-                        if x <> false then 
-                            sum := sum + u*x/4;
-                        else
-                            row := [];
-                        fi;                            
-                    fi;
-                
-                    if row <> [] then 
-                        if ForAll(row, x -> x = 0) then 
-                            if ForAny( sum, x -> x <> 0) then
-                                if ProductList[6] <> false then 
-                                    Error("Resurrection error");
-                                fi;
-                            fi;
-                        else
+                        u := [1..dim]*0; u[i] := 1;
                             
-                            for g in DuplicateFreeList(ProductList[12]) do
-                                if g <> false then 
-                                
-                                    if sum = [] then 
-                                        Error("empty");
+                        z := MAJORANA_SeparateAlgebraProduct(u,y,UnknownAlgebraProducts,AlgebraProducts,ProductList);  
+                            
+                        row := row + z[1];
+                        sum := sum + z[2];
+                    
+                        if ev_b = 2 then 
+                        
+                            u := [1..dim]*0; u[i] := 1; 
+                            x := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList);
+                        
+                            if x <> false then 
+                                sum := sum + u*x/4;
+                            else
+                                row := [];
+                            fi;                            
+                        fi;
+                    
+                        if row <> [] then 
+                            if ForAll(row, x -> x = 0) then 
+                                if ForAny( sum, x -> x <> 0) then
+                                    if ProductList[6] <> false then 
+                                        Error("Resurrection error");
                                     fi;
-                                    
-                                    y := MAJORANA_ConjugateVector(sum,g[2],ProductList);
-                                    Add(mat,MAJORANA_ConjugateRow(row,g[1],UnknownAlgebraProducts,ProductList));
-                                    Add(vec,MAJORANA_RemoveNullSpace(y,ProductList[6]));
-                                    
-                                    Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
                                 fi;
-                            od;
-                        fi;  
+                            else
+                                
+                                for g in DuplicateFreeList(ProductList[12]) do
+                                    if g <> false then 
+                                    
+                                        if sum = [] then 
+                                            Error("empty");
+                                        fi;
+                                        
+                                        y := MAJORANA_ConjugateVector(sum,g[2],ProductList);
+                                        Add(mat,MAJORANA_ConjugateRow(row,g[1],UnknownAlgebraProducts,ProductList));
+                                        Add(vec,MAJORANA_RemoveNullSpace(y,ProductList[6]));
+                                        
+                                        Add(record,[i,ev_a,ev_b,alpha,beta,gamma,g]);
+                                    fi;
+                                od;
+                            fi;  
+                        fi;
                     fi;
                 fi;
             fi;
