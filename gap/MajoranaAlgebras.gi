@@ -730,6 +730,8 @@ function(EigenVectors, AlgebraProducts, ProductList)
                     fi;
                 od;
             od;
+            
+            Display("EigenVectors unknowns");
 
             MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
         fi;
@@ -1533,7 +1535,7 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
                             MAJORANA_Append(x,mat,vec);
                             Append(record, x[3]);
                             
-                            Display([k,l,"Fusion"]);
+                            Display([k,l,"Resurrection"]);
                         
                             y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                             
@@ -1554,6 +1556,9 @@ InstallGlobalFunction(MAJORANA_FullResurrection,
             MAJORANA_Append(x,mat,vec);
             
             if mat <> [] then 
+                
+                Display("Nullspace");
+            
                 MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
             fi;            
         fi;
@@ -3359,11 +3364,11 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     # Check M2
 
-     error := MAJORANA_AxiomM2(res[5],res[6],res[8]);
+    # error := MAJORANA_AxiomM2(res[5],res[6],res[8]);
 
-    if error = -1 then
-        return "Algebra does not obey axiom M2";
-    fi;
+    # if error = -1 then
+    #    return "Algebra does not obey axiom M2";
+    # fi;
     
     return true;
     
