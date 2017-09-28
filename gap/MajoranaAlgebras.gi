@@ -83,7 +83,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
                 if x = false then 
-                    alpha := MAJORANA_FindAlpha(j,a,b,ev_a[k],ev_b[l],unknowns,EigenVectors,ProductList);
+                    alpha := MAJORANA_FindAlpha(ev_a[k],ev_b[l],unknowns,EigenVectors[j][b],ProductList);
                     
                     if alpha <> fail then 
                         x := MAJORANA_AlgebraProduct(alpha - ev_a[k],ev_b[l],AlgebraProducts,ProductList);
@@ -113,8 +113,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                 
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
 
-                if x = false then 
-                    alpha := MAJORANA_FindAlpha(j,a,b,ev_a[k],ev_b[l],unknowns,EigenVectors,ProductList);
+                if x = false then alpha := MAJORANA_FindAlpha(ev_a[k],ev_b[l],unknowns,EigenVectors[j][b],ProductList);
                     
                     if alpha <> fail then 
                         x := MAJORANA_AlgebraProduct(alpha - ev_a[k],ev_b[l],AlgebraProducts,ProductList);
@@ -160,7 +159,7 @@ function(a, b, j, AlgebraProducts, EigenVectors, GramMatrix, ProductList)
                 x := MAJORANA_AlgebraProduct( ev_a[k], ev_b[l], AlgebraProducts, ProductList );
                 
                 if x = false then 
-                    alpha := MAJORANA_FindAlpha(j,b,a,ev_a[k],ev_b[l],unknowns,EigenVectors,ProductList);
+                    alpha := MAJORANA_FindAlpha(ev_a[k],ev_b[l],unknowns,EigenVectors[j][a],ProductList);
                     
                     if alpha <> fail then 
                         x := MAJORANA_AlgebraProduct(alpha - ev_a[k],ev_b[l],AlgebraProducts,ProductList);
@@ -1285,7 +1284,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
 InstallGlobalFunction(MAJORANA_FindAlpha,
 
-    function(i,ev_a,ev_b,beta,gamma,UnknownAlgebraProducts,EigenVectors,ProductList)
+    function(beta,gamma,UnknownAlgebraProducts,evecs,ProductList)
     
     local   j, 
             k,
@@ -1320,11 +1319,11 @@ InstallGlobalFunction(MAJORANA_FindAlpha,
     
     Sort(bad);
 
-    for j in [1..Size(EigenVectors[i][ev_b])] do 
-        Add(list, StructuralCopy(EigenVectors[i][ev_b][j]{bad}));
+    for j in [1..Size(evecs)] do 
+        Add(list, StructuralCopy(evecs[j]{bad}));
     od;
 
-    if ev_a = ev_b and beta in list then 
+    if beta in list then 
         pos := Position(list,beta);
         list[pos] := [1..Size(bad)]*0;
     else
@@ -1338,8 +1337,8 @@ InstallGlobalFunction(MAJORANA_FindAlpha,
         alpha := [];
     
         for j in [1..Size(x)] do
-            if ev_a <> ev_b or j <> pos then
-                alpha := alpha + x[j]*EigenVectors[i][ev_b][j];
+            if j <> pos then
+                alpha := alpha + x[j]*evecs[j];
             fi;
         od;
         
@@ -1406,7 +1405,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 row := row + x[1];
                 sum := sum + x[2];
                    
-                alpha := MAJORANA_FindAlpha(i,ev_a,ev_b,beta,gamma,UnknownAlgebraProducts,EigenVectors,ProductList);
+                alpha := MAJORANA_FindAlpha(beta,gamma,UnknownAlgebraProducts,EigenVectors[i][ev_b],ProductList);
                 
                 if alpha <> fail then 
                 
