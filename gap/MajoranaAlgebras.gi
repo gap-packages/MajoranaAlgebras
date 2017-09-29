@@ -37,6 +37,99 @@ function(AlgebraProducts, ProductList)
     return AsSet(unknowns);
 end);
 
+InstallGlobalFunction( MAJORANA_NewFusion,
+
+function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
+
+    local   i,
+            j,
+            k,
+            a,
+            b,
+            dim,
+            unknowns,
+            new,
+            u,
+            evals,
+            new_ev,
+            pos,
+            mat,
+            x,
+            null,
+            bad;
+    
+    dim := Size(ProductList[1]);
+    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
+    
+    for i in ProductList[10][1] do 
+        
+        new := [ [], [], [] ];
+        u := [1..dim]*0; u[i] := 1;
+    
+        for evals in [[1,1],[1,2],[1,3],[2,3]] do 
+            
+            new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+            pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
+            
+            for a in EigenVectors[i][evals[1]] do 
+            
+                mat := [];
+            
+                for b in EigenVectors[i][evals[2]] do 
+                    
+                    x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                    
+                    if x <> false then 
+                        Add(new[pos],x);
+                    else
+                        Add(mat, b);
+                    fi;
+                od;
+                
+                if mat <> [] then 
+                
+                    bad := [];
+                    
+                    for j in [1..dim] do
+                        if a[j] <> 0 then 
+                            for k in [1 .. j - 1] do 
+                                if [k,j] in unknowns then 
+                                    Add(bad,k);
+                                fi;
+                            od;
+                            for k in [j + 1 .. dim] do 
+                                if [j,k] in unknowns then 
+                                    Add(bad,k);
+                                fi;
+                            od;
+                        fi;
+                    od;
+
+                    bad := DuplicateFreeList(bad);
+        
+                    Sort(bad);
+                    
+                    null := NullspaceMat(List(mat, x -> x{bad}));
+                    
+                    for j in [1..Size(null)] do 
+                        
+                        b := null[i]*mat;
+                        
+                        x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                        
+                        Add(new[pos],x);
+                        
+                    od;
+                fi; 
+            od;
+        od;
+    od;
+    
+    return [true];    
+    
+    end );     
+    
+
 # This creates new eigenvectors through fusion rules
 
 InstallGlobalFunction( MAJORANA_Fusion,
@@ -191,7 +284,7 @@ end);
 
 InstallGlobalFunction(MAJORANA_FullFusion,
 
-    function(AlgebraProducts,EigenVectors, GramMatrix, ProductList)
+    function(GramMatrix, AlgebraProducts,EigenVectors,ProductList)
     
     local   j,                  # loop over T
             k,                  # loop over pairs of eigenvalues
@@ -1322,13 +1415,6 @@ InstallGlobalFunction(MAJORANA_FindAlpha,
     for j in [1..Size(evecs)] do 
         Add(list, StructuralCopy(evecs[j]{bad}));
     od;
-
-    if beta in list then 
-        pos := Position(list,beta);
-        list[pos] := [1..Size(bad)]*0;
-    else
-        pos := 0;
-    fi;
     
     x := SolutionMat(list,beta{bad});
     
@@ -1337,9 +1423,7 @@ InstallGlobalFunction(MAJORANA_FindAlpha,
         alpha := [];
     
         for j in [1..Size(x)] do
-            if j <> pos then
-                alpha := alpha + x[j]*evecs[j];
-            fi;
+            alpha := alpha + x[j]*evecs[j];
         od;
         
         return alpha;
@@ -1378,7 +1462,9 @@ InstallGlobalFunction(MAJORANA_Resurrection,
             z, 
             g, 
             sign, 
-            record;
+            record,
+            evecs,
+            pos;
     
     dim := Size(ProductList[1]);
     
@@ -1405,7 +1491,14 @@ InstallGlobalFunction(MAJORANA_Resurrection,
                 row := row + x[1];
                 sum := sum + x[2];
                    
-                alpha := MAJORANA_FindAlpha(beta,gamma,UnknownAlgebraProducts,EigenVectors[i][ev_b],ProductList);
+                evecs := ShallowCopy(EigenVectors[i][ev_b]);   
+                
+                if false and a = b and beta in evecs then 
+                    pos := Position(evecs, beta);
+                    Remove(evecs,pos);
+                fi;
+                   
+                alpha := MAJORANA_FindAlpha(beta,gamma,UnknownAlgebraProducts,evecs,ProductList);
                 
                 if alpha <> fail then 
                 
@@ -3149,7 +3242,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     if ForAny(maindimensions, x -> x < dim - 1) then                
     
-        x := MAJORANA_FullFusion(AlgebraProducts,EigenVectors, GramMatrix, ProductList);
+        x := MAJORANA_FullFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
         
         if not x[1] and ProductList[6] <> false then 
             return MAJORANA_OutputError(x[2],

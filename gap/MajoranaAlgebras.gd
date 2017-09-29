@@ -26,6 +26,8 @@ DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
 DeclareGlobalFunction( "MAJORANA_Fusion" );
 
+DeclareGlobalFunction( "MAJORANA_NewFusion" );
+
 DeclareGlobalFunction( "MAJORANA_FullFusion" );
 
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
