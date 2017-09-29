@@ -55,6 +55,8 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             pos,
             mat,
             x,
+            y,
+            z,
             null,
             bad;
     
@@ -80,7 +82,23 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                     x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
                     
                     if x <> false then 
-                        Add(new[pos],x);
+                        if evals = [2,2] then 
+                            y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
+                            
+                            if y <> false then 
+                                Add(new[1], x - (1/4)*u*y);
+                            fi;
+                        elif evals = [3,3] then 
+                            y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
+                            z := MAJORANA_AlgebraProduct(u,x,AlgebraProducts, ProductList);
+                            
+                            if y <> false and z <> false then 
+                                Add(new[2], z - (1/32)*u*y);
+                            fi;
+                                
+                        else
+                            Add(new[pos],x);
+                        fi;
                     else
                         Add(mat, b);
                     fi;
@@ -3242,7 +3260,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     if ForAny(maindimensions, x -> x < dim - 1) then                
     
-        x := MAJORANA_FullFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+        x := MAJORANA_NewFusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
         
         if not x[1] and ProductList[6] <> false then 
             return MAJORANA_OutputError(x[2],
