@@ -24,11 +24,9 @@ DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
+DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
+
 DeclareGlobalFunction( "MAJORANA_Fusion" );
-
-DeclareGlobalFunction( "MAJORANA_NewFusion" );
-
-DeclareGlobalFunction( "MAJORANA_FullFusion" );
 
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
 
@@ -63,6 +61,8 @@ DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 DeclareGlobalFunction( "MAJORANA_FindAlpha" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
+
+DeclareGlobalFunction( "MAJORANA_NewResurrection" );
 
 DeclareGlobalFunction( "MAJORANA_FullResurrection" );
 
