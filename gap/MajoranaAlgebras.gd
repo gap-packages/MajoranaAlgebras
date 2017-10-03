@@ -102,3 +102,5 @@ DeclareGlobalFunction( "MAJORANA_SetUp" );
 
 DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
 
+DeclareGlobalFunction( "MAJORANA_NewUnknownsAxiomM1" );
+

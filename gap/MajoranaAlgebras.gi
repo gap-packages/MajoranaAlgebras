@@ -716,6 +716,78 @@ function(v,NullSp)
     
     );
 
+InstallGlobalFunction(MAJORANA_NewUnknownsAxiomM1,
+
+    function(GramMatrix, AlgebraProducts, ProductList)
+    
+    local   dim,
+            mat,
+            vec,
+            i,
+            j,
+            k,
+            u,
+            v,
+            w,
+            x,
+            y,
+            z,
+            row,
+            sum,
+            pos,
+            unknowns;
+    
+    dim := Size(ProductList[1]);
+    
+    mat := [];
+    vec := [];
+    
+    unknowns := Positions(GramMatrix, false);
+    
+    for i in [1..dim] do 
+        
+        u := [1..dim]*0; u[i] := 1;
+    
+        for j in [1..Size(AlgebraProducts)] do 
+            
+            if AlgebraProducts[j] <> false then 
+            
+                pos := ProductList[7][j];
+                
+                for k in [pos,Reversed(pos)] do
+                
+                    v := [1..dim]*0; v[k[1]] := 1;
+                    w := [1..dim]*0; w[k[2]] := 1;
+                
+                    row := [];
+                    sum := 0;
+                
+                    x := MAJORANA_SeparateInnerProduct(u, AlgebraProducts[j], unknowns, GramMatrix, ProductList);
+                    
+                    row := row + x[1];
+                    sum := sum + x[2];
+                
+                    y := MAJORANA_AlgebraProduct(u, v, AlgebraProducts, ProductList);
+                    
+                    if y <> false then 
+                        z := MAJORANA_SeparateInnerProduct(y, w, unknowns, GramMatrix, ProductList);
+                        
+                        row := row - z[1];
+                        sum := sum - z[2];
+                        
+                        Add(mat,row);
+                        Add(vec,[sum]);
+                    fi;     
+                od;
+            fi;
+        od;
+    od;
+    
+    MAJORANA_SolutionInnerProducts(mat,vec,unknowns,GramMatrix);
+    
+    end );
+            
+
 InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
     function(j,k, GramMatrix, AlgebraProducts, ProductList)
@@ -2117,45 +2189,6 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
         return true;
     
     end );
-    
-InstallGlobalFunction(MAJORANA_EigenvectorsFromConjugation,
-
-    function(EigenVectors,ProductList)
-
-    local   G,
-            i,
-            H,
-            g,
-            perm,
-            j,
-            k,
-            v,
-            new;
-    
-    G := ProductList[8];
-    
-    for i in ProductList[10][1] do 
-    
-        H := AsList(Stabilizer(G, ProductList[1][i]));
-        
-        for g in H do 
-            perm := MAJORANA_FindVectorPermutation(g, ProductList);
-            
-            for j in [1..3] do
-                for k in [1..Size(EigenVectors[i][j])] do 
-                    v := EigenVectors[i][j][k]; 
-                    new := MAJORANA_ConjugateVector(v,perm,ProductList);
-                    Add(EigenVectors[i][j],new);
-                od;
-                
-                EigenVectors[i][j] := ShallowCopy(BaseMat(EigenVectors[i][j]));
-                EigenVectors[i][j] := List(EigenVectors[i][j], x -> MAJORANA_RemoveNullSpace(x,ProductList[6]));
-                
-            od;
-        od;
-    od;
-        
-    end );
         
 InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
@@ -3003,7 +3036,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
                                 ## STEP 5: INNER PRODUCTS M1 ##
                                 
-    MAJORANA_FullUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
+    MAJORANA_NewUnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
     
     x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
     
@@ -3041,10 +3074,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                             [GramMatrix,AlgebraProducts,EigenVectors,ProductList]);
         fi;
         
-    fi;
-    
-    if ForAny(maindimensions, x -> x < dim - 1) then  
-        MAJORANA_EigenvectorsFromConjugation(EigenVectors,ProductList);
     fi;
                                 ## STEP 7: PRODUCTS FROM EIGENVECTORS ##
 
