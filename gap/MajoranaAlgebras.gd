@@ -38,6 +38,8 @@ DeclareGlobalFunction( "MAJORANA_FullOrthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_MoreEigenvectors" );
 
+DeclareGlobalFunction( "MAJORANA_EigenvectorsFromConjugation" );
+
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_PositionLastOne");
