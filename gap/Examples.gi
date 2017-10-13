@@ -51,7 +51,6 @@ BindGlobal("A7",function()
     end
     );
     
-    
 BindGlobal("S4",function()
     local G, T;
     G:=SymmetricGroup(4);
@@ -59,3 +58,6 @@ BindGlobal("S4",function()
     return([G,T]);
     end
     );
+    
+
+    
