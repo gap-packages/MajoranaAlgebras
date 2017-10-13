@@ -18,4 +18,6 @@ DeclareGlobalFunction( "MAJORANA_ThreeClosedAllConjugates" );
 
 DeclareGlobalFunction( "MAJORANA_ThreeClosedResurrection" );
 
-DeclareGlobalFunction( "MAJORANA_ThreeClosedSolutionAlgProducts" );
+DeclareGlobalFunction( "MAJORANA_ThreeClosedSolutionProducts" );
+
+DeclareGlobalFunction( "MAJORANA_ThreeClosedOrthogonality" );
