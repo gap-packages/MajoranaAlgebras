@@ -26,6 +26,8 @@ DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
 DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
 
+DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
+
 DeclareGlobalFunction( "MAJORANA_Fusion" );
 
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
@@ -48,27 +50,13 @@ DeclareGlobalFunction( "MAJORANA_RemoveNullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
-DeclareGlobalFunction( "MAJORANA_FullUnknownsAxiomM1" );
-
-DeclareGlobalFunction( "MAJORANA_FullUnknownsAxiomM1Old" );
-
-DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProductsAxiomM1" );
-
-DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
-
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
-DeclareGlobalFunction( "MAJORANA_FindAlpha" );
-
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
-DeclareGlobalFunction( "MAJORANA_NewResurrection" );
-
-DeclareGlobalFunction( "MAJORANA_FullResurrection" );
-
-DeclareGlobalFunction( "MAJORANA_EchelonMat" );
+DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
 
@@ -102,5 +90,4 @@ DeclareGlobalFunction( "MAJORANA_SetUp" );
 
 DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
 
-DeclareGlobalFunction( "MAJORANA_NewUnknownsAxiomM1" );
 

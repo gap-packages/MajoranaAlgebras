@@ -7,3 +7,5 @@ DeclareGlobalFunction( "MAJORANA_SolutionMatVecs1" );
 DeclareGlobalFunction( "MAJORANA_PositiveDefinite" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpace" );
+
+DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );

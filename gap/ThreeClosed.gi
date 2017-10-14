@@ -128,6 +128,8 @@ InstallGlobalFunction(ThreeClosedMajorana,
         newfalsecount[1] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(NewAlgebraProducts, dim));
         newfalsecount[2] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(NewGramMatrix,dim));
     
+        Display([falsecount,newfalsecount]);
+    
         if newfalsecount = [0,0] then
             break;
         elif newdimensions = maindimensions and newfalsecount = falsecount then 
@@ -778,6 +780,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedOrthogonality,
         od;
     od;
     
+    Error("pause");
     MAJORANA_ThreeClosedSolutionProducts(mat,vec,NewGramMatrix,NewProductList,new_unknowns,unknowns);
     
     end );
