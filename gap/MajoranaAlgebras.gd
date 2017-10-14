@@ -10,10 +10,6 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
-DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
-
-DeclareGlobalFunction( "MajoranaAlgebraTest" );
-
 DeclareGlobalFunction( "MAJORANA_Append" );
 
 DeclareGlobalFunction( "MAJORANA_FindVectorPermutation" );

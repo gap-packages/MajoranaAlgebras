@@ -1,5 +1,7 @@
 DeclareGlobalFunction( "MAJORANA_SetUp" );
 
+DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
+
 DeclareGlobalFunction( "MAJORANA_PairConjElements" );
 
 DeclareGlobalFunction( "MAJORANA_PairOrbits" );

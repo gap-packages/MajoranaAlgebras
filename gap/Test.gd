@@ -1,3 +1,5 @@
+DeclareGlobalFunction( "MajoranaAlgebraTest" );
+
 DeclareGlobalFunction( "MAJORANA_TestOrthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_TestFusion" );
