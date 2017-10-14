@@ -40,8 +40,6 @@ DeclareGlobalFunction( "MAJORANA_FullOrthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_MoreEigenvectors" );
 
-DeclareGlobalFunction( "MAJORANA_EigenvectorsFromConjugation" );
-
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_PositionLastOne");
@@ -60,34 +58,16 @@ DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 
 DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
 
-DeclareGlobalFunction( "MAJORANA_PairConjElements" );
-
-DeclareGlobalFunction( "MAJORANA_PairOrbits" );
-
-DeclareGlobalFunction( "MAJORANA_PairRepresentatives" );
-
-DeclareGlobalFunction( "MAJORANA_LongCoordinates" );
-
-DeclareGlobalFunction( "MAJORANA_MakeVector" );
-
 DeclareGlobalFunction( "MAJORANA_OutputError" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
-DeclareGlobalFunction( "MAJORANA_SetupOrbitals" );
-
-DeclareGlobalFunction( "MAJORANA_SetupOrbits" );
-
 DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
-
-DeclareGlobalFunction( "MAJORANA_ConnectedComponents" );
 
 DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
-DeclareGlobalFunction( "MAJORANA_SetUp" );
 
-DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
 
 
