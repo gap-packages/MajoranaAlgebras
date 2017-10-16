@@ -536,7 +536,58 @@ InstallGlobalFunction(MAJORANA_PairRepresentatives,
     
     end);
     
-    InstallGlobalFunction( MAJORANA_SetupOrbitals,
+InstallGlobalFunction( MAJORANA_LongCoordinates,
+    
+    function(t,ProductList)
+    
+    local   i,      # loop over coordinates
+            dim,    # size of coordinates
+            x;      # coordinate;
+            
+    dim := Size(ProductList[1]);
+
+    for i in [t+1..dim] do
+        
+        x := ProductList[1][i];
+    
+        if Order(x) = 3 then 
+    
+            Append(ProductList[5],[i,i]);
+            Append(ProductList[2],[x,x^2]);
+            
+        elif Order(x) = 4 then 
+
+            Append(ProductList[5],[i,i]);
+            Append(ProductList[2],[x,x^3]);
+            
+        elif Order(x) = 5 then 
+            Append(ProductList[5],[i,-i,-i,i]);
+            Append(ProductList[2],[x,x^2,x^3,x^4]); 
+        fi;
+    od;
+    
+    ProductList[2] := Flat(ProductList[2]);
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_MakeVector,
+
+    function( pos, vals, dim)
+    
+    local   vec,    # output vector
+            i;      # loop over input
+            
+    vec := [1..dim]*0;;
+    
+    for i in [1..Size(pos)] do
+        vec[pos[i]] := vec[pos[i]] + vals[i];
+    od;
+    
+    return vec;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_SetupOrbitals,
 
     function(ProductList, OrbitalsT)
     

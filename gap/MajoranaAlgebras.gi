@@ -107,6 +107,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             
             if y <> false and z <> false then 
                 Add(new[2], z - (1/32)*u*y);
+                Add(new[1], x + (3/32)*u*y - 4*z);
             elif y <> false then 
                 Add(other_mat, x - (1/32)*u*y);
             fi;
@@ -196,6 +197,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             for j in [1..Size(null)] do 
                 z := MAJORANA_AlgebraProduct(u,null[j]*other_mat,AlgebraProducts, ProductList);
                 Add(new[2], z);
+                Add(new[1], null[j]*other_mat - 4*z);
             od;
         fi;
         
@@ -1151,58 +1153,6 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
     od;
     
     return [mat,vec,record];
-    
-    end );
-    
-    
-InstallGlobalFunction( MAJORANA_LongCoordinates,
-    
-    function(t,ProductList)
-    
-    local   i,      # loop over coordinates
-            dim,    # size of coordinates
-            x;      # coordinate;
-            
-    dim := Size(ProductList[1]);
-
-    for i in [t+1..dim] do
-        
-        x := ProductList[1][i];
-    
-        if Order(x) = 3 then 
-    
-            Append(ProductList[5],[i,i]);
-            Append(ProductList[2],[x,x^2]);
-            
-        elif Order(x) = 4 then 
-
-            Append(ProductList[5],[i,i]);
-            Append(ProductList[2],[x,x^3]);
-            
-        elif Order(x) = 5 then 
-            Append(ProductList[5],[i,-i,-i,i]);
-            Append(ProductList[2],[x,x^2,x^3,x^4]); 
-        fi;
-    od;
-    
-    ProductList[2] := Flat(ProductList[2]);
-    
-    end );
-    
-InstallGlobalFunction( MAJORANA_MakeVector,
-
-    function( pos, vals, dim)
-    
-    local   vec,    # output vector
-            i;      # loop over input
-            
-    vec := [1..dim]*0;;
-    
-    for i in [1..Size(pos)] do
-        vec[pos[i]] := vec[pos[i]] + vals[i];
-    od;
-    
-    return vec;
     
     end );
     

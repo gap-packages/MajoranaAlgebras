@@ -52,10 +52,12 @@ BindGlobal("A7",function()
     );
     
 BindGlobal("S4",function()
-    local G, T;
+    local G, T, input, res;
     G:=SymmetricGroup(4);
-    T := [ (1,2), (1,3), (1,4), (2,3), (2,4), (3,4), (1,2)(3,4), (1,3)(2,4), (1,4)(2,3) ];;
-    return([G,T]);
+    T := [ (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)];;
+    input := ShapesOfMajoranaRepresentation(G,T);;
+    res := MajoranaRepresentation(input,2);;
+    return(res);
     end
     );
     

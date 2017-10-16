@@ -111,9 +111,9 @@ InstallGlobalFunction(ThreeClosedMajorana,
         
         MAJORANA_ThreeClosedFusion(NewGramMatrix, NewAlgebraProducts, EigenVectors, NewProductList, unknowns);
         
-        MAJORANA_ThreeClosedEigenvectorsAlgebraUnknowns(NewAlgebraProducts, EigenVectors,  NewProductList, unknowns);
+        x := MAJORANA_ThreeClosedEigenvectorsAlgebraUnknowns(NewAlgebraProducts, EigenVectors,  NewProductList, unknowns);
         
-        MAJORANA_ThreeClosedResurrection(NewGramMatrix, NewAlgebraProducts, EigenVectors, NewProductList, unknowns);
+        MAJORANA_ThreeClosedResurrection(x[1],x[2],NewGramMatrix, NewAlgebraProducts, EigenVectors, NewProductList, unknowns);
         
         MAJORANA_ThreeClosedOrthogonality(NewGramMatrix, EigenVectors, NewProductList, unknowns);
     
@@ -380,6 +380,48 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
     
     end );
     
+InstallGlobalFunction(MAJORANA_ThreeClosedMoreFusion,
+    
+    function(a, mat, NewAlgebraProducts)
+    
+    local   bad,
+            i,
+            j,
+            null,
+            vecs;
+    
+    if mat <> [] then 
+    
+        vecs := [];
+        
+        bad := [];
+        
+        for i in [1..Size(a)] do 
+            if a[i] <> 0 then 
+                for j in [1..Size(a)] do 
+                    if NewAlgebraProducts[i][j] = false then 
+                        Add(bad,j);
+                    fi;
+                od;
+            fi;
+        od;
+        
+        bad := DuplicateFreeList(bad);
+        Sort(bad);
+        
+        null := NullspaceMat(List(mat, x -> x{bad}));
+        
+        for i in [1..Size(null)] do 
+            Add(vecs,null[i]*mat);
+        od;
+        
+        return vecs;
+    else
+        return [];
+    fi;
+    
+    end ); 
+    
 InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
 
     function(NewGramMatrix, NewAlgebraProducts, EigenVectors, NewProductList, unknowns)
@@ -397,7 +439,9 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
             x,
             y,
             z,
-            u;
+            u,
+            mat,
+            vecs;
             
     # need to 
             
@@ -423,17 +467,35 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
             pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
             
             for a in EigenVectors[i][j[1]] do 
+            
+                mat := [];
+                
                 for b in EigenVectors[i][j[2]] do 
                     x := MAJORANA_ThreeClosedProduct(a, b,  NewAlgebraProducts);
                     
                     if x <> false then 
                         Add(new[pos], x);
+                    else
+                        Add(mat,b);
                     fi;
                 od;
+                
+                vecs := MAJORANA_ThreeClosedMoreFusion(a, mat, NewAlgebraProducts);
+                
+                for b in vecs do 
+                
+                    x := MAJORANA_ThreeClosedProduct(a, b,  NewAlgebraProducts);
+                    
+                    Add(new[pos], x);
+                od; 
+                
             od;            
         od;
 
         for a in EigenVectors[i][2] do 
+            
+            mat := [];
+        
             for b in EigenVectors[i][2] do
                 x := MAJORANA_ThreeClosedProduct(a, b, NewAlgebraProducts);
                 
@@ -442,11 +504,29 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
                     if y <> false then 
                         Add(new[1], x - (1/4)*u*y);
                     fi;
-                fi;
+                else
+                    Add(mat,b);
+                fi;                
             od;
+            
+            vecs := MAJORANA_ThreeClosedMoreFusion(a, mat, NewAlgebraProducts);
+                
+            for b in vecs do 
+            
+                x := MAJORANA_ThreeClosedProduct(a, b,  NewAlgebraProducts);
+                y := MAJORANA_ThreeClosedProduct(a,b, NewGramMatrix);
+                
+                if y <> false then 
+                    Add(new[1], x - (1/4)*u*y);
+                fi;
+            od; 
+            
         od;
         
         for a in EigenVectors[i][3] do 
+        
+            mat := [];
+        
             for b in EigenVectors[i][3] do 
                 x := MAJORANA_ThreeClosedProduct(a, b,  NewAlgebraProducts);
                 
@@ -460,8 +540,27 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
                             Add(new[2], z - (1/32)*u*y); 
                         fi;
                     fi;
+                else
+                    Add(mat,b);
                 fi;
             od;
+            
+            vecs := MAJORANA_ThreeClosedMoreFusion(a, mat, NewAlgebraProducts);
+                
+            for b in vecs do 
+            
+                x := MAJORANA_ThreeClosedProduct(a, b,  NewAlgebraProducts);
+                y := MAJORANA_ThreeClosedProduct(a,b, NewGramMatrix);
+                
+                if y <> false then 
+                    z := MAJORANA_ThreeClosedProduct(u, x, NewAlgebraProducts);
+                    
+                    if z <> false then  
+                        Add(new[2], z - (1/32)*u*y); 
+                    fi;
+                fi;
+            od; 
+            
         od;
         
         for j in [1..3] do 
@@ -520,7 +619,9 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
         od;
     od;
     
-    MAJORANA_ThreeClosedSolutionProducts(mat, vec, NewAlgebraProducts,NewProductList,new_unknowns,unknowns);
+    return [mat,vec];
+    
+   # MAJORANA_ThreeClosedSolutionProducts(mat, vec, NewAlgebraProducts,NewProductList,new_unknowns,unknowns);
     
     end );
             
@@ -655,10 +756,9 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAllConjugates,
 
 InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
 
-    function( NewGramMatrix, NewAlgebraProducts, EigenVectors, NewProductList, unknowns)
+    function( mat, vec, NewGramMatrix, NewAlgebraProducts, EigenVectors, NewProductList, unknowns)
 
-    local   mat,
-            vec,
+    local   
             new_dim,
             dim,
             new_unknowns,
@@ -675,9 +775,6 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
             w,
             row,
             sum;
-    
-    mat := [];
-    vec := [];
     
     new_dim := Size(NewProductList[1]);
     dim := new_dim - Size(unknowns);
@@ -779,8 +876,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedOrthogonality,
             od;
         od;
     od;
-    
-    Error("pause");
+
     MAJORANA_ThreeClosedSolutionProducts(mat,vec,NewGramMatrix,NewProductList,new_unknowns,unknowns);
     
     end );
