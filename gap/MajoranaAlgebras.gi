@@ -1358,7 +1358,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     od;                    
                 od;
                 
-               # Append(EigenVectors[j][1],ProductList[6][2]);
+               Append(EigenVectors[j][1],ProductList[6][2]);
             fi;
         fi;
         

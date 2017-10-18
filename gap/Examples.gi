@@ -8,11 +8,12 @@ BindGlobal("PSL211",function()
     );
     
 BindGlobal("2XD8",function()
-    local G, T, input;
+    local G, T, input, res;
     T:=[ (1,2)(5,6), (3,4)(5,6), (1,3)(2,4)(5,6), (1,4)(2,3)(5,6), (1,3)(2,4), (1,4)(2,3) ];
     G := Group(T);
     input := ShapesOfMajoranaRepresentation(G,T);
-    return(input);
+    res := MajoranaRepresentation(input,1);
+    return res;
     end
     );
     
