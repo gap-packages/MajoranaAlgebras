@@ -30,6 +30,8 @@ InstallGlobalFunction(ThreeClosedMajorana,
     NewProductList := ShallowCopy(ProductList);
     NewProductList := List(NewProductList, x -> ShallowCopy(x));
     
+    NewProductList[6] := false;
+    
     for x in unknowns do 
         Add(NewProductList[1], [ProductList[1][x[1]], ProductList[1][x[2]]]);
     od;
@@ -117,18 +119,22 @@ InstallGlobalFunction(ThreeClosedMajorana,
         
         MAJORANA_ThreeClosedOrthogonality(NewGramMatrix, EigenVectors, NewProductList, unknowns);
     
+        newfalsecount := [0,0];
+        
+        newfalsecount[1] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(NewAlgebraProducts, dim));
+        newfalsecount[2] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(NewGramMatrix,dim));
+        
+        if newfalsecount[2] = 0 then 
+            MAJORANA_ThreeClosedCheckNullspace(NewGramMatrix,NewAlgebraProducts,EigenVectors,NewProductList);
+        fi;
+    
+        Display([falsecount,newfalsecount]);
+        
         newdimensions := [];
         
         for i in NewProductList[10][1] do
             Add(newdimensions, Sum(List(EigenVectors[i], x -> Size(x))) + 1);
         od;
-    
-        newfalsecount := [0,0];
-        
-        newfalsecount[1] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(NewAlgebraProducts, dim));
-        newfalsecount[2] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(NewGramMatrix,dim));
-    
-        Display([falsecount,newfalsecount]);
     
         if newfalsecount = [0,0] then
             break;
@@ -216,7 +222,12 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSeparateProduct,
     new_dim := Size(products);
     
     row := [1..Size(new_unknowns)]*0;
-    sum := 0;
+    
+    if IsRowVector(products[1][1]) then 
+        sum := [1..new_dim]*0;
+    else
+        sum := 0;
+    fi;
     
     for i in [1..new_dim] do 
         if u[i] <> 0 then 
@@ -242,6 +253,127 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSeparateProduct,
     return [row,sum];
 
     end);
+    
+InstallGlobalFunction( MAJORANA_ThreeClosedConjugateRow,
+    
+    function( row, g, NewProductList, new_unknowns, unknowns)
+    
+    local   new_dim,
+            dim,
+            new_row,
+            list,
+            i,
+            j,
+            k,
+            h,
+            x,
+            sign,
+            pos;
+    
+    new_dim := Size(NewProductList[1]);
+    dim := new_dim - Size(unknowns);
+    
+    new_row := [1..Size(row)]*0;
+    
+    list := [[],[1],[1,2],[1,3],[1,2,3,4]];
+    
+    for i in [1..Size(new_unknowns)] do 
+        if row[i] <> 0 then 
+            x := new_unknowns[i];
+            pos := [0,0];
+            sign := 1;
+            
+            if x[1] <= dim then
+                
+                h := NewProductList[1][x[1]]^g;
+                
+                for j in list[Order(h)] do 
+                    if h^j in NewProductList[1] then 
+                        pos[1] := Position(NewProductList[1], h^j);
+                        
+                        if Order(h) = 5 and j in [2,3] then 
+                            sign := -sign;
+                        fi;
+                        
+                    fi;
+                od;
+            else
+                
+                h := List(NewProductList[1][x[1]], x -> x^g);
+                    
+                for j in list[Order(h[1])] do 
+                    for k in list[Order(h[2])] do 
+                        if [h[1]^j,h[2]^k] in NewProductList[1] then 
+                            pos[1] := Position(NewProductList[1],[h[1]^j,h[2]^k]);
+                            
+                            if Order(h[1]) = 5 and j in [2,3] then 
+                                sign := -sign;
+                            fi;
+                            
+                            if Order(h[2]) = 5 and k in [2,3] then 
+                                sign := -sign;
+                            fi;
+                            
+                        elif [h[2]^k,h[1]^j] in NewProductList[1] then 
+                            pos[1] := Position(NewProductList[1],[h[2]^k,h[1]^j]);
+                            
+                            if Order(h[1]) = 5 and j in [2,3] then 
+                                sign := -sign;
+                            fi;
+                            
+                            if Order(h[2]) = 5 and k in [2,3] then 
+                                sign := -sign;
+                            fi;
+                            
+                        fi;
+                    od;
+                od;
+            fi;
+            
+            h := List(NewProductList[1][x[2]], x -> x^g);
+                    
+            for j in list[Order(h[1])] do 
+                for k in list[Order(h[2])] do 
+                    if [h[1]^j,h[2]^k] in NewProductList[1] then 
+                        pos[2] := Position(NewProductList[1],[h[1]^j,h[2]^k]);
+                        
+                        if Order(h[1]) = 5 and j in [2,3] then 
+                            sign := -sign;
+                        fi;
+                        
+                        if Order(h[2]) = 5 and k in [2,3] then 
+                            sign := -sign;
+                        fi;
+                        
+                    elif [h[2]^k,h[1]^j] in NewProductList[1] then 
+                        pos[2] := Position(NewProductList[1],[h[2]^k,h[1]^j]);
+                        
+                        if Order(h[1]) = 5 and j in [2,3] then 
+                            sign := -sign;
+                        fi;
+                        
+                        if Order(h[2]) = 5 and k in [2,3] then 
+                            sign := -sign;
+                        fi;
+
+                    fi;
+                od;
+            od;
+            
+            if pos[1] < pos[2] then 
+                j := Position(new_unknowns, pos);
+            else
+                j := Position(new_unknowns, [pos[2],pos[1]]);
+            fi;
+            
+            new_row[j] := sign*row[i];
+        fi;
+    od;
+    
+    return new_row;
+    
+    end );    
+        
     
 InstallGlobalFunction( MAJORANA_ThreeClosedConjugateVector,
     
@@ -650,6 +782,8 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
             u,
             v,
             x,
+            y,
+            g,
             pos,
             sol;
     
@@ -672,10 +806,16 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
                 x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, NewAlgebraProducts);
             
                 if ForAny(x[1] , y -> y <> 0) then 
-                
-                    Add(mat, x[1]);
-                    Add(vec, x[2] + table[j]*v);
-                    Add(record, [i,j, Position(EigenVectors[i][j],v)]);
+                    for g in NewProductList[12] do 
+                        
+                        y := [,];
+                        
+                        y[1] := [MAJORANA_ThreeClosedConjugateRow(x[1], g[1], NewProductList, new_unknowns, unknowns)];
+                        y[2] := MAJORANA_ThreeClosedConjugateVector(x[2] + table[j]*v, g[1], NewProductList, unknowns); 
+                        y[2] := [MAJORANA_ThreeClosedRemoveNullspace( y[2], NewProductList[6])]; 
+                        
+                        MAJORANA_Append(y,mat,vec);
+                    od;
                 fi;
             od;
         od;
@@ -835,6 +975,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
             y,
             z,
             w,
+            g,
             row,
             sum;
     
@@ -854,10 +995,9 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
                     if MAJORANA_ThreeClosedProduct(beta,gamma,NewAlgebraProducts) = false then
                 
                         ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+                        x := ev*MAJORANA_ThreeClosedSeparateProduct(beta, gamma, new_unknowns, NewAlgebraProducts);
                         
-                        for alpha in EigenVectors[i][evals[1]] do 
-                        
-                            x := ev*MAJORANA_ThreeClosedSeparateProduct(beta, gamma, new_unknowns, NewAlgebraProducts);
+                        for alpha in EigenVectors[i][evals[1]] do
                         
                             row := []; sum := [];
                         
@@ -882,10 +1022,18 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
                                     
                                 fi;
                                 
-                                if row <> [] then
+                                if row <> [] and ForAny(row, x -> x <> 0) then
+                                    
+                                    for g in NewProductList[12] do 
+                                        
+                                        z := [];
+                                        
+                                        z[1] := [MAJORANA_ThreeClosedConjugateRow(row, g[1],  NewProductList, new_unknowns, unknowns)];
+                                        z[2] := [MAJORANA_ThreeClosedConjugateVector(sum, g[1], NewProductList, unknowns)];
+                                        
+                                        MAJORANA_Append(z, mat, vec);
             
-                                    Add(mat,row);
-                                    Add(vec,sum);
+                                    od;
                                 fi;
                             fi;
                         od;
@@ -944,6 +1092,89 @@ InstallGlobalFunction( MAJORANA_ThreeClosedOrthogonality,
     od;
 
     MAJORANA_ThreeClosedSolutionProducts(mat,vec,NewGramMatrix,NewProductList,new_unknowns,unknowns);
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_ThreeClosedRemoveNullspace,
+    
+    function(v,NullSp) 
+
+    local   i,      # loop over nullspace
+            j;      # leading coefficient (from rhs)
+    
+    if NullSp <> false then 
+        for i in [1..Size(NullSp[2])] do
+            
+            j := NullSp[1][i];
+            
+            if v[j] <> 0 then 
+                v := v - v[j]*NullSp[2][i];
+            fi;
+        od;
+    fi;
+    
+    return v;
+    
+    end
+    
+    );
+    
+InstallGlobalFunction( MAJORANA_ThreeClosedCheckNullspace,
+
+    function(NewGramMatrix,NewAlgebraProducts,EigenVectors,NewProductList)
+    
+    local   new_dim,
+            x,                  # result of positive definite
+            i,                  # loop over orbitals
+            j,                  # loop over representatives
+            k;                  # loop over eigenvalues
+    
+        new_dim := Size(NewProductList[1]);
+    
+        if NewProductList[6] = false then 
+
+                x := MAJORANA_PositiveDefinite(NewGramMatrix);
+
+                if x < 0 then
+                    return false;
+                elif x = 0 then
+                    NewProductList[6] := MAJORANA_NullSpace(NewGramMatrix);
+                elif x > 0 then
+                    NewProductList[6] := [[],[]];
+                fi; 
+                
+                for i in [1..Size(NewProductList[6][2])] do
+                    Add(NewProductList[6][1], MAJORANA_PositionLastOne(NewProductList[6][2][i]));
+                od;
+
+            if NewProductList[6] <> false and NewProductList[6][2] <> [] then
+
+                # Change alg products to get rid of any axes not in the basis
+                
+                for i in [1..new_dim] do
+                    for j in [1..new_dim] do 
+                        if NewAlgebraProducts[i][j] <> false then
+                            NewAlgebraProducts[i][j] := MAJORANA_RemoveNullSpace(NewAlgebraProducts[i][j], NewProductList[6]);
+                        fi;
+                    od;
+                od;
+
+                # Change evecs to get rid of any axes not in the basis
+
+                for j in NewProductList[10][1] do
+                    for k in [1..3] do                        
+                        for x in [1..Size(EigenVectors[j][k])] do
+                            EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],NewProductList[6]);
+                        od;                                                   
+                        Append(EigenVectors[j][k],NewProductList[6][2]);
+                    od;                    
+                od;
+                
+                
+            fi;
+        fi;
+        
+        return true;
     
     end );
                         

@@ -644,6 +644,8 @@ function(AlgebraProducts, EigenVectors, ProductList)
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
             y,          # result of SolutionAlgProducts
+            z,          # to be added to mat vec system
+            g,          # conjugating element
             dim;        # size of ProductList[1]
     
     dim := Size(ProductList[1]);
@@ -673,9 +675,21 @@ function(AlgebraProducts, EigenVectors, ProductList)
                     if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
                         return [false,1,v];
                     fi;
-                elif not x[1] in mat then         
-                    Add(mat, x[1]);
-                    Add(vec, x[2] + table[ev]*v); 
+                else  
+                     for g in DuplicateFreeList(ProductList[12]) do
+
+                        if g <> false then 
+                            
+                            y := MAJORANA_ConjugateVector(x[2] + table[ev]*v, g[2], ProductList);
+                            
+                            z := [,];
+                            
+                            z[1] := [MAJORANA_ConjugateRow(x[1], g[1], unknowns, ProductList)];
+                            z[2] := [MAJORANA_RemoveNullSpace(y, ProductList[6])]; 
+                      
+                            MAJORANA_Append(z,mat,vec);
+                        fi;
+                    od;
                 fi;                
             od;
         od;
