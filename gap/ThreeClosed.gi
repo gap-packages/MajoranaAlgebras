@@ -1169,8 +1169,6 @@ InstallGlobalFunction( MAJORANA_ThreeClosedCheckNullspace,
                         Append(EigenVectors[j][k],NewProductList[6][2]);
                     od;                    
                 od;
-                
-                
             fi;
         fi;
         
