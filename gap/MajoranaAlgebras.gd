@@ -48,7 +48,7 @@ DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
-DeclareGlobalFunction( "MAJORANA_Resurrection" );
+DeclareGlobalFunction( "MAJORANA_AddConjugates" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 

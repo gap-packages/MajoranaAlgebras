@@ -41,24 +41,30 @@ end);
 
 InstallGlobalFunction(MAJORANA_FindBadIndices,
     
-    function(v, unknowns)
+    function(v, AlgebraProducts, ProductList)
     
     local   i,
             j,
+            k,
+            dim,
             bad;            
     
     bad := [];
+    dim := Size(ProductList[1]);
                     
-    for i in [1..Size(v)] do
+    for i in [1..dim] do
         if v[i] <> 0 then 
-            for j in [1 .. i - 1] do 
-                if [j,i] in unknowns then 
-                    Add(bad,j);
-                fi;
-            od;
-            for j in [i + 1 .. Size(v)] do 
-                if [i,j] in unknowns then 
-                    Add(bad,j);
+            for j in [1..dim] do 
+               k :=  ProductList[3][i][j];
+               
+               if k > 0 then 
+                    if AlgebraProducts[k] = false then 
+                        Add(bad,j);
+                    fi;
+                else
+                    if AlgebraProducts[-k] = false then 
+                        Add(bad,j);
+                    fi;
                 fi;
             od;
         fi;
@@ -174,7 +180,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                 
                 if mat <> [] then 
                 
-                    bad := MAJORANA_FindBadIndices(a,unknowns);
+                    bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
                     null := NullspaceMat(List(mat, x -> x{bad}));
                     
                     for j in [1..Size(null)] do 
@@ -191,7 +197,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
         if other_mat <> [] then 
             u := [1..dim]*0; u[i] := 1;
         
-            bad := MAJORANA_FindBadIndices(u,unknowns);
+            bad := MAJORANA_FindBadIndices(u,AlgebraProducts, ProductList );
             null := NullspaceMat(List(other_mat, x -> x{bad}));
             
             for j in [1..Size(null)] do 
@@ -952,77 +958,29 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
     end);     
     
-InstallGlobalFunction(MAJORANA_Resurrection,
+InstallGlobalFunction(MAJORANA_AddConjugates,
 
-    function(alpha,beta,gamma,unknowns,i,evals,mat,vec,bad_mat,GramMatrix, AlgebraProducts, EigenVectors, ProductList)   
+    function(row, sum, mat, vec, unknowns, ProductList)   
     
-    local   dim,
-            u,
-            row,
-            sum,
-            x,
-            y,
-            z,
-            ev,
-            g;
-            
-    dim := Size(ProductList[1]);
-    u := [1..dim]*0; u[i] := 1;
-
-    row := [];
-    sum := [];
+    local   g,
+            x;
     
-    x := MAJORANA_AlgebraProduct(alpha - beta, gamma, AlgebraProducts, ProductList);
-    
-    if x = false then 
-        Add(bad_mat, alpha - beta);
-    else                                
-        y := MAJORANA_SeparateAlgebraProduct(u, x, unknowns, AlgebraProducts, ProductList);
-        
-        row := row + y[1];
-        sum := sum + y[2];
-        
-        ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
-        
-        z := ev*MAJORANA_SeparateAlgebraProduct(beta,gamma,unknowns,AlgebraProducts,ProductList);
-            
-        row := row + z[1];
-        sum := sum + z[2];
-        
-        if evals[1] = 2 then 
-            z := MAJORANA_InnerProduct(alpha,gamma,GramMatrix,ProductList);
-            
-            if z <> false then 
-                sum := sum + (1/4)*u*z;
-            else 
-                row := [];
-            fi;
-        fi;                               
-    fi;
-    
-    if row <> [] and ForAny(row, x -> x <> 0) then 
+    if ForAny(row, x -> x <> 0) then 
         for g in DuplicateFreeList(ProductList[12]) do
 
             if g <> false then 
-            
-                if sum = [] then 
-                    Error("empty");
-                fi;
                 
-                y := MAJORANA_ConjugateVector(sum,g[2],ProductList);
+                x := [,];
                 
-                z := [,];
-                
-                z[1] := [MAJORANA_ConjugateRow(row,g[1],unknowns,ProductList)];
-                z[2] := [MAJORANA_RemoveNullSpace(y,ProductList[6])];
+                x[1] := [MAJORANA_ConjugateRow(row,g[1],unknowns,ProductList)];
+                x[2] := MAJORANA_ConjugateVector(sum,g[2],ProductList);
+                x[2] := [MAJORANA_RemoveNullSpace(x[2],ProductList[6])];
 
-                MAJORANA_Append(z,mat,vec);
+                MAJORANA_Append(x,mat,vec);
                 
             fi;
         od;
     fi;
-
-    return fail;
     
     end );
     
@@ -1033,6 +991,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     local   dim,
             i,
             j,
+            u,
             evals,
             mat,
             vec,
@@ -1043,7 +1002,13 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             bad,
             null,
             bad_mat,
-            x;
+            ev,
+            row,
+            sum,
+            x,
+            y,
+            z,
+            w;
     
     dim := Size(ProductList[1]);
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
@@ -1059,31 +1024,86 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     # Find unknown algebra products from the resurrection principle
     
     for i in ProductList[10][1] do     
-        for evals in [[1,2],[2,1],[1,3],[2,3]] do         
+        
+        u := [1..dim]*0;; u[i] := 1;;
+    
+        for evals in [[1,2],[2,1],[1,3],[2,3]] do  
+        
+            ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+            
             for beta in EigenVectors[i][evals[2]] do
                 for gamma in EigenVectors[i][evals[1]] do  
                 
-                    if MAJORANA_AlgebraProduct(beta,gamma,AlgebraProducts,ProductList) = false then
-                    
+                    x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, AlgebraProducts, ProductList); 
+                
+                    if ForAny(x[1], y -> y <> 0) then
+                        
                         bad_mat := [];
                                             
                         for alpha in EigenVectors[i][evals[1]] do 
                         
-                             MAJORANA_Resurrection(alpha, beta, gamma, unknowns, i, evals, mat,vec, bad_mat, GramMatrix, AlgebraProducts, EigenVectors, ProductList);
+                            row := [];
+                            sum := [];
+                        
+                            y := MAJORANA_AlgebraProduct( alpha - beta, gamma, AlgebraProducts, ProductList);
+                            
+                            if y = false then   
+                                Add(bad_mat, alpha - beta);
+                            else
+                                
+                                z := MAJORANA_SeparateAlgebraProduct(u,y,unknowns, AlgebraProducts, ProductList);
+                                
+                                row := row + z[1] + ev*x[1];
+                                sum := sum + z[2] + ev*x[2];
+                                
+                                if evals[1] = 2 then 
+                                    w := MAJORANA_InnerProduct(alpha - beta, gamma, GramMatrix, ProductList);
+                                    
+                                    if w <> false then 
+                                        sum := sum + (1/4)*w*u;
+                                    else
+                                        row := [];
+                                    fi;
+                                fi;
+                            
+                                if row <> [] then 
+                                    MAJORANA_AddConjugates(row, sum, mat, vec, unknowns, ProductList) ;
+                                fi;
+                            fi;
 
                         od;
                         
                         if bad_mat <> [] then
                             
-                            bad := MAJORANA_FindBadIndices(gamma,unknowns);
+                            bad := MAJORANA_FindBadIndices(gamma,AlgebraProducts, ProductList);
                             
                             null := NullspaceMat(List(bad_mat, x -> x{bad}));
                             
                             for j in [1..Size(null)] do 
-                            
-                                alpha := null[j]*bad_mat + Sum(null[j])*beta;
                                 
-                                MAJORANA_Resurrection(alpha, Sum(null[j])*beta, gamma, unknowns, i, evals, mat,vec, [], GramMatrix, AlgebraProducts, EigenVectors, ProductList);
+                                row := [];
+                                sum := [];
+                            
+                                y := MAJORANA_AlgebraProduct(null[j]*bad_mat, gamma, AlgebraProducts, ProductList);
+                                
+                                z := MAJORANA_SeparateAlgebraProduct(u,y,unknowns, AlgebraProducts, ProductList);
+                                
+                                row := row + z[1] + ev*Sum(null[j])*x[1];
+                                sum := sum + z[2] + ev*Sum(null[j])*x[2];
+                                
+                                if evals[1] = 2 then 
+                                    w := MAJORANA_InnerProduct(null[j]*bad_mat, gamma, GramMatrix, ProductList);
+                                    
+                                    if w <> false then 
+                                        sum := sum + (1/4)*w*u;
+                                    else
+                                        row := [];
+                                    fi;
+                                fi;
+                                
+                                if row <> [] then 
+                                    MAJORANA_AddConjugates(row, sum, mat, vec, unknowns, ProductList); 
+                                fi;
                                 
                             od;
                         fi;
