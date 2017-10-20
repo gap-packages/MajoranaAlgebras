@@ -954,11 +954,10 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
 InstallGlobalFunction(MAJORANA_Resurrection,
 
-    function(alpha,beta,gamma,i,evals,mat,vec,bad_mat,GramMatrix, AlgebraProducts, EigenVectors, ProductList)   
+    function(alpha,beta,gamma,unknowns,i,evals,mat,vec,bad_mat,GramMatrix, AlgebraProducts, EigenVectors, ProductList)   
     
     local   dim,
             u,
-            unknowns,
             row,
             sum,
             x,
@@ -969,8 +968,6 @@ InstallGlobalFunction(MAJORANA_Resurrection,
             
     dim := Size(ProductList[1]);
     u := [1..dim]*0; u[i] := 1;
-    
-    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
 
     row := [];
     sum := [];
@@ -1072,7 +1069,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                             
                         for alpha in EigenVectors[i][evals[1]] do 
                         
-                             MAJORANA_Resurrection(alpha, beta, gamma, i, evals, mat,vec, bad_mat, GramMatrix, AlgebraProducts, EigenVectors, ProductList);
+                             MAJORANA_Resurrection(alpha, beta, gamma, unknowns, i, evals, mat,vec, bad_mat, GramMatrix, AlgebraProducts, EigenVectors, ProductList);
 
                         od;
                         
@@ -1086,7 +1083,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             
                                 alpha := null[j]*bad_mat + Sum(null[j])*beta;
                                 
-                                MAJORANA_Resurrection(alpha, Sum(null[j])*beta, gamma, i, evals, mat,vec, [], GramMatrix, AlgebraProducts, EigenVectors, ProductList);
+                                MAJORANA_Resurrection(alpha, Sum(null[j])*beta, gamma, unknowns, i, evals, mat,vec, [], GramMatrix, AlgebraProducts, EigenVectors, ProductList);
                                 
                             od;
                         fi;
