@@ -187,19 +187,6 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
         
         m := Size(mat);
         n := Size(mat[1]);
-        
-        for i in [1..m] do 
-            lcm := 1;
-            for x in mat[i] do 
-                if x <> 0 then 
-                    lcm := LcmInt(lcm,DenominatorRat(x));
-                fi;
-            od;
-            
-            mat[i] := mat[i]*lcm;
-            vec[i] := vec[i]*lcm;
-            
-        od;
 
         res := SemiEchelonMatTransformationDestructive(mat);
         mat := List(res.vectors,ShallowCopy);

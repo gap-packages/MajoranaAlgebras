@@ -288,15 +288,10 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
     local   i,              # loop over vector
             dim,            # length of vector
             vec,            # output vector
-            perm,
-            sign,           # corrects sign of 5A axes 
             pos_1,          # position of conjugated element in longcoords
             pos_2;          # position of conjugated element in coords
     
     if g[1] <> () then 
-        
-        perm := g[1];
-        sign := g[2];
         
         dim := Size(v);
         
@@ -306,7 +301,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
         
             if v[i] <> 0 then 
             
-                vec[i^perm] := sign[i^perm]*v[i];
+                vec[i^g[1]] := g[2][i^g[1]]*v[i];
                 
             fi;
         od;
@@ -331,6 +326,9 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 g,      # conjugating element
                 sign,   # correct sign of 5A axes
                 vec,    # output vec
+                vecs,
+                elts,
+                pos,
                 dim;    # size of vectors 
 
         dim:=Size(u);
@@ -339,6 +337,9 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         if ForAll(u, x -> x = 0) or ForAll(v, x -> x = 0) then
             return u*0;
         fi;
+
+        elts := [];
+        vecs := [];
 
         for i in [1..dim] do
             if u[dim - i + 1] <> 0 then 
@@ -360,7 +361,14 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                             
                             g := list[4][dim - i + 1][dim - j + 1][1];
                             
-                            vec := vec + sign*u[dim - i + 1]*v[dim - j + 1]*MAJORANA_ConjugateVector(x,g,list);
+                            pos := Position(elts,g);
+                            
+                            if pos <> fail then 
+                                vecs[pos] := vecs[pos] + sign*u[dim - i + 1]*v[dim - j + 1]*x;
+                            else
+                                Add(elts,g);
+                                Add(vecs,sign*u[dim - i + 1]*v[dim - j + 1]*x);
+                            fi;
                         else
                             # cannot calculate product
                             return false;
@@ -368,6 +376,10 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                     fi;
                 od;
             fi;
+        od;
+        
+        for i in [1..Size(elts)] do 
+            vec := vec + MAJORANA_ConjugateVector(vecs[i],elts[i], list);
         od;
         
         vec := MAJORANA_RemoveNullSpace(vec, list[6]);
@@ -682,7 +694,7 @@ function(AlgebraProducts, EigenVectors, ProductList)
                         return [false,1,v];
                     fi;
                 else  
-                     for g in DuplicateFreeList(ProductList[12]) do
+                     for g in ProductList[12] do
 
                         if g <> false then 
                             
@@ -840,6 +852,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             k,
             g,
             sign,
+            elts,
+            vecs,
             x,          # vector with 1 in the ith position
             y,
             pos,        # position of unknown product 
@@ -850,34 +864,44 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     row := [1..Size(UnknownAlgebraProducts)]*0;
     sum := [1..dim]*0;
     
+    elts := [];
+    vecs := [];
+    
     for i in [1..dim] do
         if u[i] <> 0 then
             for j in [1..dim] do
                 if v[j] <> 0 then
                 
-                    if i < j then 
-                        l := [i,j];
+                    k := ProductList[3][i][j];
+                    
+                    if k > 0 then 
+                        sign := 1;
                     else
-                        l := [j,i];
+                        sign := -1;
+                        k := -k;
                     fi;
                     
-                    if not l in UnknownAlgebraProducts then 
-                        
-                        k := ProductList[3][i][j];
+                    x := AlgebraProducts[k];
+                    
+                    if x <> false then 
+                                                
                         g := ProductList[4][i][j][1];
                         
-                        if k > 0 then 
-                            sign := 1;
-                        else
-                            sign := -1;
-                            k := -k;
-                        fi;
+                        pos := Position(elts,g);
                         
-                        x := AlgebraProducts[k];
-
-                        sum := sum - sign*u[i]*v[j]*MAJORANA_ConjugateVector(x,g,ProductList);
-                    
+                        if pos <> fail then 
+                            vecs[pos] := vecs[pos] - sign*u[i]*v[j]*x;
+                        else
+                            Add(elts,g);
+                            Add(vecs,- sign*u[i]*v[j]*x);
+                        fi;
                     else
+                    
+                        if i < j then
+                            l := [i,j];
+                        else
+                            l := [j,i];
+                        fi;
                         
                         pos := Position(UnknownAlgebraProducts,l);
                         row[pos] := row[pos] + u[i]*v[j]; 
@@ -885,6 +909,10 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                 fi;
             od;
         fi;
+    od;
+    
+    for i in [1..Size(elts)] do 
+        sum := sum + MAJORANA_ConjugateVector(vecs[i],elts[i],ProductList);
     od;
     
     sum := MAJORANA_RemoveNullSpace(sum,ProductList[6]);
@@ -966,19 +994,15 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
             x;
     
     if ForAny(row, x -> x <> 0) then 
-        for g in DuplicateFreeList(ProductList[12]) do
+        for g in ProductList[12] do
+                
+            x := [,];
+            
+            x[1] := [MAJORANA_ConjugateRow(row,g[1],unknowns,ProductList)];
+            x[2] := MAJORANA_ConjugateVector(sum,g[2],ProductList);
+            x[2] := [MAJORANA_RemoveNullSpace(x[2],ProductList[6])];
 
-            if g <> false then 
-                
-                x := [,];
-                
-                x[1] := [MAJORANA_ConjugateRow(row,g[1],unknowns,ProductList)];
-                x[2] := MAJORANA_ConjugateVector(sum,g[2],ProductList);
-                x[2] := [MAJORANA_RemoveNullSpace(x[2],ProductList[6])];
-
-                MAJORANA_Append(x,mat,vec);
-                
-            fi;
+            MAJORANA_Append(x,mat,vec);
         od;
     fi;
     
@@ -1279,9 +1303,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             if prod <> false then 
                 
                 g := ProductList[4][x[1]][x[2]][1];
+                
+                prod := MAJORANA_ConjugateVector(prod,g,ProductList);
                     
                 for j in [1..Size(sol[3][1])] do 
-                    sol[3][2][j] := sol[3][2][j] - sign*sol[3][1][j][i]*MAJORANA_ConjugateVector(prod,g,ProductList);
+                    sol[3][2][j] := sol[3][2][j] - sign*sol[3][1][j][i]*prod;
                 od; 
             else
                 Add(unsolved,i);
@@ -1353,18 +1379,10 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
             if ForAll(GramMatrix, x -> x <> false) then 
                 GramMatrixFull := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
 
-                x := MAJORANA_PositiveDefinite(GramMatrixFull);
-
-                if x < 0 then
-                    return false;
-                elif x = 0 then
-                    ProductList[6] := MAJORANA_NullSpace(GramMatrixFull);
-                elif x > 0 then
-                    ProductList[6] := [[],[]];
-                fi; 
+                ProductList[6] := MAJORANA_NullSpace(GramMatrixFull); 
                 
-                for i in [1..Size(ProductList[6][2])] do
-                    Add(ProductList[6][1], MAJORANA_PositionLastOne(ProductList[6][2][i]));
+                for x in ProductList[6][2] do
+                    Add(ProductList[6][1], MAJORANA_PositionLastOne(x));
                 od;
                               
             fi;

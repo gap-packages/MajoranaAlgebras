@@ -241,7 +241,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     ProductList[7]  := [];    
     ProductList[8]  := G;
     ProductList[10] := [[],[]];
-    ProductList[12] := NullMat(t,2);
+    ProductList[12] := [];
     ProductList[13] := [1..t]*0;
     ProductList[14] := [];
 
@@ -713,6 +713,7 @@ InstallGlobalFunction(MAJORANA_SetupOrbits,
     function(T,ProductList)
     
     local   G,      # the group
+            g,      # conjugating element
             x,      # orbit    
             i,      # loop over T
             j,      # loop over orbits 
@@ -743,8 +744,13 @@ InstallGlobalFunction(MAJORANA_SetupOrbits,
                 
                 k := ProductList[10][1][j];
                 
-                ProductList[12][i][1] := RepresentativeAction(G,T[k],T[i]);
-                ProductList[12][i][2] := MAJORANA_FindVectorPermutation(ProductList[12][i][1],ProductList);
+                g := [RepresentativeAction(G,T[k],T[i]),];
+                
+                if ForAll(ProductList[12], x -> not g[1] in x) then
+                    g[2] := MAJORANA_FindVectorPermutation(g[1],ProductList);
+                    
+                    Add(ProductList[12],g);
+                fi;
                 
                 j := Size(ProductList[11]) + 1;;
                 
