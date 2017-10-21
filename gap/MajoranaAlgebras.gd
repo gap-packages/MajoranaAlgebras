@@ -46,8 +46,6 @@ DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
-DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct1" );
-
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
 DeclareGlobalFunction( "MAJORANA_AddConjugates" );

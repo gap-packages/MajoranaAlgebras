@@ -693,21 +693,10 @@ function(AlgebraProducts, EigenVectors, ProductList)
                     if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
                         return [false,1,v];
                     fi;
-                else  
-                     for g in ProductList[12] do
-
-                        if g <> false then 
-                            
-                            y := MAJORANA_ConjugateVector(x[2] + table[ev]*v, g[2], ProductList);
-                            
-                            z := [,];
-                            
-                            z[1] := [MAJORANA_ConjugateRow(x[1], g[1], unknowns, ProductList)];
-                            z[2] := [MAJORANA_RemoveNullSpace(y, ProductList[6])]; 
-                      
-                            MAJORANA_Append(z,mat,vec);
-                        fi;
-                    od;
+                else                          
+                    x[1] := [x[1]];
+                    x[2] := [x[2] + table[ev]*v];
+                    MAJORANA_Append(x,mat,vec);
                 fi;                
             od;
         od;
@@ -838,8 +827,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     fi;
     
     end );
-    
-    
+
 InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
 
     function(u,v,UnknownAlgebraProducts,AlgebraProducts,ProductList)
@@ -1091,7 +1079,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 fi;
                             
                                 if row <> [] then 
-                                    MAJORANA_AddConjugates(row, sum, mat, vec, unknowns, ProductList) ;
+                                    MAJORANA_Append([[row],[sum]],mat,vec);
                                 fi;
                             fi;
 
@@ -1125,8 +1113,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                     fi;
                                 fi;
                                 
-                                if row <> [] then 
-                                    MAJORANA_AddConjugates(row, sum, mat, vec, unknowns, ProductList); 
+                                if row <> [] and ForAny(row, x -> x <> 0) then 
+                                    MAJORANA_Append([[row],[sum]],mat,vec);
                                 fi;
                                 
                             od;
@@ -1160,6 +1148,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         unknowns := ShallowCopy(x[3]);
     fi;
     
+    
     if ProductList[6] <> [] and ProductList[6] <> false then                  
                             
         x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
@@ -1170,8 +1159,26 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             
             Display("Nullspace");
         
-            MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+            x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
+            
+            mat := ShallowCopy(x[1]);
+            vec := ShallowCopy(x[2]);
+            unknowns := ShallowCopy(x[3]);
         fi;            
+    fi;
+    
+    if mat <> [] then 
+        for i in [1..Size(mat)] do 
+            MAJORANA_AddConjugates(mat[i],vec[i],mat,vec,unknowns,ProductList);
+        od;
+        
+        Display("All conjugates");
+        
+        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+                    
+        mat := ShallowCopy(x[1]);
+        vec := ShallowCopy(x[2]);
+        unknowns := ShallowCopy(x[3]);
     fi;
     
     end );
