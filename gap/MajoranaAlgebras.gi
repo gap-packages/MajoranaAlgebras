@@ -149,6 +149,8 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             bad,
             other_mat;
             
+    # looks like we should get rid of this - check on a big example
+            
     for j in ProductList[10][1] do 
         for k in [1..3] do 
             if EigenVectors[j][k] <> [] then
@@ -664,13 +666,6 @@ function(AlgebraProducts, EigenVectors, ProductList)
     
     for i in ProductList[10][1] do 
         for ev in [1..3] do 
-            
-            if false then
-            if EigenVectors[i][ev] <> [] then
-                MAJORANA_ReversedEchelonForm(EigenVectors[i][ev]);
-                EigenVectors[i][ev] := List(EigenVectors[i][ev], x -> MAJORANA_RemoveNullSpace(x,ProductList[6]));
-            fi;
-            fi;
             
             u := [1..dim]*0; u[i] := 1;
             
