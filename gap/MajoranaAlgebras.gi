@@ -1007,6 +1007,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             ev,
             row,
             sum,
+            old_mat,
             x,
             y,
             z,
@@ -1129,8 +1130,25 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     fi;
     
     if mat <> [] then 
-        for i in [1..Size(mat)] do 
-            MAJORANA_AddConjugates(mat[i],vec[i],mat,vec,unknowns,ProductList);
+    
+        old_mat := ShallowCopy(mat);
+    
+        for i in [1..Size(old_mat)] do 
+            
+            if unknowns <> [] then 
+                MAJORANA_AddConjugates(mat[i],vec[i],mat,vec,unknowns,ProductList);
+                
+                if Size(mat) > Size(mat[1]) then 
+                
+                    Display(["All conjugates",i]);
+                
+                    x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+                        
+                    mat := ShallowCopy(x[1]);
+                    vec := ShallowCopy(x[2]);
+                    unknowns := ShallowCopy(x[3]);
+                fi;
+            fi;
         od;
         
         Display("All conjugates");
