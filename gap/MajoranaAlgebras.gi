@@ -82,7 +82,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
-    function(a,b,i,evals,mat,other_mat, new, GramMatrix, AlgebraProducts, ProductList)
+    function(a,b,i,evals,other_mat, new, GramMatrix, AlgebraProducts, ProductList)
     
     local   dim,
             u,
@@ -100,32 +100,26 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     
     x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
                     
-    if x <> false then 
-        if evals = [2,2] then 
-            y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
-            
-            if y <> false then 
-                Add(new[1], x - (1/4)*u*y);
-            fi;
-        elif evals = [3,3] then 
-            y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
-            z := MAJORANA_AlgebraProduct(u,x,AlgebraProducts, ProductList);
-            
-            if y <> false and z <> false then 
-                Add(new[2], z - (1/32)*u*y);
-                Add(new[1], x + (3/32)*u*y - 4*z);
-            elif y <> false then 
-                Add(other_mat, x - (1/32)*u*y);
-            fi;
-                
-        else
-            Add(new[pos],x);
+    if evals = [2,2] then 
+        y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
+        
+        if y <> false then 
+            Add(new[1], x - (1/4)*u*y);
         fi;
+    elif evals = [3,3] then 
+        y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
+        z := MAJORANA_AlgebraProduct(u,x,AlgebraProducts, ProductList);
+        
+        if y <> false and z <> false then 
+            Add(new[2], z - (1/32)*u*y);
+            Add(new[1], x + (3/32)*u*y - 4*z);
+        elif y <> false then 
+            Add(other_mat, x - (1/32)*u*y);
+        fi;
+            
     else
-        Add(mat, b);
+        Add(new[pos],x);
     fi;
-
-    return [new, mat, other_mat];
     
     end );
 
@@ -173,24 +167,17 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
         for evals in [[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[2,2],[3,3]] do
             for a in EigenVectors[i][evals[1]] do
-                mat := [];
-                for b in EigenVectors[i][evals[2]] do 
-                    MAJORANA_FuseEigenvectors(a, b, i, evals, mat, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
-                od;
                 
-                if mat <> [] then 
+                bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
+                null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
                 
-                    bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
-                    null := NullspaceMat(List(mat, x -> x{bad}));
+                for j in [1..Size(null)] do 
                     
-                    for j in [1..Size(null)] do 
-                        
-                        b := null[j]*mat;
-                        
-                        MAJORANA_FuseEigenvectors(a, b, i, evals, mat, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
-                        
-                    od;
-                fi; 
+                    b := null[j]*EigenVectors[i][evals[2]];
+                    
+                    MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
+                    
+                od;
             od;
         od;
         
@@ -1123,7 +1110,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     fi;
     
     
-    if ProductList[6] <> [] and ProductList[6] <> false then                  
+    if false then                  
                             
         x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
         
