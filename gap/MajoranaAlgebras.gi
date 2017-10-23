@@ -677,10 +677,12 @@ function(AlgebraProducts, EigenVectors, ProductList)
     
     for i in ProductList[10][1] do 
         for ev in [1..3] do 
-        
+            
+            if false then
             if EigenVectors[i][ev] <> [] then
                 MAJORANA_ReversedEchelonForm(EigenVectors[i][ev]);
                 EigenVectors[i][ev] := List(EigenVectors[i][ev], x -> MAJORANA_RemoveNullSpace(x,ProductList[6]));
+            fi;
             fi;
             
             u := [1..dim]*0; u[i] := 1;
@@ -1011,9 +1013,10 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             alpha,
             beta,
             gamma,
-            bad,
             null,
-            bad_mat,
+            alpha_mat,
+            bad,
+            n,
             ev,
             row,
             sum,
@@ -1022,8 +1025,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             z,
             w;
     
-    dim := Size(ProductList[1]);
-    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
+    dim := Size(ProductList[1]);;
     
     # Find unknown algebra products from eigenvectors
     
@@ -1050,26 +1052,34 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 
                     if ForAny(x[1], y -> y <> 0) then
                         
-                        bad_mat := [];
+                        alpha_mat := [];
                                             
-                        for alpha in EigenVectors[i][evals[1]] do 
+                        for alpha in EigenVectors[i][evals[1]] do                             
+                            Add(alpha_mat, alpha - beta);                        
+                        od;
                         
-                            row := [];
-                            sum := [];
+                        bad := MAJORANA_FindBadIndices(gamma, AlgebraProducts, ProductList);
                         
-                            y := MAJORANA_AlgebraProduct( alpha - beta, gamma, AlgebraProducts, ProductList);
+                        null := NullspaceMat(List(alpha_mat, x-> x{bad}));
+                        
+                        for j in [1..Size(null)] do 
+                        
+                            n := Sum(null[j]);
+                        
+                            if n <> 0 then
                             
-                            if y = false then   
-                                Add(bad_mat, alpha - beta);
-                            else
+                                row := [];
+                                sum := [];
                                 
-                                z := MAJORANA_SeparateAlgebraProduct(u,y,unknowns, AlgebraProducts, ProductList);
+                                y := MAJORANA_AlgebraProduct(null[j]*alpha_mat, gamma, AlgebraProducts, ProductList);
                                 
-                                row := row + z[1] + ev*x[1];
-                                sum := sum + z[2] + ev*x[2];
+                                z := MAJORANA_SeparateAlgebraProduct(u, y, unknowns, AlgebraProducts, ProductList);
+                            
+                                row := row + z[1] + n*ev*x[1];
+                                sum := sum + z[2] + n*ev*x[2];
                                 
                                 if evals[1] = 2 then 
-                                    w := MAJORANA_InnerProduct(alpha - beta, gamma, GramMatrix, ProductList);
+                                    w := MAJORANA_InnerProduct(null[j]*alpha_mat, gamma, GramMatrix, ProductList);
                                     
                                     if w <> false then 
                                         sum := sum + (1/4)*w*u;
@@ -1077,48 +1087,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                         row := [];
                                     fi;
                                 fi;
-                            
+                                
                                 if row <> [] then 
                                     MAJORANA_Append([[row],[sum]],mat,vec);
                                 fi;
                             fi;
-
                         od;
-                        
-                        if bad_mat <> [] then
-                            
-                            bad := MAJORANA_FindBadIndices(gamma,AlgebraProducts, ProductList);
-                            
-                            null := NullspaceMat(List(bad_mat, x -> x{bad}));
-                            
-                            for j in [1..Size(null)] do 
-                                
-                                row := [];
-                                sum := [];
-                            
-                                y := MAJORANA_AlgebraProduct(null[j]*bad_mat, gamma, AlgebraProducts, ProductList);
-                                
-                                z := MAJORANA_SeparateAlgebraProduct(u,y,unknowns, AlgebraProducts, ProductList);
-                                
-                                row := row + z[1] + ev*Sum(null[j])*x[1];
-                                sum := sum + z[2] + ev*Sum(null[j])*x[2];
-                                
-                                if evals[1] = 2 then 
-                                    w := MAJORANA_InnerProduct(null[j]*bad_mat, gamma, GramMatrix, ProductList);
-                                    
-                                    if w <> false then 
-                                        sum := sum + (1/4)*w*u;
-                                    else
-                                        row := [];
-                                    fi;
-                                fi;
-                                
-                                if row <> [] and ForAny(row, x -> x <> 0) then 
-                                    MAJORANA_Append([[row],[sum]],mat,vec);
-                                fi;
-                                
-                            od;
-                        fi;
                     fi;
                     
                     if mat <> [] and Size(mat) > Size(mat[1]) then 
