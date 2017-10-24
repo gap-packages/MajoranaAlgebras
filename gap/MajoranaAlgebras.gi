@@ -171,7 +171,12 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             for a in EigenVectors[i][evals[1]] do
                 
                 bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
-                null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
+                
+                if bad <> [] then  
+                    null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
+                else
+                    null := IdentityMat(Size(EigenVectors[i][evals[2]]));
+                fi;
                 
                 for j in [1..Size(null)] do 
                     
@@ -639,7 +644,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(AlgebraProducts, EigenVectors, ProductList)
+function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
 
     local   i,          # loop over representatives
             ev,         # loop over eigenvalues
@@ -673,13 +678,21 @@ function(AlgebraProducts, EigenVectors, ProductList)
                 
                 x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
                 
+                x[2] := x[2] + table[ev]*v;
+                
                 if ForAll(x[1], y -> y = 0) then 
-                    if ForAny((x[2] + table[ev]*v), y -> y <> 0 ) then 
-                        return [false,1,v];
+                    
+                    if ForAny(x[2], y -> y <> 0 ) then
+                        
+                        y := MAJORANA_InnerProduct(x[2],x[2],GramMatrix, ProductList);
+                        
+                        if not y in [0, false] then 
+                            Error("EigenVectors alg unknowns");
+                        fi;
                     fi;
                 else                          
                     x[1] := [x[1]];
-                    x[2] := [x[2] + table[ev]*v];
+                    x[2] := [x[2]];
                     MAJORANA_Append(x,mat,vec);
                 fi;                
             od;
@@ -1012,8 +1025,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     # Find unknown algebra products from eigenvectors
     
-    x := MAJORANA_EigenvectorsAlgebraUnknowns(AlgebraProducts, EigenVectors, ProductList);
-    
+    x := MAJORANA_EigenvectorsAlgebraUnknowns(GramMatrix, AlgebraProducts, EigenVectors, ProductList);
+
     mat := ShallowCopy(x[1]);
     vec := ShallowCopy(x[2]);
     unknowns := ShallowCopy(x[3]);
