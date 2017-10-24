@@ -1084,7 +1084,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                     fi;
                                 fi;
                                 
-                                if row <> [] then 
+                                if row <> [] and ForAny(row, x -> x <> 0) then 
                                     MAJORANA_Append([[row],[sum]],mat,vec);
                                 fi;
                             fi;
@@ -1397,11 +1397,13 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     for k in [1..3] do                        
                         for x in [1..Size(EigenVectors[j][k])] do
                             EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList[6]);
-                        od;                                                   
+                        od;   
+                        
+                        Append(EigenVectors[j][k],ProductList[6][2]);                                                
                     od;                    
                 od;
                 
-               Append(EigenVectors[j][1],ProductList[6][2]);
+               
             fi;
         fi;
         
