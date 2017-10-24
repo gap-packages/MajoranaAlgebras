@@ -62,5 +62,17 @@ BindGlobal("S4",function()
     end
     );
     
+BindGlobal("S6", function()
+    local G, T, input;
+    G := SymmetricGroup(6);
+    T := ShallowCopy(AsList(ConjugacyClass(G,(1,2))));
+    Append(T,AsList(ConjugacyClass(G,(1,2)(3,4))));
+    input := ShapesOfMajoranaRepresentation(G,T);
+    return(input);
+    end
+    );
+    
+
+    
 
     

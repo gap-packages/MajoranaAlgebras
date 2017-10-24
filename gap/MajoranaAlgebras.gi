@@ -1078,7 +1078,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         od;
                     fi;
                     
-                    if mat <> [] and Size(mat) > Size(mat[1]) then 
+                    if mat <> [] and Size(mat) > Size(mat[1])/2 then 
                     
                         Display(["Resurrection", evals]);
             
@@ -1094,7 +1094,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         od;
     od;
     
-    if mat <> [] and Size(mat) <= Size(mat[1]) then 
+    if mat <> [] and Size(mat) <= Size(mat[1])/2 then 
                     
         Display(["Resurrection final"]);
 
@@ -1133,7 +1133,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             if Size(mat) >= i then 
                 MAJORANA_AddConjugates(mat[i],vec[i],mat,vec,unknowns,ProductList);
                 
-                if Size(mat) > Size(mat[1]) then 
+                if Size(mat) > Size(mat[1])/2 then 
                 
                     Display(["All conjugates",i]);
                 
