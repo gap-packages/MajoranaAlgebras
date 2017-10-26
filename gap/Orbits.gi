@@ -12,7 +12,14 @@ InstallGlobalFunction( MAJORANA_Orbits,
                 pos,
                 use,
                 o,
+                table,
+                orders,
+                y,
+                i,
+                j,
                 result;
+                
+    table := [[], [1], [1,2], [1,3], [1,2,3,4]];
   
     gens := GeneratorsOfGroup(G);
     
@@ -31,15 +38,26 @@ InstallGlobalFunction( MAJORANA_Orbits,
     
         orb := MAJORANA_OrbitOp( G, D[pos], gens, act );
         
-        # Add reversed pair to the orbits
+        orders := List(D[pos], Order);
         
-        if not Reversed(D[pos]) in orb[1] then 
-            orb2 := MAJORANA_OrbitOp( G, Reversed(D[pos]), gens, act );
+        for i in table[orders[1]] do 
+            for j in table[orders[2]] do 
+                if not [D[pos][1]^i,D[pos][2]^j] in orb[1] then 
+                    orb2 := MAJORANA_OrbitOp( G, [D[pos][1]^i,D[pos][2]^j], gens, act );
             
-            Append(orb[1], orb2[1]);
-            Append(orb[2], orb2[2]);
+                    Append(orb[1], orb2[1]);
+                    Append(orb[2], orb2[2]);
+                fi;
+                
+                if not [D[pos][2]^j,D[pos][1]^i] in orb[1] then 
+                    orb2 := MAJORANA_OrbitOp( G, [D[pos][1]^i,D[pos][2]^j], gens, act );
             
-        fi;
+                    Append(orb[1], orb2[1]);
+                    Append(orb[2], orb2[2]);
+                fi;
+            od;
+        od;
+                
         
         Add( orbs, Immutable(orb[1]) );
         Add( elements, Immutable(orb[2]) );

@@ -618,6 +618,8 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
 
     ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
     
+    if false then 
+    
     i := Size(OrbitalsT) + 1;
             
     while i < Size(ProductList[9]) + 1 do
@@ -665,6 +667,8 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
         i := i + 1;       
         
     od;
+    
+    fi;
         
     end );    
     
