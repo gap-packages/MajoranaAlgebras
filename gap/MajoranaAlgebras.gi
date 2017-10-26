@@ -1146,7 +1146,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             if Size(mat) >= i then 
                 MAJORANA_AddConjugates(mat[i],vec[i],mat,vec,unknowns,ProductList);
                 
-                if Size(mat) > Size(mat[1])/2 then 
+                if Size(mat) > Size(mat[1]) then 
                 
                     Display(["All conjugates",i]);
                 

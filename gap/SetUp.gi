@@ -604,7 +604,7 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
             
     x := Cartesian(ProductList[1],ProductList[1]);
 
-    ProductList[9] := List(Orbits(G,x,OnPairs),ShallowCopy);
+    ProductList[9] := List(Orbits(G,x,OnPairs), y -> ShallowCopy(y.orbits));
 
     # This is a bit of a patch, ask Markus tomorrow
 

@@ -19,3 +19,5 @@ ReadPackage( "MajoranaAlgebras", "gap/Examples.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/ThreeClosed.gi");
 
+ReadPackage( "MajoranaAlgebras", "gap/Orbits.gi");
+
