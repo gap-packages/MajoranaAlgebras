@@ -6,6 +6,7 @@ InstallGlobalFunction( MAJORANA_Orbits,
                 orbs,
                 elements, 
                 orb,
+                orb2,
                 sort,
                 plist,
                 pos,
@@ -30,8 +31,18 @@ InstallGlobalFunction( MAJORANA_Orbits,
     
         orb := MAJORANA_OrbitOp( G, D[pos], gens, act );
         
-        Add( orbs, orb[1] );
-        Add(elements, orb[2]);
+        # Add reversed pair to the orbits
+        
+        if not Reversed(D[pos]) in orb[1] then 
+            orb2 := MAJORANA_OrbitOp( G, Reversed(D[pos]), gens, act );
+            
+            Append(orb[1], orb2[1]);
+            Append(orb[2], orb2[2]);
+            
+        fi;
+        
+        Add( orbs, Immutable(orb[1]) );
+        Add( elements, Immutable(orb[2]) );
             
         if plist then
             if sort then
@@ -112,7 +123,7 @@ InstallGlobalFunction( MAJORANA_OrbitOp,
         od;
     od;
     
-    result := [Immutable(orb),Immutable(orb_elts)];
+    result := [orb,orb_elts];
     
     return result;
     
