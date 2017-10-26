@@ -600,11 +600,13 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
             k,      # loop over orders of second axis
             l;      # loop over orbitals
             
-    G := ProductList[8];
+   G := ProductList[8];
             
     x := Cartesian(ProductList[1],ProductList[1]);
 
-    ProductList[9] := List(MAJORANA_Orbits(G,x,OnPairs).orbits, ShallowCopy);
+    ProductList[9] := List(Orbits(G,x,OnPairs), y -> ShallowCopy(y));
+
+    # This is a bit of a patch, ask Markus tomorrow
 
     j:=1;
 
@@ -618,7 +620,43 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
 
     ProductList[9] := Concatenation(OrbitalsT,ProductList[9]);
     
-    if false then 
+    j := Size(OrbitalsT) + 1;
+    
+    while j < Size(ProductList[9]) + 1 do 
+        if not [ProductList[9][j][1][2],ProductList[9][j][1][1]] in ProductList[9][j] then
+            k := j + 1;
+            
+            while k < Size(ProductList[9]) +1 do
+            
+                if  [ProductList[9][j][1][2],ProductList[9][j][1][1]]  in ProductList[9][k] then
+                
+                    if Order(ProductList[9][j][1][1]) < Order(ProductList[9][j][1][2]) then 
+                
+                        Append(ProductList[9][j],ProductList[9][k]);
+                        Remove(ProductList[9],k);
+                    
+                    else 
+                    
+                        Append(ProductList[9][k],ProductList[9][j]);
+                        Remove(ProductList[9],j);
+                        
+                        j := j - 1;
+                        
+                    fi;
+                    
+                    k := Size(ProductList[9]) + 1;
+                    
+                else
+                    
+                    k := k + 1;
+                fi;
+            od;
+                                
+        fi;
+        
+        j := j + 1;
+        
+    od;
     
     i := Size(OrbitalsT) + 1;
             
@@ -667,10 +705,8 @@ InstallGlobalFunction( MAJORANA_SetupOrbitals,
         i := i + 1;       
         
     od;
-    
-    fi;
         
-    end );    
+end );     
     
 InstallGlobalFunction(MAJORANA_SetupOrbits,
 

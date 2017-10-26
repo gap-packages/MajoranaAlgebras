@@ -1091,7 +1091,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         od;
                     fi;
                     
-                    if mat <> [] and Size(mat) > Size(mat[1])/2 then 
+                    if mat <> [] and Size(mat) > Size(mat[1]) then 
                     
                         Display(["Resurrection", evals]);
             
@@ -1107,7 +1107,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         od;
     od;
     
-    if mat <> [] and Size(mat) <= Size(mat[1])/2 then 
+    if mat <> [] and Size(mat) <= Size(mat[1]) then 
                     
         Display(["Resurrection final"]);
 
