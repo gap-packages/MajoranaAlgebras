@@ -1,4 +1,4 @@
-InstallGlobalFunction(ShapesOfMajoranaRepresentation,
+InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     
     function(G,T)
     
@@ -149,6 +149,176 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
                 shape[k]:="3C";
             fi;            
         od;
+        
+        Add(shapeslist,ShallowCopy(shape));
+        
+    od;
+    
+    result := rec(  group := G,
+                    involutions := T,
+                    orbitals := OrbitalsT,
+                    shapes := shapeslist);
+    
+    return result;
+
+    end );
+    
+InstallGlobalFunction(ShapesOfMajoranaRepresentation,
+    
+    function(G,T)
+    
+    local   t,              # size of T
+            i,              # indices
+            j,
+            k,
+            x,              # result of orbitals
+            ind,            # list of indices  
+            OrbitalsT,      # orbitals on T
+            shape,          # one shape
+            RepsSquares4X,  # (ts)^2 where o(ts) = 4
+            RepsSquares6A,  # (ts)^2 where o(ts) = 6
+            RepsCubes6A,    # (ts)^3 where o(ts) = 6
+            gph,            # digraph of 2X, 4X inclusions
+            cc,             # connected components of gph
+            pos,            # positions
+            Binaries,       # used to loop through options for shapes
+            shapeslist,     # final list of shapes
+            result;         #
+    
+    t := Size(T);
+    
+    # Construct orbitals of G on T x T
+    
+    if IsAbelian(G) then 
+        OrbitalsT := Combinations(T,2);
+    else
+        OrbitalsT := OrbitsDomain(G,Combinations(T,2),OnSets);
+    fi;
+
+    # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
+
+    shape := NullMat(1,Size(OrbitalsT))[1];
+
+    RepsSquares4X := [];
+    RepsSquares6A := [];
+    RepsCubes6A := [];
+    
+    ind := NullMat(Size(OrbitalsT),0);;
+
+    for i in [1..Size(OrbitalsT)] do
+    
+        x := Representative(OrbitalsT[i]);
+        
+        if Order(x[1]*x[2]) = 2 then
+            shape[i]:="2X";
+            Add(ind[2],i);
+        fi;
+        if Order(x[1]*x[2]) = 3 then
+            shape[i]:="3X";
+            Add(ind[3],i);
+        fi;
+        if Order(x[1]*x[2]) = 4 then
+            shape[i]:="4X";
+            Add(ind[4],i);
+            Add(RepsSquares4X, (x[1]*x[2])^2);
+        fi;
+        if Order(x[1]*x[2]) = 5 then
+            shape[i]:="5A";
+        fi;
+        if Order(x[1]*x[2])=6 then
+            shape[i]:="6A";
+            Add(ind[6],i);
+            Add(RepsSquares6A,(x[1]*x[2])^2);
+            Add(RepsCubes6A,(x[1]*x[2])^3);
+        fi;
+    od;
+    
+    # Check for inclusions of 2X in 4X
+    
+    gph := NullMat(Size(OrbitalsT), 0);
+    
+    for i in ind[2] do 
+        for x in OrbitalsT[i] do
+            pos := Positions(RepsSquares4X, x[1]*x[2]);
+            
+            if pos <> [] then
+                Append(gph[i], ind[4]{pos} + Size(ind[2]));
+            fi;
+        od;
+    od;
+    
+    gph := List(gph, DuplicateFreeList);
+    
+    cc := AutoConnectedComponents(gph);
+
+    # Check for inclusions of 2A and 3A in 6A
+
+    for i in ind[3] do
+        if ForAny(OrbitalsT[i], x -> x[1]*x[2] in RepsSquares6A) then
+            shape[i]:="3A";;
+            ind[3] := Difference(ind[3], [i]);            
+        fi;
+    od;
+    
+    for i in ind[2] do 
+        if ForAny(OrbitalsT[i], x -> x[1]*x[2] in RepsCubes6A) then 
+        
+            shape[i]:="2A";;
+            
+            for x in cc do 
+                if i in x then 
+                    for j in Intersection(ind[2],x) do 
+                        shape[j] := "2A";
+                    od;
+                    for j in Intersection(ind[4],x - Size(ind[2])) do 
+                        shape[j] := "4B";
+                    od;
+                fi;
+            od; 
+             
+            cc := Difference(cc, [x]);
+        fi;
+    od;
+    
+    cc := Filtered(cc, x -> Size(Intersection(x,ind[2])) > 0);
+
+    Binaries:=AsList(FullRowSpace(GF(2),Size(ind[3]) + Size(cc)));
+    
+    Error("Pause");
+    
+    shapeslist := [];
+
+    # Add new values in the shape
+
+    for i in [1..Size(Binaries)] do
+        
+        for j in [1..Size(ind[3])] do
+            k:=ind[3][j];
+            if Binaries[i][j] = 1*Z(2) then
+                shape[k]:="3A";
+            else
+                shape[k]:="3C";
+            fi;            
+        od;
+        
+        for j in [1 .. Size(cc)] do 
+            
+            if Binaries[i][j + Size(ind[3])] = 1*Z(2) then 
+                for k in Intersection(ind[2],cc[j]) do 
+                    shape[k] := "2A";
+                od;
+                for k in Intersection(ind[4],cc[j] - Size(ind[2])) do 
+                    shape[k] := "4B";
+                od;
+            else
+                for k in Intersection(ind[2],cc[j]) do 
+                    shape[k] := "2B";
+                od;
+                for k in Intersection(ind[4],cc[j] - Size(ind[2])) do 
+                    shape[k] := "4A";
+                od;
+            fi;
+        od;            
         
         Add(shapeslist,ShallowCopy(shape));
         
