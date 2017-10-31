@@ -1,4 +1,3 @@
-# TODO change instances of gp elements to permutations
 # TODO check with Sasha what happens when we have g,t \in T st 
 # \ll a_t, a_g \rr is of type 2A but tg \notin T and implement
 
@@ -7,14 +6,15 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     function(G,T)
     
     local   t,              # size of T
-            i,              # indexes
-            j,              #
-            k,              #
+            i,              # indices
+            j,
+            k,
             x,              # result of orbitals
-            OrbitalsT,      # orbitals on T
+            orbs,           # orbitals on T
             shape,          # one shape
             RepsSquares6A,  # (ts)^2 where o(ts) = 6
-            Unknowns3X,     # orbitals which may be 3A or 3C
+            unknowns,       # indices of 3X axes
+            pos,            # positions
             Binaries,       # used to loop through options for shapes
             shapeslist,     # final list of shapes
             result;         #
@@ -31,113 +31,52 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         od;
     od;
     
-    # Construct orbitals of G on T x T
+    # Construct orbitals of  on T x T
     
-    if IsAbelian(G) then 
-        x := Cartesian(T,T);
-    
-        x := List(x,y -> [y]);
-
-    else
-        x := OrbitsDomain(G,Cartesian(T,T),OnPairs);
-    fi;
-
-    
-    OrbitalsT := [];
-    
-    for i in [1..Size(x)] do
-        Add(OrbitalsT, ShallowCopy(x[i]));
-    od;
-    
-    i := 1;
-    
-    while i < Size(OrbitalsT) do 
-    
-        if not [OrbitalsT[i][1][2],OrbitalsT[i][1][1]] in OrbitalsT[i] then
-        
-            j := i + 1;
-            
-            while j < Size(OrbitalsT) + 1 do
-            
-                if  [OrbitalsT[i][1][2],OrbitalsT[i][1][1]]  in OrbitalsT[j] then
-                
-                    Append(OrbitalsT[i],OrbitalsT[j]);
-                    Remove(OrbitalsT,j);
-                        
-                    j := Size(OrbitalsT) + 1;
-                    
-                else
-                    
-                    j := j + 1;
-                fi;
-            od;
-        fi;
-        
-        i := i + 1;
-        
-    od;
+    orbs := MAJORANA_OrbitalsT(G,T);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := NullMat(1,Size(OrbitalsT))[1];
+    shape := NullMat(1,Size(orbs.pairreps))[1];
 
     RepsSquares6A := [];
+    unknowns := [];;
 
-    for i in [1..Size(OrbitalsT)] do
+    for i in [1..Size(orbs.pairreps)] do
     
-        x := Representative(OrbitalsT[i]);
+        x := T{orbs.pairreps[i]};
         
-        if Order(x[1]*x[2]) = 1 then
-            shape[i]:="1A";
-        fi;
-        if Order(x[1]*x[2]) = 2 and x[1]*x[2] in T then
+        if Order(x[1]*x[2]) = 1 then 
+            shape[i] := "1A";
+        elif Order(x[1]*x[2]) = 2 and x[1]*x[2] in T then
             shape[i]:="2A";
-        fi;
-        if Order(x[1]*x[2]) = 2 and not x[1]*x[2] in T then
+        elif Order(x[1]*x[2]) = 2 and not x[1]*x[2] in T then
             shape[i]:="2B";
-        fi;
-        if Order(x[1]*x[2]) = 3 then
+        elif Order(x[1]*x[2]) = 3 then
             shape[i]:="3X";
-        fi;
-        if Order(x[1]*x[2]) = 4 and not (x[1]*x[2])^2 in T then
+            Add(unknowns,i);
+        elif Order(x[1]*x[2]) = 4 and not (x[1]*x[2])^2 in T then
             shape[i]:="4A";
-        fi;
-        if Order(x[1]*x[2]) = 4 and (x[1]*x[2])^2 in T then
+        elif Order(x[1]*x[2]) = 4 and (x[1]*x[2])^2 in T then
             shape[i]:="4B";
-        fi;
-        if Order(x[1]*x[2]) = 5 then
+        elif Order(x[1]*x[2]) = 5 then
             shape[i]:="5A";
-        fi;
-        if Order(x[1]*x[2])=6 then
+        elif Order(x[1]*x[2])=6 then
             shape[i]:="6A";
             Add(RepsSquares6A,(x[1]*x[2])^2);
         fi;
     od;
 
-    # Check for inclusions of 3A in 6A
+    # Check for inclusions of 2A and 3A in 6A
 
-    for i in [1..Size(OrbitalsT)] do
-        if shape[i][1] = '3' then
-            j := 0;
-            while j < Size(OrbitalsT[i]) do
-                j := j + 1;
-                if OrbitalsT[i][j][1]*OrbitalsT[i][j][2] in RepsSquares6A then
-                    shape[i]:="3A";;
-                    j:=Size(OrbitalsT[i])+1;;
-                fi;
-            od;
-        fi;
-    od;
-
-    Unknowns3X:=[];
-
-    for i in [1..Size(OrbitalsT)] do
-        if shape[i] = ['3','X'] then
-            Add(Unknowns3X,i);
+    for i in unknowns do
+        if ForAny(orbs.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
+            shape[i]:="3A";;
+            unknowns := Difference(unknowns, [i]);            
         fi;
     od;
     
-    Binaries:=AsList(FullRowSpace(GF(2),Size(Unknowns3X)));
+    Binaries := AsList(FullRowSpace(GF(2),Size(unknowns)));
     
     shapeslist := [];
 
@@ -145,8 +84,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     for i in [1..Size(Binaries)] do
         
-        for j in [1..Size(Unknowns3X)] do
-            k:=Unknowns3X[j];
+        for j in [1..Size(unknowns)] do
+            k := unknowns[j];
             if Binaries[i][j] = 1*Z(2) then
                 shape[k]:="3A";
             else
@@ -158,10 +97,13 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         
     od;
     
-    result := rec(  group := G,
+    result := rec(  group       := G,
                     involutions := T,
-                    orbitals := OrbitalsT,
-                    shapes := shapeslist);
+                    orbitals    := orbs.orbitals,
+                    shapes      := shapeslist,
+                    pairreps    := orbs.pairreps,
+                    pairorbit   := orbs.pairorbit,
+                    pairconj    := orbs.pairconj     );
     
     return result;
 
@@ -468,7 +410,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     # Check algebra obeys axiom M1 at this stage
 
-    #x := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,ProductList);;
+    x := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,SetUp);;
     
     if false then 
         return MAJORANA_OutputError( "Algebra does not obey axiom M1"

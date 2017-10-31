@@ -278,10 +278,10 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                 for k in [1..dim] do 
                     
                     u := NullMat(1,dim)[1];
-                    u[list[7][j][1]] := 1;
+                    u[list.pairreps[j][1]] := 1;
                     
                     v := NullMat(1,dim)[1];
-                    v[list[7][j][2]] := 1;
+                    v[list.pairreps[j][2]] := 1;
                     
                     w := NullMat(1,dim)[1];
                     w[k] := 1;
