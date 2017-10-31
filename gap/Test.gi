@@ -12,10 +12,8 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
     function(GramMatrix,AlgebraProducts,EigenVectors,ProductList) 
         
-    # list should be of the form [ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5],ProductList[6]]
-        
         local   errorfusion,    # list of indices which do not obey fusion rules
-                dim,            # size of ProductList[1]
+                dim,            # size of ProductList.coords
                 a,              # first eigenvalue
                 b,              # second eigenvalue
                 ev_a,           # a - eigenvectors
@@ -34,7 +32,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
         dim := Size(AlgebraProducts[1]);
 
-        for j in ProductList[10][1] do
+        for j in ProductList.orbitreps[1] do
 
             u := [1..dim]*0; u[j]:=1;
             
@@ -211,7 +209,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         
         errorortho := [];
 
-        for j in ProductList[10][1] do
+        for j in ProductList.orbitreps[1] do
 
             u := [1..Size(AlgebraProducts[1])]*0; u[j]:=1;
             
@@ -260,13 +258,11 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(GramMatrix,AlgebraProducts,list) 
 
-    # list should be of the form [ProductList[1],ProductList[2],ProductList[3],ProductList[4],ProductList[5]]
-
         local   ErrorM1,    # list of indices which do not obey axiom M1
                 j,          # loop over algebra products
-                k,          # loop over ProductList[1]
+                k,          # loop over ProductList.coords
                 p,          # second product
-                dim,        # size of ProductList[1]
+                dim,        # size of ProductList.coords
                 x,          # first inner product
                 y,          # second inner product
                 u,          # vectors
@@ -316,8 +312,8 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
         function(GramMatrix,AlgebraProducts,ProductList) # Tests that the algebra obeys axiom M2
 
         local   B,      # matrix of inner products
-                dim,    # size of ProductList[1]
-                j,      # loop through ProductList[1]
+                dim,    # size of ProductList.coords
+                j,      # loop through ProductList.coords
                 k,      # 
                 l,      #
                 m,      #

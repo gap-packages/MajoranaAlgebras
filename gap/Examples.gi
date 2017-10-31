@@ -29,7 +29,7 @@ BindGlobal("A5",function()
     local G, T,input;
     G:=AlternatingGroup(5);
     T:=Filtered(AsList(G),x->Order(x) = 2);
-    input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    input := ShapesOfMajoranaRepresentation(G,T);
     return(input);
     end
     );

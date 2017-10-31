@@ -1,5 +1,6 @@
+DeclareGlobalFunction( "MAJORANA_Orbitals" );
+
+DeclareGlobalFunction( "MAJORANA_OrbitalsT" );
+
 DeclareGlobalFunction( "MAJORANA_Orbits" );
 
-DeclareGlobalFunction( "MAJORANA_OrbitOp" );
-
-DeclareGlobalFunction( "MAJORANA_Orbitals" );

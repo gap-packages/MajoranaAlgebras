@@ -1,162 +1,86 @@
-InstallGlobalFunction( MAJORANA_Orbits,
+ 
+InstallGlobalFunction(MAJORANA_Orbits,
 
-    function(G, D, act)
+    function(G, t, SetUp)
     
-    local       gens,
-                orbs,
-                elements, 
-                orb,
-                orb2,
-                sort,
-                plist,
-                pos,
-                use,
-                o,
-                table,
-                orders,
-                y,
-                i,
-                j,
-                result;
-                
-    table := [[], [1], [1,2], [1,3], [1,2,3,4]];
-  
-    gens := GeneratorsOfGroup(G);
-    
-    sort := Length(D)>0 and CanEasilySortElements(D[1]);
-    plist := IsPlistRep(D);
-  
-    if not plist then
-        use := BlistList([1..Length(D)],[]);
-    fi;
-    
-    orbs := [];
-    elements := [];
-    pos := 1;
-    
-    while Length(D) > 0 and pos <= Length(D) do
-    
-        orders := List(D[pos], Order);
-        
-        if orders[1] > orders[2] then 
-            D[pos] := Reversed(D[pos]);
-        fi;
-    
-        orb := MAJORANA_OrbitOp( G, D[pos], gens, act );
-        
-        for i in table[orders[1]] do 
-            for j in table[orders[2]] do 
-                if not [D[pos][1]^i,D[pos][2]^j] in orb[1] then 
-                    orb2 := MAJORANA_OrbitOp( G, [D[pos][1]^i,D[pos][2]^j], gens, act );
-            
-                    Append(orb[1], orb2[1]);
-                    Append(orb[2], orb2[2]);
-                fi;
-                
-                if not [D[pos][2]^j,D[pos][1]^i] in orb[1] then 
-                    orb2 := MAJORANA_OrbitOp( G, [D[pos][1]^i,D[pos][2]^j], gens, act );
-            
-                    Append(orb[1], orb2[1]);
-                    Append(orb[2], orb2[2]);
-                fi;
-            od;
-        od;
-                
-        
-        Add( orbs, Immutable(orb[1]) );
-        Add( elements, Immutable(orb[2]) );
-            
-        if plist then
-            if sort then
-                D:=Difference(D,orb[1]);
-                MakeImmutable(D); # to remember sortedness
-            else
-                D:=Filtered(D,i-> not i in orb[1]);
-            fi;
-        else
-            for o in orb[1] do
-                use[PositionCanonical(D,o)]:=true;
-            od;
-            
-            # not plist -- do not take difference as there may be special
-            # `PositionCanonical' method.
-            
-            while pos <= Length(D) and use[pos] do 
-                pos := pos + 1;
-            od;
-        fi;
-    od;
-    
-    result := rec(  orbits := orbs,
-                    elts := elements );
-    
-    return result;
-    
-    end );
-    
-InstallGlobalFunction( MAJORANA_OrbitOp, 
-
-    function( G, pnt, gens, act )
-    
-    local   D,
-            orb,
-            orb_elts,
-            d,
-            gen,
+    local   gens,
+            dim,
             i,
-            g,
-            h,
-            p,
+            pnt,
+            d,
+            orb,
+            gen,
+            elts,
             count,
-            result;
+            p,
+            q,
+            h,
+            g,
+            pos;
     
-    D := DomainForAction(pnt,gens,act);
+    gens := GeneratorsOfGroup(G);
+    dim := Size(SetUp.coords);
+    SetUp.conjelts := [1..dim]*0;
+    SetUp.orbitreps := [];
     
-    pnt := Immutable(pnt);
-    
-    d := NewDictionary(pnt, false, D);
-    
-    orb := [ pnt ];
-    orb_elts := [ Identity(G) ];
-    
-    AddDictionary(d,pnt);
-    
-    g := Identity(G);
-    
-    count := 0;
-    
-    for p in orb do
-        
-        count := count + 1;
-        h := orb_elts[count];
-        
-        for gen in gens do
-    
-            i := act(p,gen);
-            g := h*gen;
+    for i in [1..dim] do 
+        if SetUp.conjelts[i] = 0 then 
             
-            MakeImmutable(i);
+            Add(SetUp.orbitreps, i);
+            SetUp.conjelts[i] := ();
+        
+            pnt := Immutable(SetUp.coords[i]);
             
-            if not KnowsDictionary(d,i) then
-                Add( orb, i );
-                AddDictionary(d,i);
-                Add( orb_elts, g);
-            fi;
-        od;
+            d := NewDictionary(pnt, false);
+            
+            orb := [pnt];
+            elts := [()];
+            
+            count := 0;
+            
+            AddDictionary(d, pnt);
+            
+            for p in orb do 
+            
+                count := count + 1;
+                h := elts[count];
+                
+                for gen in gens do 
+                
+                    q := OnPoints(p, gen);
+                    g := h*gen;
+                    
+                    MakeImmutable(q);
+                    
+                    if not KnowsDictionary(d,q) then 
+                        Add(orb, q);
+                        AddDictionary(d,q);
+                        Add(elts, g);
+                        
+                        pos := Position(SetUp.longcoords, q);
+                        pos := SetUp.poslist[pos];
+                        
+                        if pos < 0 then pos := -pos; fi;
+                        
+                        SetUp.conjelts[pos] := g;
+                    fi;
+                od;
+            od;
+        fi;
     od;
     
-    result := [orb,orb_elts];
+    SetUp.conjelts := DuplicateFreeList(SetUp.conjelts);
     
-    return result;
-    
-    end );
-    
+    SetUp.orbitreps := [  Filtered(SetUp.orbitreps, x -> x <= t),
+                          Filtered(SetUp.orbitreps, x -> x > t)   ];
+                        
+    end ); 
+   
 InstallGlobalFunction(MAJORANA_Orbitals,
 
-    function(ProductList)
+    function(G,t,SetUp)
     
-    local   G,
-            dim,
+    local   dim,
             gens,
             i,j,k,l,
             pnt,
@@ -175,27 +99,21 @@ InstallGlobalFunction(MAJORANA_Orbitals,
             pos_1,
             pos_2,
             sign;
-            
     
-    G := ProductList[8];
-    dim := Size(ProductList[1]);
+    dim := Size(SetUp.coords);
     
     table := [[], [1], [1,2], [1,3], [1,2,3,4]];
 
     gens := GeneratorsOfGroup(G);
-    
-    ProductList[3] := NullMat(dim,dim);
-    ProductList[4] := NullMat(dim,dim);
-    ProductList[7] := [];
 
     for i in [1..dim] do 
-        for j in [i..dim] do 
+        for j in [Maximum(i,t + 1)..dim] do 
 
-            if ProductList[3][i][j] = 0 then 
+            if SetUp.pairorbit[i][j] = 0 then 
                 
-                Add(ProductList[7], [i,j]);
+                Add(SetUp.pairreps, [i,j]);
                 
-                pnt := Immutable(ProductList[1]{[i,j]});
+                pnt := Immutable(SetUp.coords{[i,j]});
                 
                 d := NewDictionary(pnt, false);
                 
@@ -207,13 +125,13 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 count := 0;
                 
                 x := List(pnt, Order);
-                y := Size(ProductList[7]);
+                y := Size(SetUp.pairreps);
                 
-                ProductList[3][i][j] := y;
-                ProductList[3][j][i] := y;
+                SetUp.pairorbit[i][j] := y;
+                SetUp.pairorbit[j][i] := y;
         
-                ProductList[4][i][j] := ();
-                ProductList[4][j][i] := ();
+                SetUp.pairconj[i][j] := ();
+                SetUp.pairconj[j][i] := ();
                 
                 for p in orb do 
                     
@@ -225,7 +143,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         q := OnPairs(p,gen);
                         g := h*gen;
                         
-                        MakeImmutable(i);
+                        MakeImmutable(q);
                         
                         if not KnowsDictionary(d,q) then 
                         
@@ -234,21 +152,19 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             Add( elts, g);
                             
                             for k in table[x[1]] do 
-                            
-                                sign := 1;
-                            
-                                pos_1 := Position(ProductList[2], q[1]^k);
-                                pos_1 := ProductList[5][pos_1];
+                                for l in table[x[2]] do
+                                    sign := 1;
                                 
-                                if pos_1 < 0 then 
-                                    pos_1 := -pos_1;
-                                    sign := - sign;
-                                fi;
-                            
-                                for l in table[x[2]] do 
-
-                                    pos_2 := Position(ProductList[2], q[2]^l);
-                                    pos_2 := ProductList[5][pos_2];
+                                    pos_1 := Position(SetUp.longcoords, q[1]^k);
+                                    pos_1 := SetUp.poslist[pos_1];
+                                    
+                                    if pos_1 < 0 then 
+                                        pos_1 := -pos_1;
+                                        sign := - sign;
+                                    fi;
+                                    
+                                    pos_2 := Position(SetUp.longcoords, q[2]^l);
+                                    pos_2 := SetUp.poslist[pos_2];
                                     
                                     if pos_2 < 0 then 
                                         pos_2 := -pos_2;
@@ -256,26 +172,137 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                                     fi;
                          
                                     if x = [5,5] then
-                                        if [k,l] in [[1,2],[2,1],[1,3],[3,1],[2,4],[4,2],[3,4],[4,3]] then 
+                                        if k in [2,3] then  
+                                            sign := -sign;
+                                        fi;
+                                        if l in [2,3] then 
                                             sign := -sign;
                                         fi;
                                     elif x[2] = 5 and k in [2,3] then 
                                         sign := -sign;
                                     fi;
                                     
-                                    ProductList[3][pos_1][pos_2] := sign*y;
-                                    ProductList[3][pos_2][pos_1] := sign*y;
+                                    SetUp.pairorbit[pos_1][pos_2] := sign*y;
+                                    SetUp.pairorbit[pos_2][pos_1] := sign*y;
                             
-                                    ProductList[4][pos_1][pos_2] := g;
-                                    ProductList[4][pos_2][pos_1] := g;
+                                    SetUp.pairconj[pos_1][pos_2] := g;
+                                    SetUp.pairconj[pos_2][pos_1] := g;
                                 
                                 od;
                             od;
                         fi;
                     od;
-                od;
+                od;                
             fi;
         od;
     od;
+    
+    end );
+    
+            
+InstallGlobalFunction( MAJORANA_OrbitalsT,
+
+    function(G, T)
+    
+    local   gens,
+            t, 
+            i,
+            j,
+            k,
+            pairorbit,
+            pairconj,
+            pairreps,
+            pnt,
+            d,
+            gen,
+            orb,
+            orbs,
+            elts,
+            count,
+            p,
+            q,
+            h,
+            g,
+            res,
+            pos_1,
+            pos_2;
+            
+    gens := GeneratorsOfGroup(G);
+    t := Size(T);
+    
+    pairorbit := NullMat(t,t);
+    pairconj  := NullMat(t,t);
+    pairreps  := [];
+    orbs      := [];
+    
+    
+    for i in [1..t] do 
+        for j in [i..t] do 
+            if pairorbit[i][j] = 0 then 
+                
+                Add(pairreps, [i,j]);
+                
+                k := Size(pairreps);
+                
+                pairorbit[i][j] := k;
+                pairorbit[j][i] := k;
+                
+                pairconj[i][j] := ();
+                pairconj[j][i] := ();
+                
+                pnt := Immutable(T{[i,j]});
+                
+                d := NewDictionary(pnt, false);
+                
+                orb := [pnt];
+                elts := [()];
+                
+                AddDictionary(d,pnt);
+                
+                count := 0;
+                
+                for p in orb do 
+                    
+                    count := count + 1;
+                    h := elts[count];
+                    
+                    for gen in gens do 
+                    
+                        q := OnPairs(p,gen);
+                        g := h*gen;
+                        
+                        MakeImmutable(q);
+                        
+                        if not KnowsDictionary(d,q) then 
+                        
+                            Add( orb, q );
+                            AddDictionary(d,q);
+                            Add( elts, g);
+                
+                            pos_1 := Position(T,q[1]);
+                            pos_2 := Position(T,q[2]);
+                                
+                            pairorbit[pos_1][pos_2] := k;
+                            pairorbit[pos_2][pos_1] := k;
+                            
+                            pairconj[pos_1][pos_2] := g;
+                            pairconj[pos_2][pos_1] := g;
+                            
+                        fi;
+                    od;
+                od;
+                
+                Add(orbs, Immutable(orb));
+                
+            fi;
+        od;
+    od;
+    
+    res := rec( pairorbit := pairorbit,
+                pairconj  := pairconj,
+                pairreps  := pairreps,
+                orbitals  := orbs   );
+                
+    return res;
     
     end );
