@@ -774,11 +774,11 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
         
         # 1/32 eigenvectors from conjugation
         
-        for j in [t+1..dim] do 
+        for j in [t+1 .. dim] do 
         
             h := SetUp.coords[j];
             
-            if not h^T[i] in [h,h^2] then 
+            if not h^T[i] in [h,h^2,h^3,h^4] then 
             
                 pos := [j, 0];
                 pos[2] := SetUp.poslist[Position(SetUp.longcoords,h^T[i])];
