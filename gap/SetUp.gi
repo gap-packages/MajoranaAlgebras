@@ -410,7 +410,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     # Check algebra obeys axiom M1 at this stage
 
-    x := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,SetUp);;
+    #x := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,SetUp);;
     
     if false then 
         return MAJORANA_OutputError( "Algebra does not obey axiom M1"

@@ -181,7 +181,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
         od;
     od;
     
-    for i in [t + 1 .. dim] do 
+    for i in [1 .. dim] do 
     
         o := Order(SetUp.coords[i]);
         
