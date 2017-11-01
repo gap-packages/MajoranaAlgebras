@@ -679,6 +679,27 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
         od;
     od;
     
+    if ProductList.nullspace <> false then 
+        for i in Union(ProductList.orbitreps{[1,2]}) do 
+            u := [1..dim]*0; u[i] := 1;        
+
+            for v in ProductList.nullspace[2] do
+                
+                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
+
+                if ForAll(x[1], x -> x = 0) then 
+                    if ForAny( x[2] , y -> y <> 0) then 
+                        Error("Nullspace"); 
+                    fi;
+                else
+                    x[1] := [x[1]];
+                    x[2] := [x[2]];
+                    MAJORANA_Append(x,mat,vec);
+                fi;
+            od;        
+        od;
+    fi;
+    
     Display("EigenVectors unknowns");
     
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
@@ -807,7 +828,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
 
 InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
 
-    function(u,v,UnknownAlgebraProducts,AlgebraProducts,ProductList)
+    function(u,v,unknowns,AlgebraProducts,ProductList)
     
     local   row,        # record values of unknowns
             sum,        # record values of knowns
@@ -826,7 +847,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     
     dim := Size(ProductList.coords);
     
-    row := [1..Size(UnknownAlgebraProducts)]*0;
+    row := [1..Size(unknowns)]*0;
     sum := [1..dim]*0;
     
     elts := [];
@@ -868,7 +889,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                             l := [j,i];
                         fi;
                         
-                        pos := Position(UnknownAlgebraProducts,l);
+                        pos := Position(unknowns,l);
                         row[pos] := row[pos] + u[i]*v[j]; 
                     fi;
                 fi;
@@ -993,6 +1014,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             bad,
             n,
             ev,
+            evecs,
             row,
             sum,
             old_mat,
@@ -1012,7 +1034,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     unknowns := ShallowCopy(x[3]);
     
     # Find unknown algebra products from the resurrection principle
-    
+
     for i in ProductList.orbitreps[1] do     
         
         u := [1..dim]*0;; u[i] := 1;;
@@ -1021,7 +1043,13 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         
             ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
             
-            for beta in EigenVectors[i][evals[2]] do
+            if ProductList.nullspace <> false then
+                evecs := Union(EigenVectors[i][evals[2]], ProductList.nullspace[2]);
+            else
+                evecs := EigenVectors[i][evals[2]];
+            fi;
+            
+            for beta in evecs do
                 for gamma in EigenVectors[i][evals[1]] do  
                 
                     x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, AlgebraProducts, ProductList); 
@@ -1097,25 +1125,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         vec := ShallowCopy(x[2]);
         unknowns := ShallowCopy(x[3]);
     fi;
-    
-    
-    if false then                  
-                            
-        x := MAJORANA_NullSpaceAlgebraProducts(unknowns, AlgebraProducts, ProductList);
-        
-        MAJORANA_Append(x,mat,vec);
-        
-        if mat <> [] then 
-            
-            Display("Nullspace");
-        
-            x := MAJORANA_SolutionAlgProducts(mat,vec, unknowns, AlgebraProducts, ProductList);
-            
-            mat := ShallowCopy(x[1]);
-            vec := ShallowCopy(x[2]);
-            unknowns := ShallowCopy(x[3]);
-        fi;            
-    fi;
+      
     
     if mat <> [] then 
     
@@ -1152,22 +1162,18 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
 InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
 
-    function(UnknownAlgebraProducts, AlgebraProducts, ProductList)
+    function(mat, vec, unknowns, AlgebraProducts, ProductList)
     
-    local i, j, m, k, row, sum, dim, y, mat, vec, a, x, record, pos;
+    local i, j, m, k, row, sum, dim, y, a, x, pos;
     
     dim := Size(ProductList.coords);
-    
-    mat := [];
-    vec := [];
-    record := [];
-    
+
     for j in Union(ProductList.orbitreps{[1,2]}) do 
         a := [1..dim]*0; a[j] := 1;        
 
         for k in [1..Size(ProductList.nullspace[2])] do
             
-            x := MAJORANA_SeparateAlgebraProduct(a,ProductList.nullspace[2][k],UnknownAlgebraProducts,AlgebraProducts,ProductList);
+            x := MAJORANA_SeparateAlgebraProduct(a,ProductList.nullspace[2][k],unknowns,AlgebraProducts,ProductList);
 
             if ForAll(x[1], x -> x = 0) then 
                 if ForAny( x[2] , y -> y <> 0) then 
@@ -1176,12 +1182,15 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
             else
                 Add(mat,x[1]);
                 Add(vec,x[2]);
-                Add(record,[k,"n"]);
             fi;
         od;        
     od;
     
-    return [mat,vec,record];
+    Display("Nullspace unknowns");
+    
+    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+            
+    return y;
     
     end );
     
@@ -1204,12 +1213,12 @@ InstallGlobalFunction( MAJORANA_OutputError,
     
 InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
-    function( mat, vec, UnknownAlgebraProducts, AlgebraProducts, ProductList)
+    function( mat, vec, unknowns, AlgebraProducts, ProductList)
     
     local   sol,        # solution of system
             sign,       # correct sign of 5A axes
-            i,          # loop over <UnknownAlgebraProducts>
-            x,          # element of <UnknownAlgebraProducts>
+            i,          # loop over <unknowns>
+            x,          # element of <unknowns>
             y,          # orbit of x
             g,          # conj element of x
             unsolved,
@@ -1227,11 +1236,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         Display("Solved it!");
 
         if sol <> false then
-            for i in [1..Size(UnknownAlgebraProducts)] do
+            for i in [1..Size(unknowns)] do
             
                 if not i in sol[2] then
                 
-                    x := UnknownAlgebraProducts[i]; 
+                    x := unknowns[i]; 
                     
                     y := ProductList.pairorbit[x[1]][x[2]];
                     g := ProductList.pairconj[x[1]][x[2]][2];
@@ -1259,9 +1268,9 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
         unsolved := [];
         
-        for i in [1..Size(UnknownAlgebraProducts)] do 
+        for i in [1..Size(unknowns)] do 
         
-            x := UnknownAlgebraProducts[i]; 
+            x := unknowns[i]; 
                         
             y := ProductList.pairorbit[x[1]][x[2]];
             
@@ -1302,9 +1311,9 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         sol[3][1] := sol[3][1]{nonzero};
         sol[3][2] := sol[3][2]{nonzero};
         
-        return [sol[3][1],sol[3][2],UnknownAlgebraProducts{unsolved}];
+        return [sol[3][1],sol[3][2],unknowns{unsolved}];
     else
-        return [[],[],UnknownAlgebraProducts];
+        return [[],[],unknowns];
     fi;
     
     end );
@@ -1377,9 +1386,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
                     for k in [1..3] do                        
                         for x in [1..Size(EigenVectors[j][k])] do
                             EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],ProductList.nullspace);
-                        od;   
-                        
-                        Append(EigenVectors[j][k],ProductList.nullspace[2]);                                                
+                        od;                                             
                     od;                    
                 od;
                 
