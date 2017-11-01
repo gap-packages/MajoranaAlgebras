@@ -105,6 +105,10 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         
         if y <> false then 
             Add(new[1], x - (1/4)*u*y);
+            
+            #if not MAJORANA_AlgebraProduct( u, x - (1/4)*u*y, AlgebraProducts, ProductList) in [u*0, false] then 
+            #    Error("Fusion error");
+            #fi;
         fi;
     elif evals = [3,3] then 
         y := MAJORANA_InnerProduct(a,b,GramMatrix,ProductList);
@@ -113,12 +117,26 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         if y <> false and z <> false then 
             Add(new[2], z - (1/32)*u*y);
             Add(new[1], x + (3/32)*u*y - 4*z);
+            
+            #if not MAJORANA_AlgebraProduct( u, x + (3/32)*u*y - 4*z, AlgebraProducts, ProductList) in [u*0, false] then 
+            #    Error("Fusion error");
+            #fi;
+            #if not MAJORANA_AlgebraProduct( u, z - (1/32)*u*y, AlgebraProducts, ProductList) in [(z - (1/32)*u*y)/4, false] then 
+            #    Error("Fusion error");
+            #fi;
+            
+            
+            
         elif y <> false then 
             Add(other_mat, x - (1/32)*u*y);
         fi;
             
     else
         Add(new[pos],x);
+        
+        #if not MAJORANA_AlgebraProduct(u, x, AlgebraProducts, ProductList) in [x*new_ev, false] then 
+        #    Error("Fusion error");
+        #fi;
     fi;
     
     end );
@@ -150,7 +168,8 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             other_mat;
             
     # looks like we should get rid of this - check on a big example
-            
+    
+    if false then         
     for j in ProductList.orbitreps[1] do 
         for k in [1..3] do 
             if EigenVectors[j][k] <> [] then
@@ -158,6 +177,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             fi;
         od;
     od;
+    fi;
     
     dim := Size(ProductList.coords);
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
