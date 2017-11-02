@@ -189,22 +189,23 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
         for evals in [[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[2,2],[3,3]] do
             for a in EigenVectors[i][evals[1]] do
-                
-                bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
-                
-                if bad <> [] then  
-                    null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
-                else
-                    null := IdentityMat(Size(EigenVectors[i][evals[2]]));
+                if Size(EigenVectors[i][evals[2]]) <> 0 then 
+                    bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
+                    
+                    if bad <> [] then  
+                        null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
+                    else
+                        null := IdentityMat(Size(EigenVectors[i][evals[2]]));
+                    fi;
+                    
+                    for j in [1..Size(null)] do 
+                        
+                        b := null[j]*EigenVectors[i][evals[2]];
+                        
+                        MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
+                        
+                    od;
                 fi;
-                
-                for j in [1..Size(null)] do 
-                    
-                    b := null[j]*EigenVectors[i][evals[2]];
-                    
-                    MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
-                    
-                od;
             od;
         od;
         
