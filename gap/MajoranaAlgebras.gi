@@ -224,7 +224,9 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
         
         for j in [1..3] do 
             Append(EigenVectors[i][j], new[j]);
-            EigenVectors[i][j] := ShallowCopy(BaseMat(EigenVectors[i][j]));
+            if EigenVectors[i][j] <> [] then 
+                EigenVectors[i][j] := ShallowCopy(BaseMat(EigenVectors[i][j]));
+            fi;
         od;
         
     od;
@@ -1444,7 +1446,9 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 for ev in [1..3] do 
                     Display(["More eigenvectors",i,ev]); 
                     Append(EigenVectors[i][ev], ShallowCopy(NullspaceMat(mat - IdentityMat(dim)*table[ev])));
-                    EigenVectors[i][ev] := ShallowCopy(BaseMat(EigenVectors[i][ev]));                    
+                    if EigenVectors[i][ev] <> [] then 
+                        EigenVectors[i][ev] := ShallowCopy(BaseMat(EigenVectors[i][ev]));
+                    fi;
                 od;
             fi;
         fi; 
@@ -1456,7 +1460,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
 InstallGlobalFunction(MAJORANA_MainLoop,
 
-    function(GramMatrix,AlgebraProducts,EigenVectors,ProductList)
+    function(rep)
     
     local   x, 
             dim,
@@ -1464,59 +1468,50 @@ InstallGlobalFunction(MAJORANA_MainLoop,
             j,
             k;
             
-    dim := Size(ProductList.coords);
+    dim := Size(rep.setup.coords);
     
                                 ## STEP 5: INNER PRODUCTS M1 ##
                                 
-    MAJORANA_UnknownsAxiomM1(GramMatrix,AlgebraProducts,ProductList);
-    
-    x := MAJORANA_CheckNullSpace(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
-    
-    if x = false then
-        return  MAJORANA_OutputError("The inner product is not positive definite"
-                            , []
-                            , ["Shape",GramMatrix,AlgebraProducts,EigenVectors,ProductList]);                                     
-    fi;
+    MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
                                                 
                                 ## STEP 6: FUSION ##                                        
                             
-
     # Use these eigenvectors and the fusion rules to find more
     
     maindimensions:=[];
 
-    for j in ProductList.orbitreps[1] do
-        for k in [1..3] do
-            if Size(EigenVectors[j][k]) > 0 then
-                EigenVectors[j][k] := ShallowCopy(BaseMat(EigenVectors[j][k]));
+    for j in rep.setup.orbitreps[1] do
+        for k in [1..3] do                  #  TODO - do we need to find this basemat?
+            if Size(rep.evecs[j][k]) > 0 then
+                rep.evecs[j][k] := ShallowCopy(BaseMat(rep.evecs[j][k]));
             fi;
         od;
-        Add(maindimensions,   Size(EigenVectors[j][1])
-                            + Size(EigenVectors[j][2])
-                            + Size(EigenVectors[j][3])+1);
+        Add(maindimensions,   Size(rep.evecs[j][1])
+                            + Size(rep.evecs[j][2])
+                            + Size(rep.evecs[j][3])+1);
     od;
 
     if ForAny(maindimensions, x -> x < dim - 1) then                
     
-        x := MAJORANA_Fusion(GramMatrix, AlgebraProducts,EigenVectors,ProductList);
+        x := MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);
         
-        if not x[1] and ProductList.nullspace <> false then 
+        if not x[1] and rep.setup.nullspace <> false then 
             return MAJORANA_OutputError(x[2],
                             x[3],
-                            [GramMatrix,AlgebraProducts,EigenVectors,ProductList]);
+                            rep);
         fi;
         
     fi;
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(GramMatrix,AlgebraProducts,EigenVectors,ProductList);
+    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
     
                                 ## STEP 9: MORE EVECS II ##
 
     # Check if we have full espace decomp, if not find it
 
-    x := MAJORANA_MoreEigenvectors(AlgebraProducts,EigenVectors,ProductList);
+    x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup);
     
     
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
@@ -1524,12 +1519,12 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 
     # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
 
-    x := MAJORANA_FullOrthogonality(EigenVectors,GramMatrix, AlgebraProducts,ProductList);
+    x := MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.algebraproducts,rep.setup);
     
     if not x[1] then 
         return MAJORANA_OutputError( x[2]
                         , x[3]
-                        , [,GramMatrix,AlgebraProducts,EigenVectors,ProductList]);
+                        , rep);
     fi;
     
     end);
@@ -1539,57 +1534,41 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(input,index)
 
-    local   # Seress
-            ProductList,  
+    local   i,
+            j,
+            rep,
+            dim,
+            maindimensions,
+            newdimensions,
+            falsecount,
+            newfalsecount,
+            switchmain;    
 
-            # indexing and temporary variables
-            i, j, k, x, y, 
-
-            # Step 0 - Set Up
-            t, SizeOrbitals, OrbitalsT, G, T,
-            
-            # Step 1 - Shape
-            Shape, 
-
-            # Step 3 - Products and evecs I
-            GramMatrix, GramMatrixFull, AlgebraProducts, EigenVectors, sign,
-
-            # Step 4 - More products and evecs
-            h, s, dim,
-            
-            vals, pos, OutputList, record, 
-
-            falsecount, newfalsecount, maindimensions, newdimensions, switchmain;     
-
-    OutputList :=  MAJORANA_SetUp(input,index);
+    rep :=  MAJORANA_SetUp(input,index);
     
-    if Size(OutputList) <> 5 then 
-        Error("Some error");
-    fi;
-    
-    dim := Size(OutputList[5].coords);
+    dim := Size(rep.setup.coords);
     
     maindimensions:=[];
 
-    for j in OutputList[5].orbitreps[1] do
-        for k in [1..3] do
-            if Size(OutputList[4][j][k]) > 0 then
-                OutputList[4][j][k]:=ShallowCopy(BaseMat(OutputList[4][j][k]));
+    for i in rep.setup.orbitreps[1] do
+        for j in [1..3] do
+            if Size(rep.evecs[i][j]) > 0 then
+                rep.evecs[i][j]:=ShallowCopy(BaseMat(rep.evecs[i][j]));
             fi;
         od;
-        Add(maindimensions,   Size(OutputList[4][j][1])
-                            + Size(OutputList[4][j][2])
-                            + Size(OutputList[4][j][3])+1);
+        Add(maindimensions,   Size(rep.evecs[i][1])
+                            + Size(rep.evecs[i][2])
+                            + Size(rep.evecs[i][3]) + 1);
     od;
     
     falsecount := [0,0];
     
-    if false in OutputList[2] then
-        falsecount[1] := Size(Positions(OutputList[2],false));
+    if false in rep.algebraproducts then
+        falsecount[1] := Size(Positions(rep.algebraproducts,false));
     fi;
     
-    if false in OutputList[3] then
-        falsecount[2] := Size(Positions(OutputList[3],false));
+    if false in rep.innerproducts then
+        falsecount[2] := Size(Positions(rep.innerproducts,false));
     fi;
     
     if ForAll(maindimensions, x -> x = dim) and falsecount = [0,0] then 
@@ -1600,24 +1579,24 @@ function(input,index)
     
     while switchmain = 0 do
                                 
-        MAJORANA_MainLoop(OutputList[2],OutputList[3],OutputList[4],OutputList[5]);
+        MAJORANA_MainLoop(rep);
         
         newdimensions := [];
         
-        for j in OutputList[5].orbitreps[1] do 
-            Add(newdimensions, Size(OutputList[4][j][1]) 
-                                + Size(OutputList[4][j][2]) 
-                                + Size(OutputList[4][j][3]) + 1);
+        for i in rep.setup.orbitreps[1] do 
+            Add(newdimensions,   Size(rep.evecs[i][1])
+                               + Size(rep.evecs[i][2])
+                               + Size(rep.evecs[i][3]) + 1);
         od;
         
         newfalsecount := [0,0];
         
-        if false in OutputList[2] then
-            newfalsecount[1] := Size(Positions(OutputList[2],false));
+        if false in rep.algebraproducts then
+            newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
         fi;
         
-        if false in OutputList[3] then
-            newfalsecount[2] := Size(Positions(OutputList[3],false));
+        if false in rep.innerproducts then
+            newfalsecount[2] := Size(Positions(rep.innerproducts,false));
         fi;
         
         Display([newfalsecount,falsecount]);
@@ -1628,12 +1607,7 @@ function(input,index)
 
             return StructuralCopy(["Fail"
                         , "Missing values"
-                        ,
-                        , OutputList[1]
-                        , OutputList[2]
-                        , OutputList[3]
-                        , OutputList[4]
-                        , OutputList[5]]);
+                        , rep] );
             break;
         else
             maindimensions := StructuralCopy(newdimensions);
@@ -1641,15 +1615,8 @@ function(input,index)
         fi;
     od;
 
-    x := StructuralCopy(["Success"
-                ,
-                ,
-                , OutputList[1]
-                , OutputList[2]
-                , OutputList[3]
-                , OutputList[4]
-                , OutputList[5]]);
+    Display("Success");
     
-    return x;
+    return rep;
 
 end );

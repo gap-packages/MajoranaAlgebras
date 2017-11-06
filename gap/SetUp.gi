@@ -17,7 +17,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
             pos,            # positions
             Binaries,       # used to loop through options for shapes
             shapeslist,     # final list of shapes
-            result;         #
+            input;          #
     
     t := Size(T);
 
@@ -97,7 +97,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         
     od;
     
-    result := rec(  group       := G,
+    input  := rec(  group       := G,
                     involutions := T,
                     orbitals    := orbs.orbitals,
                     shapes      := shapeslist,
@@ -105,7 +105,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
                     pairorbit   := orbs.pairorbit,
                     pairconj    := orbs.pairconj     );
     
-    return result;
+    return input;
 
     end );
     
@@ -129,7 +129,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
             pos,            # positions
             Binaries,       # used to loop through options for shapes
             shapeslist,     # final list of shapes
-            result;         #
+            input;          #
     
     t := Size(T);
     
@@ -262,7 +262,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
         
     od;
     
-    result := rec(  group       := G,
+    input  := rec(  group       := G,
                     involutions := T,
                     orbitals    := orbs.orbitals,
                     shapes      := shapeslist,
@@ -270,7 +270,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
                     pairorbit   := orbs.pairorbit,
                     pairconj    := orbs.pairconj     );
     
-    return result;
+    return input;
 
     end );
 
@@ -278,10 +278,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     function(input, index)
     
-    local   G,              # group
-            T,              # involutions
-            Shape,          # chosen shape
-            OrbitalsT,      # orbits of G on T
+    local   rep,
             t,              # size of T
             x,              # temporary variables
             i,              # index variables
@@ -291,134 +288,116 @@ InstallGlobalFunction( MAJORANA_SetUp,
             y,
             res,
             dim,            # size of coordinates
-            s,              # number of orbits of G on T x T
-            GramMatrix,
-            AlgebraProducts,
-            EigenVectors,
-            SetUp;
+            s;              # number of orbits of G on T x T
 
-    G           := input.group;
-    T           := input.involutions;
-    Shape       := input.shapes[index];
-    OrbitalsT   := input.orbitals;  
+    t := Size(input.involutions);  
     
-    t := Size(T);  
+    rep  := rec(    shape := input.shapes[index]    );
     
-    SetUp := rec(   coords      := ShallowCopy(T),
-                    longcoords  := ShallowCopy(T),
-                    poslist     := [1..t]     );
-
+    rep.setup := rec(   coords      := ShallowCopy(input.involutions),
+                        longcoords  := ShallowCopy(input.involutions),
+                        poslist     := [1..t]           );
+    
     # Create coordinates lists
 
-    for i in [1..Size(OrbitalsT)] do
+    for i in [1..Size(input.orbitals)] do
     
-        if Shape[i]=['3','A'] then
-            for j in [1..Size(OrbitalsT[i])] do
+        if rep.shape[i]=['3','A'] then
+            for j in [1..Size(input.orbitals[i])] do
             
-                x := OrbitalsT[i][j][1]*OrbitalsT[i][j][2];
+                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
                 
-                if not x in SetUp.longcoords then 
-                    Add(SetUp.coords,x);
+                if not x in rep.setup.longcoords then 
+                    Add(rep.setup.coords,x);
                 
-                    k := Size(SetUp.coords);
+                    k := Size(rep.setup.coords);
                 
-                    Append(SetUp.poslist, [k,k]);
-                    Append(SetUp.longcoords, [x, x^2]);
+                    Append(rep.setup.poslist, [k,k]);
+                    Append(rep.setup.longcoords, [x, x^2]);
                 fi;
             od;
-        elif Shape[i]=['4','A'] then
-            for j in [1..Size(OrbitalsT[i])] do
+        elif rep.shape[i]=['4','A'] then
+            for j in [1..Size(input.orbitals[i])] do
             
-                x := OrbitalsT[i][j][1]*OrbitalsT[i][j][2];
+                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
                 
-                if not x in SetUp.longcoords then 
-                    Add(SetUp.coords,x);
+                if not x in rep.setup.longcoords then 
+                    Add(rep.setup.coords,x);
                     
-                    k := Size(SetUp.coords);
+                    k := Size(rep.setup.coords);
                     
-                    Append(SetUp.poslist, [k,k]);
-                    Append(SetUp.longcoords, [x, x^3]);
+                    Append(rep.setup.poslist, [k,k]);
+                    Append(rep.setup.longcoords, [x, x^3]);
                 fi;
                 
             od;
-        elif Shape[i]=['5','A'] then
-            for j in [1..Size(OrbitalsT[i])] do
+        elif rep.shape[i]=['5','A'] then
+            for j in [1..Size(input.orbitals[i])] do
             
-                x := OrbitalsT[i][j][1]*OrbitalsT[i][j][2];
+                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
                 
-                if not x in SetUp.longcoords then 
-                    Add(SetUp.coords,x);
+                if not x in rep.setup.longcoords then 
+                    Add(rep.setup.coords,x);
                     
-                    k := Size(SetUp.coords);
+                    k := Size(rep.setup.coords);
                     
-                    Append(SetUp.poslist, [k,-k,-k,k]);
-                    Append(SetUp.longcoords, [x, x^2, x^3, x^4]);
+                    Append(rep.setup.poslist, [k,-k,-k,k]);
+                    Append(rep.setup.longcoords, [x, x^2, x^3, x^4]);
                 fi;    
             od;
         fi;
     od;
     
-    dim := Size(SetUp.coords);
+    dim := Size(rep.setup.coords);
 
-    SetUp.pairorbit := NullMat(dim,dim);
-    SetUp.pairconj  := NullMat(dim,dim);
-    SetUp.nullspace := false;
+    rep.setup.pairorbit := NullMat(dim,dim);
+    rep.setup.pairconj  := NullMat(dim,dim);
+    rep.setup.nullspace := false;
     
-    SetUp.pairreps  := ShallowCopy(input.pairreps);
+    rep.setup.pairreps  := ShallowCopy(input.pairreps);
     
     for i in [1..t] do 
         for j in [1..t] do 
-            SetUp.pairorbit[i][j] := input.pairorbit[i][j];
-            SetUp.pairconj[i][j]  := input.pairconj[i][j];
+            rep.setup.pairorbit[i][j] := input.pairorbit[i][j];
+            rep.setup.pairconj[i][j]  := input.pairconj[i][j];
         od;
     od;    
 
-    MAJORANA_Orbits(G, t, SetUp);
+    MAJORANA_Orbits(input.group, t, rep.setup);
 
-    MAJORANA_Orbitals(G, t, SetUp);
+    MAJORANA_Orbitals(input.group, t, rep.setup);
 
-    MAJORANA_FindAllPermutations(G, SetUp);
+    MAJORANA_FindAllPermutations(input.group, rep.setup);
     
                                 ## STEP 3: PRODUCTS AND EVECS I ##
                                 
-    s := Size(SetUp.pairreps);
+    s := Size(rep.setup.pairreps);
 
-    # Set up algebra product and gram matrices
+    # Set up rep record
 
-    AlgebraProducts := List([1..s], x -> false);
-    GramMatrix := List([1..s], x -> false);
+    rep.algebraproducts := List([1..s], x -> false);
+    rep.innerproducts   := List([1..s], x -> false);
+    rep.evecs           := NullMat(t,3);               
 
     # Set up eigenvector matrix
 
-    EigenVectors := NullMat(t,3);
-
     for j in [1..t] do
-        if j in SetUp.orbitreps[1] then
+        if j in rep.setup.orbitreps[1] then
             for k in [1..3] do
-                EigenVectors[j][k] := [];
+                rep.evecs[j][k] := [];
             od;
         else
             for k in [1..3] do
-                EigenVectors[j][k] := false;
+                rep.evecs[j][k] := false;
             od;
         fi;
     od;
     
     # Start filling in values and products!
 
-    MAJORANA_DihedralProducts(T,OrbitalsT, Shape, GramMatrix, AlgebraProducts, EigenVectors, SetUp);
-    
-    # Check algebra obeys axiom M1 at this stage
+    MAJORANA_DihedralProducts(input.involutions, rep);
 
-    #x := MAJORANA_AxiomM1(GramMatrix,AlgebraProducts,SetUp);;
-    
-    if false then 
-        return MAJORANA_OutputError( "Algebra does not obey axiom M1"
-                            , x
-                            , [Shape, GramMatrix, AlgebraProducts, EigenVectors, SetUp]);
-    fi;
-    
-    return [Shape, GramMatrix, AlgebraProducts, EigenVectors, SetUp];
+    return rep;
     
     end );
     
@@ -441,7 +420,7 @@ InstallGlobalFunction(MAJORANA_MakeVector,
     
 InstallGlobalFunction( MAJORANA_FindVectorPermutation, 
     
-    function(g,SetUp)
+    function(g,setup)
     
     local   dim,        # size of coordinates
             i,          # loop over group elements
@@ -452,7 +431,7 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
             pos_1,      # position of conjugated element in longcoordinates
             pos_2;      # corresponding position in coordinates
     
-    dim := Size(SetUp.coords);
+    dim := Size(setup.coords);
     
     signlist := ListWithIdenticalEntries(dim,1);
     
@@ -462,8 +441,8 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
         list := [1..dim]*0;
         for j in [1..dim] do 
         
-            pos_1 := Position(SetUp.longcoords,SetUp.coords[j]^g);
-            pos_2 := SetUp.poslist[pos_1];
+            pos_1 := Position(setup.longcoords,setup.coords[j]^g);
+            pos_2 := setup.poslist[pos_1];
             
             if pos_2 > 0 then 
                 list[j] := pos_2;
@@ -482,7 +461,7 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     
 InstallGlobalFunction( MAJORANA_FindAllPermutations,
 
-    function(G, SetUp)
+    function(G, setup)
     
     local   gp,
             perms,
@@ -492,38 +471,38 @@ InstallGlobalFunction( MAJORANA_FindAllPermutations,
             g,
             pos;
             
-    gp := AsSet(G);
-    perms := List(gp, x -> MAJORANA_FindVectorPermutation(x, SetUp)); 
+    gp      := AsSet(G);
+    perms   := List(gp, x -> MAJORANA_FindVectorPermutation(x, setup)); 
     
-    dim := Size(SetUp.coords);
+    dim := Size(setup.coords);
     
     for i in [1..dim] do
         for j in [i..dim] do 
     
-            g := SetUp.pairconj[i][j];
+            g := setup.pairconj[i][j];
             
             pos := [Position(gp, g)];
             pos[2] := Position(gp, Inverse(g));
             
-            SetUp.pairconj[i][j] := perms{pos};
-            SetUp.pairconj[j][i] := perms{pos};
+            setup.pairconj[i][j] := perms{pos};
+            setup.pairconj[j][i] := perms{pos};
         od;
     od;
     
-    for i in [1..Size(SetUp.conjelts)] do 
+    for i in [1..Size(setup.conjelts)] do 
         
-        g := SetUp.conjelts[i];
+        g := setup.conjelts[i];
         
         pos := Position(gp, g);
         
-        SetUp.conjelts[i] := [g, perms[pos]];
+        setup.conjelts[i] := [g, perms[pos]];
     od;
     
     end );
     
 InstallGlobalFunction(MAJORANA_DihedralProducts,
 
-    function(T,OrbitalsT, Shape, GramMatrix, AlgebraProducts, EigenVectors, SetUp)
+    function(T, rep)
 
     local   i,
             j,      # loop over reps of T
@@ -539,60 +518,60 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
             t,      # size of T
             sign;   # corrects sign of 5A axes
             
-    dim := Size(SetUp.coords);
+    dim := Size(rep.setup.coords);
     t   := Size(T);
     
-    # (2,2) products and eigenvectors from IPSS10
+    # (2,2) products and rep.evecs from IPSS10
 
-    # Add eigenvectors from IPSS10
+    # Add rep.evecs from IPSS10
 
-    for i in SetUp.orbitreps[1] do
+    for i in rep.setup.orbitreps[1] do
         for j in [1..t] do
         
             if i <> j then 
 
-                x := SetUp.pairorbit[i][j];
+                x := rep.setup.pairorbit[i][j];
 
-                if Shape[x] = ['2','A'] then
+                if rep.shape[x] = ['2','A'] then
                 
                     pos := [i, j, 0];
                     pos[3] := Position(T,T[i]*T[j]);
                     
                     vals := [-1/4, 1, 1];
                     
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
                     
                     vals := [0, 1, -1];
 
-                    Add(EigenVectors[i][2], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
 
-                elif Shape[x] = ['2','B'] then
+                elif rep.shape[x] = ['2','B'] then
                 
                     pos := [j];
                     vals := [1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
-                elif Shape[x] = ['3','A'] then
+                elif rep.shape[x] = ['3','A'] then
                 
                     pos := [i, j, 0, 0];
 
                     pos[3] := Position(T, T[i]*T[j]*T[i]);
-                    pos[4] := SetUp.poslist[Position(SetUp.longcoords,T[i]*T[j])];
+                    pos[4] := rep.setup.poslist[Position(rep.setup.longcoords,T[i]*T[j])];
 
                     vals := [-10/27, 32/27, 32/27, 1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
                     
                     vals := [-8/45, -32/45, -32/45, 1];
 
-                    Add(EigenVectors[i][2], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                elif Shape[x] = ['3','C'] then
+                elif rep.shape[x] = ['3','C'] then
                 
                     pos := [i, j, 0];
 
@@ -600,32 +579,32 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [-1/32, 1, 1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                elif Shape[x] = ['4','A'] then
+                elif rep.shape[x] = ['4','A'] then
                     
                     pos := [i, j, 0, 0, 0];
                     pos[3] := Position(T, T[i]*T[j]*T[i]);
                     pos[4] := Position(T, T[j]*T[i]*T[j]);
-                    pos[5] := SetUp.poslist[Position(SetUp.longcoords,T[i]*T[j])];
+                    pos[5] := rep.setup.poslist[Position(rep.setup.longcoords,T[i]*T[j])];
 
                     vals := [-1/2, 2, 2, 1, 1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [-1/3, -2/3, -2/3, -1/3, 1]; 
 
-                    Add(EigenVectors[i][2], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1, 0, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                elif Shape[x] = ['4','B'] then
+                elif rep.shape[x] = ['4','B'] then
                     
                     pos := [i, j, 0, 0, 0];
                     pos[3] := Position(T, T[i]*T[j]*T[i]);
@@ -634,21 +613,21 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     
                     vals := [-1/32, 1, 1, 1/8, -1/8];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1, 0, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
-                elif Shape[x] = ['5','A'] then
+                elif rep.shape[x] = ['5','A'] then
                 
-                    x := Position(SetUp.longcoords,T[i]*T[j]);
+                    x := Position(rep.setup.longcoords,T[i]*T[j]);
                 
                     pos := [i, j, 0, 0, 0, 0];
                     pos[3] := Position(T, T[i]*T[j]*T[i]);
                     pos[4] := Position(T, T[j]*T[i]*T[j]);
                     pos[5] := Position(T, T[i]*T[j]*T[i]*T[j]*T[i]);
-                    pos[6] := SetUp.poslist[x]; 
+                    pos[6] := rep.setup.poslist[x]; 
 
                     if pos[6] < 0 then
                         pos[6] := -pos[6];
@@ -659,25 +638,25 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [3/512, -15/128, -15/128, -1/128, -1/128, sign*1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [-3/512, 1/128, 1/128, 15/128, 15/128, sign*1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [0, 1/128, 1/128, -1/128, -1/128, sign*1];
 
-                    Add(EigenVectors[i][2], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [0, 1, -1, 0, 0, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [0, 0, 0, 1, -1, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
 
-                elif Shape[x] = ['6','A'] then
+                elif rep.shape[x] = ['6','A'] then
 
                     pos := [i, j, 0, 0, 0, 0, 0, 0];
                     pos[3] := Position(T, T[i]*T[j]*T[i]);
@@ -685,45 +664,45 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     pos[5] := Position(T, T[i]*T[j]*T[i]*T[j]*T[i]);
                     pos[6] := Position(T, T[j]*T[i]*T[j]*T[i]*T[j]);
                     pos[7] := Position(T, (T[i]*T[j])^3);
-                    pos[8] := SetUp.poslist[Position(SetUp.longcoords,(T[i]*T[j])^2)];
+                    pos[8] := rep.setup.poslist[Position(rep.setup.longcoords,(T[i]*T[j])^2)];
 
                     vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
 
-                    Add(EigenVectors[i][1], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [-8/45, 0, 0, -32/45, -32/45, -32/45, 32/45, 1];
 
-                    Add(EigenVectors[i][2], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [0, 1, -1, 0, 0, 0, 0, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [0, 0, 0, 1, -1, 0, 0, 0];
 
-                    Add(EigenVectors[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
                     
                     # put in products of 2A and 3A axes
                     
-                    x := SetUp.pairorbit[pos[7]][pos[8]];
+                    x := rep.setup.pairorbit[pos[7]][pos[8]];
                     
-                    AlgebraProducts[x] := [1..dim]*0;
+                    rep.algebraproducts[x] := [1..dim]*0;
                     
-                    GramMatrix[x] := 0;
+                    rep.innerproducts[x] := 0;
                 fi;
             fi;
         od;
         
-        # 1/32 eigenvectors from conjugation
+        # 1/32 rep.evecs from conjugation
         
         for j in [t+1 .. dim] do 
         
-            h := SetUp.coords[j];
+            h := rep.setup.coords[j];
             
             if not h^T[i] in [h,h^2,h^3,h^4] then 
             
                 pos := [j, 0];
-                pos[2] := SetUp.poslist[Position(SetUp.longcoords,h^T[i])];
+                pos[2] := rep.setup.poslist[Position(rep.setup.longcoords,h^T[i])];
                 
                 if pos[2] < 0 then
                     pos[2] := -pos[2];
@@ -734,82 +713,82 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 
                 vals := [1,-sign*1];
                 
-                Add(EigenVectors[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
             fi;
         od;
     od;
         
     # Products from IPSS10
 
-    for i in [1..Size(SetUp.pairreps)] do
+    for i in [1..Size(rep.setup.pairreps)] do
 
-        j := SetUp.pairreps[i][1];
-        k := SetUp.pairreps[i][2];
+        j := rep.setup.pairreps[i][1];
+        k := rep.setup.pairreps[i][2];
         
-        if Order(SetUp.coords[j]) = 2 and Order(SetUp.coords[k]) = 2 then 
-            if Shape[i] = ['1','A'] then
+        if Order(rep.setup.coords[j]) = 2 and Order(rep.setup.coords[k]) = 2 then 
+            if rep.shape[i] = ['1','A'] then
             
                 pos := [j];
                 vals := [1];
                 
-                AlgebraProducts[i] := MAJORANA_MakeVector( pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector( pos, vals, dim);
                 
-                GramMatrix[i] := 1;
+                rep.innerproducts[i] := 1;
             
-            elif Shape[i] = ['2','A'] then
+            elif rep.shape[i] = ['2','A'] then
 
                 pos := [j, k, 0];
                 pos[3] := Position(T,T[j]*T[k]);
 
                 vals := [1/8, 1/8, -1/8];
                 
-                AlgebraProducts[i] := MAJORANA_MakeVector( pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector( pos, vals, dim);
 
-                GramMatrix[i] := 1/8;
+                rep.innerproducts[i] := 1/8;
 
-            elif Shape[i] = ['2','B'] then
+            elif rep.shape[i] = ['2','B'] then
 
-                AlgebraProducts[i] := NullMat(1,dim)[1];
+                rep.algebraproducts[i] := NullMat(1,dim)[1];
 
-                GramMatrix[i] := 0;
+                rep.innerproducts[i] := 0;
 
-            elif Shape[i] = ['3','A'] then
+            elif rep.shape[i] = ['3','A'] then
             
                 pos := [j, k, 0, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
-                pos[4] := SetUp.poslist[Position(SetUp.longcoords,T[j]*T[k])];
+                pos[4] := rep.setup.poslist[Position(rep.setup.longcoords,T[j]*T[k])];
 
                 vals := [1/16, 1/16, 1/32, -135/2048];
                 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i] := 13/256;
+                rep.innerproducts[i] := 13/256;
 
-            elif Shape[i] = ['3','C'] then
+            elif rep.shape[i] = ['3','C'] then
             
                 pos := [j, k, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
                 
                 vals := [1/64, 1/64, -1/64];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i]:=1/64;
+                rep.innerproducts[i]:=1/64;
 
-            elif Shape[i] = ['4','A'] then
+            elif rep.shape[i] = ['4','A'] then
 
                 pos := [j, k, 0, 0, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
                 pos[4] := Position(T,T[k]*T[j]*T[k]);
-                pos[5] := SetUp.poslist[Position(SetUp.longcoords,T[j]*T[k])];
+                pos[5] := rep.setup.poslist[Position(rep.setup.longcoords,T[j]*T[k])];
 
                 vals := [3/64, 3/64, 1/64, 1/64, -3/64]; 
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i] := 1/32;
+                rep.innerproducts[i] := 1/32;
 
-            elif Shape[i] = ['4','B'] then
+            elif rep.shape[i] = ['4','B'] then
             
                 pos := [j, k, 0, 0, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
@@ -818,17 +797,17 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                 vals := [1/64, 1/64, -1/64, -1/64, 1/64];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i]:=1/64;
+                rep.innerproducts[i]:=1/64;
 
-            elif  Shape[i] = ['5','A'] then
+            elif  rep.shape[i] = ['5','A'] then
             
                 pos := [j, k, 0, 0, 0, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
                 pos[4] := Position(T,T[k]*T[j]*T[k]);
                 pos[5] := Position(T,T[j]*T[k]*T[j]*T[k]*T[j]);
-                pos[6] := SetUp.poslist[Position(SetUp.longcoords,T[j]*T[k])];
+                pos[6] := rep.setup.poslist[Position(rep.setup.longcoords,T[j]*T[k])];
 
                 if pos[6] < 0 then
                     pos[6] := -pos[6];
@@ -839,11 +818,11 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 
                 vals := [3/128, 3/128, -1/128, -1/128, -1/128, sign];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i]:=3/128;
+                rep.innerproducts[i]:=3/128;
 
-            elif Shape[i] = ['6','A'] then
+            elif rep.shape[i] = ['6','A'] then
             
                 pos := [j, k, 0, 0, 0, 0, 0, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
@@ -851,21 +830,21 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 pos[5] := Position(T,T[j]*T[k]*T[j]*T[k]*T[j]);
                 pos[6] := Position(T,T[k]*T[j]*T[k]*T[j]*T[k]);
                 pos[7] := Position(T,(T[j]*T[k])^3);
-                pos[8] := SetUp.poslist[Position(SetUp.longcoords,(T[j]*T[k])^2)];
+                pos[8] := rep.setup.poslist[Position(rep.setup.longcoords,(T[j]*T[k])^2)];
                 
                 vals := [1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i]:=5/256;
+                rep.innerproducts[i]:=5/256;
             fi;
 
         # 2,3 products
 
-        elif Order(SetUp.coords[j]) = 2 and Order(SetUp.coords[k]) = 3 then
-            if SetUp.coords[j]*SetUp.coords[k] in T then 
+        elif Order(rep.setup.coords[j]) = 2 and Order(rep.setup.coords[k]) = 3 then
+            if rep.setup.coords[j]*rep.setup.coords[k] in T then 
 
-                s := SetUp.coords[j]; h := SetUp.coords[k];
+                s := rep.setup.coords[j]; h := rep.setup.coords[k];
 
                 # Inside a 3A algebra
                 
@@ -875,17 +854,17 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 
                 vals := [2/9, -1/9, -1/9, 5/32];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i]:=1/4;
+                rep.innerproducts[i]:=1/4;
             fi;
 
         # 2,4 products
 
-        elif Order(SetUp.coords[j]) = 2 and Order(SetUp.coords[k]) = 4 then
+        elif Order(rep.setup.coords[j]) = 2 and Order(rep.setup.coords[k]) = 4 then
 
-            s := SetUp.coords[j];
-            h := SetUp.coords[k];
+            s := rep.setup.coords[j];
+            h := rep.setup.coords[k];
 
             if s*h in T then
 
@@ -898,17 +877,17 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 
                 vals := [5/16, -1/8, -1/8, -1/16, 3/16];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i] := 3/8;
+                rep.innerproducts[i] := 3/8;
             fi;
 
         # (2,5) values
 
-        elif Order(SetUp.coords[j]) = 2 and Order(SetUp.coords[k]) = 5 then
+        elif Order(rep.setup.coords[j]) = 2 and Order(rep.setup.coords[k]) = 5 then
 
-            s := SetUp.coords[j];
-            h := SetUp.coords[k];
+            s := rep.setup.coords[j];
+            h := rep.setup.coords[k];
 
             if s*h in T then
 
@@ -922,28 +901,28 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 
                 vals := [7/4096, 7/4096, -7/4096, -7/4096, 7/32];
 
-                AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
-                GramMatrix[i] := 0;
+                rep.innerproducts[i] := 0;
             fi;
             
         elif j = k then  
         
-            h := SetUp.coords[j];
+            h := rep.setup.coords[j];
             
             if Order(h) = 3 then    # (3,3) values
                 
-                AlgebraProducts[i] := NullMat(1,dim)[1];
-                AlgebraProducts[i][j] := 1;
+                rep.algebraproducts[i] := NullMat(1,dim)[1];
+                rep.algebraproducts[i][j] := 1;
 
-                GramMatrix[i] := 8/5;
+                rep.innerproducts[i] := 8/5;
                 
             elif Order(h) = 4 then  # (4,4) values
             
-                AlgebraProducts[i] := NullMat(1,dim)[1];
-                AlgebraProducts[i][j] := 1;
+                rep.algebraproducts[i] := NullMat(1,dim)[1];
+                rep.algebraproducts[i][j] := 1;
 
-                GramMatrix[i] := 2;
+                rep.innerproducts[i] := 2;
                 
             elif Order(h) = 5 then  # (5,5) values
             
@@ -963,7 +942,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                         
                         vals := [1,1,1,1,1]*(175/524288);
 
-                        AlgebraProducts[i] := MAJORANA_MakeVector(pos, vals, dim);
+                        rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
 
                         l:=t+1;
                     else
@@ -971,7 +950,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     fi;
                 od;
 
-                GramMatrix[i] := 875/2^(19);
+                rep.innerproducts[i] := 875/2^(19);
             fi;
         fi;
     od;
