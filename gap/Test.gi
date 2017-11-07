@@ -114,7 +114,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                     
                                         y := MAJORANA_InnerProduct(u,x,GramMatrix,ProductList);
                     
-                                        if y <> 0 then 
+                                        if y <> false then 
                                             
                                             x0 := x0 - y*u;
                                             
@@ -143,22 +143,22 @@ InstallGlobalFunction(MAJORANA_TestFusion,
         
 InstallGlobalFunction(MajoranaAlgebraTest,
     
-    function(res)
+    function(rep)
     
     local   error,
             GramMatrixFull;
                             
     # Check bilinear form is positive definite
     
-    GramMatrixFull := MAJORANA_FillGramMatrix(res[5], res[8]);
+    GramMatrixFull := MAJORANA_FillGramMatrix(rep.innerproducts, rep.setup);
 
-    if not false in res[5] and MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
+    if not false in rep.innerproducts and MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
         return "Gram Matrix is not positive definite";
     fi;
 
     # Check that all triples obey axiom M1
 
-    error := MAJORANA_AxiomM1(res[5],res[6],res[8]);
+    error := MAJORANA_AxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
 
     if Size(error)>0 then
         return ["Algebra does not obey axiom M1", error];
@@ -166,7 +166,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     # Check that eigenvectors obey the fusion rules
 
-    error := MAJORANA_TestFusion(res[5],res[6],res[7],res[8]);
+    error := MAJORANA_TestFusion(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
 
     if ForAny(error,x->Size(x)>0) then
         return ["Algebra does not obey fusion rules", error];
@@ -174,15 +174,15 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     # Check that the eigenspaces are orthogonal
 
-    error := MAJORANA_TestOrthogonality(res[5],res[6],res[7],res[8]);
+    error := MAJORANA_TestOrthogonality(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
 
     if Size(error) > 0 then
-        return ["Eigenspaces are not orthogonal with respect to the inner product", error];
+        return ["Eigenspaces are not orthogonal with reppect to the inner product", error];
     fi;
 
     # Check M2
 
-    # error := MAJORANA_AxiomM2(res[5],res[6],res[8]);
+    # error := MAJORANA_AxiomM2(rep.innerproducts,rep.algebraproducts,rep.setup);
 
     # if error = -1 then
     #    return "Algebra does not obey axiom M2";

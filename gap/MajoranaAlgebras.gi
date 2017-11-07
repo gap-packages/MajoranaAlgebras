@@ -703,7 +703,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
         od;
     fi;
     
-    Display("EigenVectors unknowns");
+    #Display("EigenVectors unknowns");
     
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
             
@@ -1104,7 +1104,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                     
                     if mat <> [] and Size(mat) > Size(mat[1]) then 
                     
-                        Display(["Resurrection", evals]);
+                        #Display(["Resurrection", evals]);
             
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                                 
@@ -1120,7 +1120,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if mat <> [] and Size(mat) <= Size(mat[1]) then 
                     
-        Display(["Resurrection final"]);
+        #Display(["Resurrection final"]);
 
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                 
@@ -1141,7 +1141,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 
                 if Size(mat) > Size(mat[1]) then 
                 
-                    Display(["All conjugates",i]);
+                    #Display(["All conjugates",i]);
                 
                     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                         
@@ -1152,7 +1152,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             fi;
         od;
         
-        Display("All conjugates");
+        #Display("All conjugates");
         
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                     
@@ -1189,7 +1189,7 @@ InstallGlobalFunction(MAJORANA_NullSpaceAlgebraProducts,
         od;        
     od;
     
-    Display("Nullspace unknowns");
+    #Display("Nullspace unknowns");
     
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
             
@@ -1232,11 +1232,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
     if mat <> [] then
     
-        Display([Size(mat),Size(mat[1])]);
+        #Display([Size(mat),Size(mat[1])]);
     
         sol := MAJORANA_SolutionMatVecs(mat,vec);
         
-        Display("Solved it!");
+        #Display("Solved it!");
 
         if sol <> false then
             for i in [1..Size(unknowns)] do
@@ -1444,7 +1444,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
             if mat <> [] then 
 
                 for ev in [1..3] do 
-                    Display(["More eigenvectors",i,ev]); 
+                    #Display(["More eigenvectors",i,ev]); 
                     Append(EigenVectors[i][ev], ShallowCopy(NullspaceMat(mat - IdentityMat(dim)*table[ev])));
                     if EigenVectors[i][ev] <> [] then 
                         EigenVectors[i][ev] := ShallowCopy(BaseMat(EigenVectors[i][ev]));
@@ -1599,7 +1599,7 @@ function(input,index)
             newfalsecount[2] := Size(Positions(rep.innerproducts,false));
         fi;
         
-        Display([newfalsecount,falsecount]);
+        #Display([newfalsecount,falsecount]);
         
         if newfalsecount = [0,0] then
             break;
@@ -1615,7 +1615,7 @@ function(input,index)
         fi;
     od;
 
-    Display("Success");
+    #Display("Success");
     
     return rep;
 

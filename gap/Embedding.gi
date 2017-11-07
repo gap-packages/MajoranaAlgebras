@@ -54,10 +54,10 @@ InstallGlobalFunction( "MAJORANA_Embed",
             k := -k;
         fi;
         
-        if rep.algebraproducts[k] = false then 
-            rep.algebraproducts[k] := 
-                sign*MAJORANA_ImageVector(subrep.algebraproducts[i], emb, subrep, rep);
-        fi;
+        #if rep.algebraproducts[k] = false then 
+        #    rep.algebraproducts[k] := 
+        #        sign*MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
+        #fi;
         
         if rep.innerproducts[k] = false then 
             rep.innerproducts[k] := sign*subrep.innerproducts[i];
@@ -69,7 +69,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
 InstallGlobalFunction( "MAJORANA_ImageVector",
 
-    function(v, emb, subrep, rep)
+    function(v, emb, rep, subrep)
     
     local   dim,
             i,
