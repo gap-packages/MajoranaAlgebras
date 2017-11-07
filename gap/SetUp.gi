@@ -289,14 +289,16 @@ InstallGlobalFunction( MAJORANA_SetUp,
             res,
             dim,            # size of coordinates
             s;              # number of orbits of G on T x T
-
-    t := Size(input.involutions);  
+            
+    t := Size(input.involutions);
     
-    rep  := rec(    shape := input.shapes[index]    );
-    
-    rep.setup := rec(   coords      := ShallowCopy(input.involutions),
+    rep         := rec( group       := input.group,
+                        involutions := input.involutions,
+                        shape       := input.shapes[index]  );
+                        
+    rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
-                        poslist     := [1..t]           );
+                        poslist     := [1..t]               );
     
     # Create coordinates lists
 
