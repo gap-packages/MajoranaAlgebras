@@ -1,10 +1,40 @@
-InstallGlobalFunction( "MAJORANA_FindEmbeddings",
+InstallGlobalFunction( "MAJORANA_CheckEmbedding",
 
-    function(rep, subrep)
+    function(rep, subrep,emb)
     
-    local   embs;
+    local   check,
+            i,
+            x,
+            im1,
+            im2,
+            pos1,
+            pos2,
+            k;
     
-    embs := IsomorphicSubgroups(rep.group, subrep.group);
+    check := IsSubsetSet(AsSet(rep.involutions), AsSet(Image(emb, subrep.involutions)));
+    
+    if check then     
+        for i in [1..Size(subrep.shape)] do 
+            if subrep.shape[i][1] in [2,3,4] then 
+                x := subrep.setup.pairreps[i];
+                
+                im1 := Image(emb, subrep.setup.coords[x[1]]);
+                im2 := Image(emb, subrep.setup.coords[x[2]]);
+                
+                pos1 := Position(rep.setup.coords, im1);
+                pos2 := Position(rep.setup.coords, im2);
+                
+                k := rep.setup.pairorbit[pos1][pos2];
+                
+                if subrep.shape[i] <> rep.shape[k] then 
+                    return false;
+                fi; 
+            fi;
+        od;
+    fi;
+    
+    return check;
+        
 
     end);
     
@@ -20,6 +50,8 @@ InstallGlobalFunction( "MAJORANA_Embed",
             pos1,
             pos2,
             k,
+            g,
+            v,
             sign;
     
     for i in [1..Size(subrep.algebraproducts)] do 
@@ -54,10 +86,12 @@ InstallGlobalFunction( "MAJORANA_Embed",
             k := -k;
         fi;
         
-        #if rep.algebraproducts[k] = false then 
-        #    rep.algebraproducts[k] := 
-        #        sign*MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
-        #fi;
+        g := rep.setup.pairconj[pos1][pos2][2];
+        
+        if rep.algebraproducts[k] = false then 
+            v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
+            rep.algebraproducts[k] := sign*MAJORANA_ConjugateVector(v,g,rep.setup);
+        fi;
         
         if rep.innerproducts[k] = false then 
             rep.innerproducts[k] := sign*subrep.innerproducts[i];

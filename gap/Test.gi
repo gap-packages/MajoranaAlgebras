@@ -26,7 +26,8 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                 x,              # product of eigenvectors
                 y,              # product of x with u
                 z,              # inner product where needed
-                x0;             # further product in 1/32 case
+                x0,             # further product in 1/32 case
+                test;
 
         errorfusion:=[];
 
@@ -54,7 +55,12 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                     y:=MAJORANA_AlgebraProduct(u,x,AlgebraProducts,ProductList);
                                     
                                     if y <> false and y <> ev * x then 
-                                        Add(errorfusion,[j,a,b,v,w]);
+                                        
+                                        test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, GramMatrix, ProductList);
+                                        
+                                        if not test in [0, false] then 
+                                            Add(errorfusion,[j,a,b,v,w]);
+                                        fi;
                                     fi;
                                 fi;
                             od;
@@ -84,7 +90,11 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                         y := MAJORANA_AlgebraProduct(u,x,AlgebraProducts,ProductList);
                                         
                                         if y <> false and y <> ev * x then 
-                                            Add(errorfusion,[j,a,b,v,w]);
+                                            test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, GramMatrix, ProductList);
+                                        
+                                            if not test in [0, false] then 
+                                                Add(errorfusion,[j,a,b,v,w]);
+                                            fi;
                                         fi;
                                         
                                     fi;
@@ -122,7 +132,11 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                             
                                             if (z <> false) and (z <> x0/4) then  
                                             
-                                                Add(errorfusion,[j,a,b,v,w]);
+                                                test := MAJORANA_InnerProduct(z - x0/4,z - x0/4, GramMatrix, ProductList);
+                                        
+                                                if not test in [0, false] then 
+                                                    Add(errorfusion,[j,a,b,v,w]);
+                                                fi;
                                             
                                             fi;
                                         fi;
