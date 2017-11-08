@@ -1397,8 +1397,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup);
     
-    Error("Pause");
-    
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
         
                                 
