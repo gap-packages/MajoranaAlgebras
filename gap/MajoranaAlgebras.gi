@@ -688,11 +688,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                 
                 x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
 
-                if ForAll(x[1], x -> x = 0) then 
-                    if ForAny( x[2] , y -> y <> 0) then 
-                        Error("Nullspace"); 
-                    fi;
-                else
+                if ForAny(x[1], x -> x <> 0) then 
                     x[1] := [x[1]];
                     x[2] := [x[2]];
                     MAJORANA_Append(x,mat,vec);
@@ -987,6 +983,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     mat := ShallowCopy(x[1]);
     vec := ShallowCopy(x[2]);
     unknowns := ShallowCopy(x[3]);
+    
+    if Size(unknowns) = 0 then return; fi;
     
     # Find unknown algebra products from the resurrection principle
 
