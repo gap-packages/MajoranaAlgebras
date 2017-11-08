@@ -44,6 +44,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
     function(rep, subrep, emb)
     
     local   i,
+            j,
             x,
             im1,
             im2,
@@ -51,6 +52,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
             pos2,
             k,
             g,
+            perm,
             v,
             sign;
     
@@ -97,6 +99,35 @@ InstallGlobalFunction( "MAJORANA_Embed",
             rep.innerproducts[k] := sign*subrep.innerproducts[i];
         fi;
         
+    od;
+    
+    for i in subrep.setup.orbitreps[1] do 
+        
+        im1 := Image(emb, subrep.setup.coords[i]);
+        
+        for g in List(rep.setup.conjelts, x -> Inverse(x[1])) do 
+        
+            pos1 := Position(rep.setup.coords, im1^g);
+            
+            if pos1 in rep.setup.orbitreps[1] then 
+                break; 
+            fi;
+        od;
+        
+        perm := MAJORANA_FindVectorPermutation(g, rep.setup); 
+        
+        for j in [1..3] do 
+            for v in subrep.evecs[i][j] do 
+                
+                im2 := MAJORANA_ImageVector(v, emb, rep, subrep);
+                im2 := MAJORANA_ConjugateVector(im2, perm, rep.setup);
+                
+                Add(rep.evecs[pos1][j], im2);
+            od;
+            
+            rep.evecs[pos1][j] := ShallowCopy(BaseMat(rep.evecs[pos1][j]));
+            
+        od;
     od;
     
     end );
