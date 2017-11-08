@@ -1133,44 +1133,16 @@ InstallGlobalFunction( MAJORANA_ThreeClosedCheckNullspace,
     
         if NewProductList[6] = false then 
 
-                x := MAJORANA_PositiveDefinite(NewGramMatrix);
+            x := MAJORANA_PositiveDefinite(NewGramMatrix);
 
-                if x < 0 then
-                    return false;
-                elif x = 0 then
-                    NewProductList[6] := MAJORANA_NullSpace(NewGramMatrix);
-                elif x > 0 then
-                    NewProductList[6] := [[],[]];
-                fi; 
-                
-                for i in [1..Size(NewProductList[6][2])] do
-                    Add(NewProductList[6][1], MAJORANA_PositionLastOne(NewProductList[6][2][i]));
-                od;
-
-            if NewProductList[6] <> false and NewProductList[6][2] <> [] then
-
-                # Change alg products to get rid of any axes not in the basis
-                
-                for i in [1..new_dim] do
-                    for j in [1..new_dim] do 
-                        if NewAlgebraProducts[i][j] <> false then
-                            NewAlgebraProducts[i][j] := MAJORANA_RemoveNullSpace(NewAlgebraProducts[i][j], NewProductList[6]);
-                        fi;
-                    od;
-                od;
-
-                # Change evecs to get rid of any axes not in the basis
-
-                for j in NewProductList[10][1] do
-                    for k in [1..3] do                        
-                        for x in [1..Size(EigenVectors[j][k])] do
-                            EigenVectors[j][k][x] := MAJORANA_RemoveNullSpace(EigenVectors[j][k][x],NewProductList[6]);
-                        od;                                                   
-                        Append(EigenVectors[j][k],NewProductList[6][2]);
-                    od;                    
-                od;
-            fi;
-        fi;
+            if x < 0 then
+                return false;
+            elif x = 0 then
+                NewProductList[6] := MAJORANA_NullSpace(NewGramMatrix);
+            elif x > 0 then
+                NewProductList[6] := [];
+            fi; 
+    fi;
         
         return true;
     

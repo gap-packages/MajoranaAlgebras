@@ -1,31 +1,4 @@
 # Takes input matrix, returns a matrix whose rows form a basis of the nullspace of mat
-
-InstallGlobalFunction(MAJORANA_NullSpace,
-
-    function(mat) 
-
-        local   A,      # input matrix
-                B;      # output matrix
-
-        A := ShallowCopy(mat);
-        
-        A := NullspaceMat(TransposedMat(A));
-        
-        if A <> [] then 
-        
-            B := List( A, ShallowCopy );
-        
-            MAJORANA_ReversedEchelonForm(B);
-            
-            return [[],B];
-            
-        else
-            return [[],[]];            
-        fi;
-
-        end
-
-        );
         
 InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
     
