@@ -130,6 +130,11 @@ InstallGlobalFunction( "MAJORANA_Embed",
         od;
     od;
     
+    for v in subrep.setup.nullspace do 
+        Add(rep.setup.nullspace, MAJORANA_ImageVector(v, emb, rep, subrep));        
+    od;
+    
+    
     end );
     
 InstallGlobalFunction( "MAJORANA_ImageVector",
