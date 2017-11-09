@@ -673,7 +673,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
     od;
     
     if nullspace <> [] then 
-        for i in Union(ProductList.orbitreps{[1,2]}) do 
+        for i in [1..dim] do 
             u := [1..dim]*0; u[i] := 1;        
 
             for v in nullspace do
