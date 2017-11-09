@@ -399,6 +399,12 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_DihedralProducts(input.involutions, rep);
 
+    for i in rep.setup.orbitreps[1] do
+        for j in [1..3] do 
+            rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
+        od; 
+    od;
+
     return rep;
     
     end );
