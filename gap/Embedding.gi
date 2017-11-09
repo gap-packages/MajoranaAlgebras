@@ -15,7 +15,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
     
     if check then     
         for i in [1..Size(subrep.shape)] do 
-            if subrep.shape[i][1] in [2,3,4] then 
+            if subrep.shape[i][1] in ['2','3','4'] then 
                 x := subrep.setup.pairreps[i];
                 
                 im1 := Image(emb, subrep.setup.coords[x[1]]);
