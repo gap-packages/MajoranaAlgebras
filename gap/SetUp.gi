@@ -294,7 +294,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
-                        shape       := input.shapes[index]  );
+                        shape       := input.shapes[index],  
+                        nullspace   := []                   );
                         
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
@@ -354,7 +355,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
-    rep.setup.nullspace := [];
     
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
     
