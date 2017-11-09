@@ -991,17 +991,17 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             for beta in evecs do
                 for gamma in EigenVectors[i][evals[1]] do  
                 
-                    x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, AlgebraProducts, ProductList); 
-                
-                    if ForAny(x[1], y -> y <> 0) then
+                    bad := MAJORANA_FindBadIndices(gamma, AlgebraProducts, ProductList);
+                    
+                    if ForAny(beta{bad}, x -> x <> 0) then 
+                        
+                        x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, AlgebraProducts, ProductList);
                         
                         alpha_mat := [];
                                             
                         for alpha in EigenVectors[i][evals[1]] do                             
                             Add(alpha_mat, alpha - beta);                        
                         od;
-                        
-                        bad := MAJORANA_FindBadIndices(gamma, AlgebraProducts, ProductList);
                         
                         null := NullspaceMat(List(alpha_mat, x-> x{bad}));
                         
