@@ -680,7 +680,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
         od;
     od;
     
-    if ProductList.nullspace <> false then 
+    if ProductList.nullspace <> [] then 
         for i in Union(ProductList.orbitreps{[1,2]}) do 
             u := [1..dim]*0; u[i] := 1;        
 
@@ -996,11 +996,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         
             ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
             
-            if ProductList.nullspace <> false then
-                evecs := Union(EigenVectors[i][evals[2]], ProductList.nullspace);
-            else
-                evecs := EigenVectors[i][evals[2]];
-            fi;
+            evecs := Union(EigenVectors[i][evals[2]], ProductList.nullspace);
             
             for beta in evecs do
                 for gamma in EigenVectors[i][evals[1]] do  
@@ -1282,11 +1278,9 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
             j,        # loop over representatives
             k;        # loop over eigenvalues
     
-        if ProductList.nullspace = false then 
-            if ForAll(GramMatrix, x -> x <> false) then 
-                gram := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
-                ProductList.nullspace := NullspaceMat(TransposedMat(gram));; 
-            fi;
+        if ForAll(GramMatrix, x -> x <> false) then 
+            gram := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
+            ProductList.nullspace := NullspaceMat(TransposedMat(gram));; 
         fi;
         
         return true;
@@ -1387,7 +1381,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
         x := MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);
         
-        if not x[1] and rep.setup.nullspace <> false then 
+        if not x[1] then 
             return MAJORANA_OutputError(x[2],
                             x[3],
                             rep);
