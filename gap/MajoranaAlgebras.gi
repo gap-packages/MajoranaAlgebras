@@ -55,22 +55,22 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     for i in [1..dim] do
         if v[i] <> 0 then 
             for j in [1..dim] do 
-               k :=  ProductList.pairorbit[i][j];
-               
-               if k > 0 then 
-                    if AlgebraProducts[k] = false then 
-                        Add(bad,j);
-                    fi;
-                else
-                    if AlgebraProducts[-k] = false then 
-                        Add(bad,j);
+                if not j in bad then  
+                    k :=  ProductList.pairorbit[i][j];
+                   
+                    if k > 0 then 
+                        if AlgebraProducts[k] = false then 
+                            Add(bad,j);
+                        fi;
+                    else
+                        if AlgebraProducts[-k] = false then 
+                            Add(bad,j);
+                        fi;
                     fi;
                 fi;
             od;
         fi;
     od;
-
-    bad := DuplicateFreeList(bad);
 
     Sort(bad);
     
