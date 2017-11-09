@@ -603,22 +603,22 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
                 od;
             od;
         od;
-    fi;
-    
-
-    if mat <> [] then 
-        MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
-    fi;
-    
-    if not false in GramMatrix then 
-        x := MAJORANA_CheckNullSpace(GramMatrix,ProductList);
         
-        if x = false then
-            return [false, "The inner product is not positive definite", []];  
+        if mat <> [] then 
+            MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
         fi;
+        
+        if not false in GramMatrix then 
+            x := MAJORANA_CheckNullSpace(GramMatrix,ProductList);
+            
+            if x = false then
+                return [false, "The inner product is not positive definite", []];  
+            fi;
+        fi;        
     fi;
+    
 
-    return [true, mat, vec];
+    
     
     end );
 
@@ -1404,13 +1404,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 
     # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
 
-    x := MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.algebraproducts,rep.setup);
-    
-    if not x[1] then 
-        return MAJORANA_OutputError( x[2]
-                        , x[3]
-                        , rep);
-    fi;
+    MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.algebraproducts,rep.setup);
     
     end);
     
