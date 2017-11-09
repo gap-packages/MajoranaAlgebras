@@ -166,69 +166,59 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             null,
             bad,
             other_mat;
-            
-    # looks like we should get rid of this - check on a big example
-    
-    if false then         
-    for j in ProductList.orbitreps[1] do 
-        for k in [1..3] do 
-            if EigenVectors[j][k] <> [] then
-                MAJORANA_ReversedEchelonForm(EigenVectors[j][k]);
-            fi;
-        od;
-    od;
-    fi;
     
     dim := Size(ProductList.coords);
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
     
     for i in ProductList.orbitreps[1] do 
-        
-        new := [ [], [], [] ];
-        other_mat := [];
     
-        for evals in [[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[2,2],[3,3]] do
-            for a in EigenVectors[i][evals[1]] do
-                if Size(EigenVectors[i][evals[2]]) <> 0 then 
-                    bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
-                    
-                    if bad <> [] then  
-                        null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
-                    else
-                        null := IdentityMat(Size(EigenVectors[i][evals[2]]));
+        if Sum(List(EigenVectors[i], x -> Size(x))) < dim - 1 then 
+        
+            new := [ [], [], [] ];
+            other_mat := [];
+        
+            for evals in [[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[2,2],[3,3]] do
+                for a in EigenVectors[i][evals[1]] do
+                    if Size(EigenVectors[i][evals[2]]) <> 0 then 
+                        bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
+                        
+                        if bad <> [] then  
+                            null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
+                        else
+                            null := IdentityMat(Size(EigenVectors[i][evals[2]]));
+                        fi;
+                        
+                        for j in [1..Size(null)] do 
+                            
+                            b := null[j]*EigenVectors[i][evals[2]];
+                            
+                            MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
+                            
+                        od;
                     fi;
-                    
-                    for j in [1..Size(null)] do 
-                        
-                        b := null[j]*EigenVectors[i][evals[2]];
-                        
-                        MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
-                        
-                    od;
+                od;
+            od;
+            
+            if other_mat <> [] then 
+                u := [1..dim]*0; u[i] := 1;
+            
+                bad := MAJORANA_FindBadIndices(u,AlgebraProducts, ProductList );
+                null := NullspaceMat(List(other_mat, x -> x{bad}));
+                
+                for j in [1..Size(null)] do 
+                    z := MAJORANA_AlgebraProduct(u,null[j]*other_mat,AlgebraProducts, ProductList);
+                    Add(new[2], z);
+                    Add(new[1], null[j]*other_mat - 4*z);
+                od;
+            fi;
+            
+            for j in [1..3] do 
+                Append(EigenVectors[i][j], new[j]);
+                if EigenVectors[i][j] <> [] then 
+                    EigenVectors[i][j] := ShallowCopy(BaseMat(EigenVectors[i][j]));
                 fi;
             od;
-        od;
-        
-        if other_mat <> [] then 
-            u := [1..dim]*0; u[i] := 1;
-        
-            bad := MAJORANA_FindBadIndices(u,AlgebraProducts, ProductList );
-            null := NullspaceMat(List(other_mat, x -> x{bad}));
-            
-            for j in [1..Size(null)] do 
-                z := MAJORANA_AlgebraProduct(u,null[j]*other_mat,AlgebraProducts, ProductList);
-                Add(new[2], z);
-                Add(new[1], null[j]*other_mat - 4*z);
-            od;
         fi;
-        
-        for j in [1..3] do 
-            Append(EigenVectors[i][j], new[j]);
-            if EigenVectors[i][j] <> [] then 
-                EigenVectors[i][j] := ShallowCopy(BaseMat(EigenVectors[i][j]));
-            fi;
-        od;
-        
     od;
     
     return [true];    
@@ -1363,31 +1353,9 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 ## STEP 6: FUSION ##                                        
                             
     # Use these eigenvectors and the fusion rules to find more
+                 
     
-    maindimensions:=[];
-
-    for j in rep.setup.orbitreps[1] do
-        for k in [1..3] do                  #  TODO - do we need to find this basemat?
-            if Size(rep.evecs[j][k]) > 0 then
-                rep.evecs[j][k] := ShallowCopy(BaseMat(rep.evecs[j][k]));
-            fi;
-        od;
-        Add(maindimensions,   Size(rep.evecs[j][1])
-                            + Size(rep.evecs[j][2])
-                            + Size(rep.evecs[j][3])+1);
-    od;
-
-    if ForAny(maindimensions, x -> x < dim - 1) then                
-    
-        x := MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);
-        
-        if not x[1] then 
-            return MAJORANA_OutputError(x[2],
-                            x[3],
-                            rep);
-        fi;
-        
-    fi;
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
