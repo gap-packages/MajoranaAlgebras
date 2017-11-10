@@ -401,7 +401,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     for i in rep.setup.orbitreps[1] do
         for j in [1..3] do 
-            rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
+            if rep.evecs[i][j] <> [] then 
+                rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
+            fi;
         od; 
     od;
 
