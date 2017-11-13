@@ -3,6 +3,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
     function(rep, subrep,emb)
     
     local   check,
+            conj,
             i,
             x,
             im1,
@@ -13,9 +14,22 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
     
     check := IsSubsetSet(AsSet(rep.involutions), AsSet(Image(emb, subrep.involutions)));
     
-    if check then     
+    # this bit assumes axiom M8! Could implement general method but would be slower.
+    
+    if check then 
+        conj := ConjugacyClasses(subrep.group);
+        conj := Filtered(conj, x -> Order(Representative(x)) = 2);
+    
+        for x in conj do 
+            if not Representative(x) in subrep.involutions then 
+                if Image(emb, Representative(x)) in rep.involutions then 
+                    return false;
+                fi;
+            fi;
+        od;
+            
         for i in [1..Size(subrep.shape)] do 
-            if subrep.shape[i][1] in ['2','3','4'] then 
+            if subrep.shape[i][1] = '3' then 
                 x := subrep.setup.pairreps[i];
                 
                 im1 := Image(emb, subrep.setup.coords[x[1]]);
@@ -27,7 +41,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
                 k := rep.setup.pairorbit[pos1][pos2];
                 
                 if subrep.shape[i] <> rep.shape[k] then 
-                    return false;
+                    return fail; # need to implement finding of automorphism which switches unknown algs
                 fi; 
             fi;
         od;
