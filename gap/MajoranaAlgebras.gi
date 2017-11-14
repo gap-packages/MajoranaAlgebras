@@ -159,6 +159,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             new,
             u,
             evals,
+            evecs,
             new_ev,
             pos,
             mat,
@@ -179,24 +180,34 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             new := [ [], [], [] ];
             other_mat := [];
         
-            for evals in [[1,1],[1,2],[2,1],[1,3],[3,1],[2,3],[2,2],[3,3]] do
+            for evals in [[1,1],[1,2],[2,2],[1,3],[2,3],[3,3]] do
+                if evals[1] = evals[2] then 
+                    evecs := ShallowCopy(EigenVectors[i][evals[2]]);
+                else
+                    evecs := EigenVectors[i][evals[2]];
+                fi;
+                
                 for a in EigenVectors[i][evals[1]] do
-                    if Size(EigenVectors[i][evals[2]]) <> 0 then 
+                    if Size(evecs) <> 0 then 
                         bad := MAJORANA_FindBadIndices(a,AlgebraProducts,ProductList);
                         
                         if bad <> [] then  
-                            null := NullspaceMat(List(EigenVectors[i][evals[2]], x -> x{bad}));
+                            null := NullspaceMat(List(evecs, x -> x{bad}));
                         else
-                            null := IdentityMat(Size(EigenVectors[i][evals[2]]));
+                            null := IdentityMat(Size(evecs));
                         fi;
                         
                         for j in [1..Size(null)] do 
                             
-                            b := null[j]*EigenVectors[i][evals[2]];
+                            b := null[j]*evecs;
                             
                             MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
                             
                         od;
+                        
+                        if evals[1] = evals[2] then 
+                            evecs := Difference(evecs,[a]);
+                        fi;
                     fi;
                 od;
             od;
