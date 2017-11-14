@@ -181,11 +181,8 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             other_mat := [];
         
             for evals in [[1,1],[1,2],[2,2],[1,3],[2,3],[3,3]] do
-                if evals[1] = evals[2] then 
-                    evecs := ShallowCopy(EigenVectors[i][evals[2]]);
-                else
-                    evecs := EigenVectors[i][evals[2]];
-                fi;
+
+                evecs := EigenVectors[i][evals[2]];
                 
                 for a in EigenVectors[i][evals[1]] do
                     if Size(evecs) <> 0 then 
@@ -204,10 +201,6 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                             MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, GramMatrix, AlgebraProducts, ProductList);
                             
                         od;
-                        
-                        if evals[1] = evals[2] then 
-                            evecs := Difference(evecs,[a]);
-                        fi;
                     fi;
                 od;
             od;
