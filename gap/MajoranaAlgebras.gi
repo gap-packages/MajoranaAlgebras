@@ -1357,7 +1357,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
     end);
     
-        
 InstallGlobalFunction(MajoranaRepresentation,
 
 function(input,index)
