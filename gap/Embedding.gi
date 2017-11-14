@@ -4,54 +4,65 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
     
     local   check,
             conj,
-            i,
-            x,
+            g,
+            list,
+            aut;
+    
+    check := IsSubsetSet(AsSet(rep.involutions), AsSet(Image(emb, subrep.involutions)));
+    
+    if not check then 
+        return false;
+    fi;
+       
+    aut := AutomorphismGroup(subrep.group);
+    list := [1..Size(subrep.shape)];
+    
+    for g in aut do 
+        if ForAll(list, i -> MAJORANA_CheckShape(rep, subrep, emb, g, i)) then 
+            return g;
+        fi;
+    od;
+
+    return false;
+        
+    end);
+    
+InstallGlobalFunction( "MAJORANA_CheckShape",
+
+    function(rep, subrep, emb, g, i)
+    
+    local   x,
             im1,
             im2,
             pos1,
             pos2,
             k;
     
-    check := IsSubsetSet(AsSet(rep.involutions), AsSet(Image(emb, subrep.involutions)));
-    
-    # this bit assumes axiom M8! Could implement general method but would be slower.
-    
-    if check then 
-        conj := ConjugacyClasses(subrep.group);
-        conj := Filtered(conj, x -> Order(Representative(x)) = 2);
-    
-        for x in conj do 
-            if not Representative(x) in subrep.involutions then 
-                if Image(emb, Representative(x)) in rep.involutions then 
-                    return false;
-                fi;
-            fi;
-        od;
-            
-        for i in [1..Size(subrep.shape)] do 
-            if subrep.shape[i][1] = '3' then 
-                x := subrep.setup.pairreps[i];
-                
-                im1 := Image(emb, subrep.setup.coords[x[1]]);
-                im2 := Image(emb, subrep.setup.coords[x[2]]);
-                
-                pos1 := Position(rep.setup.coords, im1);
-                pos2 := Position(rep.setup.coords, im2);
-                
-                k := rep.setup.pairorbit[pos1][pos2];
-                
-                if subrep.shape[i] <> rep.shape[k] then 
-                    return fail; # need to implement finding of automorphism which switches unknown algs
-                fi; 
-            fi;
-        od;
+    if subrep.shape[i][1] in [2,3,4] then 
+        x := subrep.setup.pairreps[i];
+        
+        im1 := Image(g, subrep.setup.coords[x[1]]);
+        im2 := Image(g, subrep.setup.coords[x[2]]);
+        
+        im1 := Image(emb, im1);
+        im2 := Image(emb, im2);
+        
+        pos1 := Position(rep.setup.coords, im1);
+        pos2 := Position(rep.setup.coords, im2);
+        
+        k := rep.setup.pairorbit[pos1][pos2];
+        
+        if subrep.shape[i] <> rep.shape[k] then 
+            return false;
+        else
+            return true;
+        fi; 
     fi;
     
-    return check;
-        
-
-    end);
+    return true;
     
+    end );
+
 
 InstallGlobalFunction( "MAJORANA_Embed",
     
