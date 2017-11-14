@@ -558,7 +558,7 @@ function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
     
 InstallGlobalFunction(MAJORANA_FullOrthogonality,
 
-    function(EigenVectors,GramMatrix, AlgebraProducts, ProductList,nullspace)
+    function(EigenVectors,GramMatrix, ProductList)
     
     local   i,          # loop over T
             j,          # loop over eigenvalues
@@ -610,7 +610,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
+function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
 
     local   i,          # loop over representatives
             ev,         # loop over eigenvalues
@@ -664,24 +664,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
             od;
         od;
     od;
-    
-    if false then 
-        for i in [1..dim] do 
-            u := [1..dim]*0; u[i] := 1;        
 
-            for v in nullspace do
-                
-                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
-
-                if ForAny(x[1], x -> x <> 0) then 
-                    x[1] := [x[1]];
-                    x[2] := [x[2]];
-                    MAJORANA_Append(x,mat,vec);
-                fi;
-            od;        
-        od;
-    fi;
-    
     Display("EigenVectors unknowns");
     
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
@@ -934,7 +917,7 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
+    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
     local   dim,
             i,
@@ -965,7 +948,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     # Find unknown algebra products from eigenvectors
     
-    x := MAJORANA_EigenvectorsAlgebraUnknowns(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace);
+    x := MAJORANA_EigenvectorsAlgebraUnknowns(GramMatrix, AlgebraProducts, EigenVectors, ProductList);
 
     mat := ShallowCopy(x[1]);
     vec := ShallowCopy(x[2]);
@@ -1260,11 +1243,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     function(GramMatrix,ProductList)
     
     local   gram,     # full gram matrix
-            null,     # nullspace of gram matrix
-            x,        # result of positive definite
-            i,        # loop over orbitals
-            j,        # loop over representatives
-            k;        # loop over eigenvalues
+            null;     # nullspace of gram matrix
     
         if ForAll(GramMatrix, x -> x <> false) then 
             gram := MAJORANA_FillGramMatrix(GramMatrix, ProductList);
@@ -1358,7 +1337,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
+    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
     
                                 ## STEP 9: MORE EVECS II ##
 
@@ -1370,7 +1349,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
        
     # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
     
-    MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.algebraproducts,rep.setup,rep.nullspace);
+    MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.setup);
         
     if not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
