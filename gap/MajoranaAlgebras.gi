@@ -661,7 +661,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
         od;
     od;
     
-    if nullspace <> [] then 
+    if false then 
         for i in [1..dim] do 
             u := [1..dim]*0; u[i] := 1;        
 
@@ -979,7 +979,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         
             ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
             
-            evecs := Union(EigenVectors[i][evals[2]], nullspace);
+            evecs := EigenVectors[i][evals[2]];
             
             for beta in evecs do
                 for gamma in EigenVectors[i][evals[1]] do  
@@ -1341,13 +1341,9 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     dim := Size(rep.setup.coords);
     
                                 ## STEP 5: INNER PRODUCTS M1 ##
-    if false in rep.innerproducts then                         
-        MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
-       
-        if not false in rep.innerproducts then 
-            rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        fi;
-    fi;                                      
+                     
+    MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
+                                 
                                 ## STEP 6: FUSION ##                                        
                             
     # Use these eigenvectors and the fusion rules to find more
@@ -1370,12 +1366,10 @@ InstallGlobalFunction(MAJORANA_MainLoop,
        
     # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
     
-    if false in rep.innerproducts then
-        MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.algebraproducts,rep.setup,rep.nullspace);
-    
-        if not false in rep.innerproducts then 
-            rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        fi;
+    MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.algebraproducts,rep.setup,rep.nullspace);
+        
+    if not false in rep.innerproducts then 
+        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
     fi;
     
     end);
