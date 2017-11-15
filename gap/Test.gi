@@ -33,7 +33,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
         dim := Size(AlgebraProducts[1]);
 
-        for j in ProductList.orbitreps[1] do
+        for j in ProductList.orbitreps do
 
             u := [1..dim]*0; u[j]:=1;
             
@@ -223,7 +223,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         
         errorortho := [];
 
-        for j in ProductList.orbitreps[1] do
+        for j in ProductList.orbitreps do
 
             u := [1..Size(AlgebraProducts[1])]*0; u[j]:=1;
             

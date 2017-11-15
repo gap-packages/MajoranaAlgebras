@@ -189,7 +189,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
         
     od;
     
-    for i in subrep.setup.orbitreps[1] do 
+    for i in subrep.setup.orbitreps do 
         
         im1 := Image(emb, subrep.setup.coords[i]);
         
@@ -197,7 +197,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
         
             pos1 := Position(rep.setup.coords, im1^g);
             
-            if pos1 in rep.setup.orbitreps[1] then 
+            if pos1 in rep.setup.orbitreps then 
                 break; 
             fi;
         od;

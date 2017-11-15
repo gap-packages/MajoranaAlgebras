@@ -384,7 +384,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     # Set up eigenvector matrix
 
     for j in [1..t] do
-        if j in rep.setup.orbitreps[1] then
+        if j in rep.setup.orbitreps then
             for k in [1..3] do
                 rep.evecs[j][k] := [];
             od;
@@ -399,7 +399,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_DihedralProducts(input.involutions, rep);
 
-    for i in rep.setup.orbitreps[1] do
+    for i in rep.setup.orbitreps do
         for j in [1..3] do 
             if rep.evecs[i][j] <> [] then 
                 rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
@@ -535,7 +535,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
     # Add rep.evecs from IPSS10
 
-    for i in rep.setup.orbitreps[1] do
+    for i in rep.setup.orbitreps do
         for j in [1..t] do
         
             if i <> j then 

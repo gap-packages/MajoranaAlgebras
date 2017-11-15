@@ -186,7 +186,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     dim := Size(ProductList.coords);
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, ProductList);
     
-    for i in ProductList.orbitreps[1] do 
+    for i in ProductList.orbitreps do 
     
         if Sum(List(EigenVectors[i], x -> Size(x))) < dim - 1 then 
         
@@ -589,7 +589,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     
     if Size(unknowns) > 0 then 
     
-        for i in ProductList.orbitreps[1] do        
+        for i in ProductList.orbitreps do        
             for j in [0..3] do 
                 for k in [j+1..3] do
 
@@ -648,7 +648,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
     
-    for i in ProductList.orbitreps[1] do 
+    for i in ProductList.orbitreps do 
         for ev in [1..3] do 
             
             u := [1..dim]*0; u[i] := 1;
@@ -971,7 +971,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     # Find unknown algebra products from the resurrection principle
 
-    for i in ProductList.orbitreps[1] do     
+    for i in ProductList.orbitreps do     
         
         u := [1..dim]*0;; u[i] := 1;;
     
@@ -1285,7 +1285,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     
     table := [0,1/4,1/32];
 
-    for i in ProductList.orbitreps[1] do
+    for i in ProductList.orbitreps do
                     
         a := [1..dim]*0; a[i] := 1;
     
@@ -1390,7 +1390,7 @@ function(input,index)
     
     maindimensions:=[];
 
-    for i in rep.setup.orbitreps[1] do
+    for i in rep.setup.orbitreps do
         for j in [1..3] do
             if Size(rep.evecs[i][j]) > 0 then
                 rep.evecs[i][j]:=ShallowCopy(BaseMat(rep.evecs[i][j]));
@@ -1423,7 +1423,7 @@ function(input,index)
         
         newdimensions := [];
         
-        for i in rep.setup.orbitreps[1] do 
+        for i in rep.setup.orbitreps do 
             Add(newdimensions,   Size(rep.evecs[i][1])
                                + Size(rep.evecs[i][2])
                                + Size(rep.evecs[i][3]) + 1);
