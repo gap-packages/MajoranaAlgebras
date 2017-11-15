@@ -443,7 +443,7 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     
     dim := Size(setup.coords);
     
-    signlist := ListWithIdenticalEntries(dim,1);
+    signlist := List([1..dim], x -> 1);
     
     if g = () then 
         return [(),signlist];
