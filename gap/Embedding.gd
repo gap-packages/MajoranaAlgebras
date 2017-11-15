@@ -6,4 +6,5 @@ DeclareGlobalFunction( "MAJORANA_CheckEmbedding" );
 
 DeclareGlobalFunction( "MAJORANA_CheckShape" );
 
+DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
 

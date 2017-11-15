@@ -1,3 +1,67 @@
+InstallGlobalFunction( "MAJORANA_AllEmbeddings",
+
+    function(rep)
+    
+    local   unknowns,
+            x,
+            y,
+            gens,
+            subgp,
+            T,
+            subrep,
+            ex,
+            i,
+            embs,
+            emb,
+            g;
+            
+    unknowns  := Positions(rep.algebraproducts, false);
+    
+    for x in unknowns do
+        if rep.algebraproducts[x] = false then 
+    
+            y := rep.setup.pairreps[x];
+            gens := rep.setup.coords{y};
+            
+            subgp := Subgroup(rep.group,gens);
+            
+            if Size(subgp) < Size(rep.group) then 
+                T := Intersection(subgp, rep.involutions);
+
+                if T <> [] and Size(Group(T)) = Size(subgp) then 
+                    embs := IsomorphicSubgroups(rep.group,subgp);
+                    ex := ShapesOfMajoranaRepresentationAxiomM8(subgp,T);
+                    
+                    for i in [1..Size(ex.shapes)] do 
+                        if IsSubsetSet(AsSet(rep.shape), AsSet(ex.shapes[i])) then 
+                            
+                            subrep := MAJORANA_SetUp(ex,i);
+                            
+                            MAJORANA_AllEmbeddings(subrep);
+                            
+                            while false in subrep.algebraproducts do 
+                                MAJORANA_MainLoop(subrep); 
+                            od;
+                            
+                            for emb in embs do 
+                                g := MAJORANA_CheckEmbedding(rep, subrep, emb);
+                                
+                                if g <> false then 
+                                
+                                    g := CompositionMapping2(emb, g);
+                                    
+                                    MAJORANA_Embed(rep,subrep,g);
+                                fi;
+                            od;    
+                        fi;    
+                    od;                
+                fi;
+            fi;  
+        fi;
+    od;
+        
+    end );
+
 InstallGlobalFunction( "MAJORANA_CheckEmbedding",
 
     function(rep, subrep,emb)
@@ -150,12 +214,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
             rep.evecs[pos1][j] := ShallowCopy(BaseMat(rep.evecs[pos1][j]));
             
         od;
-    od;
-    
-    for v in subrep.nullspace do 
-        Add(rep.nullspace, MAJORANA_ImageVector(v, emb, rep, subrep));        
-    od;
-    
+    od;    
     
     end );
     
