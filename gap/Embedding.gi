@@ -37,7 +37,9 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                             
                             subrep := MAJORANA_SetUp(ex,i);
                             
-                            MAJORANA_AllEmbeddings(subrep);
+                            if false then 
+                                MAJORANA_AllEmbeddings(subrep);
+                            fi;
                             
                             while false in subrep.algebraproducts do 
                                 MAJORANA_MainLoop(subrep); 
