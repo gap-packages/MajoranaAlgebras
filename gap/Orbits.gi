@@ -111,8 +111,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 
                 pnt := Immutable(SetUp.coords{[i,j]});
                 
-                d := NewDictionary(pnt, false);
-                
                 orb := [pnt];
                 elts := [()];
                 
@@ -146,13 +144,10 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         if pos_1 < 0 then pos_1 := -pos_1; fi;
                         if pos_2 < 0 then pos_2 := -pos_2; fi;
                         
-                        q := SetUp.coords{[pos_1,pos_2]};
-                        
-                        if not KnowsDictionary(d,q) then 
+                        if SetUp.pairorbit[pos_1][pos_2] = 0 then 
                         
                             Add( orb, q );
                             Add( elts, g);
-                            AddDictionary( d, q);
                             
                             SetUp.pairorbit[pos_1][pos_2] := y;
                             SetUp.pairorbit[pos_2][pos_1] := y;
