@@ -37,7 +37,7 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                             
                             subrep := MAJORANA_SetUp(ex,i);
                             
-                            if false then 
+                            if Size(subgp) > 120 then 
                                 MAJORANA_AllEmbeddings(subrep);
                             fi;
                             
