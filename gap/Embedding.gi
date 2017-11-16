@@ -41,6 +41,8 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                                 MAJORANA_AllEmbeddings(subrep);
                             fi;
                             
+                            Display(StructureDescription(subgp));
+                            
                             while false in subrep.algebraproducts do 
                                 MAJORANA_MainLoop(subrep); 
                             od;
