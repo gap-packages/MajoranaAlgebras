@@ -35,17 +35,9 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                     for i in [1..Size(ex.shapes)] do 
                         if IsSubsetSet(AsSet(rep.shape), AsSet(ex.shapes[i])) then 
                             
-                            subrep := MAJORANA_SetUp(ex,i);
-                            
-                            if Size(subgp) > 120 then 
-                                MAJORANA_AllEmbeddings(subrep);
-                            fi;
-                            
                             Display(StructureDescription(subgp));
                             
-                            while false in subrep.algebraproducts do 
-                                MAJORANA_MainLoop(subrep); 
-                            od;
+                            subrep := MajoranaRepresentation(ex,i);
                             
                             for emb in embs do 
                                 g := MAJORANA_CheckEmbedding(rep, subrep, emb);
