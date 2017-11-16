@@ -111,19 +111,18 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 
                 pnt := Immutable(SetUp.coords{[i,j]});
                 
-                d := NewDictionary(pnt, false);
-                
                 orb := [pnt];
                 elts := [()];
-                
-                AddDictionary(d,pnt);
-                
-                count := 0;
-                
-                x := List(pnt, Order);
+
                 y := Size(SetUp.pairreps);
                 
-                MAJORANA_AddPowers(table{x}, pnt, y, (), d, SetUp);
+                SetUp.pairorbit[i][j] := y;
+                SetUp.pairorbit[j][i] := y;
+                
+                SetUp.pairconj[i][j] := ();
+                SetUp.pairconj[j][i] := ();
+                
+                count := 0;
                 
                 for p in orb do 
                     
@@ -135,14 +134,19 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         q := OnPairs(p,gen);
                         g := h*gen;
                         
-                        MakeImmutable(q);
+                        if OnPairs(SetUp.coords{SetUp.pairreps[y]},g) <> q then 
+                            Error("setup 0");
+                        fi;
                         
-                        if not KnowsDictionary(d,q) then 
+                        MakeImmutable(q);
+                        MakeImmutable(g);
+                        
+                        if not q in orb then 
                         
                             Add( orb, q );
                             Add( elts, g);
                             
-                            MAJORANA_AddPowers(table{x}, q, y, g, d, SetUp);
+                            MAJORANA_AddPowers(q, y, g, SetUp);
                             
                         fi;
                     od;
@@ -192,19 +196,13 @@ InstallGlobalFunction(MAJORANA_Orbitals,
     
 InstallGlobalFunction( MAJORANA_AddPowers,
 
-    function(table, pnt, k, g, d, SetUp)
+    function(pnt, k, g, SetUp)
     
     local   i,
             j,
             sign,
             pos_1,
             pos_2;
-    
-    for i in table[1] do 
-        for j in table[2] do
-            AddDictionary(d,[pnt[1]^i,pnt[2]^j]);
-        od;
-    od;
     
     sign := 1;
         
@@ -224,8 +222,8 @@ InstallGlobalFunction( MAJORANA_AddPowers,
         sign := -sign;
     fi;
             
-            
-    if SetUp.pairorbit[pos_1][pos_2] = 0 then 
+    if SetUp.pairorbit[pos_1][pos_2] = 0 then         
+        
         SetUp.pairorbit[pos_1][pos_2] := k;
         SetUp.pairorbit[pos_2][pos_1] := k;
 
