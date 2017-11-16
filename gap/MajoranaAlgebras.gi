@@ -189,7 +189,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     for i in ProductList.orbitreps do 
     
         if Sum(List(EigenVectors[i], x -> Size(x))) < dim - 1 then 
-        
+
             new := [ [], [], [] ];
             other_mat := [];
         
@@ -252,7 +252,7 @@ InstallGlobalFunction(MAJORANA_Append,
             pos;        # position of first non zero elt of row
     
     for i in [1..Size(x[1])] do
-    
+        
         pos := PositionNonZero(x[1][i]);
         x[2][i] := x[2][i]/x[1][i][pos];
         x[1][i] := x[1][i]/x[1][i][pos];
@@ -596,7 +596,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
                     x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
                     
                     if x[1] then 
-                        MAJORANA_Append(x[2],mat,vec);
+                        MAJORANA_Append(x[2],mat,vec); 
                     else
                         ev := [,];
                     
@@ -979,7 +979,7 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
+    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
     local   dim,
             i,
@@ -1389,18 +1389,18 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                      
     MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
                                  
-                                ## STEP 6: FUSION ##                                        
+    ## STEP 6: FUSION ##                                        
                             
     # Use these eigenvectors and the fusion rules to find more
     # TODO PSL(2,11) is doing more eigenvectors then fusion, shouldn't be happening, check why
                  
     
-    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);
-
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);                            
+    
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
+    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
     
                                 ## STEP 9: MORE EVECS II ##
 
@@ -1435,6 +1435,10 @@ function(input,index)
             switchmain;    
 
     rep :=  MAJORANA_SetUp(input,index);
+    
+    if Size(rep.group) > 120 then 
+        MAJORANA_AllEmbeddings(rep);
+    fi;
     
     dim := Size(rep.setup.coords);
     
