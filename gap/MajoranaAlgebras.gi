@@ -619,7 +619,52 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
     fi;
 
     end );
+    
+InstallGlobalFunction(MAJORANA_NullspaceAlgebraUnknowns,
 
+    function(AlgebraProducts, setup, nullspace)
+    
+    local   i,
+            dim,
+            unknowns,   
+            mat,
+            vec,
+            u,
+            n,
+            x,
+            y;
+            
+    dim := Size(setup.coords);
+    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, setup);
+    
+    if Size(unknowns) > 0 and nullspace <> [] then 
+        mat := [];
+        vec := [];
+
+        for i in [1..dim] do 
+            u := [1..dim]*0; u[i] := 1;
+            
+            for n in nullspace do 
+                x := MAJORANA_SeparateAlgebraProduct(u,n,unknowns,AlgebraProducts,setup);
+                
+                if ForAny(x[1], y -> y <> 0) then 
+                    MAJORANA_Append([[x[1]], [x[2]]], mat, vec);
+                fi;
+            od;
+        od;
+        
+        Display("Nullspace unknowns");
+        
+        y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, setup);
+                
+        return y;
+    else
+        return [[],[],[]];
+    fi;
+        
+    end );
+    
+    
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
@@ -648,41 +693,45 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
     
-    for i in ProductList.orbitreps do 
-        for ev in [1..3] do 
-            
-            u := [1..dim]*0; u[i] := 1;
-            
-            for v in EigenVectors[i][ev] do
+    if Size(unknowns) > 0 then 
+        for i in ProductList.orbitreps do 
+            for ev in [1..3] do 
                 
-                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
+                u := [1..dim]*0; u[i] := 1;
                 
-                x[2] := x[2] + table[ev]*v;
-                
-                if ForAll(x[1], y -> y = 0) then 
+                for v in EigenVectors[i][ev] do
                     
-                    if ForAny(x[2], y -> y <> 0 ) then
+                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
+                    
+                    x[2] := x[2] + table[ev]*v;
+                    
+                    if ForAll(x[1], y -> y = 0) then 
                         
-                        y := MAJORANA_InnerProduct(x[2],x[2],GramMatrix, ProductList);
-                        
-                        if not y in [0, false] then 
-                            Error("EigenVectors alg unknowns");
+                        if ForAny(x[2], y -> y <> 0 ) then
+                            
+                            y := MAJORANA_InnerProduct(x[2],x[2],GramMatrix, ProductList);
+                            
+                            if not y in [0, false] then 
+                                Error("EigenVectors alg unknowns");
+                            fi;
                         fi;
-                    fi;
-                else                          
-                    x[1] := [x[1]];
-                    x[2] := [x[2]];
-                    MAJORANA_Append(x,mat,vec);
-                fi;                
+                    else                          
+                        x[1] := [x[1]];
+                        x[2] := [x[2]];
+                        MAJORANA_Append(x,mat,vec);
+                    fi;                
+                od;
             od;
         od;
-    od;
 
-    Display("EigenVectors unknowns");
-    
-    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
-            
-    return y;
+        Display("EigenVectors unknowns");
+        
+        y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+                
+        return y;
+    else
+        return [[],[],[]];
+    fi;
     
     end);
     
@@ -930,7 +979,7 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
+    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
     
     local   dim,
             i,
@@ -1343,6 +1392,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 ## STEP 6: FUSION ##                                        
                             
     # Use these eigenvectors and the fusion rules to find more
+    # TODO PSL(2,11) is doing more eigenvectors then fusion, shouldn't be happening, check why
                  
     
     MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);
@@ -1350,7 +1400,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
+    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
                                 ## STEP 9: MORE EVECS II ##
 

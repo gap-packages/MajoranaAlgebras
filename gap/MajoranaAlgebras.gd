@@ -34,6 +34,8 @@ DeclareGlobalFunction( "MAJORANA_FullOrthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_MoreEigenvectors" );
 
+DeclareGlobalFunction( "MAJORANA_NullspaceAlgebraUnknowns" );
+
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
