@@ -4,7 +4,6 @@ InstallGlobalFunction(MAJORANA_Orbits,
     function(G, t, SetUp)
     
     local   gens,
-            dim,
             i,
             pnt,
             d,
@@ -19,11 +18,10 @@ InstallGlobalFunction(MAJORANA_Orbits,
             pos;
     
     gens := GeneratorsOfGroup(G);
-    dim := Size(SetUp.coords);
-    SetUp.conjelts := [1..dim]*0;
+    SetUp.conjelts := [1..t]*0;
     SetUp.orbitreps := [];
     
-    for i in [1..dim] do 
+    for i in [1..t] do 
         if SetUp.conjelts[i] = 0 then 
             
             Add(SetUp.orbitreps, i);
@@ -70,9 +68,6 @@ InstallGlobalFunction(MAJORANA_Orbits,
     od;
     
     SetUp.conjelts := DuplicateFreeList(SetUp.conjelts);
-    
-    SetUp.orbitreps := [  Filtered(SetUp.orbitreps, x -> x <= t),
-                          Filtered(SetUp.orbitreps, x -> x > t)   ];
                         
     end ); 
    
@@ -121,6 +116,8 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 orb := [pnt];
                 elts := [()];
                 
+                AddDictionary(d,pnt);
+                
                 count := 0;
                 
                 x := List(pnt, Order);
@@ -129,7 +126,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 MAJORANA_AddPowers(table{x}, pnt, y, (), d, SetUp);
                 
                 for p in orb do 
-                
+                    
                     count := count + 1;
                     h := elts[count];
                     
@@ -139,7 +136,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         g := h*gen;
                         
                         MakeImmutable(q);
-                        MakeImmutable(g);
                         
                         if not KnowsDictionary(d,q) then 
                         
@@ -168,7 +164,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 
                 p := SetUp.coords{SetUp.pairreps[x]};
                 q := OnPairs(p, g);
-                
+
                 if SetUp.coords[j] in [q[2]^2,q[2]^3,q[1]^2,q[1]^3] then 
                     sign := -sign;
                 elif not SetUp.coords[j] in [q[2],q[2]^4,q[1],q[1]^4] then 
@@ -181,7 +177,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                     elif not SetUp.coords[i] in [q[2],q[2]^4,q[1],q[1]^4] then 
                         Error("setup 1");
                     fi;
-                fi;
+                fi; 
             
                 SetUp.pairorbit[i][j] := sign*SetUp.pairorbit[i][j];
                 SetUp.pairorbit[j][i] := sign*SetUp.pairorbit[j][i];
