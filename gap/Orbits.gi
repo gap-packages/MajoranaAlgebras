@@ -116,14 +116,16 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 orb := [pnt];
                 elts := [()];
                 
-                AddDictionary(d,pnt);
-                
                 count := 0;
                 
                 x := List(pnt, Order);
                 y := Size(SetUp.pairreps);
                 
-                MAJORANA_AddPowers(table{x}, pnt, y, (), d, SetUp);
+                SetUp.pairorbit[i][j] := y;
+                SetUp.pairorbit[j][i] := y;
+                
+                SetUp.pairconj[i][j] := ();
+                SetUp.pairconj[j][i] := ();
                 
                 for p in orb do 
                     
@@ -135,14 +137,29 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         q := OnPairs(p,gen);
                         g := h*gen;
                         
-                        MakeImmutable(q);
+                        pos_1 := Position(SetUp.longcoords,q[1]);
+                        pos_2 := Position(SetUp.longcoords,q[2]);
+                        
+                        pos_1 := SetUp.poslist[pos_1];
+                        pos_2 := SetUp.poslist[pos_2];
+                        
+                        if pos_1 < 0 then pos_1 := -pos_1; fi;
+                        if pos_2 < 0 then pos_2 := -pos_2; fi;
+                        
+                        q := SetUp.coords{[pos_1,pos_2]};
                         
                         if not KnowsDictionary(d,q) then 
                         
                             Add( orb, q );
                             Add( elts, g);
+                            AddDictionary( d, q);
                             
-                            MAJORANA_AddPowers(table{x}, q, y, g, d, SetUp);
+                            SetUp.pairorbit[pos_1][pos_2] := y;
+                            SetUp.pairorbit[pos_2][pos_1] := y;
+                            
+                            SetUp.pairconj[pos_1][pos_2] := g;
+                            SetUp.pairconj[pos_2][pos_1] := g;
+                            
                         fi;
                     od;
                 od;                
@@ -287,6 +304,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                 elts := [()];
                 
                 AddDictionary(d,pnt);
+                AddDictionary(d,Reversed(pnt));
                 
                 count := 0;
                 
@@ -306,6 +324,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                         
                             Add( orb, q );
                             AddDictionary(d,q);
+                            AddDictionary(d,Reversed(q));
                             Add( elts, g);
                 
                             pos_1 := Position(T,q[1]);
