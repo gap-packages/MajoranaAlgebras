@@ -246,6 +246,10 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
                 pos := -pos;
             fi;
             
+            if res[pos] <> 0 then 
+                Error("embedding");
+            fi;
+            
             res[pos] := sign*v[i];
         fi;
     od;

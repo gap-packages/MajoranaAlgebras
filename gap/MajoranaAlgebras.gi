@@ -88,6 +88,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     
     local   dim,
             u,
+            test,
             new_ev,
             pos,
             x,
@@ -108,9 +109,11 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         if y <> false then 
             Add(new[1], x - (1/4)*u*y);
             
-            #if not MAJORANA_AlgebraProduct( u, x - (1/4)*u*y, AlgebraProducts, ProductList) in [u*0, false] then 
-            #    Error("Fusion error");
-            #fi;
+            test := MAJORANA_AlgebraProduct( u, x - (1/4)*u*y, AlgebraProducts, ProductList); 
+            
+            if test <> false and not MAJORANA_InnerProduct(test,test,GramMatrix, ProductList) in [0, false] then 
+                Error("Fusion error");
+            fi;
             if not MAJORANA_InnerProduct( u, x - (1/4)*u*y, GramMatrix, ProductList) in [0, false] then 
                 Error("Orthog error");
             fi;
@@ -123,9 +126,11 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             Add(new[2], z - (1/32)*u*y);
             Add(new[1], x + (3/32)*u*y - 4*z);
             
-            #if not MAJORANA_AlgebraProduct( u, x + (3/32)*u*y - 4*z, AlgebraProducts, ProductList) in [u*0, false] then 
-            #    Error("Fusion error");
-            #fi;
+            test := MAJORANA_AlgebraProduct( u, x + (3/32)*u*y - 4*z, AlgebraProducts, ProductList);
+            
+            if test <> false and not MAJORANA_InnerProduct(test,test,GramMatrix, ProductList) in [0, false] then 
+                Error("Fusion error");
+            fi;
             #if not MAJORANA_AlgebraProduct( u, z - (1/32)*u*y, AlgebraProducts, ProductList) in [(z - (1/32)*u*y)/4, false] then 
             #    Error("Fusion error");
             #fi;
@@ -137,8 +142,6 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
                 Error("Orthog error");
             fi;
             
-            
-            
         elif y <> false then 
             Add(other_mat, x - (1/32)*u*y);
         fi;
@@ -146,9 +149,11 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     else
         Add(new[pos],x);
         
-        #if not MAJORANA_AlgebraProduct(u, x, AlgebraProducts, ProductList) in [x*new_ev, false] then 
-        #    Error("Fusion error");
-        #fi;
+        test := MAJORANA_AlgebraProduct(u, x, AlgebraProducts, ProductList);
+        
+        if test <> false and not MAJORANA_InnerProduct(test - x*new_ev,test - x*new_ev,GramMatrix,ProductList) in [0, false] then 
+            Error("Fusion error");
+        fi;
         if not MAJORANA_InnerProduct(u, x, GramMatrix, ProductList) in [0, false] then 
             Error("Orthog error");
         fi;

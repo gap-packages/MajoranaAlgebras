@@ -253,13 +253,8 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                 
                 pnt := Immutable(T{[i,j]});
                 
-                d := NewDictionary(pnt, false);
-                
                 orb := [pnt];
                 elts := [()];
-                
-                AddDictionary(d,pnt);
-                AddDictionary(d,Reversed(pnt));
                 
                 count := 0;
                 
@@ -274,16 +269,14 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                         g := h*gen;
                         
                         MakeImmutable(q);
+
+                        pos_1 := Position(T,q[1]);
+                        pos_2 := Position(T,q[2]);
                         
-                        if not KnowsDictionary(d,q) then 
+                        if pairorbit[pos_1][pos_2] = 0 then 
                         
                             Add( orb, q );
-                            AddDictionary(d,q);
-                            AddDictionary(d,Reversed(q));
                             Add( elts, g);
-                
-                            pos_1 := Position(T,q[1]);
-                            pos_2 := Position(T,q[2]);
                                 
                             pairorbit[pos_1][pos_2] := k;
                             pairorbit[pos_2][pos_1] := k;
