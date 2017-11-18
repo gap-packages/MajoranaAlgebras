@@ -193,7 +193,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
     for i in ProductList.orbitreps do 
     
-        if Sum(List(EigenVectors[i], x -> Size(x))) < dim - 1 then 
+        if IsMutable(EigenVectors[i][1]) and Sum(List(EigenVectors[i], x -> Size(x))) < dim - 1 then 
 
             new := [ [], [], [] ];
             other_mat := [];
@@ -1343,7 +1343,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                     
         a := [1..dim]*0; a[i] := 1;
     
-        if Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1 <> dim then
+        if IsMutable(EigenVectors[i][1]) and Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1 < dim then
         
             mat:=[];
 
@@ -1365,10 +1365,8 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
                 for ev in [1..3] do 
                     Display(["More eigenvectors",i,ev]); 
-                    Append(EigenVectors[i][ev], ShallowCopy(NullspaceMat(mat - IdentityMat(dim)*table[ev])));
-                    if EigenVectors[i][ev] <> [] then 
-                        EigenVectors[i][ev] := ShallowCopy(BaseMat(EigenVectors[i][ev]));
-                    fi;
+                    EigenVectors[i][ev] := NullspaceMat(mat - IdentityMat(dim)*table[ev]);
+
                 od;
             fi;
         fi; 
@@ -1390,18 +1388,11 @@ InstallGlobalFunction(MAJORANA_MainLoop,
             
     dim := Size(rep.setup.coords);
     
+          
+    
                                 ## STEP 5: INNER PRODUCTS M1 ##
                      
     MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
-                                 
-    ## STEP 6: FUSION ##                                        
-                            
-    # Use these eigenvectors and the fusion rules to find more
-    # TODO PSL(2,11) is doing more eigenvectors then fusion, shouldn't be happening, check why
-                 
-    
-    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);                            
-    
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
@@ -1412,6 +1403,14 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     # Check if we have full espace decomp, if not find it
 
     x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup);
+    
+    ## STEP 6: FUSION ##                                        
+                            
+    # Use these eigenvectors and the fusion rules to find more
+    # TODO PSL(2,11) is doing more eigenvectors then fusion, shouldn't be happening, check why
+                 
+    
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);   
     
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
        
