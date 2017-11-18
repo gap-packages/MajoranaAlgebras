@@ -72,6 +72,15 @@ BindGlobal("S6", function()
     end
     );
     
+BindGlobal("S7", function()
+    local G, T, input;
+    G := SymmetricGroup(7);
+    T := ShallowCopy(AsList(ConjugacyClass(G,(1,2))));
+    Append(T,AsList(ConjugacyClass(G,(1,2)(3,4))));
+    input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return(input);
+    end
+    );
 
     
 

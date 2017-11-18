@@ -8,3 +8,5 @@ DeclareGlobalFunction( "MAJORANA_CheckShape" );
 
 DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
 
+DeclareGlobalFunction( "MAJORANA_EmbeddingFusion" );
+

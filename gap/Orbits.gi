@@ -160,8 +160,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         fi;
                     od;
                 od; 
-                
-                Error("pause");
                                
             fi;
         od;

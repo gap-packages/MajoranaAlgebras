@@ -3,6 +3,7 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     function(rep)
     
     local   unknowns,
+            list,
             x,
             y,
             gens,
@@ -11,11 +12,20 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
             subrep,
             ex,
             i,
+            j,
             embs,
             emb,
             g;
             
     unknowns  := Positions(rep.algebraproducts, false);
+    
+    list := NullMat(Size(rep.involutions),3);
+    
+    for i in rep.setup.orbitreps do 
+        for j in [1..3] do 
+            list[i][j] := [1,Size(rep.evecs[i][j])];
+        od;
+    od;
     
     for x in unknowns do
         if rep.algebraproducts[x] = false then 
@@ -47,6 +57,12 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                                     g := CompositionMapping2(emb, g);
                                     
                                     MAJORANA_Embed(rep,subrep,g);
+                                    
+                                    for i in rep.setup.orbitreps do 
+                                        for j in [1..3] do
+                                            Add(list[i][j],Size(rep.evecs[i][j]));
+                                        od;
+                                    od;
                                 fi;
                             od;    
                         fi;    
@@ -55,7 +71,56 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
             fi;  
         fi;
     od;
-        
+    
+    # fuse eigenvectors which come from different embeddings
+    
+    MAJORANA_EmbeddingFusion(list, rep);
+    
+    end );
+
+InstallGlobalFunction( "MAJORANA_EmbeddingFusion",
+
+    function( list, rep)
+    
+    local   i,
+            j,
+            evals,
+            range1,
+            range2,
+            evecs,
+            u,
+            v,
+            bad,
+            null;
+
+    for i in rep.setup.orbitreps do 
+        for evals in [[1,1],[1,2],[2,2],[1,3],[2,3],[3,3]] do
+            for j in [2..Size(list[i][1])] do 
+                range1 := [list[i][evals[1]][j - 1]..list[i][evals[1]][j]];
+                range2 := [list[i][evals[2]][j - 1]..list[i][evals[2]][j]];
+                range2 := Difference([1..Reversed(list[i][evals[2]])[1]], range2);
+                
+                evecs := rep.evecs[i][evals[2]]{range2};
+                
+                for u in rep.evecs[i][evals[1]]{range1} do 
+                    if Size(evecs) <> 0 then 
+                        bad := MAJORANA_FindBadIndices(u,rep.algebraproducts, rep.setup);
+                        
+                        if bad <> [] then  
+                            null := NullspaceMat(List(evecs, x -> x{bad}));
+                        else
+                            null := IdentityMat(Size(evecs));
+                        fi;
+                        
+                        for v in null do 
+                            MAJORANA_FuseEigenvectors(u, v*evecs, i, evals, [], rep.evecs[i], rep.innerproducts, rep.algebraproducts, rep.setup);
+                        od;
+                    fi;
+                od;
+            od;
+        od;
+    od;
+    
     end );
 
 InstallGlobalFunction( "MAJORANA_CheckEmbedding",
