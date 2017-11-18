@@ -3,7 +3,6 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     function(rep)
     
     local   unknowns,
-            list,
             x,
             y,
             gens,
@@ -19,11 +18,9 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
             
     unknowns  := Positions(rep.algebraproducts, false);
     
-    list := NullMat(Size(rep.involutions),3);
-    
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            list[i][j] := [1,Size(rep.evecs[i][j])];
+            rep.evecs[i][j] := [rep.evecs[i][j]];
         od;
     od;
     
@@ -58,11 +55,6 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                                     
                                     MAJORANA_Embed(rep,subrep,g);
                                     
-                                    for i in rep.setup.orbitreps do 
-                                        for j in [1..3] do
-                                            Add(list[i][j],Size(rep.evecs[i][j]));
-                                        od;
-                                    od;
                                 fi;
                             od;    
                         fi;    
@@ -74,37 +66,53 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     
     # fuse eigenvectors which come from different embeddings
     
-    MAJORANA_EmbeddingFusion(list, rep);
+    # MAJORANA_EmbeddingFusion(rep);
+    
+    for i in rep.setup.orbitreps do 
+        for j in [1..3] do
+            rep.evecs[i][j] := Union(rep.evecs[i][j]);
+            if rep.evecs[i][j] <> [] then 
+                rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
+            fi;
+        od;
+    od;
     
     end );
 
 InstallGlobalFunction( "MAJORANA_EmbeddingFusion",
 
-    function( list, rep)
+    function(rep)
     
     local   i,
             j,
+            k,
+            list,
+            len,
+            new,
             evals,
-            range1,
-            range2,
             evecs,
             u,
             v,
             bad,
             null;
 
+    len := Size(rep.evecs[1][1]);
+
     for i in rep.setup.orbitreps do 
+        
+        new := [[],[],[]];
+        
         for evals in [[1,1],[1,2],[2,2],[1,3],[2,3],[3,3]] do
-            for j in [2..Size(list[i][1])] do 
-                range1 := [list[i][evals[1]][j - 1]..list[i][evals[1]][j]];
-                range2 := [list[i][evals[2]][j - 1]..list[i][evals[2]][j]];
-                range2 := Difference([1..Reversed(list[i][evals[2]])[1]], range2);
+        
+            for j in [1..len] do 
+            
+                list := Difference([1..len], [j]);
                 
-                evecs := rep.evecs[i][evals[2]]{range2};
-                
-                for u in rep.evecs[i][evals[1]]{range1} do 
+                evecs := Union(rep.evecs[i][evals[2]]{list});
+            
+                for u in rep.evecs[i][evals[1]][j] do 
                     if Size(evecs) <> 0 then 
-                        bad := MAJORANA_FindBadIndices(u,rep.algebraproducts, rep.setup);
+                        bad := MAJORANA_FindBadIndices(u,rep.algebraproducts,rep.setup);
                         
                         if bad <> [] then  
                             null := NullspaceMat(List(evecs, x -> x{bad}));
@@ -112,13 +120,24 @@ InstallGlobalFunction( "MAJORANA_EmbeddingFusion",
                             null := IdentityMat(Size(evecs));
                         fi;
                         
-                        for v in null do 
-                            MAJORANA_FuseEigenvectors(u, v*evecs, i, evals, [], rep.evecs[i], rep.innerproducts, rep.algebraproducts, rep.setup);
+                        for k in [1..Size(null)] do 
+                            
+                            v := null[j]*evecs;
+                            
+                            MAJORANA_FuseEigenvectors(u,v, i, evals, [], new, rep.innerproducts, rep.algebraproducts, rep.setup);
+                            
                         od;
                     fi;
                 od;
             od;
         od;
+        
+        for j in [1..3] do 
+            
+            Add(rep.evecs[i][j], new[j]);
+            
+        od;
+        
     od;
     
     end );
@@ -197,6 +216,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
             im2,
             pos1,
             pos2,
+            temp,
             k,
             g,
             perm,
@@ -264,15 +284,18 @@ InstallGlobalFunction( "MAJORANA_Embed",
         perm := MAJORANA_FindVectorPermutation(g, rep.setup); 
         
         for j in [1..3] do 
+            
+            temp := [];
+            
             for v in subrep.evecs[i][j] do 
                 
                 im2 := MAJORANA_ImageVector(v, emb, rep, subrep);
                 im2 := MAJORANA_ConjugateVector(im2, perm, rep.setup);
                 
-                Add(rep.evecs[pos1][j], im2);
+                Add(temp, im2);
             od;
             
-            rep.evecs[pos1][j] := ShallowCopy(BaseMat(rep.evecs[pos1][j]));
+            Add(rep.evecs[pos1][j], temp);
             
         od;
     od;    
