@@ -183,12 +183,16 @@ InstallGlobalFunction( "MAJORANA_Embed",
         g := rep.setup.pairconj[pos1][pos2][2];
         
         if rep.algebraproducts[k] = false then 
-            v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
-            rep.algebraproducts[k] := sign*MAJORANA_ConjugateVector(v,g,rep.setup);
+            if subrep.algebraproducts[i] <> false then 
+                v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
+                rep.algebraproducts[k] := sign*MAJORANA_ConjugateVector(v,g,rep.setup);
+            fi;
         fi;
         
         if rep.innerproducts[k] = false then 
-            rep.innerproducts[k] := sign*subrep.innerproducts[i];
+            if subrep.innerproducts[i] <> false then 
+                rep.innerproducts[k] := sign*subrep.innerproducts[i];
+            fi;
         fi;
         
     od;
