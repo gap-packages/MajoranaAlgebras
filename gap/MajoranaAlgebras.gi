@@ -994,7 +994,7 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
                 
                 if Size(mat) > Size(mat[1]) then 
                 
-                    Display(["All conjugates",i]);
+                    Display(["Partial conjugates",i]);
                 
                     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                         
@@ -1002,21 +1002,24 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
                     vec := ShallowCopy(x[2]);
                     unknowns := ShallowCopy(x[3]);
                     
-                    if Size(unknowns) = 0 then return; fi;
+                    if Size(unknowns) = 0 then 
+                        return [[],[],[]]; 
+                    fi;
                     
                 fi;
             fi;
         od;
         
+        Display("All conjugates");
+        
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                     
         mat := ShallowCopy(x[1]);
         vec := ShallowCopy(x[2]);
-        unknowns := ShallowCopy(x[3]);
-        
-        if Size(unknowns) = 0 then return; fi;
-        
+        unknowns := ShallowCopy(x[3]);        
     fi;
+    
+    return [mat,vec,unknowns];
     
     end );
     
@@ -1135,15 +1138,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         
                         if Size(unknowns) = 0 then return; fi;
                         
-                        MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
-                        
-                        x := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, AlgebraProducts, ProductList);
+                        x := MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
                         
                         mat := ShallowCopy(x[1]);
                         vec := ShallowCopy(x[2]);
                         unknowns := ShallowCopy(x[3]);
                         
-                        if Size(unknowns) = 0 then return; fi;
                         if Size(unknowns) = 0 then return; fi;
                         
                     fi;
@@ -1166,10 +1166,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         if Size(unknowns) = 0 then return; fi;
     fi;
     
-    if Size(unknowns) > 0 then 
-    
-        Display("All conjugates");
-        
+    if Size(unknowns) > 0 then         
         MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
     fi;
     
@@ -1403,6 +1400,11 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                      
     MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
     
+    if IsMutable(rep.innerproducts) and not false in rep.innerproducts then 
+        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+        MakeImmutable(rep.innerproducts);
+    fi;
+    
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
     MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
@@ -1427,8 +1429,9 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
     MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.setup);
         
-    if not false in rep.innerproducts then 
+    if IsMutable(rep.innerproducts) and not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+        MakeImmutable(rep.innerproducts);
     fi;
     
     end);
