@@ -1192,6 +1192,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     if mat <> [] then
     
         Display([Size(mat),Size(mat[1])]);
+        
+        #if Size(mat) = 634 then 
+        #AppendTo("./A6matrix.txt", mat);
+        #AppendTo("./A6vector.txt", vec);
+        #fi;
     
         sol := MAJORANA_SolutionMatVecs(mat,vec);
         
@@ -1366,7 +1371,6 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 for ev in [1..3] do 
                     Display(["More eigenvectors",i,ev]); 
                     EigenVectors[i][ev] := NullspaceMat(mat - IdentityMat(dim)*table[ev]);
-
                 od;
             fi;
         fi; 
