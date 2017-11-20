@@ -676,6 +676,7 @@ InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
 
     local   i,          # loop over representatives
+            t,
             ev,         # loop over eigenvalues
             unknowns,   # unknown algebra products
             mat,        # matrix of unknowns
@@ -690,6 +691,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             dim;        # size of ProductList.coords
     
     dim := Size(ProductList.coords);
+    t := Size(EigenVectors);
     
     table := [0, 1/4, 1/32];
     
@@ -698,7 +700,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
     
-    if Size(unknowns) > 0 then 
+    if ForAny(unknowns, x -> x[1] <= t) then 
         for i in ProductList.orbitreps do 
             for ev in [1..3] do 
                 
@@ -735,7 +737,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                 
         return y;
     else
-        return [[],[],[]];
+        return [[],[],unknowns];
     fi;
     
     end);
