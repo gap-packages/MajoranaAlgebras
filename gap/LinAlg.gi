@@ -177,7 +177,7 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
             
             if pos = 0 then 
                 Add(unsolved,i);   
-                sol[i] := [];             
+                sol[i] := fail;             
             else
                 for j in [i + 1 .. n] do
                     if mat[pos][j] <> 0 then 
@@ -196,14 +196,13 @@ InstallGlobalFunction(MAJORANA_SolutionMatVecs,
                 if not i in unsolved then 
                     sol[i] := vec[pos];
                 else
-                    sol[i] := [];
+                    sol[i] := fail;
                 fi;
             fi;
         od;
         
-        # Display("Solved it!");
-        
-        return [sol,unsolved,relations];
+        return rec( solutions := sol,
+                    relations := relations  );
 
         end );
     

@@ -1192,40 +1192,32 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     if mat <> [] then
     
         Display([Size(mat),Size(mat[1])]);
-        
-        #if Size(mat) = 634 then 
-        #AppendTo("./A6matrix.txt", mat);
-        #AppendTo("./A6vector.txt", vec);
-        #fi;
-    
+
         sol := MAJORANA_SolutionMatVecs(mat,vec);
         
         Display("Solved it!");
-
-        if sol <> false then
-            for i in [1..Size(unknowns)] do
+        
+        for i in [1..Size(unknowns)] do
+        
+            if sol.solutions[i] <> fail then  
             
-                if not i in sol[2] then
+                x := unknowns[i]; 
                 
-                    x := unknowns[i]; 
-                    
-                    y := ProductList.pairorbit[x[1]][x[2]];
-                    g := ProductList.pairconj[x[1]][x[2]][2];
+                y := ProductList.pairorbit[x[1]][x[2]];
+                g := ProductList.pairconj[x[1]][x[2]][2];
                 
-                    
-                    if y > 0 then 
-                        sign := 1;
-                    else
-                        sign := -1;
-                        y := -y;
-                    fi;
-                    
-                    if AlgebraProducts[y] = false then 
-                        AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(sol[1][i],g,ProductList);                 
-                    fi;                   
-                fi;                
-            od;
-        fi;
+                if y > 0 then 
+                    sign := 1;
+                else
+                    sign := -1;
+                    y := -y;
+                fi;
+                
+                if AlgebraProducts[y] = false then 
+                    AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(sol.solutions[i],g,ProductList);                 
+                fi;                   
+            fi;                
+        od;
         
         # take the remaining relations and remove any products which are now known
     
@@ -1252,8 +1244,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                 
                 prod := MAJORANA_ConjugateVector(prod,g,ProductList);
                     
-                for j in [1..Size(sol[3][1])] do 
-                    sol[3][2][j] := sol[3][2][j] - sign*sol[3][1][j][i]*prod;
+                for j in [1..Size(sol.relations[1])] do 
+                    sol.relations[2][j] := sol.relations[2][j] - sign*sol.relations[1][j][i]*prod;
                 od; 
             else
                 Add(unsolved,i);
@@ -1262,18 +1254,18 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
            
         nonzero := [];
                             
-        for j in [1..Size(sol[3][1])] do  
-            sol[3][1][j] := sol[3][1][j]{unsolved};
+        for j in [1..Size(sol.relations[1])] do  
+            sol.relations[1][j] := sol.relations[1][j]{unsolved};
             
-            if ForAny(sol[3][1][j], x -> x <> 0) then 
+            if ForAny(sol.relations[1][j], x -> x <> 0) then 
                 Add(nonzero,j);
             fi;
         od;
         
-        sol[3][1] := sol[3][1]{nonzero};
-        sol[3][2] := sol[3][2]{nonzero};
+        sol.relations[1] := sol.relations[1]{nonzero};
+        sol.relations[2] := sol.relations[2]{nonzero};
         
-        return [sol[3][1],sol[3][2],unknowns{unsolved}];
+        return [sol.relations[1],sol.relations[2],unknowns{unsolved}];
     else
         return [[],[],unknowns];
     fi;
@@ -1284,29 +1276,20 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
 
     function( mat, vec, UnknownInnerProducts, GramMatrix)
     
-    local   Solution,   # solution of system
-            i,          # loop over <UnknownInnerProducts>
-            x;          # element of <UnknownInnerProducts>    
+    local   sol,    # solution of system
+            i,      # loop over <UnknownInnerProducts>
+            x;      # element of <UnknownInnerProducts>    
     
-    Solution := MAJORANA_SolutionMatVecs(mat,vec);
-
-    if Solution <> false then                    
+    sol := MAJORANA_SolutionMatVecs(mat,vec);                   
         
-        for i in [1..Size(Solution[1])] do
-            if not i in Solution[2] then
-    
-                x:=UnknownInnerProducts[i]; 
-
-                GramMatrix[x]:=Solution[1][i][1];
-            fi;
-        od;
-        
-        if Size(Solution[2]) = Size(Solution[1]) then
-            return [false, Solution];
+    for i in [1..Size(sol.solutions)] do
+        if sol.solutions[i] <> fail then
+            x := UnknownInnerProducts[i]; 
+            GramMatrix[x] := sol.solutions[i][1];
         fi;
-        
-        return [true];
-    fi;
+    od;
+    
+    return [true];
     
     end );
     
