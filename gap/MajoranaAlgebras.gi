@@ -1006,6 +1006,14 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
             fi;
         od;
         
+        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+                    
+        mat := ShallowCopy(x[1]);
+        vec := ShallowCopy(x[2]);
+        unknowns := ShallowCopy(x[3]);
+        
+        if Size(unknowns) = 0 then return; fi;
+        
     fi;
     
     end );
@@ -1125,8 +1133,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         
                         if Size(unknowns) = 0 then return; fi;
                         
-                        MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
-                        
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                                 
                         mat := ShallowCopy(x[1]);
@@ -1154,20 +1160,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         
         if Size(unknowns) = 0 then return; fi;
     fi;
-      
-    MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
     
     if Size(unknowns) > 0 then 
     
         Display("All conjugates");
-            
-        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
-                    
-        mat := ShallowCopy(x[1]);
-        vec := ShallowCopy(x[2]);
-        unknowns := ShallowCopy(x[3]);
         
-        if Size(unknowns) = 0 then return; fi;
+        MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
     fi;
     
     end );
@@ -1327,7 +1325,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
         
 InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
-    function(AlgebraProducts,EigenVectors,ProductList)
+    function(AlgebraProducts,EigenVectors,ProductList,nullspace)
     
     local   i,
             j,
@@ -1347,30 +1345,33 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                     
         a := [1..dim]*0; a[i] := 1;
     
-        if IsMutable(EigenVectors[i][1]) and Size(EigenVectors[i][1])+Size(EigenVectors[i][2])+Size(EigenVectors[i][3]) + 1 < dim then
-        
-            mat:=[];
-
-            for j in [1..dim] do
+        if IsMutable(EigenVectors[i][1]) then 
             
-                b := [1..dim]*0; b[j] := 1;
-                
-                x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
-                
-                if x <> false then
-                    Add(mat,x);
-                else
-                    mat := [];
-                    break;
-                fi;
-            od;
+            if Size(BaseMat(Union(EigenVectors[i][1],EigenVectors[i][2],EigenVectors[i][3],nullspace))) < dim - 1 then
+        
+                mat:=[];
 
-            if mat <> [] then 
-
-                for ev in [1..3] do 
-                    Display(["More eigenvectors",i,ev]); 
-                    EigenVectors[i][ev] := NullspaceMat(mat - IdentityMat(dim)*table[ev]);
+                for j in [1..dim] do
+                
+                    b := [1..dim]*0; b[j] := 1;
+                    
+                    x := MAJORANA_AlgebraProduct(a,b,AlgebraProducts,ProductList);
+                    
+                    if x <> false then
+                        Add(mat,x);
+                    else
+                        mat := [];
+                        break;
+                    fi;
                 od;
+
+                if mat <> [] then 
+
+                    for ev in [1..3] do 
+                        Display(["More eigenvectors",i,ev]); 
+                        EigenVectors[i][ev] := NullspaceMat(mat - IdentityMat(dim)*table[ev]);
+                    od;
+                fi;
             fi;
         fi; 
     od;
@@ -1405,7 +1406,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     # Check if we have full espace decomp, if not find it
 
-    x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup);
+    x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
     ## STEP 6: FUSION ##                                        
                             
