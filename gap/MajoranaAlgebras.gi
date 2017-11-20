@@ -1133,14 +1133,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         
                         if Size(unknowns) = 0 then return; fi;
                         
-                        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
-                                
-                        mat := ShallowCopy(x[1]);
-                        vec := ShallowCopy(x[2]);
-                        unknowns := ShallowCopy(x[3]);
-                        
-                        if Size(unknowns) = 0 then return; fi;
-                        
                     fi;
                     
                 od;
