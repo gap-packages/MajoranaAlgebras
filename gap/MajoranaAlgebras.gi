@@ -685,7 +685,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
             od;
         od;
 
-        Display("EigenVectors unknowns");
+        Info( InfoMajorana, 50, "Solving eigenvector unknowns");
         
         y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                 
@@ -948,7 +948,7 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
                 
                 if Size(mat) > Size(mat[1]) then 
                 
-                    Display(["Partial conjugates",i]);
+                    Info(InfoMajorana, 50, STRINGIFY("Partial conjugates ",i));
                 
                     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                         
@@ -964,7 +964,7 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
             fi;
         od;
         
-        Display("All conjugates");
+        Info(InfoMajorana, 50, "All conjugates");
         
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                     
@@ -1082,7 +1082,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                     
                     if mat <> [] and Size(mat) > Size(mat[1]) then 
                     
-                        Display(["Resurrection", evals]);
+                        Info(   InfoMajorana, 50, 
+                                STRINGIFY("Solving resurrection for evals ", evals) );
             
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                                 
@@ -1109,7 +1110,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if mat <> [] and Size(mat) <= Size(mat[1]) then 
                     
-        Display(["Resurrection final"]);
+        Info( InfoMajorana, 50, "Solving final resurrection" );
 
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                 
@@ -1161,11 +1162,12 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
     if mat <> [] then
     
-        Display([Size(mat),Size(mat[1])]);
+        Info(   InfoMajorana, 40, 
+                STRINGIFY("Solving a ", Size(mat), " x ", Size(mat[1]), " matrix") );
 
         sol := MAJORANA_SolutionMatVecs(mat,vec);
         
-        Display("Solved it!");
+        Info(   InfoMajorana, 40, "Solved it!" );
         
         for i in [1..Size(unknowns)] do
         
@@ -1305,7 +1307,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
             
             if Size(BaseMat(Union(EigenVectors[i][1],EigenVectors[i][2],EigenVectors[i][3],nullspace))) < dim - 1 then
         
-                mat:=[];
+                mat := [];
 
                 for j in [1..dim] do
                 
@@ -1322,9 +1324,11 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 od;
 
                 if mat <> [] then 
-
-                    for ev in [1..3] do 
-                        Display(["More eigenvectors",i,ev]); 
+                    for ev in [1..3] do
+                     
+                        Info(   InfoMajorana, 50, 
+                                STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
+                                
                         EigenVectors[i][ev] := NullspaceMat(mat - IdentityMat(dim)*table[ev]);
                     od;
                 fi;
@@ -1462,13 +1466,18 @@ function(input,index)
         if false in rep.innerproducts then
             newfalsecount[2] := Size(Positions(rep.innerproducts,false));
         fi;
-        
-        Display([newfalsecount,falsecount]);
-        
+
+        Info(InfoMajorana, 20,
+                STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
+        Info(InfoMajorana, 20,
+                STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
+
         if newfalsecount = [0,0] then
             break;
         elif newdimensions = maindimensions and newfalsecount = falsecount then
-            Display("Fail");
+            
+            Info( InfoMajorana, 10, "Fail" );
+            
             return rep;
             break;
         else
@@ -1477,7 +1486,7 @@ function(input,index)
         fi;
     od;
 
-    Display("Success");
+    Info( InfoMajorana, 10, "Success" );
     
     return rep;
 

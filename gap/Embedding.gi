@@ -36,7 +36,8 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                     for i in [1..Size(ex.shapes)] do 
                         if IsSubsetSet(AsSet(rep.shape), AsSet(ex.shapes[i])) then 
                             
-                            Display(StructureDescription(subgp));
+                            Info(   InfoMajorana, 10, 
+                                    STRINGIFY("Constructing subrep of ", StructureDescription(subgp) ) );
                             
                             subrep := MajoranaRepresentation(ex,i);
                             

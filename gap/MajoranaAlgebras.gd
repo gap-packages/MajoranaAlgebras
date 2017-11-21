@@ -62,4 +62,6 @@ DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
 DeclareInfoClass( "InfoMajorana" );
 
+DeclareInfoClass( "InfoMajoranaMainLoop" );
+
 
