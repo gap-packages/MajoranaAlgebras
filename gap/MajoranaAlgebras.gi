@@ -623,53 +623,7 @@ InstallGlobalFunction(MAJORANA_FullOrthogonality,
         fi;        
     fi;
 
-    end );
-    
-InstallGlobalFunction(MAJORANA_NullspaceAlgebraUnknowns,
-
-    function(AlgebraProducts, setup, nullspace)
-    
-    local   i,
-            dim,
-            unknowns,   
-            mat,
-            vec,
-            u,
-            n,
-            x,
-            y;
-            
-    dim := Size(setup.coords);
-    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts, setup);
-    
-    if Size(unknowns) > 0 and nullspace <> [] then 
-        mat := [];
-        vec := [];
-
-        for i in [1..dim] do 
-            u := [1..dim]*0; u[i] := 1;
-            
-            for n in nullspace do 
-                x := MAJORANA_SeparateAlgebraProduct(u,n,unknowns,AlgebraProducts,setup);
-                
-                if ForAny(x[1], y -> y <> 0) then 
-                    MAJORANA_Append([[x[1]], [x[2]]], mat, vec);
-                fi;
-            od;
-        od;
-        
-        Display("Nullspace unknowns");
-        
-        y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, setup);
-                
-        return y;
-    else
-        return [[],[],[]];
-    fi;
-        
-    end );
-    
-    
+    end );    
     
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 

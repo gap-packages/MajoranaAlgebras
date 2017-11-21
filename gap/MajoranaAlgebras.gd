@@ -60,6 +60,6 @@ DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
-
+DeclareInfoClass( "InfoMajorana" );
 
 
