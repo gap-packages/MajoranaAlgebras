@@ -253,20 +253,16 @@ InstallGlobalFunction(MAJORANA_Append,
 
     function(x,mat,vec)
 
-    local   i,          # loop over size of x
-            pos;        # position of first non zero elt of row
-    
-    for i in [1..Size(x[1])] do
+    local   pos;        # position of first non zero elt of row
         
-        pos := PositionNonZero(x[1][i]);
-        x[2][i] := x[2][i]/x[1][i][pos];
-        x[1][i] := x[1][i]/x[1][i][pos];
-    
-        if not x[1][i] in mat then             
-            Add(mat,x[1][i]);
-            Add(vec,x[2][i]);
-        fi;
-    od;
+    pos := PositionNonZero(x[1]);
+    x[2] := x[2]/x[1][pos];
+    x[1] := x[1]/x[1][pos];
+
+    if not x[1] in mat then             
+        Add(mat,x[1]);
+        Add(vec,x[2]);
+    fi;
     
     end); 
     
@@ -417,7 +413,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                             x := MAJORANA_SeparateInnerProduct(u,v,unknowns,GramMatrix,ProductList);
                             
                             if ForAll(x[1], y -> y = 0) then 
-                                return x[2]; 
+                                return x[2][1]; 
                             else
                                 return false;
                             fi;
@@ -510,118 +506,69 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
         fi;
     od;
 
-    return [row,sum];
+    return [row,[sum]];
 
     end );
-
-
+    
 InstallGlobalFunction(MAJORANA_Orthogonality,
-
-function(a,b,i,UnknownInnerProducts, EigenVectors, GramMatrix, ProductList)
-
-    local   mat,                    # matrix of unknowns 
-            vec,                    # vector of knowns
-            ev_a,                   # a - eigenvectors
-            ev_b,                   # b - eigenvectors
-            u,                      # a - eigenvector
-            v,                      # b - eigenvector
-            x,                      # result of separate inner product 
-            dim,                    # size of coordinates
-            OrthogonalityError;     # list of vectors which do not obey orthogonality
-            
-    dim := Size(ProductList.coords);
-
-    mat := [];
-    vec := [];
-
-    OrthogonalityError := [];
-
-    if a = 0 then
-        
-        u := [1..dim]*0; u[i] := 1;
-        ev_a := [u];
-    
-     else
-        ev_a := EigenVectors[i][a];
-    fi;
-    
-    ev_b := EigenVectors[i][b];
-        
-    for u in ev_a do
-        for v in ev_b do
-
-            x := MAJORANA_SeparateInnerProduct(u,v,UnknownInnerProducts,GramMatrix,ProductList);
-
-            if ForAll(x[1], y -> y = 0) then
-                if x[2] <> 0 then
-                    Add(OrthogonalityError,[u,v]);
-                fi;
-            else
-                Add(mat,x[1]);
-                Add(vec,[x[2]]);
-            fi;
-            
-        od;
-    od;
-    
-    if Size(OrthogonalityError) > 0 then 
-        return [false, OrthogonalityError];
-    else
-        return [true,[mat,vec]];
-    fi;
-    
-    end
-
-    );
-    
-InstallGlobalFunction(MAJORANA_FullOrthogonality,
 
     function(EigenVectors,GramMatrix, ProductList)
     
     local   i,          # loop over T
-            j,          # loop over eigenvalues
+            ev,         # loop over eigenvalues
             k,          # loop over eigenvalues
+            evecs_a,    #
+            evecs_b,    #
+            u,
+            v,
+            dim,
             x,          # res of orthogonality
             mat,        # matrix of unknown values
-            vec,        # vector of known values
-            ev,         # pair of eigenvalues     
+            vec,        # vector of known values   
             unknowns;     
             
     mat := [];
     vec := [];
     
+    dim := Size(ProductList.coords);
+    
     unknowns := Positions(GramMatrix,false);
     
-    if Size(unknowns) > 0 then 
+    if Size(unknowns) = 0 then
+        return;
+    fi; 
     
-        for i in ProductList.orbitreps do        
-            for j in [0..3] do 
-                for k in [j+1..3] do
+    for i in ProductList.orbitreps do        
+        for ev in Combinations([0..3],2) do  
+            if ev[1] = 0 then 
+                u := [1..dim]*0; u[i] := 1;
+                evecs_a := [u];  
+            else
+                evecs_a := EigenVectors[i][ev[1]];
+            fi;
+            
+            evecs_b := EigenVectors[i][ev[2]];
+                
+            for u in evecs_a do
+                for v in evecs_b do
 
-                    x := MAJORANA_Orthogonality(j,k,i,unknowns,EigenVectors,GramMatrix, ProductList);
-                    
-                    if x[1] then 
-                        MAJORANA_Append(x[2],mat,vec); 
-                    else
-                        ev := [,];
-                    
-                        ev[1] := MAJORANA_FusionTable[1][j + 1];
-                        ev[2] := MAJORANA_FusionTable[1][k + 1];
+                    x := MAJORANA_SeparateInnerProduct( u, v,
+                                                        unknowns,
+                                                        GramMatrix,
+                                                        ProductList);
 
-                        return [false, 
-                                STRINGIFY( "Orthogonality of "
-                                    , ev[1], ",", ev[2] 
-                                    , " eigenvectors does not hold"),
-                                x[2]];
+                    if ForAny(x[1], y -> y <> 0) then
+                        MAJORANA_Append(x, mat, vec);
                     fi;
+                    
                 od;
             od;
         od;
-        
-        if mat <> [] then 
-            MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
-        fi;        
-    fi;
+    od;
+    
+    if mat <> [] then 
+        MAJORANA_SolutionInnerProducts(mat,vec, unknowns, GramMatrix);
+    fi;        
 
     end );    
     
@@ -676,9 +623,7 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                                 Error("EigenVectors alg unknowns");
                             fi;
                         fi;
-                    else                          
-                        x[1] := [x[1]];
-                        x[2] := [x[2]];
+                    else 
                         MAJORANA_Append(x,mat,vec);
                     fi;                
                 od;
@@ -726,51 +671,52 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     
     unknowns := Positions(GramMatrix, false);
     
-    if Size(unknowns) > 0 then 
-        for i in [1..dim] do 
+    if unknowns = [] then 
+        return;
+    fi;
+    
+    for i in [1..dim] do 
+        
+        u := [1..dim]*0; u[i] := 1;
+    
+        for j in [1..Size(AlgebraProducts)] do 
             
-            u := [1..dim]*0; u[i] := 1;
-        
-            for j in [1..Size(AlgebraProducts)] do 
+            if AlgebraProducts[j] <> false then 
+            
+                pos := ProductList.pairreps[j];
                 
-                if AlgebraProducts[j] <> false then 
+                for k in [pos,Reversed(pos)] do
                 
-                    pos := ProductList.pairreps[j];
+                    v := [1..dim]*0; v[k[1]] := 1;
+                    w := [1..dim]*0; w[k[2]] := 1;
+                
+                    row := [];
+                    sum := [0];
+                
+                    x := MAJORANA_SeparateInnerProduct(u, AlgebraProducts[j], unknowns, GramMatrix, ProductList);
                     
-                    for k in [pos,Reversed(pos)] do
+                    row := row + x[1];
+                    sum := sum + x[2];
+                
+                    y := MAJORANA_AlgebraProduct(u, v, AlgebraProducts, ProductList);
                     
-                        v := [1..dim]*0; v[k[1]] := 1;
-                        w := [1..dim]*0; w[k[2]] := 1;
-                    
-                        row := [];
-                        sum := 0;
-                    
-                        x := MAJORANA_SeparateInnerProduct(u, AlgebraProducts[j], unknowns, GramMatrix, ProductList);
+                    if y <> false then 
+                        z := MAJORANA_SeparateInnerProduct(y, w, unknowns, GramMatrix, ProductList);
                         
-                        row := row + x[1];
-                        sum := sum + x[2];
-                    
-                        y := MAJORANA_AlgebraProduct(u, v, AlgebraProducts, ProductList);
+                        row := row - z[1];
+                        sum := sum - z[2];
                         
-                        if y <> false then 
-                            z := MAJORANA_SeparateInnerProduct(y, w, unknowns, GramMatrix, ProductList);
-                            
-                            row := row - z[1];
-                            sum := sum - z[2];
-                            
-                            if ForAny(row, x -> x <> 0) then 
-                                Add(mat,row);
-                                Add(vec,[sum]);
-                            fi;
-                        fi;     
-                    od;
-                fi;
-            od;
+                        if ForAny(row, x -> x <> 0) then 
+                            MAJORANA_Append([row,sum], mat, vec);
+                        fi;
+                    fi;     
+                od;
+            fi;
         od;
-        
-        if mat <> [] then 
-            MAJORANA_SolutionInnerProducts(mat,vec,unknowns,GramMatrix);#
-        fi;
+    od;
+    
+    if mat <> [] then 
+        MAJORANA_SolutionInnerProducts(mat,vec,unknowns,GramMatrix);
     fi;
     
     end );
@@ -941,8 +887,8 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
                             
                         x := [,];
                         
-                        x[1] := [MAJORANA_ConjugateRow(mat[i],g[1],unknowns,ProductList)];
-                        x[2] := [MAJORANA_ConjugateVector(vec[i],g[2],ProductList)];
+                        x[1] := MAJORANA_ConjugateRow(mat[i],g[1],unknowns,ProductList);
+                        x[2] := MAJORANA_ConjugateVector(vec[i],g[2],ProductList);
 
                         MAJORANA_Append(x,mat,vec);
                     od;
@@ -1080,7 +1026,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 fi;
                                 
                                 if row <> [] and ForAny(row, x -> x <> 0) then 
-                                    MAJORANA_Append([[row],[sum]],mat,vec);
+                                    MAJORANA_Append([row,sum],mat,vec);
                                 fi;
                             fi;
                         od;
@@ -1423,7 +1369,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
        
     # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
     
-    MAJORANA_FullOrthogonality(rep.evecs,rep.innerproducts, rep.setup);
+    MAJORANA_Orthogonality(rep.evecs,rep.innerproducts, rep.setup);
         
     if IsMutable(rep.innerproducts) and not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
