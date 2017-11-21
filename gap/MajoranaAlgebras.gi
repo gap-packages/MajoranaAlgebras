@@ -691,7 +691,9 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                 
         return y;
     else
-        return [[],[],unknowns];
+        return rec( mat := [],
+                    vec := [],
+                    unknowns := unknowns) ;
     fi;
     
     end);
@@ -952,12 +954,14 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
                 
                     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                         
-                    mat := ShallowCopy(x[1]);
-                    vec := ShallowCopy(x[2]);
-                    unknowns := ShallowCopy(x[3]);
+                    mat := ShallowCopy(x.mat);
+                    vec := ShallowCopy(x.vec);
+                    unknowns := ShallowCopy(x.unknowns);
                     
                     if Size(unknowns) = 0 then 
-                        return [[],[],[]]; 
+                        return rec( mat := [],
+                                    vec := [],
+                                    unknowns := []  ); 
                     fi;
                     
                 fi;
@@ -968,12 +972,14 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
         
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                     
-        mat := ShallowCopy(x[1]);
-        vec := ShallowCopy(x[2]);
-        unknowns := ShallowCopy(x[3]);        
+        mat := ShallowCopy(x.mat);
+        vec := ShallowCopy(x.vec);
+        unknowns := ShallowCopy(x.unknowns);        
     fi;
     
-    return [mat,vec,unknowns];
+    return rec( mat := mat,
+                vec := vec,
+                unknowns := unknowns    );
     
     end );
     
@@ -1012,9 +1018,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     x := MAJORANA_EigenvectorsAlgebraUnknowns(GramMatrix, AlgebraProducts, EigenVectors, ProductList);
 
-    mat := ShallowCopy(x[1]);
-    vec := ShallowCopy(x[2]);
-    unknowns := ShallowCopy(x[3]);
+    mat := ShallowCopy(x.mat);
+    vec := ShallowCopy(x.vec);
+    unknowns := ShallowCopy(x.unknowns);
     
     if Size(unknowns) = 0 then return; fi;
     
@@ -1089,17 +1095,17 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
                 x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                         
-                mat := ShallowCopy(x[1]);
-                vec := ShallowCopy(x[2]);
-                unknowns := ShallowCopy(x[3]);
+                mat := ShallowCopy(x.mat);
+                vec := ShallowCopy(x.vec);
+                unknowns := ShallowCopy(x.unknowns);
                 
                 if Size(unknowns) = 0 then return; fi;
                 
                 x := MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
                 
-                mat := ShallowCopy(x[1]);
-                vec := ShallowCopy(x[2]);
-                unknowns := ShallowCopy(x[3]);
+                mat := ShallowCopy(x.mat);
+                vec := ShallowCopy(x.vec);
+                unknowns := ShallowCopy(x.unknowns);
                 
                 if Size(unknowns) = 0 then return; fi;
                 
@@ -1114,9 +1120,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                 
-        mat := ShallowCopy(x[1]);
-        vec := ShallowCopy(x[2]);
-        unknowns := ShallowCopy(x[3]);
+        mat := ShallowCopy(x.mat);
+        vec := ShallowCopy(x.vec);
+        unknowns := ShallowCopy(x.unknowns);
         
         if Size(unknowns) = 0 then return; fi;
     fi;
@@ -1191,8 +1197,10 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             fi;                
         od;
         
-        x := MAJORANA_RemoveKnownAlgProducts(   sol.relations[1], 
-                                                sol.relations[2], 
+        Unbind(sol.solutions);
+        
+        x := MAJORANA_RemoveKnownAlgProducts(   sol.mat,
+                                                sol.vec,
                                                 unknowns,
                                                 AlgebraProducts,
                                                 ProductList         );
@@ -1200,7 +1208,9 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         return x;
         
     else
-        return [[],[],unknowns];
+        return rec( mat := [],
+                    vec := [],
+                    unknowns := unknowns    );
     fi;
     
     end );
@@ -1266,7 +1276,9 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     mat := mat{nonzero};
     vec := vec{nonzero};
     
-    return [mat, vec, unknowns{unsolved}];
+    return rec( mat := mat, 
+                vec := vec, 
+                unknowns := unknowns{unsolved});
         
     end );
     
