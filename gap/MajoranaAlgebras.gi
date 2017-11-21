@@ -973,9 +973,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     x := MAJORANA_EigenvectorsAlgebraUnknowns(GramMatrix, AlgebraProducts, EigenVectors, ProductList);
 
-    mat := ShallowCopy(x.mat);
-    vec := ShallowCopy(x.vec);
-    unknowns := ShallowCopy(x.unknowns);
+    mat := x.mat;
+    vec := x.vec;
+    unknowns := x.unknowns;
     
     if Size(unknowns) = 0 then return; fi;
     
@@ -1039,33 +1039,25 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 fi;
                             fi;
                         od;
-                    fi;                    
-                od;
-            od;
-            
-            if mat <> [] then 
+                    fi; 
                     
-                Info(   InfoMajorana, 50, 
-                        STRINGIFY("Solving resurrection for evals ", evals) );
-    
-                x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+                    if mat <> [] and Size(mat) > Size(mat[1]) then 
+                    
+                        Info(   InfoMajorana, 50, 
+                                STRINGIFY("Solving resurrection for evals ", evals) );
+            
+                        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+                                
+                        mat := x.mat;
+                        vec := x.vec;
+                        unknowns := x.unknowns;
                         
-                mat := ShallowCopy(x.mat);
-                vec := ShallowCopy(x.vec);
-                unknowns := ShallowCopy(x.unknowns);
-                
-                if Size(unknowns) = 0 then return; fi;
-                
-                x := MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
-                
-                mat := ShallowCopy(x.mat);
-                vec := ShallowCopy(x.vec);
-                unknowns := ShallowCopy(x.unknowns);
-                
-                if Size(unknowns) = 0 then return; fi;
-                
-            fi;
-                                               
+                        if Size(unknowns) = 0 then return; fi;
+                        
+                    fi;
+                                       
+                od;
+            od;                                               
         od;
     od;
     
@@ -1074,17 +1066,14 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         Info( InfoMajorana, 50, "Solving final resurrection" );
 
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
-                
-        mat := ShallowCopy(x.mat);
-        vec := ShallowCopy(x.vec);
-        unknowns := ShallowCopy(x.unknowns);
         
-        if Size(unknowns) = 0 then return; fi;
+        if Size(x.unknowns) = 0 then return; fi;
+        
+        MAJORANA_AddConjugates(x.mat, x.vec, x.unknowns, AlgebraProducts, ProductList);
+        
     fi;
-    
-    if Size(unknowns) > 0 then         
-        MAJORANA_AddConjugates(mat, vec, unknowns, AlgebraProducts, ProductList);
-    fi;
+           
+        
     
     end );
     
@@ -1121,70 +1110,61 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             nonzero,
             j;
     
-    if mat <> [] then
-    
-        Info(   InfoMajorana, 40, 
-                STRINGIFY("Solving a ", Size(mat), " x ", Size(mat[1]), " matrix") );
-
-        sol := MAJORANA_SolutionMatVecs(mat,vec);
-        
-        Info(   InfoMajorana, 40, "Solved it!" );
-        
-        for i in [1..Size(unknowns)] do
-        
-            if sol.solutions[i] <> fail then  
-            
-                x := unknowns[i]; 
-                
-                y := ProductList.pairorbit[x[1]][x[2]];
-                g := ProductList.pairconj[x[1]][x[2]][2];
-                
-                if y > 0 then 
-                    sign := 1;
-                else
-                    sign := -1;
-                    y := -y;
-                fi;
-                
-                if AlgebraProducts[y] = false then 
-                    AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(sol.solutions[i],g,ProductList);              
-                fi;                   
-            fi;                
-        od;
-        
-        Unbind(sol.solutions);
-        
-        x := MAJORANA_RemoveKnownAlgProducts(   sol.mat,
-                                                sol.vec,
-                                                unknowns,
-                                                AlgebraProducts,
-                                                ProductList         );
-                                                
-        mat := ShallowCopy(x.mat);
-        vec := ShallowCopy(x.vec);
-        unknowns := ShallowCopy(x.unknowns);
-        
-        nonzero := [];
-                        
-        for j in [1..Size(mat)] do              
-            if ForAny(mat[j], x -> x <> 0) then 
-                Add(nonzero,j);
-            fi;
-        od;
-        
-        mat := mat{nonzero};
-        vec := vec{nonzero};
-                                            
-        return rec( mat := mat,
-                    vec := vec,
-                    unknowns := unknowns    );
-                
-        
-    else
-        return rec( mat := [],
-                    vec := [],
-                    unknowns := unknowns    );
+    if mat = [] then
+        return rec( mat := [], vec := [], unknowns := unknowns    );
     fi;
+    
+    Info(   InfoMajorana, 40, 
+            STRINGIFY("Solving a ", Size(mat), " x ", Size(mat[1]), " matrix") );
+
+    sol := MAJORANA_SolutionMatVecs(mat,vec);
+    
+    Info(   InfoMajorana, 40, "Solved it!" );
+    
+    for i in [1..Size(unknowns)] do
+    
+        if sol.solutions[i] <> fail then  
+        
+            x := unknowns[i]; 
+            
+            y := ProductList.pairorbit[x[1]][x[2]];
+            g := ProductList.pairconj[x[1]][x[2]][2];
+            
+            if y > 0 then 
+                sign := 1;
+            else
+                sign := -1;
+                y := -y;
+            fi;
+            
+            if AlgebraProducts[y] = false then 
+                AlgebraProducts[y] := sign*MAJORANA_ConjugateVector(sol.solutions[i],g,ProductList);              
+            fi;                   
+        fi;                
+    od;
+    
+    Unbind(sol.solutions);
+    
+    x := MAJORANA_RemoveKnownAlgProducts(   sol.mat,
+                                            sol.vec,
+                                            unknowns,
+                                            AlgebraProducts,
+                                            ProductList         );
+                                                    
+    nonzero := [];
+                    
+    for j in [1..Size(x.mat)] do              
+        if ForAny(x.mat[j], x -> x <> 0) then 
+            Add(nonzero,j);
+        fi;
+    od;
+    
+    x.mat := x.mat{nonzero};
+    x.vec := x.vec{nonzero};
+                                        
+    return rec( mat := x.mat,
+                vec := x.vec,
+                unknowns := x.unknowns    );
     
     end );
     
