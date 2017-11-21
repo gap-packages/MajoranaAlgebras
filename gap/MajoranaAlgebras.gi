@@ -602,6 +602,9 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(AlgebraProducts,ProductList);
     
     if ForAny(unknowns, x -> x[1] <= t) then 
+    
+    Info( InfoMajorana, 50, "Building eigenvector unknowns");
+    
         for i in ProductList.orbitreps do 
             for ev in [1..3] do 
                 
@@ -629,8 +632,6 @@ function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
                 od;
             od;
         od;
-
-        Info( InfoMajorana, 50, "Solving eigenvector unknowns");
         
         y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                 
@@ -980,6 +981,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     if Size(unknowns) = 0 then return; fi;
     
     # Find unknown algebra products from the resurrection principle
+    
+    Info(   InfoMajorana, 50, "Building resurrection");
 
     for i in ProductList.orbitreps do     
         
@@ -1042,9 +1045,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                     fi; 
                     
                     if mat <> [] and Size(mat) > Size(mat[1]) then 
-                    
-                        Info(   InfoMajorana, 50, 
-                                STRINGIFY("Solving resurrection for evals ", evals) );
             
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                                 
@@ -1062,8 +1062,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     od;
     
     if mat <> [] and Size(mat) <= Size(mat[1]) then 
-                    
-        Info( InfoMajorana, 50, "Solving final resurrection" );
 
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
         
