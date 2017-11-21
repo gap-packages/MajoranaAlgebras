@@ -897,40 +897,40 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
         fi;
     od;
         
-        if new_mat <> [] then 
-            
-            x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, AlgebraProducts, ProductList);
-            
-            if x.unknowns = [] then 
-                return rec( mat := [], vec := [], unknowns := []);
-            fi; 
-            
-            y := MAJORANA_RemoveKnownAlgProducts(   mat, 
-                                                    vec, 
-                                                    unknowns, 
-                                                    AlgebraProducts, 
-                                                    ProductList);
+    if new_mat <> [] then 
         
-            
-            new_mat := ShallowCopy(x.mat);
-            new_vec := ShallowCopy(x.vec);
-            
-            nonzero := [];
-            
-            for j in [1..Size(new_mat)] do 
-                if ForAll(new_mat, x ->  x = 0) then 
-                    Add(nonzero, j);
-                fi;
-            od;
-            
-            new_mat := new_mat{nonzero};
-            new_vec := new_mat{nonzero};
-            
-            mat := ShallowCopy(y.mat);
-            vec := ShallowCopy(y.vec);
-            
-            unknowns := ShallowCopy(x.unknowns);
-        fi;
+        x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, AlgebraProducts, ProductList);
+        
+        if x.unknowns = [] then 
+            return rec( mat := [], vec := [], unknowns := []);
+        fi; 
+        
+        y := MAJORANA_RemoveKnownAlgProducts(   mat, 
+                                                vec, 
+                                                unknowns, 
+                                                AlgebraProducts, 
+                                                ProductList);
+    
+        
+        new_mat := x.mat;
+        new_vec := x.vec;
+        
+        nonzero := [];
+        
+        for j in [1..Size(new_mat)] do 
+            if ForAll(new_mat, x ->  x = 0) then 
+                Add(nonzero, j);
+            fi;
+        od;
+        
+        new_mat := new_mat{nonzero};
+        new_vec := new_mat{nonzero};
+        
+        mat := y.mat;
+        vec := y.vec;
+        
+        unknowns := ShallowCopy(x.unknowns);
+    fi;
     
     return rec( mat := mat,
                 vec := vec,
