@@ -1357,11 +1357,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
-    ## STEP 6: FUSION ##                                        
-                            
-    # Use these eigenvectors and the fusion rules to find more
-    # TODO PSL(2,11) is doing more eigenvectors then fusion, shouldn't be happening, check why
-                 
+    ## STEP 6: FUSION ## 
     
     MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);   
     
