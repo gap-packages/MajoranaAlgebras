@@ -1266,8 +1266,10 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     local   i,
             j,
             dim,
+            list,
             a,
             b,
+            d,
             mat,
             x,
             table,
@@ -1302,12 +1304,16 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 od;
 
                 if mat <> [] then 
+                
+                    list := List(mat[dim], x -> DenominatorRat(x));
+                    d := Maximum(list);
+                
                     for ev in [1..3] do
                      
                         Info(   InfoMajorana, 50, 
                                 STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
                                 
-                        EigenVectors[i][ev] := NullspaceMat(mat - IdentityMat(dim)*table[ev]);
+                        EigenVectors[i][ev] := NullspaceMat(d*(mat - IdentityMat(dim)*table[ev]));
                     od;
                 fi;
             fi;
