@@ -869,69 +869,23 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
 InstallGlobalFunction(MAJORANA_AddConjugates,
 
-    function(mat,vec,unknowns,AlgebraProducts,ProductList) 
+    function(row, sum, mat,vec,unknowns,AlgebraProducts,ProductList) 
     
-    local   new_mat,
-            new_vec,
-            nonzero,
-            i,
+    local   i,
             j,
             g,
             y,
             x;
-        
-    new_mat := [];
-    new_vec := [];
             
-    for i in [1..Size(mat)] do
-        if ForAny(mat[i], x -> x <> 0) then 
-            for g in ProductList.conjelts do
-                            
-                x := [,];
-                
-                x[1] := MAJORANA_ConjugateRow(mat[i],g[1],unknowns,ProductList);
-                x[2] := MAJORANA_ConjugateVector(vec[i],g[2],ProductList);
+    for g in ProductList.conjelts do
+                    
+        x := [,];
+        
+        x[1] := MAJORANA_ConjugateRow(row,g[1],unknowns,ProductList);
+        x[2] := MAJORANA_ConjugateVector(sum,g[2],ProductList);
 
-                MAJORANA_Append(x,new_mat,new_vec);
-            od;
-            
-            if false then 
-            if  (new_mat <> []) and 
-                (Size(new_mat) > Size(new_mat[1]) or i = Size(mat)) then 
-        
-                x := MAJORANA_SolutionAlgProducts(  new_mat, new_vec, 
-                                                    unknowns, 
-                                                    AlgebraProducts, 
-                                                    ProductList);
-                if x.unknowns = [] then 
-                    return rec( mat := [], vec := [], unknowns := []);
-                fi; 
-                
-                y := MAJORANA_RemoveKnownAlgProducts(   mat, vec, unknowns, 
-                                                        AlgebraProducts, 
-                                                        ProductList); 
-                new_mat := x.mat;
-                new_vec := x.vec;
-                
-                nonzero := [];
-                
-                for j in [1..Size(new_mat)] do 
-                    if ForAll(new_mat, x ->  x = 0) then 
-                        Add(nonzero, j);
-                    fi;
-                od;
-                
-                new_mat := new_mat{nonzero}; new_vec := new_mat{nonzero};
-                
-                mat := y.mat; vec := y.vec;
-                
-                unknowns := ShallowCopy(x.unknowns);
-            fi;
-            fi;
-        fi;
+        MAJORANA_Append(x,mat,vec);
     od;
-    
-    return rec( mat := new_mat, vec := new_vec, unknowns := unknowns );
     
     end );    
     
@@ -1062,10 +1016,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 
                                 if row <> [] and ForAny(row, x -> x <> 0) then 
                                     
-                                    conj := MAJORANA_AddConjugates([row], [sum], unknowns, AlgebraProducts, ProductList);
-                                    
-                                    Append(mat, conj.mat);
-                                    Append(vec, conj.vec);
+                                    MAJORANA_AddConjugates(row, sum, mat, vec, unknowns, AlgebraProducts, ProductList);
                                 fi;
                             fi;
                         od;
