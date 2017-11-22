@@ -1,39 +1,36 @@
+dist: trusty
 language: c
-sudo: false
+env:
+  global:
+    - GAPROOT=gaproot
+    - COVDIR=coverage
 
-branches:
-  except:
-    - gh-pages
+addons:
+  apt_packages:
+    - libgmp-dev
+    - libreadline-dev
+    - libgmp-dev:i386
+    - libreadline-dev:i386
+    - gcc-multilib
+    - g++-multilib
 
 matrix:
   include:
-    - os: linux
+    - env: CFLAGS="-O2"
+      compiler: clang
+    - env: CFLAGS="-O2"
       compiler: gcc
-      env: ABI=32 PKGOPTS="CFLAGS=-m32 LDFLAGS=-m32 LOPTS=-m32 CXXFLAGS=-m32"
-      addons:
-        apt_packages:
-          - libgmp-dev:i386
-          - gcc-multilib
-          - g++-multilib
-    - os: linux
-      compiler: gcc
-      addons:
-        apt_packages:
-         - libgmp-dev
+    - env: CFLAGS=""  # test build w/o optimization
+    - env: ABI=32
 
-install:
-  - git clone --depth=2 https://github.com/gap-system/gap.git gapsrc
-  - pwd
-  - ( cd gapsrc && ./autogen.sh && ./configure --with-gmp=system && make configure && make -j && make bootstrap-pkg-minimal)
-  - ( cd gapsrc/pkg && git clone --depth=2 https://github.com/gap-packages/io && cd io && ./autogen.sh && ./configure ${PKGOPTS} && make )
-  - pwd
-#  - ( ./autogen.sh && ./configure --with-gaproot=gapsrc ${PKGOPTS} && make )
-  - pwd
-  - ls
-  - ls gapsrc
-  - ls gapsrc/pkg
-  - echo ln -s $(pwd) gapsrc/pkg/MajoranaAlgebras
-  - ln -s $(pwd) gapsrc/pkg/MajoranaAlgebras
+branches:
+  only:
+    - master
 
+before_script:
+  - scripts/build_gap.sh
 script:
-  - gapsrc/bin/gap.sh tst/testall.g
+  - scripts/run_tests.sh
+after_script:
+  - bash scripts/gather-coverage.sh
+  - bash <(curl -s https://codecov.io/bash)
