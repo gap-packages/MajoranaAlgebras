@@ -884,7 +884,6 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
     new_vec := [];
             
     for i in [1..Size(mat)] do
-        
         if ForAny(mat[i], x -> x <> 0) then 
             for g in ProductList.conjelts do
                             
@@ -895,59 +894,57 @@ InstallGlobalFunction(MAJORANA_AddConjugates,
 
                 MAJORANA_Append(x,new_mat,new_vec);
             od;
+            
+            if false then 
+            if  (new_mat <> []) and 
+                (Size(new_mat) > Size(new_mat[1]) or i = Size(mat)) then 
+        
+                x := MAJORANA_SolutionAlgProducts(  new_mat, new_vec, 
+                                                    unknowns, 
+                                                    AlgebraProducts, 
+                                                    ProductList);
+                if x.unknowns = [] then 
+                    return rec( mat := [], vec := [], unknowns := []);
+                fi; 
+                
+                y := MAJORANA_RemoveKnownAlgProducts(   mat, vec, unknowns, 
+                                                        AlgebraProducts, 
+                                                        ProductList); 
+                new_mat := x.mat;
+                new_vec := x.vec;
+                
+                nonzero := [];
+                
+                for j in [1..Size(new_mat)] do 
+                    if ForAll(new_mat, x ->  x = 0) then 
+                        Add(nonzero, j);
+                    fi;
+                od;
+                
+                new_mat := new_mat{nonzero}; new_vec := new_mat{nonzero};
+                
+                mat := y.mat; vec := y.vec;
+                
+                unknowns := ShallowCopy(x.unknowns);
+            fi;
+            fi;
         fi;
     od;
-        
-    if new_mat <> [] then 
-        
-        x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, AlgebraProducts, ProductList);
-        
-        if x.unknowns = [] then 
-            return rec( mat := [], vec := [], unknowns := []);
-        fi; 
-        
-        y := MAJORANA_RemoveKnownAlgProducts(   mat, 
-                                                vec, 
-                                                unknowns, 
-                                                AlgebraProducts, 
-                                                ProductList);
     
-        
-        new_mat := x.mat;
-        new_vec := x.vec;
-        
-        nonzero := [];
-        
-        for j in [1..Size(new_mat)] do 
-            if ForAll(new_mat, x ->  x = 0) then 
-                Add(nonzero, j);
-            fi;
-        od;
-        
-        new_mat := new_mat{nonzero};
-        new_vec := new_mat{nonzero};
-        
-        mat := y.mat;
-        vec := y.vec;
-        
-        unknowns := ShallowCopy(x.unknowns);
-    fi;
+    return rec( mat := new_mat, vec := new_vec, unknowns := unknowns );
     
-    return rec( mat := mat,
-                vec := vec,
-                unknowns := unknowns    );
-    
-    end );
+    end );    
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList)
+    function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
     
     local   dim,
             i,
             j,
             u,
             evals,
+            conj,
             mat,
             vec,
             unknowns,
@@ -964,6 +961,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             sum,
             old_mat,
             x,
+            v,
             y,
             z,
             w;
@@ -974,9 +972,31 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     x := MAJORANA_EigenvectorsAlgebraUnknowns(GramMatrix, AlgebraProducts, EigenVectors, ProductList);
 
-    mat := x.mat;
-    vec := x.vec;
-    unknowns := x.unknowns;
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+    
+    if unknowns = [] then return; fi;
+    
+    if false then 
+
+        for i in [1..dim] do 
+            u := [1..dim]*0; u[i] := 1;
+            
+            for v in nullspace do 
+                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
+                
+                if ForAny(x[1], y -> y <> 0) then 
+                    MAJORANA_Append(x, mat, vec);
+                fi;
+            od;
+        od;
+        
+        Info( InfoMajorana, 50, "Building nullspace unknowns" );
+        
+        y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+         
+        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                
+    fi;
     
     if Size(unknowns) = 0 then return; fi;
     
@@ -995,6 +1015,13 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             evecs := EigenVectors[i][evals[2]];
             
             for beta in evecs do
+            
+                alpha_mat := [];
+                                            
+                for alpha in EigenVectors[i][evals[1]] do                             
+                    Add(alpha_mat, alpha - beta);                        
+                od;
+            
                 for gamma in EigenVectors[i][evals[1]] do  
                 
                     bad := MAJORANA_FindBadIndices(gamma, AlgebraProducts, ProductList);
@@ -1002,12 +1029,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                     if ForAny(beta{bad}, x -> x <> 0) then 
                         
                         x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, AlgebraProducts, ProductList);
-                        
-                        alpha_mat := [];
-                                            
-                        for alpha in EigenVectors[i][evals[1]] do                             
-                            Add(alpha_mat, alpha - beta);                        
-                        od;
                         
                         null := NullspaceMat(List(alpha_mat, x-> x{bad}));
                         
@@ -1020,7 +1041,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 row := [];
                                 sum := [];
                                 
-                                y := MAJORANA_AlgebraProduct(null[j]*alpha_mat, gamma, AlgebraProducts, ProductList);
+                                v := null[j]*alpha_mat;
+                                
+                                y := MAJORANA_AlgebraProduct(v, gamma, AlgebraProducts, ProductList);
                                 
                                 z := MAJORANA_SeparateAlgebraProduct(u, y, unknowns, AlgebraProducts, ProductList);
                             
@@ -1038,7 +1061,11 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 fi;
                                 
                                 if row <> [] and ForAny(row, x -> x <> 0) then 
-                                    MAJORANA_Append([row,sum],mat,vec);
+                                    
+                                    conj := MAJORANA_AddConjugates([row], [sum], unknowns, AlgebraProducts, ProductList);
+                                    
+                                    Append(mat, conj.mat);
+                                    Append(vec, conj.vec);
                                 fi;
                             fi;
                         od;
@@ -1048,9 +1075,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
                                 
-                        mat := x.mat;
-                        vec := x.vec;
-                        unknowns := x.unknowns;
+                        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                         
                         if Size(unknowns) = 0 then return; fi;
                         
@@ -1067,7 +1092,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         
         if Size(x.unknowns) = 0 then return; fi;
         
-        MAJORANA_AddConjugates(x.mat, x.vec, x.unknowns, AlgebraProducts, ProductList);
+        # MAJORANA_AddConjugates(x.mat, x.vec, x.unknowns, AlgebraProducts, ProductList);
         
     fi;
 
@@ -1347,7 +1372,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
+    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
                                 ## STEP 9: MORE EVECS II ##
 
