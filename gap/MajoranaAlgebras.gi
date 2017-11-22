@@ -969,6 +969,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     fi;
     
     if Size(x.unknowns) = 0 then return; fi;
+    
+    Info( InfoMajorana, 50, "Building nullspace unknowns" );
 
     for i in [1..dim] do 
         u := [1..dim]*0; u[i] := 1;
@@ -981,9 +983,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             fi;
         od;
     od;
-    
-    Info( InfoMajorana, 50, "Building nullspace unknowns" );
-    
+
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
      
     mat := y.mat; vec := y.vec; unknowns := y.unknowns;
