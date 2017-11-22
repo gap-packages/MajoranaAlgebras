@@ -82,6 +82,13 @@ BindGlobal("S7", function()
     end
     );
 
-    
+BindGlobal("L33", function()
+    local G, T, ex;
+    G := PSL(3,3);
+    T := Filtered(G, x -> Order(x) = 2);
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return ex;
+    end 
+    );
 
     
