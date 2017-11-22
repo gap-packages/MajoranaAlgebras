@@ -163,11 +163,14 @@ InstallGlobalFunction(MajoranaAlgebraTest,
             GramMatrixFull;
                             
     # Check bilinear form is positive definite
-    
-    GramMatrixFull := MAJORANA_FillGramMatrix(rep.innerproducts, rep.setup);
 
-    if not false in rep.innerproducts and MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-        return "Gram Matrix is not positive definite";
+    if not false in rep.innerproducts then
+        GramMatrixFull := MAJORANA_FillGramMatrix(rep.innerproducts, rep.setup);
+        
+        if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
+            return "Gram Matrix is not positive definite";
+        fi;
+ 
     fi;
 
     # Check that all triples obey axiom M1
