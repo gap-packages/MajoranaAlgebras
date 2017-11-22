@@ -108,15 +108,6 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         
         if y <> false then 
             Add(new[1], x - (1/4)*u*y);
-            
-            test := MAJORANA_AlgebraProduct( u, x - (1/4)*u*y, algebraproducts, setup); 
-            
-            if test <> false and not MAJORANA_InnerProduct(test,test,innerproducts, setup) in [0, false] then 
-                Error("Fusion error");
-            fi;
-            if not MAJORANA_InnerProduct( u, x - (1/4)*u*y, innerproducts, setup) in [0, false] then 
-                Error("Orthog error");
-            fi;
         fi;
     elif evals = [3,3] then 
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
@@ -124,36 +115,12 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         
         if y <> false and z <> false then 
             Add(new[2], z - (1/32)*u*y);
-            Add(new[1], x + (3/32)*u*y - 4*z);
-            
-            test := MAJORANA_AlgebraProduct( u, x + (3/32)*u*y - 4*z, algebraproducts, setup);
-            
-            if test <> false and not MAJORANA_InnerProduct(test,test,innerproducts, setup) in [0, false] then 
-                Error("Fusion error");
-            fi;
-            
-            if not MAJORANA_InnerProduct( u, x + (3/32)*u*y - 4*z, innerproducts, setup) in [0, false] then 
-                Error("Orthog error");
-            fi;
-            if not MAJORANA_InnerProduct( u, z - (1/32)*u*y, innerproducts, setup) in [0, false] then 
-                Error("Orthog error");
-            fi;
-            
+            Add(new[1], x + (3/32)*u*y - 4*z);            
         elif y <> false then 
             Add(other_mat, x - (1/32)*u*y);
-        fi;
-            
+        fi;  
     else
         Add(new[pos],x);
-        
-        test := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
-        
-        if test <> false and not MAJORANA_InnerProduct(test - x*new_ev,test - x*new_ev,innerproducts,setup) in [0, false] then 
-            Error("Fusion error");
-        fi;
-        if not MAJORANA_InnerProduct(u, x, innerproducts, setup) in [0, false] then 
-            Error("Orthog error");
-        fi;
     fi;
     
     end );
@@ -189,28 +156,26 @@ function(innerproducts, algebraproducts, evecs, setup)
     
     for i in setup.orbitreps do 
     
-        if IsMutable(evecs[i][1]) and Sum(List(evecs[i], x -> Size(x))) < dim - 1 then 
+        if IsMutable(evecs[i]) then 
 
             new := [ [], [], [] ];
             other_mat := [];
         
             for evals in [[1,1],[1,2],[2,2],[1,3],[2,3],[3,3]] do
 
-                evecs := evecs[i][evals[2]];
-                
                 for a in evecs[i][evals[1]] do
-                    if Size(evecs) <> 0 then 
+                    if Size(evecs[i][evals[2]]) <> 0 then 
                         bad := MAJORANA_FindBadIndices(a,algebraproducts,setup);
                         
                         if bad <> [] then  
-                            null := NullspaceMat(List(evecs, x -> x{bad}));
+                            null := NullspaceMat(List(evecs[i][evals[2]], x -> x{bad}));
                         else
-                            null := IdentityMat(Size(evecs));
+                            null := IdentityMat(Size(evecs[i][evals[2]]));
                         fi;
                         
                         for j in [1..Size(null)] do 
                             
-                            b := null[j]*evecs;
+                            b := null[j]*evecs[i][evals[2]];
                             
                             MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, innerproducts, algebraproducts, setup);
                             
@@ -238,7 +203,7 @@ function(innerproducts, algebraproducts, evecs, setup)
                     evecs[i][j] := ShallowCopy(BaseMat(evecs[i][j]));
                 fi;
             od;
-        fi;
+        fi;        
     od;
     
     return [true];    
@@ -1232,47 +1197,42 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
     table := [0,1/4,1/32];
 
     for i in setup.orbitreps do
-                    
-        a := [1..dim]*0; a[i] := 1;
-    
-        if IsMutable(evecs[i][1]) then 
-            
-            if Size(BaseMat(Union(evecs[i][1],evecs[i][2],evecs[i][3],nullspace))) < dim - 1 then
         
-                mat := [];
+        if IsMutable(evecs[i]) then 
+        
+            a := [1..dim]*0; a[i] := 1;
+        
+            mat := [];
 
-                for j in [1..dim] do
+            for j in [1..dim] do
+            
+                b := [1..dim]*0; b[j] := 1;
                 
-                    b := [1..dim]*0; b[j] := 1;
-                    
-                    x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
-                    
-                    if x <> false then
-                        Add(mat,x);
-                    else
-                        mat := [];
-                        break;
-                    fi;
-                od;
-
-                if mat <> [] then 
+                x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
                 
-                    list := List(mat[dim], x -> DenominatorRat(x));
-                    d := Maximum(list);
-                
-                    for ev in [1..3] do
-                     
-                        Info(   InfoMajorana, 50, 
-                                STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
-                                
-                        evecs[i][ev] := NullspaceMat(d*(mat - IdentityMat(dim)*table[ev]));
-                    od;
+                if x <> false then
+                    Add(mat,x);
+                else
+                    mat := [];
+                    break;
                 fi;
+            od;
+
+            if mat <> [] then 
+            
+                list := List(mat[dim], x -> DenominatorRat(x));
+                d := Maximum(list);
+            
+                for ev in [1..3] do
+                 
+                    Info(   InfoMajorana, 50, 
+                            STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
+                            
+                    evecs[i][ev] := NullspaceMat(d*(mat - IdentityMat(dim)*table[ev]));
+                od;
             fi;
-        fi; 
+        fi;
     od;
-    
-    return [true];
     
     end);
 
@@ -1283,19 +1243,32 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     local   x, 
             dim,
             maindimensions,
-            j,
-            k;
+            i,
+            evecs;
             
     dim := Size(rep.setup.coords);
     
                                 ## STEP 5: INNER PRODUCTS M1 ##
-                     
+                                
     MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
     
     if IsMutable(rep.innerproducts) and not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
         MakeImmutable(rep.innerproducts);
     fi;
+                                
+                                    ## STEP 6: FUSION ## 
+    
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
+    
+    for i in rep.setup.orbitreps do 
+        
+        evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
+    
+        if IsMutable(rep.evecs[i]) and Size( BaseMat( evecs )) = dim - 1 then 
+            MakeImmutable(rep.evecs[i]);
+        fi;
+    od;
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
@@ -1305,11 +1278,16 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     # Check if we have full espace decomp, if not find it
 
-    x := MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
+    MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
-    ## STEP 6: FUSION ## 
+    for i in rep.setup.orbitreps do 
+        
+        evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
     
-    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup);   
+        if IsMutable(rep.evecs[i]) and Size( BaseMat( evecs )) = dim - 1 then 
+            MakeImmutable(rep.evecs[i]);
+        fi;
+    od;
     
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
        
