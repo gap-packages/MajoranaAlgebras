@@ -1070,9 +1070,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         MAJORANA_AddConjugates(x.mat, x.vec, x.unknowns, AlgebraProducts, ProductList);
         
     fi;
-           
-        
-    
+
     end );
     
 InstallGlobalFunction( MAJORANA_OutputError,
@@ -1207,7 +1205,9 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             prod := MAJORANA_ConjugateVector(prod,g,ProductList);
                 
             for j in [1..Size(mat)] do 
-                vec[j] := vec[j] - sign*mat[j][i]*prod;
+                if mat[j][i] <> 0 then 
+                    vec[j] := vec[j] - sign*mat[j][i]*prod;
+                fi;
             od; 
         else
             Add(unsolved,i);
