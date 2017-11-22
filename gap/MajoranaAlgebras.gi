@@ -937,8 +937,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                         conj[2] := MAJORANA_ConjugateVector(   sum,g[2],
                                                                         setup );
 
-                                        Add(mat, conj[1]);
-                                        Add(vec, conj[2]);
+                                        MAJORANA_Append(conj, mat, vec);
                                     od;
                                 fi;
                             fi;
