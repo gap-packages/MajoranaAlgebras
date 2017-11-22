@@ -17,6 +17,9 @@ fi
 # build some packages...
 cd pkg
 
+wget https://www.gap-system.org/pub/gap/gap4/tar.gz/packages/automata-1.13.tar.gz
+tar xvzf automata-1.13.tar.gz
+
 # install latest version of io
 git clone https://github.com/gap-packages/io
 cd io
