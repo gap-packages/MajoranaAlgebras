@@ -877,9 +877,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         u := [1..dim]*0;; u[i] := 1;;
     
         for evals in [[1,2],[2,1],[1,3],[2,3]] do  
-        
-            ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
-            
             for beta in evecs[i][evals[2]] do
             
                 alpha_mat := [];
@@ -889,60 +886,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 od;
             
                 for gamma in evecs[i][evals[1]] do  
-                
-                    bad := MAJORANA_FindBadIndices(gamma, algebraproducts, setup);
-                    
-                    if ForAny(beta{bad}, x -> x <> 0) then 
                         
-                        x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, algebraproducts, setup);
-                        
-                        null := NullspaceMat(List(alpha_mat, x-> x{bad}));
-                        
-                        for j in [1..Size(null)] do 
-                        
-                            n := Sum(null[j]);
-                        
-                            if n <> 0 then
-                            
-                                row := [];
-                                sum := [];
-                                
-                                v := null[j]*alpha_mat;
-                                
-                                y := MAJORANA_AlgebraProduct(v, gamma, algebraproducts, setup);
-                                
-                                z := MAJORANA_SeparateAlgebraProduct(u, y, unknowns, algebraproducts, setup);
-                            
-                                row := row + z[1] + n*ev*x[1];
-                                sum := sum + z[2] + n*ev*x[2];
-                                
-                                if evals[1] = 2 then 
-                                    w := MAJORANA_InnerProduct(null[j]*alpha_mat, gamma, innerproducts, setup);
-                                    
-                                    if w <> false then 
-                                        sum := sum + (1/4)*w*u;
-                                    else
-                                        row := [];
-                                    fi;
-                                fi;
-                                
-                                if row <> [] and ForAny(row, x -> x <> 0) then 
-                                    for g in setup.conjelts do
-                    
-                                        conj := [,];
-                                        
-                                        conj[1] := MAJORANA_ConjugateRow(  row, g[1],
-                                                                        unknowns,
-                                                                        setup );
-                                        conj[2] := MAJORANA_ConjugateVector(   sum,g[2],
-                                                                        setup );
-
-                                        MAJORANA_Append(conj, mat, vec);
-                                    od;
-                                fi;
-                            fi;
-                        od;
-                    fi; 
+                    MAJORANA_Resurrection(  i, alpha_mat, beta, gamma,  
+                                            evals, mat, vec, unknowns,
+                                            innerproducts, 
+                                            algebraproducts, 
+                                            setup);
                     
                     if mat <> [] and Size(mat) > Size(mat[1]) then 
             
@@ -989,6 +938,85 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     end );
     
+InstallGlobalFunction( MAJORANA_Resurrection,
+
+    function(i, alpha_mat, beta, gamma, evals, mat, vec, unknowns, innerproducts, algebraproducts, setup)
+    
+    local   bad,
+            null,
+            ev,
+            u,
+            j,
+            n,
+            row, 
+            sum, 
+            v,
+            x,
+            y,
+            z,
+            w,
+            g,
+            conj;
+            
+    bad := MAJORANA_FindBadIndices(gamma, algebraproducts, setup);
+                    
+    if ForAny(beta{bad}, x -> x <> 0) then 
+                        
+        x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, algebraproducts, setup);
+                            
+        null := NullspaceMat(List(alpha_mat, x-> x{bad}));
+                
+        ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+        u := [1..Size(setup.coords)]*0;; u[i] := 1;
+        
+        for j in [1..Size(null)] do 
+                            
+            n := Sum(null[j]);
+        
+            if n <> 0 then
+            
+                row := [];
+                sum := [];
+                
+                v := null[j]*alpha_mat;
+                
+                y := MAJORANA_AlgebraProduct(v, gamma, algebraproducts, setup);
+                
+                z := MAJORANA_SeparateAlgebraProduct(u, y, unknowns, algebraproducts, setup);
+            
+                row := row + z[1] + n*ev*x[1];
+                sum := sum + z[2] + n*ev*x[2];
+                
+                if evals[1] = 2 then 
+                    w := MAJORANA_InnerProduct(null[j]*alpha_mat, gamma, innerproducts, setup);
+                    
+                    if w <> false then 
+                        sum := sum + (1/4)*w*u;
+                    else
+                        row := [];
+                    fi;
+                fi;
+                
+                if row <> [] and ForAny(row, x -> x <> 0) then 
+                    for g in setup.conjelts do
+
+                        conj := [,];
+                        
+                        conj[1] := MAJORANA_ConjugateRow(   row, g[1],
+                                                            unknowns,
+                                                            setup );
+                                                            
+                        conj[2] := MAJORANA_ConjugateVector(    sum,g[2],
+                                                                setup );
+                        MAJORANA_Append(conj, mat, vec);
+                    od;
+                fi;
+            fi;
+        od;
+    fi;
+    
+    end );
+
 InstallGlobalFunction( MAJORANA_OutputError,
 
     function(message, error, OutputList)
