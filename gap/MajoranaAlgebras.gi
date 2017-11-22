@@ -866,29 +866,6 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
     end);     
 
-    
-InstallGlobalFunction(MAJORANA_AddConjugates,
-
-    function(row, sum, mat,vec,unknowns,AlgebraProducts,ProductList) 
-    
-    local   i,
-            j,
-            g,
-            y,
-            x;
-            
-    for g in ProductList.conjelts do
-                    
-        x := [,];
-        
-        x[1] := MAJORANA_ConjugateRow(row,g[1],unknowns,ProductList);
-        x[2] := MAJORANA_ConjugateVector(sum,g[2],ProductList);
-
-        MAJORANA_Append(x,mat,vec);
-    od;
-    
-    end );    
-    
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     function(GramMatrix, AlgebraProducts, EigenVectors, ProductList, nullspace)
@@ -914,6 +891,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             row,
             sum,
             old_mat,
+            g,
             x,
             v,
             y,
@@ -1015,8 +993,19 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 fi;
                                 
                                 if row <> [] and ForAny(row, x -> x <> 0) then 
-                                    
-                                    MAJORANA_AddConjugates(row, sum, mat, vec, unknowns, AlgebraProducts, ProductList);
+                                    for g in ProductList.conjelts do
+                    
+                                        conj := [,];
+                                        
+                                        conj[1] := MAJORANA_ConjugateRow(  row, g[1],
+                                                                        unknowns,
+                                                                        ProductList );
+                                        conj[2] := MAJORANA_ConjugateVector(   sum,g[2],
+                                                                        ProductList );
+
+                                        Add(mat, conj[1]);
+                                        Add(vec, conj[2]);
+                                    od;
                                 fi;
                             fi;
                         od;

@@ -40,11 +40,7 @@ DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
-DeclareGlobalFunction( "MAJORANA_AddConjugates" );
-
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
-
-DeclareGlobalFunction( "MAJORANA_NullSpaceAlgebraProducts" );
 
 DeclareGlobalFunction( "MAJORANA_OutputError" );
 
