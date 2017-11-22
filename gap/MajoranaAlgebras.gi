@@ -84,7 +84,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
-    function(a,b,i,evals,other_mat, new, innerproducts, algebraproducts, setup)
+    function(a, b, i, evals, other_mat, new, innerproducts, algebraproducts, setup)
     
     local   dim,
             u,
@@ -131,9 +131,6 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             if test <> false and not MAJORANA_InnerProduct(test,test,innerproducts, setup) in [0, false] then 
                 Error("Fusion error");
             fi;
-            #if not MAJORANA_AlgebraProduct( u, z - (1/32)*u*y, algebraproducts, setup) in [(z - (1/32)*u*y)/4, false] then 
-            #    Error("Fusion error");
-            #fi;
             
             if not MAJORANA_InnerProduct( u, x + (3/32)*u*y - 4*z, innerproducts, setup) in [0, false] then 
                 Error("Orthog error");
@@ -177,7 +174,6 @@ function(innerproducts, algebraproducts, evecs, setup)
             new,
             u,
             evals,
-            evecs,
             new_ev,
             pos,
             mat,
@@ -887,7 +883,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             bad,
             n,
             ev,
-            evecs,
             row,
             sum,
             old_mat,
