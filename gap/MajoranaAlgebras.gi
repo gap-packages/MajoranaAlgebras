@@ -908,30 +908,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if unknowns = [] then return; fi;
     
-    if false then 
-
-        for i in [1..dim] do 
-            u := [1..dim]*0; u[i] := 1;
-            
-            for v in nullspace do 
-                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
-                
-                if ForAny(x[1], y -> y <> 0) then 
-                    MAJORANA_Append(x, mat, vec);
-                fi;
-            od;
-        od;
-        
-        Info( InfoMajorana, 50, "Building nullspace unknowns" );
-        
-        y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
-         
-        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                
-    fi;
-    
-    if Size(unknowns) = 0 then return; fi;
-    
     # Find unknown algebra products from the resurrection principle
     
     Info(   InfoMajorana, 50, "Building resurrection");
@@ -1026,15 +1002,41 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         od;
     od;
     
-    if mat <> [] and Size(mat) <= Size(mat[1]) then 
+    if mat <> [] then 
 
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
         
-        if Size(x.unknowns) = 0 then return; fi;
-        
+        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+                
         # MAJORANA_AddConjugates(x.mat, x.vec, x.unknowns, AlgebraProducts, ProductList);
         
     fi;
+    
+    if Size(x.unknowns) = 0 then return; fi;
+    
+    if true then 
+
+        for i in [1..dim] do 
+            u := [1..dim]*0; u[i] := 1;
+            
+            for v in nullspace do 
+                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,AlgebraProducts,ProductList);
+                
+                if ForAny(x[1], y -> y <> 0) then 
+                    MAJORANA_Append(x, mat, vec);
+                fi;
+            od;
+        od;
+        
+        Info( InfoMajorana, 50, "Building nullspace unknowns" );
+        
+        y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, AlgebraProducts, ProductList);
+         
+        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                
+    fi;
+    
+    if Size(unknowns) = 0 then return; fi;
 
     end );
     
