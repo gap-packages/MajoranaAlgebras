@@ -556,7 +556,7 @@ function(innerproducts, algebraproducts, evecs, setup)
             y,          # result of SolutionAlgProducts
             z,          # to be added to mat vec system
             g,          # conjugating element
-            indices,
+            list,
             dim;        # size of setup.coords
     
     dim := Size(setup.coords);
@@ -568,33 +568,29 @@ function(innerproducts, algebraproducts, evecs, setup)
     vec := [];
     
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(algebraproducts,setup);
-    indices := DuplicateFreeList(Flat(unknowns));
     
     Info( InfoMajorana, 50, "Building eigenvector unknowns");
     
     for i in setup.orbitreps do 
-        if i in indices then 
+        
+        list := Filtered(unknowns, x -> i in x);
+    
+        if list <> [] then 
+        
+            list := Difference(DuplicateFreeList(Flat(list)), [i]);
+         
             for ev in [1..3] do 
                 
                 u := [1..dim]*0; u[i] := 1;
                 
                 for v in evecs[i][ev] do
+                
+                    if ForAny(v{list}, x -> x <> 0 ) then 
                     
-                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
-                    
-                    x[2] := x[2] + table[ev]*v;
-                    
-                    if ForAll(x[1], y -> y = 0) then 
+                        x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                         
-                        if ForAny(x[2], y -> y <> 0 ) then
+                        x[2] := x[2] + table[ev]*v;
                             
-                            y := MAJORANA_InnerProduct(x[2],x[2],innerproducts, setup);
-                            
-                            if not y in [0, false] then 
-                                Error("evecs alg unknowns");
-                            fi;
-                        fi;
-                    else 
                         MAJORANA_Append(x,mat,vec);
                     fi;                
                 od;
@@ -847,7 +843,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             beta,
             gamma,
             alpha_mat,
-            indices,
+            list,
             x,
             v;
     
@@ -863,18 +859,19 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     Info( InfoMajorana, 50, "Building nullspace unknowns" );
 
-    indices := DuplicateFreeList(Flat(unknowns));
-
     for i in [1..dim] do 
     
-        if i in indices then 
+        list := Filtered(unknowns, x -> i in x);
+    
+        if list <> [] then 
+        
+            list := Difference(DuplicateFreeList(Flat(list)), [i]);
         
             u := [1..dim]*0; u[i] := 1;
             
             for v in nullspace do 
-                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
-                
-                if ForAny(x[1], y -> y <> 0) then 
+                if ForAny(v{list}, x -> x <> 0) then 
+                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                     MAJORANA_Append(x, mat, vec);
                 fi;
             od;
