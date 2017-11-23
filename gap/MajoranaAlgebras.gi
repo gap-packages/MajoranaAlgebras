@@ -1130,7 +1130,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     Info( InfoMajorana, 60, "Solved a single solution");
             
     pos := PositionNot(x[1],0); 
-    x := x*x[1][pos];
+    x := x/x[1][pos];
     
     MAJORANA_RecordSolution(    x[2], unknowns[pos],
                                 algebraproducts,
