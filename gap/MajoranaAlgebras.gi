@@ -181,13 +181,6 @@ function(innerproducts, algebraproducts, evecs, setup)
                         fi;
                     od;
                 od;
-                
-                new_dim := Size(BaseMat(Union(Union(new), Union(evecs[i]))));
-                    
-                if new_dim = dim - 1 then 
-                    other_mat := [];
-                    break;
-                fi;
             od;
             
             if other_mat <> [] then 
