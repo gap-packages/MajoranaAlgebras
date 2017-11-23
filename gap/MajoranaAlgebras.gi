@@ -833,30 +833,17 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     local   dim,
             i,
-            j,
             u,
             evals,
-            conj,
             mat,
             vec,
             unknowns,
             alpha,
             beta,
             gamma,
-            null,
             alpha_mat,
-            bad,
-            n,
-            ev,
-            row,
-            sum,
-            old_mat,
-            g,
             x,
-            v,
-            y,
-            z,
-            w;
+            v;
     
     dim := Size(setup.coords);;
     
@@ -868,14 +855,29 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if unknowns = [] then return; fi;
     
+    Info( InfoMajorana, 50, "Building nullspace unknowns" );
+
+    for i in [1..dim] do 
+        u := [1..dim]*0; u[i] := 1;
+        
+        for v in nullspace do 
+            x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+            
+            if ForAny(x[1], y -> y <> 0) then 
+                MAJORANA_Append(x, mat, vec);
+            fi;
+        od;
+    od;
+
+    x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+     
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+    
     # Find unknown algebra products from the resurrection principle
     
     Info(   InfoMajorana, 50, "Building resurrection");
 
-    for i in setup.orbitreps do     
-        
-        u := [1..dim]*0;; u[i] := 1;;
-    
+    for i in setup.orbitreps do        
         for evals in [[1,2],[2,1],[1,3],[2,3]] do  
             for beta in evecs[i][evals[2]] do
             
@@ -917,24 +919,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     fi;
     
     if Size(x.unknowns) = 0 then return; fi;
-    
-    Info( InfoMajorana, 50, "Building nullspace unknowns" );
-
-    for i in [1..dim] do 
-        u := [1..dim]*0; u[i] := 1;
-        
-        for v in nullspace do 
-            x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
-            
-            if ForAny(x[1], y -> y <> 0) then 
-                MAJORANA_Append(x, mat, vec);
-            fi;
-        od;
-    od;
-
-    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
-     
-    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
 
     end );
     

@@ -67,6 +67,8 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
         od;
     od;
     
+    rep.nullspace := ShallowCopy(rep.nullspace);
+    
     end );
 
 InstallGlobalFunction( "MAJORANA_CheckEmbedding",
@@ -196,6 +198,10 @@ InstallGlobalFunction( "MAJORANA_Embed",
             fi;
         fi;
         
+    od;
+    
+    for v in subrep.nullspace do 
+        Add(rep.nullspace, MAJORANA_ImageVector( v, emb, rep, subrep));
     od;
     
     for i in subrep.setup.orbitreps do 
