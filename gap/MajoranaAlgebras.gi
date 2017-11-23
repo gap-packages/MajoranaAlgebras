@@ -865,8 +865,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             for v in nullspace do 
                 if ForAny(v{list}, x -> x <> 0) then 
                     x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
-                    MAJORANA_Append(x, mat, vec);
-                fi;
+                    MAJORANA_Append(x, mat, vec);                    
+                fi;                
             od;
         fi;
     od;
@@ -1055,20 +1055,10 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         
             x := unknowns[i]; 
             
-            y := setup.pairorbit[x[1]][x[2]];
-            g := setup.pairconj[x[1]][x[2]][2];
-            
-            if y > 0 then 
-                sign := 1;
-            else
-                sign := -1;
-                y := -y;
-            fi;
-            
-            if algebraproducts[y] = false then 
-                algebraproducts[y] := sign*MAJORANA_ConjugateVector(sol.solutions[i],g,setup);              
-            fi;                   
-        fi;                
+            MAJORANA_RecordSolution(    sol.solutions[i], x,
+                                        algebraproducts,
+                                        setup );
+        fi;
     od;
     
     Unbind(sol.solutions);
@@ -1093,6 +1083,30 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     return rec( mat := x.mat,
                 vec := x.vec,
                 unknowns := x.unknowns    );
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_RecordSolution,
+
+    function( v, x, algebraproducts, setup)
+    
+    local   y,
+            g,
+            sign;
+    
+    y := setup.pairorbit[x[1]][x[2]];
+    g := setup.pairconj[x[1]][x[2]][2];
+    
+    if y > 0 then 
+        sign := 1;
+    else
+        sign := -1;
+        y := -y;
+    fi;
+    
+    if algebraproducts[y] = false then 
+        algebraproducts[y] := sign*MAJORANA_ConjugateVector(v,g,setup);              
+    fi;      
     
     end );
     

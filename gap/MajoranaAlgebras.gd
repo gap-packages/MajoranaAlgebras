@@ -38,6 +38,8 @@ DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
+DeclareGlobalFunction( "MAJORANA_RecordSolution" );
+
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
