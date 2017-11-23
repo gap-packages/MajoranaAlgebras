@@ -1007,7 +1007,17 @@ InstallGlobalFunction( MAJORANA_Resurrection,
                     fi;
                 fi;
                 
-                if row <> [] and ForAny(row, x -> x <> 0) then 
+                if row <> [] and Size(Positions(row, 0)) = Size(row) - 1 then 
+                    
+                    y := MAJORANA_SolveSingleSolution(  [row,sum], mat, vec, unknowns, 
+                                                        algebraproducts,
+                                                        setup);
+                                                        
+                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                                        
+                    if unknowns = [] then return; fi;
+                    
+                elif row <> [] and ForAny(row, x -> x <> 0) then 
                     for g in setup.conjelts do
 
                         conj := [,];
