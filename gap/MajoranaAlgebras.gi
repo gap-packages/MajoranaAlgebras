@@ -550,6 +550,7 @@ function(innerproducts, algebraproducts, evecs, setup)
             z,          # to be added to mat vec system
             g,          # conjugating element
             list,
+            pos,
             dim;        # size of setup.coords
     
     dim := Size(setup.coords);
@@ -577,21 +578,29 @@ function(innerproducts, algebraproducts, evecs, setup)
                 u := [1..dim]*0; u[i] := 1;
                 
                 for v in evecs[i][ev] do
-                
-                    if ForAny(v{list}, x -> x <> 0 ) then 
                     
-                        x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                    
+                    x[2] := x[2] + table[ev]*v;
+                    
+                    if Size(Positions(x[1], 0)) = Size(x[1]) - 1 then 
+                        y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
+                                                        algebraproducts,
+                                                        setup);
+                                                        
+                        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                                        
+                        if unknowns = [] then return; fi;
                         
-                        x[2] := x[2] + table[ev]*v;
-                            
-                        MAJORANA_Append(x,mat,vec);
+                    elif ForAny(x[1], y -> y <> 0) then 
+                        MAJORANA_Append(x, mat, vec);                    
                     fi;                
                 od;
             od;
         fi;
     od;
     
-    if mat = [] then return rec( mat := [], vec := [], unknowns := unknowns ); fi;     
+    if mat = [] then return rec( mat := [], vec := [], unknowns := unknowns ); fi;   
         
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
             
@@ -835,9 +844,11 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             alpha,
             beta,
             gamma,
+            pos,
             alpha_mat,
             list,
             x,
+            y,
             v;
     
     dim := Size(setup.coords);;
@@ -863,10 +874,21 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             u := [1..dim]*0; u[i] := 1;
             
             for v in nullspace do 
-                if ForAny(v{list}, x -> x <> 0) then 
-                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                
+                if Size(Positions(x[1], 0)) = Size(x[1]) - 1 then 
+                    
+                    y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
+                                                        algebraproducts,
+                                                        setup);
+                                                        
+                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                                        
+                    if unknowns = [] then return; fi;
+                    
+                elif ForAny(x[1], y -> y <> 0) then 
                     MAJORANA_Append(x, mat, vec);                    
-                fi;                
+                fi;               
             od;
         fi;
     od;
@@ -1085,6 +1107,46 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                 unknowns := x.unknowns    );
     
     end );
+    
+InstallGlobalFunction( MAJORANA_SolveSingleSolution,
+
+    function(x, mat, vec, unknowns, algebraproducts, setup) 
+    
+    local   pos, 
+            y,
+            nonzero,
+            i;
+            
+    Info( InfoMajorana, 60, "Solved a single solution");
+            
+    pos := PositionNot(x[1],0); 
+    x := x*x[1][pos];
+    
+    MAJORANA_RecordSolution(    x[2], unknowns[pos],
+                                algebraproducts,
+                                setup );
+    
+    y := MAJORANA_RemoveKnownAlgProducts(    mat, vec, unknowns, 
+                                        algebraproducts,
+                                        setup );
+                                        
+    nonzero := [];
+                    
+    for i in [1..Size(y.mat)] do              
+        if ForAny(y.mat[i], y -> y <> 0) then 
+            Add(nonzero,i);
+        fi;
+    od;
+    
+    y.mat := y.mat{nonzero};
+    y.vec := y.vec{nonzero};
+                                        
+    return rec( mat := y.mat,
+                vec := y.vec,
+                unknowns := y.unknowns    );
+    
+    end );
+    
     
 InstallGlobalFunction( MAJORANA_RecordSolution,
 
