@@ -861,42 +861,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if unknowns = [] then return; fi;
     
-    Info( InfoMajorana, 50, "Building nullspace unknowns" );
-
-    for i in [1..dim] do 
-    
-        list := Filtered(unknowns, x -> i in x);
-    
-        if list <> [] then 
-        
-            list := Difference(DuplicateFreeList(Flat(list)), [i]);
-        
-            u := [1..dim]*0; u[i] := 1;
-            
-            for v in nullspace do 
-                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
-                
-                if Size(Positions(x[1], 0)) = Size(x[1]) - 1 then 
-                    
-                    y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
-                                                        algebraproducts,
-                                                        setup);
-                                                        
-                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                                                        
-                    if unknowns = [] then return; fi;
-                    
-                elif ForAny(x[1], y -> y <> 0) then 
-                    MAJORANA_Append(x, mat, vec);                    
-                fi;               
-            od;
-        fi;
-    od;
-
-    x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
-     
-    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-    
     # Find unknown algebra products from the resurrection principle
     
     Info(   InfoMajorana, 50, "Building resurrection");
@@ -945,6 +909,42 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     fi;
     
     if Size(x.unknowns) = 0 then return; fi;
+    
+    Info( InfoMajorana, 50, "Building nullspace unknowns" );
+
+    for i in [1..dim] do 
+    
+        list := Filtered(unknowns, x -> i in x);
+    
+        if list <> [] then 
+        
+            list := Difference(DuplicateFreeList(Flat(list)), [i]);
+        
+            u := [1..dim]*0; u[i] := 1;
+            
+            for v in nullspace do 
+                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                
+                if Size(Positions(x[1], 0)) = Size(x[1]) - 1 then 
+                    
+                    y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
+                                                        algebraproducts,
+                                                        setup);
+                                                        
+                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                                        
+                    if unknowns = [] then return; fi;
+                    
+                elif ForAny(x[1], y -> y <> 0) then 
+                    MAJORANA_Append(x, mat, vec);                    
+                fi;               
+            od;
+        fi;
+    od;
+
+    x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+     
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
 
     end );
     
