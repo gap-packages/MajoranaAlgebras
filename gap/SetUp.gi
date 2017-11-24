@@ -438,47 +438,23 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
             list,       # list to build permutation
             perm,       # the permutation
             signlist,   # corrects signs of 5A axes
-            pos_1,      # position of conjugated element in longcoordinates
-            pos_2;      # corresponding position in coordinates
+            pos;
     
     dim := Size(setup.coords);
     list := [1..dim]*0;
-    signlist := List([1..dim], x -> 1);
     
     if g = () then 
-        return [(),signlist];
+        return ();
     else
         list := [1..dim]*0;
-        for j in [1..dim] do 
         
-            pos_1 := Position(setup.longcoords,setup.coords[j]^g);
-            pos_2 := setup.poslist[pos_1];
-            
-            if pos_2 > 0 then 
-                list[j] := pos_2;
-            else
-                list[j] := -pos_2;
-                signlist[-pos_2] := -1;
-            fi;
+        for j in [1..dim] do 
+            pos := Position(setup.longcoords,setup.coords[j]^g); 
+            list[j] := setup.poslist[pos];
         od;
     
-        return [list,signlist];
+        return list;
     fi;
-
-    for j in [1..dim] do 
-    
-        pos_1 := Position(setup.longcoords,setup.coords[j]^g);
-        pos_2 := setup.poslist[pos_1];
-        
-        if pos_2 > 0 then 
-            list[j] := pos_2;
-        else
-            list[j] := -pos_2;
-            signlist[-pos_2] := -1;
-        fi;
-    od;
-
-    return [list, signlist];
     
     end);
     
