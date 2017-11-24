@@ -441,31 +441,28 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
             pos_1,      # position of conjugated element in longcoordinates
             pos_2;      # corresponding position in coordinates
     
-    dim := Size(setup.coords);
+    if g = () then 
+        return ();
+    fi;
     
+    dim := Size(setup.coords);
+    list := [1..dim]*0;
     signlist := List([1..dim], x -> 1);
     
-    if g = () then 
-        return [(),signlist];
-    else
-        list := [1..dim]*0;
-        for j in [1..dim] do 
-        
-            pos_1 := Position(setup.longcoords,setup.coords[j]^g);
-            pos_2 := setup.poslist[pos_1];
-            
-            if pos_2 > 0 then 
-                list[j] := pos_2;
-            else
-                list[j] := -pos_2;
-                signlist[-pos_2] := -1;
-            fi;
-        od;
-        
-        perm := PermList(list);
+    for j in [1..dim] do 
     
-        return [perm,signlist];
-    fi;
+        pos_1 := Position(setup.longcoords,setup.coords[j]^g);
+        pos_2 := setup.poslist[pos_1];
+        
+        if pos_2 > 0 then 
+            list[j] := pos_2;
+        else
+            list[j] := -pos_2;
+            signlist[-pos_2] := -1;
+        fi;
+    od;
+
+    return [list, signlist];
     
     end);
     
@@ -966,3 +963,38 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
     od;
     
     end );
+    
+#InstallGlobalFunction( MAJORANA_CheckSetup,
+
+#    function(rep)
+    
+#    local   dim,
+#            i,
+#            j,
+#            k,
+#            g;
+            
+#    table := [[], [1], [1,2], [1,3], [1,2,3,4]];
+    
+#    dim := Size(rep.setup.coords);
+    
+#    for i in [1..dim] do 
+#        for j in [1..dim] do 
+            
+#            k := rep.setup.pairorbit[i][j];
+#            g := rep.setup.pairconj[i][j][1];
+            
+#            x := rep.setup.pairreps[k];
+            
+#            im1 := rep.setup.coords[k[1]^g];
+#            im2 := k[2]^g;
+            
+#            o := List(rep.setup.coords{x}, y -> Order(y));
+            
+            
+            
+#        od;
+#    od;
+    
+#    end );
+            

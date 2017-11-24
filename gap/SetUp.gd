@@ -11,3 +11,5 @@ DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
 DeclareGlobalFunction( "MAJORANA_FindAllPermutations" );
 
 DeclareGlobalFunction( "MAJORANA_FindVectorPermutation" );
+
+DeclareGlobalFunction( "MAJORANA_CheckSetup" );

@@ -233,21 +233,19 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
     local   i,              # loop over vector
             dim,            # length of vector
             vec,            # output vector
-            pos_1,          # position of conjugated element in longcoords
-            pos_2;          # position of conjugated element in coords
+            pos;
     
-    if g[1] <> () then 
+    if g <> () then 
         
         dim := Size(v);
         
         vec := [1..dim]*0;
         
         for i in [1..dim] do 
-        
             if v[i] <> 0 then 
             
-                vec[i^g[1]] := g[2][i^g[1]]*v[i];
-                
+                pos := g[1][i];
+                vec[pos] := g[2][pos]*v[i]; 
             fi;
         od;
         
@@ -1425,7 +1423,7 @@ function(input,index)
 
     rep :=  MAJORANA_SetUp(input,index);
     
-    if Size(rep.group) > 120 then 
+    if false then 
         MAJORANA_AllEmbeddings(rep);
     fi;
     
