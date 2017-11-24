@@ -890,20 +890,35 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
         
         mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-        
     fi;
     
-    if Size(x.unknowns) = 0 then return; fi;
+    if unknowns = [] then return; fi;
+     
+    MAJORANA_NullspaceUnknowns(mat, vec, unknowns, algebraproducts, setup, nullspace);
+
+    end );
+    
+InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
+
+    function(mat, vec, unknowns, algebraproducts, setup, nullspace)
+    
+    local   i,
+            list,
+            u,
+            v,
+            x,
+            y,
+            dim;
     
     Info( InfoMajorana, 50, "Building nullspace unknowns" );
+
+    dim := Size(setup.coords);
 
     for i in [1..dim] do 
     
         list := Filtered(unknowns, x -> i in x);
     
         if list <> [] then 
-        
-            list := Difference(DuplicateFreeList(Flat(list)), [i]);
         
             u := [1..dim]*0; u[i] := 1;
             
@@ -927,10 +942,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         fi;
     od;
 
-    x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
-     
-    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-
+    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+    
     end );
     
 InstallGlobalFunction( MAJORANA_Resurrection,
@@ -1424,9 +1437,9 @@ function(input,index)
         newfalsecount[2] := Size(Positions(rep.innerproducts,false));
 
         Info(InfoMajorana, 20,
-                STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
+            STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
         Info(InfoMajorana, 20,
-                STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
+            STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
 
         if newfalsecount = [0,0] then
             Info( InfoMajorana, 10, "Success" );

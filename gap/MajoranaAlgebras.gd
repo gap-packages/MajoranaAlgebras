@@ -44,6 +44,8 @@ DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 
+DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
+
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
 DeclareGlobalFunction( "MAJORANA_OutputError" );
