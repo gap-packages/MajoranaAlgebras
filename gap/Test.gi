@@ -191,7 +191,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     # Check that the eigenspaces are orthogonal
 
-    error := MAJORANA_TestOrthogonality(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
+    error := MAJORANA_TestOrthogonality(rep.innerproducts,rep.evecs,rep.setup);
 
     if Size(error) > 0 then
         return ["Eigenspaces are not orthogonal with reppect to the inner product", error];
