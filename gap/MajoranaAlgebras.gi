@@ -235,7 +235,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
             vec,            # output vector
             pos;
     
-    if g <> () then 
+    if g[1] <> () then 
         
         dim := Size(v);
         

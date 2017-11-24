@@ -441,14 +441,14 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
             pos_1,      # position of conjugated element in longcoordinates
             pos_2;      # corresponding position in coordinates
     
-    if g = () then 
-        return ();
-    fi;
-    
     dim := Size(setup.coords);
     list := [1..dim]*0;
     signlist := List([1..dim], x -> 1);
     
+    if g = () then 
+        return [(),signlist];
+    fi;
+
     for j in [1..dim] do 
     
         pos_1 := Position(setup.longcoords,setup.coords[j]^g);
@@ -499,9 +499,7 @@ InstallGlobalFunction( MAJORANA_FindAllPermutations,
     for i in [1..Size(setup.conjelts)] do 
         
         g := setup.conjelts[i];
-        
         pos := Position(gp, g);
-        
         setup.conjelts[i] := [g, perms[pos]];
     od;
     
