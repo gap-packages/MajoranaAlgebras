@@ -877,22 +877,23 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             
                 for gamma in evecs[i][evals[1]] do  
                         
-                    MAJORANA_Resurrection(  i, alpha_mat, beta, gamma,  
+                    x := MAJORANA_Resurrection(  i, alpha_mat, beta, gamma,  
                                             evals, mat, vec, unknowns,
                                             innerproducts, 
                                             algebraproducts, 
                                             setup);
                     
-                    if mat <> [] then  
-                        if  ForAny(mat, x -> Size(Positions(x, 0)) = Size(x) -1) or 
-                            Size(mat) > Size(mat[1]) then 
+                    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+                    
+                    if unknowns = [] then return; fi;
+                    
+                    if mat <> [] and Size(mat) > Size(mat[1]) then 
             
-                            x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
-                                    
-                            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-                            
-                            if Size(unknowns) = 0 then return; fi;
-                        fi;
+                        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+                                
+                        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+                        
+                        if Size(unknowns) = 0 then return; fi;
                     fi;
                                        
                 od;
@@ -1014,8 +1015,12 @@ InstallGlobalFunction( MAJORANA_Resurrection,
                                                         setup);
                                                         
                     mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                                                        
-                    if unknowns = [] then return; fi;
+                    
+                    if unknowns = [] then 
+                        return rec(mat := [], vec := [], unknowns := []); 
+                    fi;
+                    
+                    x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, algebraproducts, setup);
                     
                 elif row <> [] and ForAny(row, x -> x <> 0) then 
                     for g in setup.conjelts do
@@ -1034,6 +1039,8 @@ InstallGlobalFunction( MAJORANA_Resurrection,
             fi;
         od;
     fi;
+    
+    return rec( mat := mat, vec := vec, unknowns := unknowns);
     
     end );
 
@@ -1128,7 +1135,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
             i;
             
     Info( InfoMajorana, 60, "Solved a single solution");
-            
+    
     pos := PositionNot(x[1],0); 
     x := x/x[1][pos];
     
@@ -1139,7 +1146,6 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     y := MAJORANA_RemoveKnownAlgProducts(    mat, vec, unknowns, 
                                         algebraproducts,
                                         setup );
-                                        
     nonzero := [];
                     
     for i in [1..Size(y.mat)] do              
