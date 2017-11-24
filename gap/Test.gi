@@ -211,7 +211,9 @@ InstallGlobalFunction(MajoranaAlgebraTest,
         
 InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
-    function(innerproducts,algebraproducts,evecs, setup) # Tests that eigenspaces are orthogonal with respect to the inner product
+    function(innerproducts,evecs, setup) 
+    
+    # Tests that eigenspaces are orthogonal with respect to the inner product
 
         local   errorortho, # list of indices which do not obey orthogonality of eigenvectors
                 u,          # vector with 1 in j th position
@@ -228,7 +230,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
         for j in setup.orbitreps do
 
-            u := [1..Size(algebraproducts[1])]*0; u[j]:=1;
+            u := [1..Size(setup.coords)]*0; u[j]:=1;
             
             for a in [1..3] do 
             
@@ -240,8 +242,6 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                     x := MAJORANA_InnerProduct(u, v, innerproducts, setup);
                     
                     if (x <> false) and (x <> 0) then 
-                    
-                        Error("Orthogonality");
                         Add(errorortho, [j,0,a,u,v]);
                     fi;
                 od;
@@ -257,8 +257,6 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                             x := MAJORANA_InnerProduct(v, w, innerproducts, setup);
                             
                             if (x <> false) and (x <> 0) then 
-                            
-                                Error("Orthogonality  1");
                                 Add(errorortho, [j,a,b,v,w]);
                             fi;
                         od;
