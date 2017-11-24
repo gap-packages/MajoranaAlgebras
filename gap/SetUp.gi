@@ -447,6 +447,22 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     
     if g = () then 
         return [(),signlist];
+    else
+        list := [1..dim]*0;
+        for j in [1..dim] do 
+        
+            pos_1 := Position(setup.longcoords,setup.coords[j]^g);
+            pos_2 := setup.poslist[pos_1];
+            
+            if pos_2 > 0 then 
+                list[j] := pos_2;
+            else
+                list[j] := -pos_2;
+                signlist[-pos_2] := -1;
+            fi;
+        od;
+    
+        return [list,signlist];
     fi;
 
     for j in [1..dim] do 

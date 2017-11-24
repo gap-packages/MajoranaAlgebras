@@ -246,6 +246,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVector,
             
                 pos := g[1][i];
                 vec[pos] := g[2][pos]*v[i]; 
+
             fi;
         od;
         
@@ -305,6 +306,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         if x <> false then
                             
                             g := list.pairconj[dim - i + 1][dim - j + 1][1];
+                            
+                            if IsPerm(g[1]) and g[1] <> () then Error("pause"); fi;
                             
                             pos := Position(elts,g);
                             
