@@ -67,7 +67,9 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
         od;
     od;
     
-    rep.nullspace := ShallowCopy(BaseMat(rep.nullspace));
+    if rep.nullspace < [] then 
+        rep.nullspace := ShallowCopy(BaseMat(rep.nullspace));
+    fi;
     
     end );
 
