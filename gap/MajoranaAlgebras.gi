@@ -277,12 +277,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 pos,
                 dim;    # size of vectors 
 
-        dim:=Size(u);
-        vec:=[1..dim]*0;
-
-        if ForAll(u, x -> x = 0) or ForAll(v, x -> x = 0) then
-            return u*0;
-        fi;
+        dim := Size(u);
+        vec := [1..dim]*0;
 
         elts := [];
         vecs := [];
@@ -291,10 +287,6 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             if u[dim - i + 1] <> 0 then 
                 for j in [1..dim] do
                     if v[dim - j + 1] <> 0 then 
-                    
-                        #if i = j and Order(list.coords[dim - i + 1]) <> 5 then 
-                        #    vec[dim - i + 1] := u[dim - i + 1]*v[dim - j + 1];
-                        # fi;
                     
                         k := list.pairorbit[dim - i + 1][dim - j + 1];
                         
@@ -310,8 +302,6 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         if x <> false then
                             
                             g := list.pairconj[dim - i + 1][dim - j + 1][1];
-                            
-                            if IsPerm(g) and g <> () then Error("pause"); fi;
                             
                             pos := Position(elts,g);
                             
@@ -371,18 +361,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                         if innerproducts[k] <> false then
                             sum := sum + sign*u[i]*v[j]*innerproducts[k];
                         else
-                            # cannot calculate product
-                            
-                            unknowns := Positions(innerproducts, false);
-                            
-                            x := MAJORANA_SeparateInnerProduct(u,v,unknowns,innerproducts,setup);
-                            
-                            if ForAll(x[1], y -> y = 0) then 
-                                return x[2][1]; 
-                            else
-                                return false;
-                            fi;
-                            
+                            return false;
                         fi;
                     fi;
                 od;
