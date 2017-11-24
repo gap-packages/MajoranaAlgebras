@@ -1423,7 +1423,7 @@ function(input,index)
 
     rep :=  MAJORANA_SetUp(input,index);
     
-    if false then 
+    if Size(rep.group) > 120 then 
         MAJORANA_AllEmbeddings(rep);
     fi;
     
