@@ -1400,12 +1400,8 @@ function(input,index)
     local   i,
             j,
             rep,
-            dim,
-            maindimensions,
-            newdimensions,
             falsecount,
-            newfalsecount,
-            switchmain;    
+            newfalsecount;  
 
     rep :=  MAJORANA_SetUp(input,index);
     
@@ -1413,58 +1409,19 @@ function(input,index)
         MAJORANA_AllEmbeddings(rep);
     fi;
     
-    dim := Size(rep.setup.coords);
-    
-    maindimensions:=[];
-
-    for i in rep.setup.orbitreps do
-        for j in [1..3] do
-            if Size(rep.evecs[i][j]) > 0 then
-                rep.evecs[i][j]:=ShallowCopy(BaseMat(rep.evecs[i][j]));
-            fi;
-        od;
-        Add(maindimensions,   Size(rep.evecs[i][1])
-                            + Size(rep.evecs[i][2])
-                            + Size(rep.evecs[i][3]) + 1);
-    od;
-    
     falsecount := [0,0];
     
-    if false in rep.algebraproducts then
-        falsecount[1] := Size(Positions(rep.algebraproducts,false));
-    fi;
+    falsecount[1] := Size(Positions(rep.algebraproducts,false));
+    falsecount[2] := Size(Positions(rep.innerproducts,false));
     
-    if false in rep.innerproducts then
-        falsecount[2] := Size(Positions(rep.innerproducts,false));
-    fi;
-    
-    if ForAll(maindimensions, x -> x = dim) and falsecount = [0,0] then 
-        switchmain := 1;
-    else
-        switchmain := 0;
-    fi;
-    
-    while switchmain = 0 do
+    while true do
                                 
         MAJORANA_MainLoop(rep);
         
-        newdimensions := [];
-        
-        for i in rep.setup.orbitreps do 
-            Add(newdimensions,   Size(rep.evecs[i][1])
-                               + Size(rep.evecs[i][2])
-                               + Size(rep.evecs[i][3]) + 1);
-        od;
-        
         newfalsecount := [0,0];
-        
-        if false in rep.algebraproducts then
-            newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
-        fi;
-        
-        if false in rep.innerproducts then
-            newfalsecount[2] := Size(Positions(rep.innerproducts,false));
-        fi;
+
+        newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
+        newfalsecount[2] := Size(Positions(rep.innerproducts,false));
 
         Info(InfoMajorana, 20,
                 STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
@@ -1472,21 +1429,14 @@ function(input,index)
                 STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
 
         if newfalsecount = [0,0] then
-            break;
-        elif newdimensions = maindimensions and newfalsecount = falsecount then
-            
-            Info( InfoMajorana, 10, "Fail" );
-            
+            Info( InfoMajorana, 10, "Success" );
             return rep;
-            break;
+        elif newfalsecount = falsecount then
+            Info( InfoMajorana, 10, "Fail" );
+            return rep;
         else
-            maindimensions := StructuralCopy(newdimensions);
             falsecount := StructuralCopy(newfalsecount);
         fi;
     od;
-
-    Info( InfoMajorana, 10, "Success" );
     
-    return rep;
-
-end );
+    end );
