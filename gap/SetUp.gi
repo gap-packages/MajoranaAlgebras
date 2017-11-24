@@ -461,10 +461,8 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
                 signlist[-pos_2] := -1;
             fi;
         od;
-        
-        perm := PermList(list);
     
-        return [perm,signlist];
+        return [list,signlist];
     fi;
     
     end);
