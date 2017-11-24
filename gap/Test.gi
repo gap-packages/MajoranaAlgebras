@@ -240,7 +240,9 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                     x := MAJORANA_InnerProduct(u, v, innerproducts, setup);
                     
                     if (x <> false) and (x <> 0) then 
-                        Add(errorortho, [j,1,a,u,v]);
+                    
+                        Error("Orthogonality");
+                        Add(errorortho, [j,0,a,u,v]);
                     fi;
                 od;
                 
@@ -255,7 +257,9 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                             x := MAJORANA_InnerProduct(v, w, innerproducts, setup);
                             
                             if (x <> false) and (x <> 0) then 
-                                Add(errorortho, [j,a,b,u,v]);
+                            
+                                Error("Orthogonality  1");
+                                Add(errorortho, [j,a,b,v,w]);
                             fi;
                         od;
                     od;
