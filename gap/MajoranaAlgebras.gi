@@ -1019,6 +1019,10 @@ InstallGlobalFunction( MAJORANA_Resurrection,
                     
                     x := MAJORANA_SeparateAlgebraProduct(beta, gamma, unknowns, algebraproducts, setup);
                     
+                    if ForAll(x[1], y -> y = 0) then 
+                        return rec( mat := mat, vec := vec, unknowns := unknowns);
+                    fi;
+                    
                 elif row <> [] and ForAny(row, x -> x <> 0) then 
                     for g in setup.conjelts do
 
@@ -1032,6 +1036,8 @@ InstallGlobalFunction( MAJORANA_Resurrection,
                                                                 setup );
                         MAJORANA_Append(conj, mat, vec);
                     od;
+                elif row <> 0 then 
+                    Error("Zero row");
                 fi;
             fi;
         od;
@@ -1363,16 +1369,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 
                                     ## STEP 6: FUSION ## 
     
-    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
     
-    for i in rep.setup.orbitreps do 
-        
-        evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
-    
-        if IsMutable(rep.evecs[i]) and Size( BaseMat( evecs )) = dim - 1 then 
-            MakeImmutable(rep.evecs[i]);
-        fi;
-    od;
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
@@ -1383,6 +1380,17 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     # Check if we have full espace decomp, if not find it
 
     MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
+    
+    for i in rep.setup.orbitreps do 
+        
+        evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
+    
+        if IsMutable(rep.evecs[i]) and Size( BaseMat( evecs )) = dim - 1 then 
+            MakeImmutable(rep.evecs[i]);
+        fi;
+    od;
+    
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
     
     for i in rep.setup.orbitreps do 
         
