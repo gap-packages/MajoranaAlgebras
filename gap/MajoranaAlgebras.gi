@@ -154,7 +154,7 @@ function(innerproducts, algebraproducts, evecs, setup)
     
     for i in setup.orbitreps do 
     
-        if IsMutable(evecs[i]) then 
+        if IsMutable(evecs[i][1]) then 
 
             new := [ [], [], [] ];
             other_mat := [];
@@ -1308,7 +1308,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
     for i in setup.orbitreps do
         
-        if IsMutable(evecs[i]) then 
+        if IsMutable(evecs[i][1]) then 
         
             a := [1..dim]*0; a[i] := 1;
         
@@ -1381,23 +1381,14 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
-    for i in rep.setup.orbitreps do 
-        
-        evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
-    
-        if IsMutable(rep.evecs[i]) and Size( BaseMat( evecs )) = dim - 1 then 
-            MakeImmutable(rep.evecs[i]);
-        fi;
-    od;
-    
     MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
     
     for i in rep.setup.orbitreps do 
         
         evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
     
-        if IsMutable(rep.evecs[i]) and Size( BaseMat( evecs )) = dim - 1 then 
-            MakeImmutable(rep.evecs[i]);
+        if IsMutable(rep.evecs[i][1]) and Size( BaseMat( evecs )) = dim - 1 then 
+            MakeImmutable(rep.evecs[i][1]);
         fi;
     od;
     
