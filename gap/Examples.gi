@@ -52,6 +52,15 @@ BindGlobal("A7",function()
     end
     );
     
+BindGlobal("A8",function()
+    local G, T,input;
+    G:=AlternatingGroup(7);
+    T:=ShallowCopy(AsList(ConjugacyClass(G, (1,2)(3,4))));
+    input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return(input);
+    end
+    );
+    
 BindGlobal("S4",function()
     local G, T, input, res;
     G:=SymmetricGroup(4);
@@ -91,4 +100,12 @@ BindGlobal("L33", function()
     end 
     );
 
+BindGlobal("M11",function()
+    local G, T,input;
+    G:=MathieuGroup(11);
+    T:=Filtered(AsList(G),x->Order(x) = 2);
+    input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return(input);
+    end
+    );
     
