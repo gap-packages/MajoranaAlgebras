@@ -54,7 +54,7 @@ BindGlobal("A7",function()
     
 BindGlobal("A8",function()
     local G, T,input;
-    G:=AlternatingGroup(7);
+    G:=AlternatingGroup(8);
     T:=ShallowCopy(AsList(ConjugacyClass(G, (1,2)(3,4))));
     input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
     return(input);
