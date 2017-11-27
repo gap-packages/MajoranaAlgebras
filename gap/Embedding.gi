@@ -134,7 +134,31 @@ InstallGlobalFunction( "MAJORANA_CheckShape",
     return true;
     
     end );
+    
+InstallGlobalFunction( "MAJORANA_EmbedKnownRep",
 
+    function( rep, subrep)
+    
+    local   embs,
+            i,
+            g,
+            emb;
+            
+    
+    embs := IsomorphicSubgroups(rep.group, subrep.group);
+    
+    for i in [1..Size(embs)] do 
+    
+        g := MAJORANA_CheckEmbedding(rep, subrep, embs[i]);
+        
+        if g <> false then 
+            emb := CompositionMapping2(embs[i], g);
+
+            MAJORANA_Embed(rep, subrep,  emb);
+        fi;
+    od;
+    
+    end );
 
 InstallGlobalFunction( "MAJORANA_Embed",
     

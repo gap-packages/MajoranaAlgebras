@@ -4,6 +4,8 @@ DeclareGlobalFunction( "MAJORANA_ImageVector" );
 
 DeclareGlobalFunction( "MAJORANA_CheckEmbedding" );
 
+DeclareGlobalFunction( "MAJORANA_EmbedKnownRep" );
+
 DeclareGlobalFunction( "MAJORANA_CheckShape" );
 
 DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
