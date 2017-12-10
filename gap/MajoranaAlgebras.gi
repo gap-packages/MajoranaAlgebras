@@ -816,27 +816,29 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
 InstallGlobalFunction(MAJORANA_SingleSolutions,
     
-    function(evals,algebraproducts, evecs, setup)
+    function(evals, innerproducts, algebraproducts, evecs, setup)
     
     local   pairs, 
             dim,
             x,
             i, j, k, l,
-            beta, gamma,
+            alpha, beta, gamma,
             unknowns,
-            orb;
+            indices,
+            orb,
+            alpha_mat;
     
     pairs := [];
     dim := Size(setup.coords);
     
     for x in setup.orbitreps do 
-        for i in [1..Size(evecs[x][evals[1]])] do 
-            beta := evecs[x][evals[1]][i];
-            for j in [1..Size(evecs[x][evals[2]])] do 
+        for i in [1..Size(evecs[x][evals[2]])] do 
+            beta := evecs[x][evals[2]][i];
+            for j in [1..Size(evecs[x][evals[1]])] do 
 
-                gamma := evecs[x][evals[2]][j];
+                gamma := evecs[x][evals[1]][j];
                 
-                unknowns := [];
+                indices := [];
                 
                 for k in [1..dim] do 
                     if beta[k] <> 0 then 
@@ -845,23 +847,32 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
                                 orb := setup.pairorbit[k][l];
                             
                                 if algebraproducts[orb] = false then 
-                                    Add(unknowns, [k,l]);
+                                    Add(indices, [k,l]);
                                 fi;
                                 
-                                if Size(unknowns) > 1 then 
+                                if Size(indices) > 1 then 
                                     break;
                                 fi;
                             fi;                    
                         od;
                     fi;
                     
-                    if Size(unknowns) > 1 then 
+                    if Size(indices) > 1 then 
                         break;
                     fi;    
                 od;
                 
-                if Size(unknowns) = 1 then 
-                    Add(pairs, [x,i,j]);
+                if Size(indices) = 1 then 
+                
+                    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(algebraproducts, setup);
+                
+                    alpha_mat := [];
+                    
+                    for alpha in evecs[x][evals[1]] do                             
+                        Add(alpha_mat, alpha - beta);                        
+                    od;
+                
+                    MAJORANA_Resurrection(x, alpha_mat, beta, gamma, evals, [], [], unknowns, innerproducts, algebraproducts, setup);
                 fi;
                 
             od;
@@ -906,6 +917,10 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     # Find unknown algebra products from the resurrection principle
     
     Info(   InfoMajorana, 50, "Building resurrection");
+
+    for evals in [[1,2],[2,1],[1,3],[2,3]] do
+        MAJORANA_SingleSolutions(evals, innerproducts, algebraproducts, evecs, setup);
+    od;
 
     for i in setup.orbitreps do        
         for evals in [[1,2],[2,1],[1,3],[2,3]] do  
@@ -1094,8 +1109,8 @@ InstallGlobalFunction( MAJORANA_Resurrection,
                                                                 setup );
                         MAJORANA_Append(conj, mat, vec);
                     od;
-                elif row <> 0 then 
-                    Error("Zero row");
+#                elif row <> 0 then 
+#                    Error("Zero row");
                 fi;
             fi;
         od;
