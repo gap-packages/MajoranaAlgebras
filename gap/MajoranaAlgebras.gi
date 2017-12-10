@@ -960,7 +960,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                     
                     if unknowns = [] then return; fi;
                     
-                    if mat <> [] and Size(mat) > Size(mat[1]) then 
+                    if mat <> [] and (Size(mat) > 8000 or Size(mat) > Size(mat[1])) then 
             
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
                                 
