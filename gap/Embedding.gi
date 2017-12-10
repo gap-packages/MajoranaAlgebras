@@ -81,6 +81,8 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
             conj,
             g,
             aut_emb,
+            im_gp,
+            im_inv,
             list,
             aut;
     
@@ -90,8 +92,13 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
     for g in aut do 
     
         aut_emb := CompositionMapping2(emb, g);
+        
+        im_inv := AsSet(Image(aut_emb, subrep.involutions));
+        im_gp  := Image(aut_emb, subrep.group);
     
-        check := IsSubsetSet(AsSet(rep.involutions), AsSet(Image(aut_emb, subrep.involutions)));
+        check := IsSubsetSet(AsSet(rep.involutions), im_inv); 
+        
+        #and Size(Intersection(rep.involutions, im_gp)) = Size(im_inv);
         
         if check and ForAll(list, i -> MAJORANA_CheckShape(rep, subrep, aut_emb, i)) then 
             return g;
@@ -113,7 +120,7 @@ InstallGlobalFunction( "MAJORANA_CheckShape",
             pos2,
             k;
     
-    if subrep.shape[i][1] in [2,3,4] then 
+    if subrep.shape[i][1] in ['2','3','4'] then 
         x := subrep.setup.pairreps[i];
         
         im1 := Image(aut_emb, subrep.setup.coords[x[1]]);

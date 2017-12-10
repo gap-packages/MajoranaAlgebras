@@ -813,6 +813,64 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     fi;
     
     end);     
+    
+InstallGlobalFunction(MAJORANA_SingleSolutions,
+    
+    function(evals,algebraproducts, evecs, setup)
+    
+    local   pairs, 
+            dim,
+            x,
+            i, j, k, l,
+            beta, gamma,
+            unknowns,
+            orb;
+    
+    pairs := [];
+    dim := Size(setup.coords);
+    
+    for x in setup.orbitreps do 
+        for i in [1..Size(evecs[x][evals[1]])] do 
+            beta := evecs[x][evals[1]][i];
+            for j in [1..Size(evecs[x][evals[2]])] do 
+
+                gamma := evecs[x][evals[2]][j];
+                
+                unknowns := [];
+                
+                for k in [1..dim] do 
+                    if beta[k] <> 0 then 
+                        for l in [1..dim] do 
+                            if gamma[l] <> 0 then 
+                                orb := setup.pairorbit[k][l];
+                            
+                                if algebraproducts[orb] = false then 
+                                    Add(unknowns, [k,l]);
+                                fi;
+                                
+                                if Size(unknowns) > 1 then 
+                                    break;
+                                fi;
+                            fi;                    
+                        od;
+                    fi;
+                    
+                    if Size(unknowns) > 1 then 
+                        break;
+                    fi;    
+                od;
+                
+                if Size(unknowns) = 1 then 
+                    Add(pairs, [x,i,j]);
+                fi;
+                
+            od;
+        od;
+    od;
+    
+    return pairs;
+    
+    end );
 
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
