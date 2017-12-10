@@ -59,6 +59,8 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                         test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, innerproducts, setup);
                                         
                                         if not test in [0, false] then 
+                                            Error("Fusion");
+                                        
                                             Add(errorfusion,[j,a,b,v,w]);
                                         fi;
                                     fi;
@@ -93,6 +95,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                             test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, innerproducts, setup);
                                         
                                             if not test in [0, false] then 
+                                                Error("Fusion");
                                                 Add(errorfusion,[j,a,b,v,w]);
                                             fi;
                                         fi;
@@ -135,6 +138,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                                 test := MAJORANA_InnerProduct(z - x0/4,z - x0/4, innerproducts, setup);
                                         
                                                 if not test in [0, false] then 
+                                                    Error("Fusion");
                                                     Add(errorfusion,[j,a,b,v,w]);
                                                 fi;
                                             
@@ -173,12 +177,12 @@ InstallGlobalFunction(MajoranaAlgebraTest,
  
     fi;
 
-    # Check that all triples obey axiom M1
+    # Check that all triples obey Fusion
 
     error := MAJORANA_AxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
 
     if Size(error)>0 then
-        return ["Algebra does not obey axiom M1", error];
+        return ["Algebra does not obey Fusion", error];
     fi;
 
     # Check that eigenvectors obey the fusion rules
@@ -242,6 +246,8 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                     x := MAJORANA_InnerProduct(u, v, innerproducts, setup);
                     
                     if (x <> false) and (x <> 0) then 
+                    
+                        Error("Orthog");
                         Add(errorortho, [j,0,a,u,v]);
                     fi;
                 od;
@@ -257,6 +263,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                             x := MAJORANA_InnerProduct(v, w, innerproducts, setup);
                             
                             if (x <> false) and (x <> 0) then 
+                                Error("Orthog");
                                 Add(errorortho, [j,a,b,v,w]);
                             fi;
                         od;
@@ -271,13 +278,13 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         
         );
         
-# Checks if bilinear and algebra products obey axiom M1, outputs a list which is empty if they do obey the axiom
+# Checks if bilinear and algebra products obey Fusion, outputs a list which is empty if they do obey the axiom
 
 InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(innerproducts,algebraproducts,list) 
 
-        local   ErrorM1,    # list of indices which do not obey axiom M1
+        local   ErrorM1,    # list of indices which do not obey Fusion
                 j,          # loop over algebra products
                 k,          # loop over setup.coords
                 p,          # second product
@@ -312,6 +319,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                         y := MAJORANA_InnerProduct(algebraproducts[j],w,innerproducts, list);
                         
                         if x <> false and y <> false and x <> y then 
+                            Error("Axiom M1");
                             Add(ErrorM1,[j,k]);
                         fi;
                         
