@@ -846,6 +846,8 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
                             if gamma[k] <> 0 then 
                                 orb := setup.pairorbit[j][k];
                             
+                                if orb < 0 then orb := -orb; fi;
+                            
                                 if algebraproducts[orb] = false then 
                                     Add(indices, [j,k]);
                                 fi;
