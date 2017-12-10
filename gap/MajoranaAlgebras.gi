@@ -899,6 +899,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             gamma,
             pos,
             alpha_mat,
+            nonzero,
             list,
             x,
             y,
@@ -921,6 +922,21 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     for evals in [[1,2],[2,1],[1,3],[2,3]] do
         MAJORANA_SingleSolutions(evals, innerproducts, algebraproducts, evecs, setup);
     od;
+    
+    x := MAJORANA_RemoveKnownAlgProducts(    mat, vec, unknowns, 
+                                        algebraproducts,
+                                        setup );
+    nonzero := [];
+                    
+    for i in [1..Size(x.mat)] do              
+        if ForAny(x.mat[i], y -> y <> 0) then 
+            Add(nonzero,i);
+        fi;
+    od;
+    
+    mat := x.mat{nonzero};
+    vec := x.vec{nonzero};
+    unknowns := x.unknowns;
 
     for i in setup.orbitreps do        
         for evals in [[1,2],[2,1],[1,3],[2,3]] do  
