@@ -885,7 +885,7 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
 
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(innerproducts, algebraproducts, evecs, setup, nullspace)
+    function(innerproducts, algebraproducts, evecs, setup, nullspace, group)
     
     local   dim,
             i,
@@ -1004,14 +1004,16 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     fi;
     
     if unknowns = [] then return; fi;
-     
-    MAJORANA_NullspaceUnknowns(mat, vec, unknowns, algebraproducts, setup, nullspace);
+    
+    if nullspace = [] then return; fi;
+    
+    MAJORANA_NullspaceUnknowns(mat, vec, unknowns, algebraproducts, setup, nullspace, group);
 
     end );
     
 InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
-    function(mat, vec, unknowns, algebraproducts, setup, nullspace)
+    function(mat, vec, unknowns, algebraproducts, setup, nullspace, group)
     
     local   i,
             list,
@@ -1022,10 +1024,12 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             dim;
     
     Info( InfoMajorana, 50, "Building nullspace unknowns" );
-
+    
     dim := Size(setup.coords);
+    
+    x := MAJORANA_Orbits(group, dim, setup);
 
-    for i in [1..dim] do 
+    for i in x.orbitreps do 
     
         list := Filtered(unknowns, x -> i in x);
     
@@ -1500,7 +1504,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
+    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace, rep.group);
     
                                 ## STEP 9: MORE EVECS II ##
 
