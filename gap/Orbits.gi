@@ -1,9 +1,11 @@
  
 InstallGlobalFunction(MAJORANA_Orbits,
 
-    function(G, t, SetUp)
+    function(G, t, setup)
     
     local   gens,
+            conjelts,
+            orbitreps,
             i,
             pnt,
             d,
@@ -18,16 +20,16 @@ InstallGlobalFunction(MAJORANA_Orbits,
             pos;
     
     gens := GeneratorsOfGroup(G);
-    SetUp.conjelts := [1..t]*0;
-    SetUp.orbitreps := [];
+    conjelts := [1..t]*0;
+    orbitreps := [];
     
     for i in [1..t] do 
-        if SetUp.conjelts[i] = 0 then 
+        if conjelts[i] = 0 then 
             
-            Add(SetUp.orbitreps, i);
-            SetUp.conjelts[i] := ();
+            Add(orbitreps, i);
+            conjelts[i] := ();
         
-            pnt := Immutable(SetUp.coords[i]);
+            pnt := Immutable(setup.coords[i]);
             
             d := NewDictionary(pnt, false);
             
@@ -55,19 +57,22 @@ InstallGlobalFunction(MAJORANA_Orbits,
                         AddDictionary(d,q);
                         Add(elts, g);
                         
-                        pos := Position(SetUp.longcoords, q);
-                        pos := SetUp.poslist[pos];
+                        pos := Position(setup.longcoords, q);
+                        pos := setup.poslist[pos];
                         
                         if pos < 0 then pos := -pos; fi;
                         
-                        SetUp.conjelts[pos] := g;
+                        conjelts[pos] := g;
                     fi;
                 od;
             od;
         fi;
     od;
     
-    SetUp.conjelts := DuplicateFreeList(SetUp.conjelts);
+    conjelts := DuplicateFreeList(conjelts);
+    
+    return rec( conjelts := conjelts,
+                orbitreps := orbitreps  );
                         
     end ); 
    

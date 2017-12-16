@@ -365,7 +365,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
         od;
     od;    
 
-    MAJORANA_Orbits(input.group, t, rep.setup);
+    x := MAJORANA_Orbits(input.group, t, rep.setup);
+
+    rep.setup.conjelts := x.conjelts;
+    rep.setup.orbitreps := x.orbitreps;
 
     MAJORANA_Orbitals(input.group, t, rep.setup);
 
