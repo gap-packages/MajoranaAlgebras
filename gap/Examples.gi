@@ -109,6 +109,16 @@ BindGlobal("M11",function()
     end
     );
     
+BindGlobal("3A6",function()
+    local z1,z2,G,T,ex;
+    z1 := (2,6)(4,11)(7,9)(8,13)(10,14)(12,16);;
+    z2 := (1,2,7,4)(3,8,6,10)(5,9,13,12)(11,15)(14,17)(16,18);;
+    G := Group(z1,z2);;
+    T := Filtered(G, x -> Order(x) = 2);;
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);;
+    return  ex;
+    end );
+    
 BindGlobal("25S5", function()
     local a, b, c, C, G, T, ex;
     a := (1,2)(3,4)(5,6)(7,8)(9,10)(11,12) ;;
@@ -140,3 +150,17 @@ BindGlobal("24A5", function()
     return  ex;
     end);
     
+BindGlobal("2wr2", function()
+    local a, b, c, G, T, ex;
+    a := (1,2)(3,4);; 
+    b := (1,3)(2,4)(5,6)(7,8);; 
+    c := (1,5)(2,7);;
+    G := Group(a,b,c);;
+    T := [];
+    Append(T, AsList(ConjugacyClass(G,a)));
+    Append(T, AsList(ConjugacyClass(G,b)));
+    Append(T, AsList(ConjugacyClass(G,c)));
+    Append(T, AsList(ConjugacyClass(G,a*b)));
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return ex;
+    end);

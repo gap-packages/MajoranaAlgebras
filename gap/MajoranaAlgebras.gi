@@ -967,6 +967,28 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                         
                         if Size(unknowns) = 0 then return; fi;
+                        
+                        if false then 
+                        for evals in [[1,2],[2,1],[1,3],[2,3]] do
+                            MAJORANA_SingleSolutions(evals, innerproducts, algebraproducts, evecs, setup);
+                        od;
+                        
+                        y := MAJORANA_RemoveKnownAlgProducts(    mat, vec, unknowns, 
+                                                            algebraproducts,
+                                                            setup );
+                        nonzero := [];
+                                        
+                        for i in [1..Size(y.mat)] do              
+                            if ForAny(y.mat[i], z -> z <> 0) then 
+                                Add(nonzero,i);
+                            fi;
+                        od;
+                        
+                        mat := y.mat{nonzero};
+                        vec := y.vec{nonzero};
+                        unknowns := y.unknowns;
+                        fi;
+                        
                     fi;
                                        
                 od;
@@ -1331,10 +1353,26 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     od;
        
     mat := List(mat, x -> x{unsolved});
+    unknowns := unknowns{unsolved};
+    
+    for x in mat do
+        if Size(Filtered(x, y -> y <> 0)) = 1 then 
+            i := Position(mat,x);
+            if i <> fail then 
+                y := MAJORANA_SolveSingleSolution(   [mat[i],vec[i]], 
+                                                mat, vec, 
+                                                unknowns, 
+                                                algebraproducts, 
+                                                setup);
+                                                
+                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+            fi;
+        fi;
+    od;
     
     return rec( mat := mat, 
                 vec := vec, 
-                unknowns := unknowns{unsolved});
+                unknowns := unknowns);
         
     end );
     
