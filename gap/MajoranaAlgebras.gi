@@ -213,13 +213,13 @@ InstallGlobalFunction(MAJORANA_Append,
 
     function(x,mat,vec)
 
-    local   pos;        # position of first non zero elt of row
+    local   lcm;
+    
+    lcm := _FoldList2(x[1], DenominatorRat, LcmInt);
+    
+    x := x*lcm;
     
     if mat <> [] then 
-        pos := PositionNonZero(x[1]);
-        x[2] := x[2]/x[1][pos];
-        x[1] := x[1]/x[1][pos];
-
         if not x[1] in mat then             
             Add(mat,x[1]);
             Add(vec,x[2]);

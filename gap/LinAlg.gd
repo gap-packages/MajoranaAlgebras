@@ -9,3 +9,5 @@ DeclareGlobalFunction( "MAJORANA_PositiveDefinite" );
 DeclareGlobalFunction( "MAJORANA_NullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_ReversedEchelonForm" );
+
+DeclareGlobalFunction( "_FoldList2" );
