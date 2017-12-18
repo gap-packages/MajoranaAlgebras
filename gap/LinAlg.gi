@@ -1,213 +1,73 @@
-# Takes input matrix, returns a matrix whose rows form a basis of the nullspace of mat
-        
-InstallGlobalFunction(MAJORANA_SolutionMatVecs1,
-    
-    function(mat,vec)
-    
-    local   A,
-            B,
-            C,
-            id,
-            error,
-            m,
-            n,
-            dim,
-            i,
-            j,
-            list,
-            pos_1,
-            pos_2,
-            sol,
-            unsolved;
-    
-    m := Size(mat);
-    n := Size(mat[1]);
-    
-    dim := Size(vec[1]);
-    
-    id := IdentityMat(m);
-    
-    A := NullMat(n,n);
-    B := NullMat(n,dim);
-    C := NullMat(n,m);
-    
-    # Put matrix A into row echelon form
-    
-    for i in [1..n] do
-    
-        list := [];
-        
-        for j in [1..m] do
-            Add(list,mat[j][i]);
-        od;
-        
-        pos_1 := Position(list,1);
-        
-        if pos_1 <> fail then 
-        
-            A[i] := ShallowCopy(mat[pos_1]);
-            B[i] := ShallowCopy(vec[pos_1]);
-            C[i] := ShallowCopy(id[pos_1]);
-                
-            for j in [pos_1 + 1 .. m] do 
-                if mat[j][i] <> 0 then 
-                
-                    mat[j] := mat[j] - mat[pos_1];
-                    vec[j] := vec[j] - vec[pos_1];
-                    id[j] := id[j] - id[pos_1];
-                    
-                    if ForAny(mat[j], x -> x <> 0) then 
-                        pos_2 := PositionNonZero(mat[j]);
-                        
-                        vec[j] := vec[j]/mat[j][pos_2];
-                        id[j]  := id[j]/mat[j][pos_2]; 
-                        mat[j] := mat[j]/mat[j][pos_2]; # change leading elt to 1
-                    fi;
-                fi;
-            od;   
-            
-            mat[pos_1] := [1..n]*0;
-            vec[pos_1] := [1..dim]*0; 
-            id[pos_1] := [1..m]*0;           
-        fi;
-    od;
-    
-    # Check if we can solve system
-    
-    error := [];
-    
-    for i in [1..m] do
-        if ForAll(mat[i], x -> x = 0 ) and ForAny(vec[i], x -> x <> 0) then 
-            Add(error, i);
-        fi;
-    od;
-    
-    if Size(error) >0 then
-        # no solutions
-        return [error,C,mat,vec];
-    fi;
-    
-    Unbind(mat);
-    Unbind(vec);
-    Unbind(C);
-    
-    # solve system
-     
-    sol := [1..n]*0;
-    unsolved := [];
-    
-    Error("Pause 3");
-
-    for i in Reversed([1..n]) do
-        if i in unsolved then
-            
-            for j in [1..i - 1] do
-                if A[j][i] <> 0 then 
-                    Add(unsolved,j);
-                    sol[j] := [];
-                fi;
-            od;
-            
-        elif A[i][i] = 0 then 
-        
-            sol[i] := [];
-            Append(unsolved,[i]);
-            
-            for j in [1..i - 1] do
-                if A[j][i] <> 0 then 
-                    Add(unsolved,j);
-                    sol[j] := [];
-                fi;
-            od;
-            
-        else
-            list:=[];
-            
-            j:= i + 1;
-            
-            sol[i] := B[i];
-            
-            for j in [1 .. i - 1] do
-                if A[j][i] <> 0 then 
-                    B[j] := B[j] - B[i]*A[j][i];
-                    A[j] := A[j] - A[i]*A[j][i];
-                fi;
-            od;
-        fi;
-    od;
-
-    return [sol,unsolved];
-    
-    end );
-    
-    
+ 
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
-    function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
+function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
 
-        local   m,
-                n,
-                lcm,
-                x,
-                res,
-                sol,
-                unsolved,
-                heads,
-                i,
-                j,
-                pos,
-                new_mat,
-                new_vec;
-        
-        m := Size(mat);
-        n := Size(mat[1]);
+    local   m,
+            n,
+            lcm,
+            x,
+            res,
+            sol,
+            unsolved,
+            heads,
+            i,
+            j,
+            k,
+            pos,
+            elm,
+            rowlist;
+    
+    m := Nrows(mat);
+    n := Ncols(mat);
 
-        res := SemiEchelonMatTransformationDestructive(mat);
-        mat := List(res.vectors,ShallowCopy);
-        vec := res.coeffs*vec;
+    res := EchelonMatTransformationDestructive(mat);
+    mat := res.vectors;
+    vec := res.coeffs*vec;
+    
+    sol := [1..n]*0;
+    unsolved := [];
+    rowlist := [];
+    
+    heads := res.heads;
+    
+    for i in Reversed([1 .. n]) do 
+    
+        pos := heads[i];
         
-        sol := [1..n]*0;
-        unsolved := [];
-        new_mat := [];
-        new_vec := [];
-        
-        heads := res.heads;
-        
-        for i in Reversed([1 .. n]) do 
-        
-            pos := heads[i];
-            
-            if pos = 0 then 
-                Add(unsolved,i);   
-                sol[i] := fail;             
-            else
-                for j in [i + 1 .. n] do
-                    if mat[pos][j] <> 0 then 
-                        if j in unsolved then
-                            Add(new_mat,mat[pos]);
-                            Add(new_vec,vec[pos]);
-                            Add(unsolved,i);
-                            break;
-                        else
-                            vec[pos] := vec[pos] - mat[pos][j]*sol[j];
-                            mat[pos][j] := 0;
-                        fi;
+        if pos = 0 then 
+            Add(unsolved,i);   
+            sol[i] := fail;             
+        else
+            for j in [i + 1 .. n] do
+                if mat[pos][j] <> 0 then 
+                    if j in unsolved then
+                        Add(rowlist, pos);
+                        Add(unsolved,i);
+                        break;
+                    else
+                        elm := GetEntry(mat, pos, j);
+                        for k in sol[j]!.indices[1] do 
+                            AddToEntry(vec, pos, k, -elm*GetEntry(sol, j, k));  
+                        od;
+                        SetEntry(mat, pos, j, 0);
                     fi;
-                od; 
-                
-                if not i in unsolved then 
-                    sol[i] := vec[pos];
-                else
-                    sol[i] := fail;
                 fi;
+            od; 
+            
+            if not i in unsolved then 
+                sol[i] := CertainRows(vec, [pos]);
+            else
+                sol[i] := fail;
             fi;
-        od;
-        
-        return rec( solutions := sol,
-                    mat := new_mat,
-                    vec := new_vec  );
-                    
-        end );
+        fi;
+    od;
+    
+    return rec( solutions := sol,
+                mat := CertainRows(mat, rowlist),
+                vec := CertainRows(vec, rowlist)  );
+                
+    end );
     
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
