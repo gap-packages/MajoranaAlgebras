@@ -287,47 +287,43 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 pos,
                 dim;    # size of vectors 
 
-        dim := Size(u);
-        vec := [1..dim]*0;
+        dim := Nrows(u);
+        vec := SparseZeroMatrix(1, dim, Rationals);
 
         elts := [];
         vecs := [];
 
-        for i in [1..dim] do
-            if u[dim - i + 1] <> 0 then 
-                for j in [1..dim] do
-                    if v[dim - j + 1] <> 0 then 
-                    
-                        k := list.pairorbit[dim - i + 1][dim - j + 1];
-                        
-                        if k > 0 then 
-                            sign := 1;
-                        else
-                            sign := -1;
-                            k := -k;
-                        fi;
+        for i in Reversed([1..Size(u!.indices[1])]) do
+            for j in Reversed([1..Size(v!.indices[1])]) do
+                
+                k := list.pairorbit[u!.indices[i]][v!.indices[j]];
+                
+                if k > 0 then 
+                    sign := 1;
+                else
+                    sign := -1;
+                    k := -k;
+                fi;
 
-                        x := algebraproducts[k];
-                        
-                        if x <> false then
-                            
-                            g := list.pairconj[dim - i + 1][dim - j + 1][1];
-                            
-                            pos := Position(elts,g);
-                            
-                            if pos <> fail then 
-                                vecs[pos] := vecs[pos] + sign*u[dim - i + 1]*v[dim - j + 1]*x;
-                            else
-                                Add(elts,g);
-                                Add(vecs,sign*u[dim - i + 1]*v[dim - j + 1]*x);
-                            fi;
-                        else
-                            # cannot calculate product
-                            return false;
-                        fi;
+                x := algebraproducts[k];
+                
+                if x <> false then
+                    
+                    g := list.pairconj[u!.indices[i]][v!.indices[j]];
+                    
+                    pos := Position(elts,g);
+                    
+                    if pos <> fail then 
+                        vecs[pos] := vecs[pos] + sign*u!.entries[i]*v!.entries[j]*x;
+                    else
+                        Add(elts,g);
+                        Add(vecs,sign*u!.entries[i]*v!.entries[j]*x);
                     fi;
-                od;
-            fi;
+                else
+                    # cannot calculate product
+                    return false;
+                fi;
+            od;
         od;
         
         for i in [1..Size(elts)] do 
