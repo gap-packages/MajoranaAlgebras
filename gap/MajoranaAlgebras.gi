@@ -54,24 +54,22 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     dim := Size(setup.coords);
     list := [1..dim];
                     
-    for i in [1..dim] do
-        if v[i] <> 0 then 
-            for j in list do 
-                k :=  setup.pairorbit[i][j];
-               
-                if k > 0 then 
-                    if algebraproducts[k] = false then 
-                        Add(bad,j);
-                        list := Difference(list,[j]);
-                    fi;
-                else
-                    if algebraproducts[-k] = false then 
-                        Add(bad,j);
-                        list := Difference(list,[j]);
-                    fi;
-                fi;                
-            od;
-        fi;
+    for i in v!.indices[1] do
+        for j in list do 
+            k :=  setup.pairorbit[i][j];
+           
+            if k > 0 then 
+                if algebraproducts[k] = false then 
+                    Add(bad,j);
+                    list := Difference(list,[j]);
+                fi;
+            else
+                if algebraproducts[-k] = false then 
+                    Add(bad,j);
+                    list := Difference(list,[j]);
+                fi;
+            fi;                
+        od;
     od;
 
     Sort(bad);
