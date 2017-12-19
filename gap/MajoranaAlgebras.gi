@@ -1408,7 +1408,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     for i in [1..Size(sol.solutions)] do
         if sol.solutions[i] <> fail then
             x := UnknownInnerProducts[i]; 
-            innerproducts[x] := sol.solutions[i][1];
+            innerproducts[x] := sol.solutions[i]!.entries[1][1];
         fi;
     od;
     
