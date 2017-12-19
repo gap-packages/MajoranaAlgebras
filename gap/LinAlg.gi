@@ -40,7 +40,7 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
             sol[i] := fail;             
         else
             for j in [i + 1 .. n] do
-                if mat[pos][j] <> 0 then 
+                if GetEntry(mat, pos, j) <> 0 then 
                     if j in unsolved then
                         Add(rowlist, pos);
                         Add(unsolved,i);
