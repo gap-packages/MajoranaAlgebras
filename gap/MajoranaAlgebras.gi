@@ -152,7 +152,7 @@ function(innerproducts, algebraproducts, evecs, setup)
     
     for i in setup.orbitreps do 
     
-        if IsMutable(rep.evecs[i]) then 
+        if IsMutable(evecs[i]) then 
 
             new := [ [], [], [] ];
             
@@ -1428,7 +1428,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
         if ForAll(innerproducts, x -> x <> false) then 
             gram := MAJORANA_FillGramMatrix(innerproducts, setup);
-            null := KernelMatDestructive(gram).relations;; 
+            null := KernelMat(gram).relations;; 
         fi;
         
         return null;
@@ -1487,7 +1487,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 Info(   InfoMajorana, 50, 
                         STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
                         
-                evecs[i][ev] := KernelMatDestructive( mat - SparseIdentityMatrix(dim, dim, Rationals)*table[ev]);
+                evecs[i][ev] := KernelMat( mat - SparseIdentityMatrix(dim, dim, Rationals)*table[ev]).relations;
             od;
         fi;
     od;
@@ -1536,7 +1536,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
         if IsMutable(rep.evecs[i]) then 
             evecs := UnionOfRows(   rep.evecs[i][1], rep.evecs[i][2], 
                                     rep.evecs[i][3], rep.nullspace);
-            evecs := EchelonMatDestructive(evecs)
+            evecs := EchelonMatDestructive(evecs).vectors;
     
             if Nrows(evecs) = dim - 1 then 
                 MakeImmutable(rep.evecs[i]);
