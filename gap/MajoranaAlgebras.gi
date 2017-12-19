@@ -226,12 +226,15 @@ InstallGlobalFunction(MAJORANA_Append,
 
     local   lcm;
     
-    lcm := _FoldList2(x[1]!.entries[1], DenominatorRat, LcmInt);
+    if not x[1]!.entries[1] in mat!.entries then  
     
-    x := x*lcm;
-    
-    UnionOfRows(mat,x[1]);
-    UnionOfRows(vec,x[2]);
+        lcm := _FoldList2(x[1]!.entries[1], DenominatorRat, LcmInt);
+        
+        x := x*lcm;
+        
+        UnionOfRows(mat,x[1]);
+        UnionOfRows(vec,x[2]);
+    fi;
     
     end); 
     
@@ -1425,7 +1428,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
         if ForAll(innerproducts, x -> x <> false) then 
             gram := MAJORANA_FillGramMatrix(innerproducts, setup);
-            null := NullspaceMat(gram);; 
+            null := KernelMatDestructive(gram).relations;; 
         fi;
         
         return null;
@@ -1454,7 +1457,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
     for i in setup.orbitreps do
         
-        if IsMutable(evecs[i][1]) then 
+        if true then 
         
             a := [1..dim]*0; a[i] := 1;
         
