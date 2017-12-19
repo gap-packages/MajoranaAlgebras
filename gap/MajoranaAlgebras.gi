@@ -233,35 +233,43 @@ InstallGlobalFunction(MAJORANA_Append,
     
 InstallGlobalFunction( MAJORANA_ConjugateVector, 
 
-    function(v,g,setup)
+    function(mat,g,setup)
     
-    local   i,              # loop over vector
-            dim,            # length of vector
-            vec,            # output vector
+    local   i,
+            j,
+            nrows,
+            ncols,
+            indices,
+            entries,
+            res,            
             pos;
     
     if g <> () then 
         
-        dim := Size(v);
+        nrows := Nrows(mat);
+        ncols := Ncols(mat);
         
-        vec := [1..dim]*0;
+        indices := IndicesOfSparseMatrix(mat);
+        entries := EntriesOfSparseMatrix(mat);
         
-        for i in [1..dim] do 
-            if v[i] <> 0 then 
-            
-                pos := g[i];
+        res := SparseZeroMatrix(nrows, ncols, Rationals);
+        
+        for i in [1..nrows] do 
+            for j in [1..Size(indices[i])] do 
                 
+                pos := g[indices[i][j]];
+        
                 if pos < 0 then 
-                    vec[-pos] := - v[i]; 
+                    SetEntry(res, i, -pos, -entries[i][j]); 
                 else
-                    vec[pos] := v[i];
+                    SetEntry(res, i, pos, entries[i][j]);
                 fi;
-            fi;
+            od;
         od;
         
-        return vec;
+        return res;
     else
-        return v;
+        return mat;
     fi;
     
     end );
