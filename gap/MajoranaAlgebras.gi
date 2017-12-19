@@ -703,54 +703,50 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     
     dim := Size(setup.coords);
     
-    row := [1..Size(unknowns)]*0;
-    sum := [1..dim]*0;
+    row := SparseZeroMatrix(1, Size(unknowns), Rationals);
+    sum := SparseZeroMatrix(1, dim, Rationals);
     
     elts := [];
     vecs := [];
     
-    for i in [1..dim] do
-        if u[i] <> 0 then
-            for j in [1..dim] do
-                if v[j] <> 0 then
+    for i in [1..Size(u!.indices[1])] do
+        for j in [1..Size(v!.indices[1])] do
+            
+            k := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+            
+            if k > 0 then 
+                sign := 1;
+            else
+                sign := -1;
+                k := -k;
+            fi;
+            
+            x := algebraproducts[k];
+            
+            if x <> false then 
+                                        
+                g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]];
                 
-                    k := setup.pairorbit[i][j];
-                    
-                    if k > 0 then 
-                        sign := 1;
-                    else
-                        sign := -1;
-                        k := -k;
-                    fi;
-                    
-                    x := algebraproducts[k];
-                    
-                    if x <> false then 
-                                                
-                        g := setup.pairconj[i][j][1];
-                        
-                        pos := Position(elts,g);
-                        
-                        if pos <> fail then 
-                            vecs[pos] := vecs[pos] - sign*u[i]*v[j]*x;
-                        else
-                            Add(elts,g);
-                            Add(vecs,- sign*u[i]*v[j]*x);
-                        fi;
-                    else
-                    
-                        if i < j then
-                            l := [i,j];
-                        else
-                            l := [j,i];
-                        fi;
-                        
-                        pos := Position(unknowns,l);
-                        row[pos] := row[pos] + u[i]*v[j]; 
-                    fi;
+                pos := Position(elts,g);
+                
+                if pos <> fail then 
+                    vecs[pos] := vecs[pos] - sign*u!.entries[1][i]*v!.entries[1][j]*x;
+                else
+                    Add(elts,g);
+                    Add(vecs,- sign*u!.entries[1][i]*v!.entries[1][j]*x);
                 fi;
-            od;
-        fi;
+            else
+            
+                if i < j then
+                    l := [i,j];
+                else
+                    l := [j,i];
+                fi;
+                
+                pos := Position(unknowns,l);
+                AddToEntry(row, 1, pos, u!.entries[1][i]*v!.entries[1][j]); 
+            fi;
+        od;
     od;
     
     for i in [1..Size(elts)] do 
