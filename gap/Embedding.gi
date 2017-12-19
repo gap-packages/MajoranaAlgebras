@@ -275,35 +275,33 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
             im,
             res,
             sign,
-            pos;
+            pos,
+            indices,
+            entries;
     
     dim := Size(rep.setup.coords);
     
-    res := [1..dim]*0;
+    res := SparseZeroMatrix(1, dim, Rationals);
     
-    for i in [1..Size(v)] do 
+    indices := IndicesOfSparseMatrix(v)[1];
+    entries := EntriesOfSparseMatrix(v)[1];
     
-        if v[i] <> 0 then 
+    for i in [1..Size(indices)] do 
     
-            sign := 1;;
-            
-            im := Image(emb, subrep.setup.coords[i]);
-            
-            pos := Position(rep.setup.longcoords, im);
-            
-            pos := rep.setup.poslist[pos];
-            
-            if pos < 0 then 
-                sign := -sign;
-                pos := -pos;
-            fi;
-            
-            if res[pos] <> 0 then 
-                Error("embedding");
-            fi;
-            
-            res[pos] := sign*v[i];
+        sign := 1;;
+        
+        im := Image(emb, subrep.setup.coords[indices[i]]);
+        
+        pos := Position(rep.setup.longcoords, im);
+        
+        pos := rep.setup.poslist[pos];
+        
+        if pos < 0 then 
+            sign := -sign;
+            pos := -pos;
         fi;
+        
+        SetEntry(res, 1, pos, sign*entries[i]);
     od;
     
     return res;
