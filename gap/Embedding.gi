@@ -233,9 +233,9 @@ InstallGlobalFunction( "MAJORANA_Embed",
         
     od;
     
-    for v in subrep.nullspace do 
-        Add(rep.nullspace, MAJORANA_ImageVector( v, emb, rep, subrep));
-    od;
+    im1 := MAJORANA_ImageVector( subrep.nullspace, emb, rep, subrep);
+
+    UnionOfRows(rep.nullspace, im1);
     
     for i in subrep.setup.orbitreps do 
         
@@ -253,14 +253,11 @@ InstallGlobalFunction( "MAJORANA_Embed",
         perm := MAJORANA_FindVectorPermutation(g, rep.setup); 
         
         for j in [1..3] do 
+
+            im2 := MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep);
+            im2 := MAJORANA_ConjugateVector(im2, perm, rep.setup);
             
-            for v in subrep.evecs[i][j] do 
-                
-                im2 := MAJORANA_ImageVector(v, emb, rep, subrep);
-                im2 := MAJORANA_ConjugateVector(im2, perm, rep.setup);
-                
-                Add(rep.evecs[pos1][j], im2);
-            od;
+            UnionOfRows(rep.evecs[pos1][j], im2);
         od;
     od;    
     
@@ -268,40 +265,45 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
 InstallGlobalFunction( "MAJORANA_ImageVector",
 
-    function(v, emb, rep, subrep)
+    function(mat, emb, rep, subrep)
     
-    local   dim,
-            i,
+    local   i,
+            j,
             im,
             res,
             sign,
             pos,
+            nrows,
+            ncols,
             indices,
             entries;
     
-    dim := Size(rep.setup.coords);
+    nrows := Nrows(mat);
+    ncols := Ncols(mat);
     
-    res := SparseZeroMatrix(1, dim, Rationals);
+    res := SparseZeroMatrix(nrows, ncols, Rationals);
     
-    indices := IndicesOfSparseMatrix(v)[1];
-    entries := EntriesOfSparseMatrix(v)[1];
+    indices := IndicesOfSparseMatrix(mat);
+    entries := EntriesOfSparseMatrix(mat);
     
-    for i in [1..Size(indices)] do 
+    for i in [1..nrows] do 
+        for j in [1..Size(indices[i])] do 
     
-        sign := 1;;
-        
-        im := Image(emb, subrep.setup.coords[indices[i]]);
-        
-        pos := Position(rep.setup.longcoords, im);
-        
-        pos := rep.setup.poslist[pos];
-        
-        if pos < 0 then 
-            sign := -sign;
-            pos := -pos;
-        fi;
-        
-        SetEntry(res, 1, pos, sign*entries[i]);
+            sign := 1;;
+            
+            im := Image(emb, subrep.setup.coords[indices[i][j]]);
+            
+            pos := Position(rep.setup.longcoords, im);
+            
+            pos := rep.setup.poslist[pos];
+            
+            if pos < 0 then 
+                sign := -sign;
+                pos := -pos;
+            fi;
+            
+            SetEntry(res, i, pos, sign*entries[i][j]);
+        od;
     od;
     
     return res;
