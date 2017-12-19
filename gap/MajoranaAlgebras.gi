@@ -219,19 +219,12 @@ InstallGlobalFunction(MAJORANA_Append,
 
     local   lcm;
     
-    lcm := _FoldList2(x[1], DenominatorRat, LcmInt);
+    lcm := _FoldList2(x[1]!.entries, DenominatorRat, LcmInt);
     
     x := x*lcm;
     
-    if mat <> [] then 
-        if not x[1] in mat then             
-            Add(mat,x[1]);
-            Add(vec,x[2]);
-        fi;
-    else
-        Add(mat,x[1]);
-        Add(vec,x[2]);
-    fi;
+    UnionOfRows(mat,x[1]);
+    UnionOfRows(vec,x[2]);
     
     end); 
     
