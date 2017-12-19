@@ -209,10 +209,8 @@ function(innerproducts, algebraproducts, evecs, setup)
         
             for j in [1..3] do 
                 evecs[i][j] := UnionOfRows(evecs[i][j], new[j]);
-                if false then 
                 if evecs[i][j] <> [] then 
-                    evecs[i][j] := ShallowCopy(BaseMat(evecs[i][j]));
-                fi;
+                    evecs[i][j] := EchelonMatDestructive(evecs[i][j]).vectors;
                 fi;
             od;
         fi;        

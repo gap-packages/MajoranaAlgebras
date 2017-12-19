@@ -402,7 +402,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_DihedralProducts(input.involutions, rep);
 
-    if false then 
     for i in rep.setup.orbitreps do
         for j in [1..3] do 
             if rep.evecs[i][j] <> [] then 
@@ -410,7 +409,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
             fi;
         od; 
     od;
-    fi;
     
     return rep;
     
