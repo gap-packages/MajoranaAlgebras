@@ -1459,37 +1459,36 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
         
         if true then 
         
-            a := [1..dim]*0; a[i] := 1;
+            a := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
         
-            mat := [];
+            mat := SparseZeroMatrix(dim, dim, Rationals);
 
             for j in [1..dim] do
             
-                b := [1..dim]*0; b[j] := 1;
+                b := SparseMatrix(1, dim [[j]], [[1]], Rationals);
                 
                 x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
                 
                 if x <> false then
-                    Add(mat,x);
+                    mat!.indices[j] := x!.indices[1];
+                    mat!.entries[j] := x!.entries[1];
                 else
                     mat := [];
                     break;
                 fi;
             od;
 
-            if mat <> [] then 
-            
-                list := List(mat[dim], x -> DenominatorRat(x));
-                d := Maximum(list);
-            
-                for ev in [1..3] do
-                 
-                    Info(   InfoMajorana, 50, 
-                            STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
-                            
-                    evecs[i][ev] := NullspaceMat(d*(mat - IdentityMat(dim)*table[ev]));
-                od;
+            if mat = [] then 
+                return;
             fi;
+            
+            for ev in [1..3] do
+             
+                Info(   InfoMajorana, 50, 
+                        STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
+                        
+                evecs[i][ev] := KernelMatDestructive( mat - SparseIdentityMatrix(dim, dim, Rationals)*table[ev]);
+            od;
         fi;
     od;
     
