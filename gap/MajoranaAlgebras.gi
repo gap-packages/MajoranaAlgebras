@@ -1258,17 +1258,17 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
 
     function(x, mat, vec, unknowns, algebraproducts, setup) 
     
-    local   pos, 
+    local   elm, 
             y,
             nonzero,
             i;
             
     Info( InfoMajorana, 60, "Solved a single solution");
     
-    pos := PositionNot(x[1],0); 
-    x := x/x[1][pos];
+    elm := x[1]!.entries[1][1]; 
+    x := x/elm;
     
-    MAJORANA_RecordSolution(    x[2], unknowns[pos],
+    MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.entries[1][1]],
                                 algebraproducts,
                                 setup );
     
@@ -1277,14 +1277,14 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
                                         setup );
     nonzero := [];
                     
-    for i in [1..Size(y.mat)] do              
-        if ForAny(y.mat[i], y -> y <> 0) then 
+    for i in [1..Nrows(y.mat)] do              
+        if y.mat!.indices[i] = [] then 
             Add(nonzero,i);
         fi;
     od;
     
-    y.mat := y.mat{nonzero};
-    y.vec := y.vec{nonzero};
+    y.mat := CertainRows(y.mat, nonzero);
+    y.vec := CertainRows(y.vec, nonzero);
                                         
     return rec( mat := y.mat,
                 vec := y.vec,
