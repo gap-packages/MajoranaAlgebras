@@ -389,7 +389,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     for j in [1..t] do
         if j in rep.setup.orbitreps then
             for k in [1..3] do
-                rep.evecs[j][k] := [];
+                rep.evecs[j][k] := SparseZeroMatrix(1, dim, Rationals);
             od;
         else
             for k in [1..3] do
@@ -402,14 +402,16 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_DihedralProducts(input.involutions, rep);
 
+    if false then 
     for i in rep.setup.orbitreps do
         for j in [1..3] do 
             if rep.evecs[i][j] <> [] then 
-                rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
+                rep.evecs[i][j] := EchelonMatDestructive(rep.evecs[i][j]).vectors;
             fi;
         od; 
     od;
-
+    fi;
+    
     return rep;
     
     end );
@@ -418,14 +420,9 @@ InstallGlobalFunction(MAJORANA_MakeVector,
 
     function(pos,vals,dim)
     
-    local   vec,
-            i;
+    local   vec;
     
-    vec := [1..dim]*0;
-    
-    for i in [1..Size(pos)] do 
-        vec[pos[i]] := vals[i];
-    od;
+    vec := SparseMatrix(1, dim, [pos], [vals], Rationals); 
     
     return vec;
     
@@ -539,18 +536,18 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     
                     vals := [-1/4, 1, 1];
                     
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
                     
                     vals := [0, 1, -1];
 
-                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][2] := UnionOfRows(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
 
                 elif rep.shape[x] = ['2','B'] then
                 
                     pos := [j];
                     vals := [1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                 elif rep.shape[x] = ['3','A'] then
                 
@@ -561,15 +558,15 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [-10/27, 32/27, 32/27, 1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
                     
                     vals := [-8/45, -32/45, -32/45, 1];
 
-                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][2] := UnionOfRows(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
                 elif rep.shape[x] = ['3','C'] then
                 
@@ -579,11 +576,11 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [-1/32, 1, 1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
                 elif rep.shape[x] = ['4','A'] then
                     
@@ -594,15 +591,15 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [-1/2, 2, 2, 1, 1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [-1/3, -2/3, -2/3, -1/3, 1]; 
 
-                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][2] := UnionOfRows(rep.evecs[i][2], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1, 0, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
                 elif rep.shape[x] = ['4','B'] then
                     
@@ -613,11 +610,11 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     
                     vals := [-1/32, 1, 1, 1/8, -1/8];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos,vals,dim));
 
                     vals := [0, 1, -1, 0, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos,vals,dim));
 
                 elif rep.shape[x] = ['5','A'] then
                 
@@ -638,23 +635,23 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [3/512, -15/128, -15/128, -1/128, -1/128, sign*1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [-3/512, 1/128, 1/128, 15/128, 15/128, sign*1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [0, 1/128, 1/128, -1/128, -1/128, sign*1];
 
-                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][2] := UnionOfRows(rep.evecs[i][2], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [0, 1, -1, 0, 0, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [0, 0, 0, 1, -1, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
 
                 elif rep.shape[x] = ['6','A'] then
 
@@ -668,19 +665,19 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
                     vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
 
-                    Add(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][1] := UnionOfRows(rep.evecs[i][1], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [-8/45, 0, 0, -32/45, -32/45, -32/45, 32/45, 1];
 
-                    Add(rep.evecs[i][2], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][2] := UnionOfRows(rep.evecs[i][2], MAJORANA_MakeVector(pos, vals, dim));
                     
                     vals := [0, 1, -1, 0, 0, 0, 0, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
 
                     vals := [0, 0, 0, 1, -1, 0, 0, 0];
 
-                    Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                    rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
                     
                     # put in products of 2A and 3A axes
                     
@@ -713,7 +710,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 
                 vals := [1,-sign*1];
                 
-                Add(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
+                rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], MAJORANA_MakeVector(pos, vals, dim));
             fi;
         od;
     od;
