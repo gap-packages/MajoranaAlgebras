@@ -226,7 +226,7 @@ InstallGlobalFunction(MAJORANA_Append,
 
     local   lcm;
     
-    lcm := _FoldList2(x[1]!.entries, DenominatorRat, LcmInt);
+    lcm := _FoldList2(x[1]!.entries[1], DenominatorRat, LcmInt);
     
     x := x*lcm;
     
@@ -435,35 +435,31 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             
     dim := Size(setup.coords);
             
-    sum := 0;
-    row := [1..Size(UnknownInnerProducts)]*0;
+    sum := SparseZeroMatrix(1, 1, Rationals);
+    row := SparseZeroMatrix(1, Size(UnknownInnerProducts), Rationals);
 
-    for i in [1..dim] do
-        if u[i] <> 0 then
-            for j in [1..dim] do
-                if v[j] <> 0 then 
-                
-                    m := setup.pairorbit[i][j];
-                    
-                    if m > 0 then 
-                        sign := 1;
-                    else
-                        sign := -1;
-                        m := -m;
-                    fi;
+    for i in [1..Size(u!.indices[1])] do
+        for j in [1..Size(v!.indices[1])] do
+            
+            m := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+            
+            if m > 0 then 
+                sign := 1;
+            else
+                sign := -1;
+                m := -m;
+            fi;
 
-                    if innerproducts[m] <> false then
-                        sum := sum - sign*u[i]*v[j]*innerproducts[m];
-                    else
-                        pos := Position(UnknownInnerProducts,m);
-                        row[pos] := row[pos] + sign*u[i]*v[j];
-                    fi;
-                fi;
-            od;
-        fi;
+            if innerproducts[m] <> false then
+                AddToEntry(sum, 1, 1, - sign*u!.entries[1][i]*v!.entries[1][j]*innerproducts[m]);
+            else
+                pos := Position(UnknownInnerProducts,m);
+                AddToEntry(row, 1, pos, sign*u!.entries[1][i]*v!.entries[1][j]);
+            fi;
+        od;
     od;
 
-    return [row,[sum]];
+    return [row,sum];
 
     end );
     
@@ -472,8 +468,9 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
     function(evecs,innerproducts, setup)
     
     local   i,          # loop over T
+            j, 
+            k,
             ev,         # loop over eigenvalues
-            k,          # loop over eigenvalues
             evecs_a,    #
             evecs_b,    #
             u,
@@ -483,9 +480,6 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
             mat,        # matrix of unknown values
             vec,        # vector of known values   
             unknowns;     
-            
-    mat := [];
-    vec := [];
     
     dim := Size(setup.coords);
     
@@ -495,26 +489,32 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
         return;
     fi; 
     
+    mat := SparseZeroMatrix(1, Size(unknowns), Rationals);
+    vec := SparseZeroMatrix(1, 1, Rationals);
+    
     for i in setup.orbitreps do        
         for ev in Combinations([0..3],2) do  
             if ev[1] = 0 then 
-                u := [1..dim]*0; u[i] := 1;
-                evecs_a := [u];  
+                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals); 
+                evecs_a := u;  
             else
                 evecs_a := evecs[i][ev[1]];
             fi;
             
             evecs_b := evecs[i][ev[2]];
                 
-            for u in evecs_a do
-                for v in evecs_b do
+            for j in [1..Nrows(evecs_a)] do
+                for k in [1..Nrows(evecs_b)] do
+
+                    u := CertainRows(evecs_a, [j]);
+                    v := CertainRows(evecs_b, [k]);
 
                     x := MAJORANA_SeparateInnerProduct( u, v,
                                                         unknowns,
                                                         innerproducts,
                                                         setup);
 
-                    if ForAny(x[1], y -> y <> 0) then
+                    if ForAny(x[1]!.indices[1], y -> y <> []) then
                         MAJORANA_Append(x, mat, vec);
                     fi;
                     
