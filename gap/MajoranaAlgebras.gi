@@ -1268,7 +1268,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     elm := x[1]!.entries[1][1]; 
     x := x/elm;
     
-    MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.entries[1][1]],
+    MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.indices[1][1]],
                                 algebraproducts,
                                 setup );
     
@@ -1327,12 +1327,13 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     local   unsolved,
             i,
             j,
+            elm,
             x,
             y,
             sign,
             g,
-            prod,
-            nonzero;
+            new,
+            prod;
 
     unsolved := [];
     
@@ -1356,32 +1357,35 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             g := setup.pairconj[x[1]][x[2]][1];
             
             prod := MAJORANA_ConjugateVector(prod,g,setup);
-                
-            for j in [1..Size(mat)] do 
-                if mat[j][i] <> 0 then 
-                    vec[j] := vec[j] - sign*mat[j][i]*prod;
+            
+            new := SparseZeroMatrix(Nrows(vec), Ncols(vec), Rationals);
+            
+            for j in [1..Nrows(vec)] do 
+                elm := GetEntry(mat, j, i);
+                if elm <> 0 then
+                    vec!.entries := -sign*elm*prod!.entries;
                 fi;
-            od; 
+            od;
+            
+            vec := vec + new;
+            
         else
             Add(unsolved,i);
         fi;
     od;
        
-    mat := List(mat, x -> x{unsolved});
+    mat := CertainColumns(mat, unsolved);
     unknowns := unknowns{unsolved};
     
-    for x in mat do
-        if Size(Filtered(x, y -> y <> 0)) = 1 then 
-            i := Position(mat,x);
-            if i <> fail then 
-                y := MAJORANA_SolveSingleSolution(   [mat[i],vec[i]], 
-                                                mat, vec, 
-                                                unknowns, 
-                                                algebraproducts, 
-                                                setup);
-                                                
-                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-            fi;
+    for i in [1..Nrows(mat)] do
+        if Size(mat!.indices[i]) = 1 then
+            y := MAJORANA_SolveSingleSolution(   [mat[i],vec[i]], 
+                                            mat, vec, 
+                                            unknowns, 
+                                            algebraproducts, 
+                                            setup);
+                                            
+            mat := y.mat; vec := y.vec; unknowns := y.unknowns;
         fi;
     od;
     
