@@ -514,7 +514,7 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
                                                         innerproducts,
                                                         setup);
 
-                    if ForAny(x[1]!.indices[1], y -> y <> []) then
+                    if x[1]!.indices[1] <> [] then
                         MAJORANA_Append(x, mat, vec);
                     fi;
                     
@@ -523,7 +523,7 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
         od;
     od;
     
-    if mat <> [] then 
+    if Nrows(mat) > 1 then 
         MAJORANA_SolutionInnerProducts(mat,vec, unknowns, innerproducts);
     fi;        
 
@@ -553,12 +553,11 @@ function(innerproducts, algebraproducts, evecs, setup)
     dim := Size(setup.coords);
     t := Size(evecs);
     
-    table := [0, 1/4, 1/32];
-    
-    mat := [];
-    vec := [];
-    
+    table := [0, 1/4, 1/32];    
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(algebraproducts,setup);
+    
+    mat := SparseZeroMatrix(1, Size(unknowns), Rationals);
+    vec := SparseZeroMatrix(1, dim, Rationals);
     
     Info( InfoMajorana, 50, "Building eigenvector unknowns");
     
@@ -567,20 +566,20 @@ function(innerproducts, algebraproducts, evecs, setup)
         list := Filtered(unknowns, x -> i in x);
     
         if list <> [] then 
-        
-            list := Difference(DuplicateFreeList(Flat(list)), [i]);
          
             for ev in [1..3] do 
                 
-                u := [1..dim]*0; u[i] := 1;
+                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
                 
-                for v in evecs[i][ev] do
+                for j in [1..Nrows(evecs[i][ev])] do
+                    
+                    v := CertainRows(evecs[i][ev], [j]);
                     
                     x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                     
                     x[2] := x[2] + table[ev]*v;
                     
-                    if Size(Positions(x[1], 0)) = Size(x[1]) - 1 then 
+                    if Size(x[1]!.indices[1]) = 1 then 
                         y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
                                                         algebraproducts,
                                                         setup);
@@ -589,7 +588,7 @@ function(innerproducts, algebraproducts, evecs, setup)
                                                         
                         if unknowns = [] then return; fi;
                         
-                    elif ForAny(x[1], y -> y <> 0) then 
+                    elif x[1]!.indices <> [] then 
                         MAJORANA_Append(x, mat, vec);                    
                     fi;                
                 od;
