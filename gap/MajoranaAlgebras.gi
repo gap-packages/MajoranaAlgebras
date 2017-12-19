@@ -823,7 +823,7 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
     
     local   dim,
             x,
-            i, j, k, l,
+            i, j, k, l, m,
             alpha, beta, gamma,
             unknowns,
             indices,
@@ -833,29 +833,28 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
     dim := Size(setup.coords);
     
     for i in setup.orbitreps do 
-        for beta in evecs[i][evals[2]] do 
-            for gamma in evecs[i][evals[1]] do 
+        for j in [1..Nrows(evecs[i][evals[2]])] do 
+            for k in [1..Nrows(evecs[i][evals[1]])] do 
+                
+                beta := CertainRows(evecs[i][evals[2]], [j]);
+                gamma := CertainRows(evecs[i][evals[1]], [k]);
                 
                 indices := [];
                 
-                for j in [1..dim] do 
-                    if beta[j] <> 0 then 
-                        for k in [1..dim] do 
-                            if gamma[k] <> 0 then 
-                                orb := setup.pairorbit[j][k];
-                            
-                                if orb < 0 then orb := -orb; fi;
-                            
-                                if algebraproducts[orb] = false then 
-                                    Add(indices, [j,k]);
-                                fi;
-                                
-                                if Size(indices) > 1 then 
-                                    break;
-                                fi;
-                            fi;                    
-                        od;
-                    fi;
+                for l in beta!.indices[1] do 
+                    for m in gamma!.indices[1] do 
+                        orb := setup.pairorbit[l][m];
+                    
+                        if orb < 0 then orb := -orb; fi;
+                    
+                        if algebraproducts[orb] = false then 
+                            Add(indices, [l,m]);
+                        fi;
+                        
+                        if Size(indices) > 1 then 
+                            break;
+                        fi;                
+                    od;
                     
                     if Size(indices) > 1 then 
                         break;
@@ -866,10 +865,10 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
                 
                     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(algebraproducts, setup);
                 
-                    alpha_mat := [];
+                    alpha_mat := SparseZeroMatrix(1, dim, Rationals);
                     
                     for alpha in evecs[i][evals[1]] do                             
-                        Add(alpha_mat, alpha - beta);                        
+                        alpha_mat := UnionOfRows(alpha_mat, alpha - beta);                        
                     od;
                 
                     MAJORANA_Resurrection(i, alpha_mat, beta, gamma, evals, [], [], unknowns, innerproducts, algebraproducts, setup, true);
