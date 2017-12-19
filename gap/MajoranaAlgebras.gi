@@ -105,20 +105,20 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
         
         if y <> false then 
-            UnionOfRows(new[1], x - (1/4)*u*y);
+            new[1] := UnionOfRows(new[1], x - (1/4)*u*y);
         fi;
     elif evals = [3,3] then 
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
         z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
         
         if y <> false and z <> false then 
-            UnionOfRows(new[2], z - (1/32)*u*y);
-            UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
+            new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
+            new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
         elif y <> false then 
             UnionOfRows(other_mat, x - (1/32)*u*y);
         fi;  
     else
-        UnionOfRows(new[pos],x);
+        new[pos] := UnionOfRows(new[pos],x);
     fi;
     
     end );
@@ -202,13 +202,13 @@ function(innerproducts, algebraproducts, evecs, setup)
                     b := CertainRows(null, [j])*other_mat;
                 
                     z := MAJORANA_AlgebraProduct(u,b,algebraproducts, setup);
-                    UnionOfRows(new[2], z);
-                    UnionOfRows(new[1], b - 4*z);
+                    new[2] := UnionOfRows(new[2], z);
+                    new[1] := UnionOfRows(new[1], b - 4*z);
                 od;
             fi;
         
             for j in [1..3] do 
-                UnionOfRows(evecs[i][j], new[j]);
+                evecs[i][j] := UnionOfRows(evecs[i][j], new[j]);
                 if false then 
                 if evecs[i][j] <> [] then 
                     evecs[i][j] := ShallowCopy(BaseMat(evecs[i][j]));
