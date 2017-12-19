@@ -774,49 +774,44 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
     if g <> () then 
     
-        len     := Size(row);
-        output  := [1..len]*0;
+        len     := Ncols(row);
+        output  := SparseZeroMatrix(1, len, Rationals);
         
-        for i in [1..Size(row)] do
-            if row[i] <> 0 then 
+        for i in [1..Size(row!.indices[1])] do
         
-                j := unknowns[i][1];
-                k := unknowns[i][2];
-                
-                x := [0,0];
-                
-                pos_1 := Position(setup.longcoords,(setup.coords[j])^g);
-                pos_2 := Position(setup.longcoords,(setup.coords[k])^g);
-                
-                x[1] := setup.poslist[pos_1];
-                x[2] := setup.poslist[pos_2];
-                
-                if x[1]*x[2] < 0 then 
-                    sign := -1;
-                    if x[1] < 0 then 
-                        x[1] := -x[1];
-                    else
-                        x[2] := -x[2];
-                    fi;
+            j := unknowns[row!.indices[1][i]][1];
+            k := unknowns[row!.indices[1][i]][2];
+            
+            x := [0,0];
+            
+            pos_1 := Position(setup.longcoords,(setup.coords[j])^g);
+            pos_2 := Position(setup.longcoords,(setup.coords[k])^g);
+            
+            x[1] := setup.poslist[pos_1];
+            x[2] := setup.poslist[pos_2];
+            
+            if x[1]*x[2] < 0 then 
+                sign := -1;
+                if x[1] < 0 then 
+                    x[1] := -x[1];
                 else
-                    sign := 1;
-                    if x[1] < 0 then 
-                        x := -x;
-                    fi;
+                    x[2] := -x[2];
                 fi;
-                
-                Sort(x);
-                
-                pos := Position(unknowns,x);
-                output[pos] := sign*row[i];
-                
+            else
+                sign := 1;
+                if x[1] < 0 then 
+                    x := -x;
+                fi;
             fi;
+            
+            Sort(x);
+            
+            pos := Position(unknowns,x);
+            SetEntry(output, 1, pos, sign*row!.entries[1][i]);
         od;
     
         return output;
-    
     else
-    
         return row;
     fi;
     
