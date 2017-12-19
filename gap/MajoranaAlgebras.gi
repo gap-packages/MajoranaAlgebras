@@ -152,7 +152,7 @@ function(innerproducts, algebraproducts, evecs, setup)
     
     for i in setup.orbitreps do 
     
-        if true then 
+        if IsMutable(rep.evecs[i]) then 
 
             new := [ [], [], [] ];
             
@@ -1457,7 +1457,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 
     for i in setup.orbitreps do
         
-        if true then 
+        if IsMutable(evecs[i]) then 
         
             a := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
         
@@ -1533,10 +1533,14 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
     for i in rep.setup.orbitreps do 
         
-        evecs := Union( rep.evecs[i][1], rep.evecs[i][2], rep.evecs[i][3], rep.nullspace);
+        if IsMutable(rep.evecs[i]) then 
+            evecs := UnionOfRows(   rep.evecs[i][1], rep.evecs[i][2], 
+                                    rep.evecs[i][3], rep.nullspace);
+            evecs := EchelonMatDestructive(evecs)
     
-        if IsMutable(rep.evecs[i][1]) and Size( BaseMat( evecs )) = dim - 1 then 
-            MakeImmutable(rep.evecs[i][1]);
+            if Nrows(evecs) = dim - 1 then 
+                MakeImmutable(rep.evecs[i]);
+            fi;
         fi;
     od;
     
