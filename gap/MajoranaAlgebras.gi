@@ -113,7 +113,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         
         if y <> false and z <> false then 
             UnionOfRows(new[2], z - (1/32)*u*y);
-            Add(new[1], x + (3/32)*u*y - 4*z);            
+            UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
         elif y <> false then 
             UnionOfRows(other_mat, x - (1/32)*u*y);
         fi;  
@@ -195,15 +195,15 @@ function(innerproducts, algebraproducts, evecs, setup)
                 u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
                 bad := MAJORANA_FindBadIndices(u,algebraproducts, setup );
-                null := KernelMat(CertainColumns(other_mat, bad));
+                null := KernelMat(CertainColumns(other_mat, bad)).relations;
                 
                 for j in [1..Nrows(null)] do 
                     
                     b := CertainRows(null, [j])*other_mat;
                 
                     z := MAJORANA_AlgebraProduct(u,b,algebraproducts, setup);
-                    Add(new[2], z);
-                    Add(new[1], b - 4*z);
+                    UnionOfRows(new[2], z);
+                    UnionOfRows(new[1], b - 4*z);
                 od;
             fi;
         
@@ -297,6 +297,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 dim;    # size of vectors 
 
         dim := Nrows(u);
+        
+        if ForAll(u!.indices, x -> x = []) or ForAll(u!.indices, x -> x = []) then 
+            return SparseZeroMatrix(1, dim, Rationals);
+        fi;
+        
         vec := SparseZeroMatrix(1, dim, Rationals);
 
         elts := [];
@@ -359,28 +364,23 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
         
         sum := 0;
 
-        for i in [1..Size(u)] do
-            if u[i] <> 0 then
-                for j in [1..Size(v)] do
-                    if v[j] <> 0 then
-                    
-                        k := setup.pairorbit[i][j];
-                        
-                        if k > 0 then 
-                            sign := 1;
-                        else
-                            sign := -1;
-                            k := -k;
-                        fi;
-                        
-                        if innerproducts[k] <> false then
-                            sum := sum + sign*u[i]*v[j]*innerproducts[k];
-                        else
-                            return false;
-                        fi;
-                    fi;
-                od;
-            fi;
+        for i in Reversed([1..Size(u!.indices[1])]) do
+            for j in Reversed([1..Size(v!.indices[1])]) do
+                k := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+                
+                if k > 0 then 
+                    sign := 1;
+                else
+                    sign := -1;
+                    k := -k;
+                fi;
+                
+                if innerproducts[k] <> false then
+                    sum := sum + sign*u!.entries[1][i]*v!.entries[1][j]*innerproducts[k];
+                else
+                    return false;
+                fi;
+            od;
         od;
         
         return sum;
