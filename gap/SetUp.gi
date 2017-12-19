@@ -294,8 +294,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
-                        shape       := input.shapes[index],  
-                        nullspace   := []                   );
+                        shape       := input.shapes[index] );
                         
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
@@ -382,7 +381,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
-    rep.evecs           := NullMat(t,3);               
+    rep.evecs           := NullMat(t,3);
+    rep.nullspace       := SparseZeroMatrix(1, dim, Rationals);               
 
     # Set up eigenvector matrix
 
