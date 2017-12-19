@@ -152,9 +152,14 @@ function(innerproducts, algebraproducts, evecs, setup)
     
     for i in setup.orbitreps do 
     
-        if IsMutable(evecs[i][1]) then 
+        if true then 
 
             new := [ [], [], [] ];
+            
+            for j in [1..3] do 
+                new[j] := SparseZeroMatrix(1, dim, Rationals);
+            od;
+            
             other_mat := SparseZeroMatrix(1, dim, Rationals);
         
             for ev_a in [1..3] do
@@ -166,14 +171,18 @@ function(innerproducts, algebraproducts, evecs, setup)
                         bad := MAJORANA_FindBadIndices(a,algebraproducts,setup);
                         
                         if bad <> [] then  
-                            null := KernelMat(CertainColumns(evecs[i][ev_b], bad));
+                            null := KernelMat(CertainColumns(evecs[i][ev_b], bad)).relations;
                         else
-                            null := SparseIdentityMatrix(Size(evecs[i][ev_b]));
+                            null := SparseIdentityMatrix(Nrows(evecs[i][ev_b]));
                         fi;
                         
                         for j in [1..Nrows(null)] do 
                             
                             b := CertainRows(null, [j])*evecs[i][ev_b];
+                            
+                            if MAJORANA_AlgebraProduct(a,b,algebraproducts,setup) = false then
+                                Error("Pause");
+                            fi;
                             
                             MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, innerproducts, algebraproducts, setup);
                             
@@ -197,15 +206,15 @@ function(innerproducts, algebraproducts, evecs, setup)
                     Add(new[1], b - 4*z);
                 od;
             fi;
-            
-            if false then 
+        
             for j in [1..3] do 
-                Append(evecs[i][j], new[j]);
+                UnionOfRows(evecs[i][j], new[j]);
+                if false then 
                 if evecs[i][j] <> [] then 
                     evecs[i][j] := ShallowCopy(BaseMat(evecs[i][j]));
                 fi;
+                fi;
             od;
-            fi;
         fi;        
     od;
     
@@ -296,7 +305,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
                 
-                k := list.pairorbit[u!.indices[i]][v!.indices[j]];
+                k := list.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
                 
                 if k > 0 then 
                     sign := 1;
@@ -309,15 +318,15 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 
                 if x <> false then
                     
-                    g := list.pairconj[u!.indices[i]][v!.indices[j]];
+                    g := list.pairconj[u!.indices[1][i]][v!.indices[1][j]][1];
                     
                     pos := Position(elts,g);
                     
                     if pos <> fail then 
-                        vecs[pos] := vecs[pos] + sign*u!.entries[i]*v!.entries[j]*x;
+                        vecs[pos] := vecs[pos] + sign*u!.entries[1][i]*v!.entries[1][j]*x;
                     else
                         Add(elts,g);
-                        Add(vecs,sign*u!.entries[i]*v!.entries[j]*x);
+                        Add(vecs,sign*u!.entries[1][i]*v!.entries[1][j]*x);
                     fi;
                 else
                     # cannot calculate product

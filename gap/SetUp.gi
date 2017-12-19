@@ -420,11 +420,16 @@ InstallGlobalFunction(MAJORANA_MakeVector,
 
     function(pos,vals,dim)
     
-    local   vec;
+    local   i,
+            vec;
     
-    vec := SparseMatrix(1, dim, [pos], [vals], Rationals); 
+    vec := [1..dim]*0;
     
-    return vec;
+    for i in [1..Size(pos)] do 
+        vec[pos[i]] := vals[i];
+    od; 
+    
+    return SparseMatrix([vec], Rationals);
     
     end);
     
