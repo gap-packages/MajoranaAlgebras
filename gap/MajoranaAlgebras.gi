@@ -399,7 +399,7 @@ function(innerproducts, setup)
     
     dim := Size(setup.coords);
     
-    GramMatrixFull := NullMat(dim,dim);
+    GramMatrixFull := SparseZeroMatrix(dim, dim, Rationals);
     
     for i in [1..dim] do 
         for j in [1..dim] do
@@ -407,9 +407,9 @@ function(innerproducts, setup)
             k := setup.pairorbit[i][j];
             
             if k > 0 then 
-                GramMatrixFull[i][j] := innerproducts[k];
+                SetEntry(GramMatrixFull, i, j, innerproducts[k]);
             else
-                GramMatrixFull[i][j] := -innerproducts[-k];
+                SetEntry(GramMatrixFull, i, j, -innerproducts[-k]);
             fi;
         od;
     od;
