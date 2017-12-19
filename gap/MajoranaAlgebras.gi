@@ -94,7 +94,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             z;
          
     dim := Size(setup.coords);
-    u := [1..dim]*0; u[i] := 1;
+    u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
     new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
@@ -105,20 +105,20 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
         
         if y <> false then 
-            Add(new[1], x - (1/4)*u*y);
+            UnionOfRows(new[1], x - (1/4)*u*y);
         fi;
     elif evals = [3,3] then 
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
         z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
         
         if y <> false and z <> false then 
-            Add(new[2], z - (1/32)*u*y);
+            UnionOfRows(new[2], z - (1/32)*u*y);
             Add(new[1], x + (3/32)*u*y - 4*z);            
         elif y <> false then 
-            Add(other_mat, x - (1/32)*u*y);
+            UnionOfRows(other_mat, x - (1/32)*u*y);
         fi;  
     else
-        Add(new[pos],x);
+        UnionOfRows(new[pos],x);
     fi;
     
     end );
