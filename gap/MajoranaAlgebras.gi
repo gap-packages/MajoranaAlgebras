@@ -155,51 +155,57 @@ function(innerproducts, algebraproducts, evecs, setup)
         if IsMutable(evecs[i][1]) then 
 
             new := [ [], [], [] ];
-            other_mat := [];
+            other_mat := SparseZeroMatrix(1, dim, Rationals);
         
             for ev_a in [1..3] do
                 for ev_b in [ev_a..3] do 
-                    for a in evecs[i][ev_a] do
-                        if Size(evecs[i][ev_b]) <> 0 then 
-                            bad := MAJORANA_FindBadIndices(a,algebraproducts,setup);
-                            
-                            if bad <> [] then  
-                                null := NullspaceMat(List(evecs[i][ev_b], x -> x{bad}));
-                            else
-                                null := IdentityMat(Size(evecs[i][ev_b]));
-                            fi;
-                            
-                            for j in [1..Size(null)] do 
-                                
-                                b := null[j]*evecs[i][ev_b];
-                                
-                                MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, innerproducts, algebraproducts, setup);
-                                
-                            od;
+                    for j in [1..Nrows(evecs[i][ev_a])] do
+                        
+                        a := CertainRows(evecs[i][ev_a], [j]);
+
+                        bad := MAJORANA_FindBadIndices(a,algebraproducts,setup);
+                        
+                        if bad <> [] then  
+                            null := KernelMat(CertainColumns(evecs[i][ev_b], bad));
+                        else
+                            null := SparseIdentityMatrix(Size(evecs[i][ev_b]));
                         fi;
+                        
+                        for j in [1..Nrows(null)] do 
+                            
+                            b := CertainRows(null, [j])*evecs[i][ev_b];
+                            
+                            MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, innerproducts, algebraproducts, setup);
+                            
+                        od;
                     od;
                 od;
             od;
             
             if other_mat <> [] then 
-                u := [1..dim]*0; u[i] := 1;
+                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
                 bad := MAJORANA_FindBadIndices(u,algebraproducts, setup );
-                null := NullspaceMat(List(other_mat, x -> x{bad}));
+                null := KernelMat(CertainColumns(other_mat, bad));
                 
-                for j in [1..Size(null)] do 
-                    z := MAJORANA_AlgebraProduct(u,null[j]*other_mat,algebraproducts, setup);
+                for j in [1..Nrows(null)] do 
+                    
+                    b := CertainRows(null, [j])*other_mat;
+                
+                    z := MAJORANA_AlgebraProduct(u,b,algebraproducts, setup);
                     Add(new[2], z);
-                    Add(new[1], null[j]*other_mat - 4*z);
+                    Add(new[1], b - 4*z);
                 od;
             fi;
             
+            if false then 
             for j in [1..3] do 
                 Append(evecs[i][j], new[j]);
                 if evecs[i][j] <> [] then 
                     evecs[i][j] := ShallowCopy(BaseMat(evecs[i][j]));
                 fi;
             od;
+            fi;
         fi;        
     od;
     
