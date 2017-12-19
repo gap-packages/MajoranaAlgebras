@@ -886,6 +886,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     local   dim,
             i,
+            j,
+            k,
             u,
             evals,
             mat,
@@ -926,27 +928,31 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     nonzero := [];
                     
     for i in [1..Size(x.mat)] do              
-        if ForAny(x.mat[i], y -> y <> 0) then 
+        if x.mat!.indices[i] = [] then 
             Add(nonzero,i);
         fi;
     od;
     
-    mat := x.mat{nonzero};
-    vec := x.vec{nonzero};
+    mat := CertainRows(x.mat, nonzero);
+    vec := CertainRows(x.vec, nonzero);
     unknowns := x.unknowns;
 
     for i in setup.orbitreps do        
         for evals in [[1,2],[2,1],[1,3],[2,3]] do  
-            for beta in evecs[i][evals[2]] do
+            for j in [1..Nrows(evecs[i][evals[2]])] do
             
-                alpha_mat := [];
+                beta := CertainRows(evecs[i][evals[2]], [j]);
+            
+                alpha_mat := SparseZeroMatrix(1, dim, Rationals);
                                             
                 for alpha in evecs[i][evals[1]] do                             
-                    Add(alpha_mat, alpha - beta);                        
+                    alpha_mat := UnionOfRows(alpha_mat, alpha - beta);                        
                 od;
             
-                for gamma in evecs[i][evals[1]] do  
+                for k in [1..Nrows(evecs[i][evals[1]])] do  
                         
+                    gamma := CertainRows(evecs[i][evals[1]]);
+                    
                     x := MAJORANA_Resurrection(  i, alpha_mat, beta, gamma,  
                                             evals, mat, vec, unknowns,
                                             innerproducts, 
@@ -957,7 +963,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                     
                     if unknowns = [] then return; fi;
                     
-                    if mat <> [] and (Size(mat) > 8000 or Size(mat) > Size(mat[1])) then 
+                    if mat <> [] and (Nrows(mat) > 8000 or Nrows(mat) > Ncols(mat)) then 
             
                         x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
                                 
@@ -1002,7 +1008,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if unknowns = [] then return; fi;
     
-    if nullspace = [] then return; fi;
+    if Nrows(nullspace) > 1 then return; fi;
     
     MAJORANA_NullspaceUnknowns(mat, vec, unknowns, algebraproducts, setup, nullspace, group);
 
