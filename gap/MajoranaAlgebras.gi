@@ -534,6 +534,7 @@ InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 function(innerproducts, algebraproducts, evecs, setup)
 
     local   i,          # loop over representatives
+            j,
             t,
             ev,         # loop over eigenvalues
             unknowns,   # unknown algebra products
@@ -626,19 +627,18 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
             unknowns;
     
     dim := Size(setup.coords);
-    
-    mat := [];
-    vec := [];
-    
     unknowns := Positions(innerproducts, false);
     
     if unknowns = [] then 
         return;
     fi;
     
+    mat := SparseZeroMatrix(1, Size(unknowns), Rationals);
+    vec := SparseZeroMatrix(1, dim, Rationals);
+    
     for i in [1..dim] do 
         
-        u := [1..dim]*0; u[i] := 1;
+        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
         for j in [1..Size(algebraproducts)] do 
             
@@ -648,11 +648,11 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                 
                 for k in [pos,Reversed(pos)] do
                 
-                    v := [1..dim]*0; v[k[1]] := 1;
-                    w := [1..dim]*0; w[k[2]] := 1;
+                    v := SparseMatrix(1, dim, [[k[1]]], [[1]], Rationals); 
+                    w := SparseMatrix(1, dim, [[k[2]]], [[1]], Rationals); 
                 
-                    row := [];
-                    sum := [0];
+                    row := SparseZeroMatrix(1, Size(unknowns), Rationals);
+                    sum := SparseZeroMatrix(1, 1, Rationals);
                 
                     x := MAJORANA_SeparateInnerProduct(u, algebraproducts[j], unknowns, innerproducts, setup);
                     
@@ -667,7 +667,7 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                         row := row - z[1];
                         sum := sum - z[2];
                         
-                        if ForAny(row, x -> x <> 0) then 
+                        if row!.indices <> [] then 
                             MAJORANA_Append([row,sum], mat, vec);
                         fi;
                     fi;     
