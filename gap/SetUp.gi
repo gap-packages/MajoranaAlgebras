@@ -382,14 +382,14 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
     rep.evecs           := NullMat(t,3);
-    rep.nullspace       := SparseZeroMatrix(1, dim, Rationals);               
+    rep.nullspace       := SparseMatrix(0, dim, [], [], Rationals);               
 
     # Set up eigenvector matrix
 
     for j in [1..t] do
         if j in rep.setup.orbitreps then
             for k in [1..3] do
-                rep.evecs[j][k] := SparseZeroMatrix(1, dim, Rationals);
+                rep.evecs[j][k] := SparseMatrix(0, dim, [], [], Rationals);
             od;
         else
             for k in [1..3] do
@@ -748,7 +748,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
             elif rep.shape[i] = ['2','B'] then
 
-                rep.algebraproducts[i] := SparseZeroMatrix(1, dim);
+                rep.algebraproducts[i] := SparseZeroMatrix(1, dim, Rationals);
 
                 rep.innerproducts[i] := 0;
 
