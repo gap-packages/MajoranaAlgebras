@@ -1515,11 +1515,13 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 
                                     ## STEP 6: FUSION ## 
     
-    
+    MajoranaAlgebraTest(rep);
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
     MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace, rep.group);
+    
+    MajoranaAlgebraTest(rep);
     
                                 ## STEP 9: MORE EVECS II ##
 
@@ -1527,8 +1529,13 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
+    MajoranaAlgebraTest(rep);
+    
     MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
     
+    MajoranaAlgebraTest(rep);
+    
+    if false then 
     for i in rep.setup.orbitreps do 
         
         if IsMutable(rep.evecs[i]) then 
@@ -1543,6 +1550,9 @@ InstallGlobalFunction(MAJORANA_MainLoop,
         fi;
     od;
     
+    fi;
+    
+    MajoranaAlgebraTest(rep);
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
        
     # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
@@ -1553,6 +1563,8 @@ InstallGlobalFunction(MAJORANA_MainLoop,
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
         MakeImmutable(rep.innerproducts);
     fi;
+    
+    MajoranaAlgebraTest(rep);
     
     end);
     
