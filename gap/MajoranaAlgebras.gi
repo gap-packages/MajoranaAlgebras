@@ -289,7 +289,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 pos,
                 dim;    # size of vectors 
 
-        dim := Nrows(u);
+        dim := Ncols(u);
         
         if ForAll(u!.indices, x -> x = []) or ForAll(u!.indices, x -> x = []) then 
             return SparseZeroMatrix(1, dim, Rationals);

@@ -66,8 +66,7 @@ BindGlobal("S4",function()
     G:=SymmetricGroup(4);
     T := [ (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)];;
     input := ShapesOfMajoranaRepresentationAxiomM8(G,T);;
-    res := MajoranaRepresentation(input,2);;
-    return(res);
+    return(input);
     end
     );
     
