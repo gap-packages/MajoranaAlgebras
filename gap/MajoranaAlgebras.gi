@@ -1363,7 +1363,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             for j in [1..Nrows(vec)] do 
                 elm := GetEntry(mat, j, i);
                 if elm <> 0 then
-                    new!.entries := -sign*elm*prod!.entries;
+                    new!.indices[i] := prod!.indices[1];
+                    new!.entries[i] := -sign*elm*prod!.entries[1];
                 fi;
             od;
             
@@ -1484,7 +1485,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 Info(   InfoMajorana, 50, 
                         STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
                         
-                evecs[i][ev] := KernelMat( mat - SparseIdentityMatrix(dim, dim, Rationals)*table[ev]).relations;
+                evecs[i][ev] := KernelMat( mat - SparseIdentityMatrix(dim, Rationals)*table[ev]).relations;
             od;
         fi;
     od;

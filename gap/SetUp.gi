@@ -686,7 +686,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     
                     x := rep.setup.pairorbit[pos[7]][pos[8]];
                     
-                    rep.algebraproducts[x] := [1..dim]*0;
+                    rep.algebraproducts[x] := SparseZeroMatrix(1, dim, Rationals);
                     
                     rep.innerproducts[x] := 0;
                 fi;
@@ -748,7 +748,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
 
             elif rep.shape[i] = ['2','B'] then
 
-                rep.algebraproducts[i] := NullMat(1,dim)[1];
+                rep.algebraproducts[i] := SparseZeroMatrix(1, dim);
 
                 rep.innerproducts[i] := 0;
 
@@ -912,16 +912,12 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
             
             if Order(h) = 3 then    # (3,3) values
                 
-                rep.algebraproducts[i] := NullMat(1,dim)[1];
-                rep.algebraproducts[i][j] := 1;
-
+                rep.algebraproducts[i] := SparseMatrix( 1, dim, [[j]], [[1]], Rationals);
                 rep.innerproducts[i] := 8/5;
                 
             elif Order(h) = 4 then  # (4,4) values
             
-                rep.algebraproducts[i] := NullMat(1,dim)[1];
-                rep.algebraproducts[i][j] := 1;
-
+                rep.algebraproducts[i] := SparseMatrix( 1, dim, [[j]], [[1]], Rationals);
                 rep.innerproducts[i] := 2;
                 
             elif Order(h) = 5 then  # (5,5) values
