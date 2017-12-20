@@ -871,6 +871,68 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
     od;
     
     end );
+    
+    
+InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
+
+    function(rep)
+    
+    local   dim, t, x, i, j, k, l, mat, vec, unknowns, u, ech_a, ech_b, evecs_a, evecs_b, a, b, c, lhs, rhs; 
+            
+    t := Size(rep.involutions);
+    dim := Size(rep.setup.coords);
+    
+    x := MAJORANA_EigenvectorsAlgebraUnknowns(rep.innerproducts, rep.algebraproducts, rep.evecs, rep.setup);
+
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+    
+    if unknowns = [] then return; fi;
+    
+    for i in rep.setup.orbitreps do 
+    
+        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        
+        ech_a := EchelonMatTransformation(CertainColumns(rep.evecs[i][1], [t+1..dim]));
+        ech_b := EchelonMatTransformation(CertainColumns(rep.evecs[i][2], [t+1..dim]));
+        
+        evecs_a := ech_a.coeffs*rep.evecs[i][1];
+        evecs_b := ech_b.coeffs*rep.evecs[i][2];
+            
+        for j in [1..Nrows(evecs_a)] do 
+            a := CertainRows(evecs_a, [j]);
+            for k in [1..Nrows(evecs_b)] do 
+                b := CertainRows(evecs_b, [k]);
+                if ech_a.vectors!.indices[j] = ech_b.vectors!.indices[k] and ech_a.vectors!.entries[j] = ech_b.vectors!.entries[k] then 
+                
+                    lhs := MAJORANA_SeparateAlgebraProduct(u, a - b, unknowns, rep.algebraproducts, rep.setup);
+                    
+                    for l in [1..Nrows(rep.evecs[i][1])] do 
+                        c := CertainRows(rep.evecs[i][1], [l]); 
+                        
+                        rhs := MAJORANA_SeparateAlgebraProduct(-(1/4)*b, c, unknowns, rep.algebraproducts, rep.setup);
+                        
+                        if rhs[1]!.indices <> [] then 
+                            mat := UnionOfRows(mat, lhs[1] - rhs[1]);
+                            vec := UnionOfRows(vec, rhs[2] - lhs[2]);
+                        fi;
+                    od;
+                fi;
+            od;
+        od;
+    od;
+    
+    x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
+    
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+    
+    if unknowns = [] then return; fi;
+    
+    if Nrows(rep.nullspace) > 1 then return; fi;
+    
+    MAJORANA_NullspaceUnknowns(mat, vec, unknowns, rep.algebraproducts, rep.setup, rep.nullspace, rep.group);
+    
+    end );
+
 
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
@@ -1519,7 +1581,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
                         ## STEP 8: RESURRECTION PRINCIPLE I ##
             
-    MAJORANA_UnknownAlgebraProducts(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace, rep.group);
+    MAJORANA_UnknownAlgebraProducts1(rep);
     
     # MajoranaAlgebraTest(rep);
     
