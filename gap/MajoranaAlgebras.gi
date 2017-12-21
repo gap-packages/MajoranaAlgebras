@@ -882,12 +882,13 @@ InstallGlobalFunction(MAJORANA_BasisOfEvecs,
     
     local ech;
     
-    mat := EchelonMatDestructive(mat).vectors;
+    # mat := EchelonMatDestructive(mat).vectors;
     
-    ech := EchelonMatTransformationDestructive(CertainColumns(mat, [t+1..dim]));
+    ech := EchelonMatTransformation(CertainColumns(mat, [dim, dim - 1..1]));
     
-    return UnionOfRows(ech.coeffs*mat, ech.relations*mat);
+    # return UnionOfRows(ech.coeffs*mat, ech.relations*mat);
     
+    return ech.coeffs*mat;
     end);
     
     
@@ -895,7 +896,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
 
     function(rep)
     
-    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c; 
+    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj; 
             
     t := Size(rep.involutions);
     dim := Size(rep.setup.coords);
@@ -917,41 +918,56 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
                 a := CertainRows(rep.evecs[i][evals[1]], [j]);
                 for k in [1..Nrows(rep.evecs[i][evals[2]])] do 
                     b := CertainRows(rep.evecs[i][evals[2]], [k]);
-                    if CertainColumns(a, [t+1..dim]) = CertainColumns(b, [t+1..dim]) then 
-                        for l in [1..Nrows(rep.evecs[i][evals[1]])] do 
-                            c := CertainRows(rep.evecs[i][evals[1]], [l]);
+                    
+                    bad := MAJORANA_FindBadIndices(a - b, rep.algebraproducts, rep.setup);
+                    
+                    null := KernelMat(CertainColumns(rep.evecs[i][evals[1]], bad)).relations;
+                    
+                    for l in [1..Nrows(null)] do 
+                    
+                        c := CertainRows(null, [l])*rep.evecs[i][evals[1]];
                             
-                            x := MAJORANA_Resurrection1(  u, a, b, c, evals, 
-                                                    unknowns,
-                                                    rep.innerproducts,
+                        x := MAJORANA_Resurrection1(  u, a, b, c, evals, 
+                                                unknowns,
+                                                rep.innerproducts,
+                                                rep.algebraproducts,
+                                                rep.setup);
+                        
+                        if x <> false and x[1]!.indices <> [] then 
+                            if Size(x[1]!.indices[1]) = 1 then 
+                            
+                                y := MAJORANA_SolveSingleSolution( x, 
+                                                    mat, vec, unknowns, 
                                                     rep.algebraproducts,
                                                     rep.setup);
-                            
-                            if x <> false and x[1]!.indices <> [] then 
-                                if Size(x[1]!.indices[1]) = 1 then 
                                 
-                                    y := MAJORANA_SolveSingleSolution( x, 
-                                                        mat, vec, unknowns, 
-                                                        rep.algebraproducts,
-                                                        rep.setup);
+                                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                
+                                if unknowns = [] then return; fi;
+                            else
+                                for g in rep.setup.conjelts do
+                                    conj := [,];
                                     
-                                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                                    
-                                    if unknowns = [] then return; fi;
-                                else
-                                    if not _IsRowOfSparseMatrix(mat, x[1]) then
-                                        mat := UnionOfRows(mat, x[1]);
-                                        vec := UnionOfRows(vec, x[2]);
+                                    conj[1] := MAJORANA_ConjugateRow(   x[1], g[1],
+                                                                        unknowns,
+                                                                        rep.setup );
+                                                                        
+                                    conj[2] := MAJORANA_ConjugateVector(    x[2],g[2],
+                                                                            rep.setup );
+                                                                            
+                                    if not _IsRowOfSparseMatrix(mat, conj[1]) then
+                                        mat := UnionOfRows(mat, conj[1]);
+                                        vec := UnionOfRows(vec, conj[2]);
                                     fi;
-                                fi;
+                                od;
                             fi;
-                        od;
-                        
-                        if Nrows(mat) > Ncols(mat) then 
-                            x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
-    
-                            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                         fi;
+                    od;
+                    
+                    if Nrows(mat) > Ncols(mat) then 
+                        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
+
+                        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                     fi;
                 od;
             od;
