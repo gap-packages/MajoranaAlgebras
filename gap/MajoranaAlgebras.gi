@@ -977,7 +977,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
                                         
                                         if unknowns = [] then return; fi;
                                     elif not _IsRowOfSparseMatrix(mat, x[1]) then
-                                        # Error("pause");
                                         for g in rep.setup.conjelts do
                                             conj := [,];
                                             
@@ -1574,15 +1573,17 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     local   sol,    # solution of system
             i,      # loop over <UnknownInnerProducts>
             x;      # element of <UnknownInnerProducts>    
-            
-    Error("pause");
 
     sol := MAJORANA_SolutionMatVecs(mat,vec);                   
         
     for i in [1..Size(sol.solutions)] do
         if sol.solutions[i] <> fail then
             x := UnknownInnerProducts[i]; 
-            innerproducts[x] := sol.solutions[i]!.entries[1][1];
+            if sol.solutions[i]!.entries[1] = [] then 
+                innerproducts[x] := 0;
+            else
+                innerproducts[x] := sol.solutions[i]!.entries[1][1];
+            fi;
         fi;
     od;
     
