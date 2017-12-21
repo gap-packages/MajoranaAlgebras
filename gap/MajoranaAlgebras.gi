@@ -127,7 +127,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
 InstallGlobalFunction( MAJORANA_Fusion,
 
-function(innerproducts, algebraproducts, evecs, setup)
+function(innerproducts, algebraproducts, evecs, setup, nullspace)
 
     local   i,
             j,
@@ -203,16 +203,14 @@ function(innerproducts, algebraproducts, evecs, setup)
                 od;
             fi;
         
+            if ForAll(new, x -> x!.indices = []) then return; fi;
+        
             for j in [1..3] do 
                 evecs[i][j] := UnionOfRows(evecs[i][j], new[j]);
-                if evecs[i][j] <> [] then 
-                    evecs[i][j] := MAJORANA_BasisOfEvecs(evecs[i][j], Size(evecs), dim);
-                fi;
+                evecs[i][j] := MAJORANA_BasisOfEvecs(evecs[i][j], Size(evecs), dim);
             od;
         fi;        
     od;
-    
-    return [true];    
     
     end );     
          
@@ -891,7 +889,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
 
     function(rep)
     
-    local   dim, t, x, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c; 
+    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c; 
             
     t := Size(rep.involutions);
     dim := Size(rep.setup.coords);
@@ -901,6 +899,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
     
     if unknowns = [] then return; fi;
+    
+    Info(   InfoMajorana, 50, "Building resurrection");
     
     for evals in [[1,2],[2,1],[1,3],[2,3]] do 
         for i in rep.setup.orbitreps do 
@@ -922,8 +922,20 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
                                                     rep.setup);
                             
                             if x <> false and x[1]!.indices <> [] then 
-                                mat := UnionOfRows(mat, x[1]);
-                                vec := UnionOfRows(vec, x[2]);
+                                if Size(x[1]!.indices[1]) = 1 then 
+                                
+                                    y := MAJORANA_SolveSingleSolution( x, 
+                                                        mat, vec, unknowns, 
+                                                        rep.algebraproducts,
+                                                        rep.setup);
+                                    
+                                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                    
+                                    if unknowns = [] then return; fi;
+                                else
+                                    mat := UnionOfRows(mat, x[1]);
+                                    vec := UnionOfRows(vec, x[2]);
+                                fi;
                             fi;
                         od;
                     fi;
@@ -1315,7 +1327,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                                             setup         );
                                                     
     nonzero := [];
-                    
+    
     for j in [1..Nrows(x.mat)] do              
         if x.mat!.indices[j] <> [] then 
             Add(nonzero,j);
@@ -1623,7 +1635,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
     # MajoranaAlgebraTest(rep);
     
-    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace); 
     
     # MajoranaAlgebraTest(rep);
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
