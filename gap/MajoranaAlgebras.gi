@@ -1573,7 +1573,12 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                         STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
                         
                 evecs[i][ev] := KernelMat( mat - SparseIdentityMatrix(dim, Rationals)*table[ev]).relations;
+                
+                evecs[i][ev] := MAJORANA_BasisOfEvecs(evecs[i][ev], Size(evecs), dim);
+                
             od;
+            
+            MakeImmutable(evecs[i]);
         fi;
     od;
     
@@ -1619,25 +1624,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     # MajoranaAlgebraTest(rep);
     
     MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup); 
-    
-    # MajoranaAlgebraTest(rep);
-    
-    if false then 
-    for i in rep.setup.orbitreps do 
-        
-        if IsMutable(rep.evecs[i]) then 
-            evecs := UnionOfRows( rep.evecs[i][1], rep.evecs[i][2]);
-            evecs := UnionOfRows( evecs, rep.evecs[i][3]);
-            evecs := UnionOfRows( evecs, rep.nullspace);
-            evecs := EchelonMatDestructive(evecs).vectors;
-    
-            if Nrows(evecs) = dim - 1 then 
-                MakeImmutable(rep.evecs[i]);
-            fi;
-        fi;
-    od;
-    
-    fi;
     
     # MajoranaAlgebraTest(rep);
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
