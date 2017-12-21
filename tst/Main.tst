@@ -1,3 +1,5 @@
+gap> SetInfoLevel(InfoPackageLoading,0);
+gap> LoadPackage("gauss");;
 gap> SetInfoLevel(InfoMajorana, 0);
 gap> ex := A5();;
 gap> rep := MajoranaRepresentation(ex,1);;
