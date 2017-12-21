@@ -207,7 +207,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
         
             for j in [1..3] do 
                 evecs[i][j] := UnionOfRows(evecs[i][j], new[j]);
-                evecs[i][j] := MAJORANA_BasisOfEvecs(evecs[i][j], Size(evecs), dim);
+                evecs[i][j] := MAJORANA_BasisOfEvecs(evecs[i][j]);
             od;
         fi;        
     od;
@@ -878,17 +878,16 @@ InstallGlobalFunction(MAJORANA_SingleSolutions,
     
 InstallGlobalFunction(MAJORANA_BasisOfEvecs,
 
-    function(mat, t, dim)
+    function(mat)
     
-    local ech;
+    local ech, dim;
     
-    # mat := EchelonMatDestructive(mat).vectors;
+    dim := Ncols(mat);
     
     ech := EchelonMatTransformation(CertainColumns(mat, [dim, dim - 1..1]));
     
-    # return UnionOfRows(ech.coeffs*mat, ech.relations*mat);
-    
     return ech.coeffs*mat;
+    
     end);
     
     
@@ -1620,7 +1619,7 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                         
                 evecs[i][ev] := KernelMat( mat - SparseIdentityMatrix(dim, Rationals)*table[ev]).relations;
                 
-                evecs[i][ev] := MAJORANA_BasisOfEvecs(evecs[i][ev], Size(evecs), dim);
+                evecs[i][ev] := MAJORANA_BasisOfEvecs(evecs[i][ev]);
                 
             od;
             

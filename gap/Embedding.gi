@@ -61,14 +61,14 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            if rep.evecs[i][j] <> [] then 
-                rep.evecs[i][j] := ShallowCopy(BaseMat(rep.evecs[i][j]));
+            if Nrows(rep.evecs[i][j]) > 0 then 
+                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
             fi;
         od;
     od;
     
-    if rep.nullspace < [] then 
-        rep.nullspace := ShallowCopy(BaseMat(rep.nullspace));
+    if Nrows(rep.nullspace) > 0 then 
+        rep.nullspace := ShallowCopy(MAJORANA_BasisOfEvecs(rep.nullspace));
     fi;
     
     end );
