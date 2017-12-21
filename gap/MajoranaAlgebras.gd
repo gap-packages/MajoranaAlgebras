@@ -10,6 +10,8 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
+DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
+
 DeclareGlobalFunction( "MAJORANA_Append" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVector" );
@@ -50,6 +52,7 @@ DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
+DeclareGlobalFunction( "MAJORANA_Resurrection1" );
 
 DeclareGlobalFunction( "MAJORANA_OutputError" );
 

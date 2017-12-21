@@ -405,7 +405,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     for i in rep.setup.orbitreps do
         for j in [1..3] do 
             if rep.evecs[i][j] <> [] then 
-                rep.evecs[i][j] := EchelonMatDestructive(rep.evecs[i][j]).vectors;
+                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j], t, dim);
             fi;
         od; 
     od;
