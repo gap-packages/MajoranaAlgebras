@@ -543,6 +543,7 @@ function(innerproducts, algebraproducts, evecs, setup)
             y,          # result of SolutionAlgProducts
             z,          # to be added to mat vec system
             g,          # conjugating element
+            conj,
             list,
             pos,
             dim;        # size of setup.coords
@@ -585,11 +586,22 @@ function(innerproducts, algebraproducts, evecs, setup)
                                                         
                         if unknowns = [] then return; fi;
                         
-                    elif x[1]!.indices[1] <> [] then 
-                        if not _IsRowOfSparseMatrix(mat, x[1]) then
-                            mat := UnionOfRows(mat, x[1]);
-                            vec := UnionOfRows(vec, x[2]);   
-                        fi;                 
+                    elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(mat, x[1]) then
+                        for g in setup.conjelts do
+                            conj := [,];
+                            
+                            conj[1] := MAJORANA_ConjugateRow(   x[1], g[1],
+                                                                unknowns,
+                                                                setup );
+                                                                
+                            conj[2] := MAJORANA_ConjugateVector(    x[2],g[2],
+                                                                    setup );
+                                                                    
+                            if not _IsRowOfSparseMatrix(mat, conj[1]) then
+                                mat := UnionOfRows(mat, conj[1]);
+                                vec := UnionOfRows(vec, conj[2]);
+                            fi;
+                        od;                
                     fi;                
                 od;
             od;
@@ -895,7 +907,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
 
     function(rep)
     
-    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj; 
+    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj, list, evecs_a, evecs_b, index; 
             
     t := Size(rep.involutions);
     dim := Size(rep.setup.coords);
@@ -908,66 +920,91 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
     
     Info(   InfoMajorana, 50, "Building resurrection");
     
-    for evals in [[1,2],[2,1],[1,3],[2,3]] do 
+    for evals in [[1,2],[2,1],[1,3],[2,3]] do     
         for i in rep.setup.orbitreps do 
         
+            evecs_a := rep.evecs[i][evals[1]];
+            evecs_b := rep.evecs[i][evals[2]];
+        
             u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-                
-            for j in [1..Nrows(rep.evecs[i][evals[1]])] do 
-                a := CertainRows(rep.evecs[i][evals[1]], [j]);
-                for k in [1..Nrows(rep.evecs[i][evals[2]])] do 
-                    b := CertainRows(rep.evecs[i][evals[2]], [k]);
-                    
-                    bad := MAJORANA_FindBadIndices(a - b, rep.algebraproducts, rep.setup);
-                    
-                    null := KernelMat(CertainColumns(rep.evecs[i][evals[1]], bad)).relations;
-                    
-                    for l in [1..Nrows(null)] do 
-                    
-                        c := CertainRows(null, [l])*rep.evecs[i][evals[1]];
-                            
-                        x := MAJORANA_Resurrection1(  u, a, b, c, evals, 
-                                                unknowns,
-                                                rep.innerproducts,
-                                                rep.algebraproducts,
-                                                rep.setup);
+            
+            list := [,];
+            
+            list[1] := List([1..Nrows(evecs_a)], i -> []);
+            list[2] := List([1..Nrows(evecs_a)], i -> []);
+             
+            for j in [1..Nrows(evecs_a)] do 
+                bad := MAJORANA_FindBadIndices(CertainRows(evecs_a,[j]), rep.algebraproducts, rep.setup);
+                for k in [1..Nrows(evecs_b)] do 
+                    x := Size(Intersection(bad, evecs_b!.indices[k]));
+                    if x = 1 then 
+                        Add(list[1][j], k);
+                    elif x > 1 then 
+                        Add(list[2][j], k);
+                    fi;
+                od;
+            od;
+            
+            for index in [1,2] do 
+                for j in [1..Nrows(evecs_a)] do 
+                    c := CertainRows(evecs_a, [j]);
+                    for k in list[index][j] do 
+                        b := CertainRows(evecs_b, [k]);
                         
-                        if x <> false and x[1]!.indices <> [] then 
-                            if Size(x[1]!.indices[1]) = 1 then 
+                        bad := MAJORANA_FindBadIndices(c, rep.algebraproducts, rep.setup);
+                        
+                        for l in [1..Nrows(evecs_a)] do 
+                        
+                            a := CertainRows(evecs_a, [l]);
                             
-                                y := MAJORANA_SolveSingleSolution( x, 
-                                                    mat, vec, unknowns, 
-                                                    rep.algebraproducts,
-                                                    rep.setup);
+                            if CertainColumns(a, bad) = CertainColumns(b, bad) then 
+                            
+                                x := MAJORANA_Resurrection1(  u, a, b, c, evals, 
+                                                        unknowns,
+                                                        rep.innerproducts,
+                                                        rep.algebraproducts,
+                                                        rep.setup);
                                 
-                                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                                
-                                if unknowns = [] then return; fi;
-                            else
-                                for g in rep.setup.conjelts do
-                                    conj := [,];
+                                if x <> false and x[1]!.indices[1] <> [] then 
+                                    if Size(x[1]!.indices[1]) = 1 then 
                                     
-                                    conj[1] := MAJORANA_ConjugateRow(   x[1], g[1],
-                                                                        unknowns,
-                                                                        rep.setup );
-                                                                        
-                                    conj[2] := MAJORANA_ConjugateVector(    x[2],g[2],
-                                                                            rep.setup );
-                                                                            
-                                    if not _IsRowOfSparseMatrix(mat, conj[1]) then
-                                        mat := UnionOfRows(mat, conj[1]);
-                                        vec := UnionOfRows(vec, conj[2]);
+                                        y := MAJORANA_SolveSingleSolution( x, 
+                                                            mat, vec, unknowns, 
+                                                            rep.algebraproducts,
+                                                            rep.setup);
+                                        
+                                        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                        
+                                        if unknowns = [] then return; fi;
+                                    elif not _IsRowOfSparseMatrix(mat, x[1]) then
+                                        # Error("pause");
+                                        for g in rep.setup.conjelts do
+                                            conj := [,];
+                                            
+                                            conj[1] := MAJORANA_ConjugateRow(   x[1], g[1],
+                                                                                unknowns,
+                                                                                rep.setup );
+                                                                                
+                                            conj[2] := MAJORANA_ConjugateVector(    x[2],g[2],
+                                                                                    rep.setup );
+                                                                                    
+                                            
+                                            mat := UnionOfRows(mat, conj[1]);
+                                            vec := UnionOfRows(vec, conj[2]);
+                                        od;
                                     fi;
-                                od;
+                                fi;
                             fi;
+                        od;
+                        
+                        if Nrows(mat) > Ncols(mat) then 
+                            x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
+
+                            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+                            
+                            if unknowns = [] then return; fi;
                         fi;
                     od;
-                    
-                    if Nrows(mat) > Ncols(mat) then 
-                        x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
-
-                        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-                    fi;
                 od;
             od;
         od;
@@ -990,18 +1027,20 @@ InstallGlobalFunction(MAJORANA_Resurrection1,
     function(u, a, b, c, evals, unknowns, innerproducts, algebraproducts, setup)
     
     local   x, y, ev, res; 
-                            
-    ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     
-    x := MAJORANA_AlgebraProduct(c, a - b, algebraproducts, setup);
+    res := MAJORANA_SeparateAlgebraProduct(b, c, unknowns, algebraproducts, setup);
     
-    if x = false then 
+    if res[1]!.indices[1] = [] then 
         return false;
     fi;
     
-    res := MAJORANA_SeparateAlgebraProduct(u, x, unknowns, algebraproducts, setup);
+    ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     
-    res := res + MAJORANA_SeparateAlgebraProduct(ev*b, c, unknowns, algebraproducts, setup);
+    res := ev*res;
+    
+    x := MAJORANA_AlgebraProduct(c, a - b, algebraproducts, setup);
+    
+    res := res + MAJORANA_SeparateAlgebraProduct(u, x, unknowns, algebraproducts, setup);
     
     if evals[1] = 2 then 
         y := MAJORANA_InnerProduct(a, c, innerproducts, setup);
@@ -1535,6 +1574,8 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     local   sol,    # solution of system
             i,      # loop over <UnknownInnerProducts>
             x;      # element of <UnknownInnerProducts>    
+            
+    Error("pause");
 
     sol := MAJORANA_SolutionMatVecs(mat,vec);                   
         
@@ -1651,6 +1692,8 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     fi;
                                 
                                     ## STEP 6: FUSION ## 
+                                    
+    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
     # MajoranaAlgebraTest(rep);
     
@@ -1667,8 +1710,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
     
     # MajoranaAlgebraTest(rep);
-    
-    MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace); 
     
     # MajoranaAlgebraTest(rep);
                         ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
