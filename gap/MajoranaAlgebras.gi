@@ -877,7 +877,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
 
     function(rep)
     
-    local   dim, t, x, i, j, k, l, mat, vec, unknowns, u, ech_a, ech_b, evecs_a, evecs_b, a, b, c, lhs, rhs; 
+    local   dim, t, x, y, i, j, k, l, evals, ev, mat, vec, unknowns, u, ech_a, ech_b, evecs_a, evecs_b, a, b, c, lhs, rhs; 
             
     t := Size(rep.involutions);
     dim := Size(rep.setup.coords);
@@ -888,35 +888,50 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
     
     if unknowns = [] then return; fi;
     
-    for i in rep.setup.orbitreps do 
-    
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+    for evals in [[1,2],[2,1],[1,3],[2,3]] do 
+        for i in rep.setup.orbitreps do 
         
-        ech_a := EchelonMatTransformation(CertainColumns(rep.evecs[i][1], [t+1..dim]));
-        ech_b := EchelonMatTransformation(CertainColumns(rep.evecs[i][2], [t+1..dim]));
+            ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
         
-        evecs_a := ech_a.coeffs*rep.evecs[i][1];
-        evecs_b := ech_b.coeffs*rep.evecs[i][2];
+            u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
-        for j in [1..Nrows(evecs_a)] do 
-            a := CertainRows(evecs_a, [j]);
-            for k in [1..Nrows(evecs_b)] do 
-                b := CertainRows(evecs_b, [k]);
-                if ech_a.vectors!.indices[j] = ech_b.vectors!.indices[k] and ech_a.vectors!.entries[j] = ech_b.vectors!.entries[k] then 
+            ech_a := EchelonMatTransformation(CertainColumns(rep.evecs[i][evals[1]], [t+1..dim]));
+            ech_b := EchelonMatTransformation(CertainColumns(rep.evecs[i][evals[2]], [t+1..dim]));
+            
+            evecs_a := ech_a.coeffs*rep.evecs[i][evals[1]];
+            evecs_b := ech_b.coeffs*rep.evecs[i][evals[2]];
                 
-                    lhs := MAJORANA_SeparateAlgebraProduct(u, a - b, unknowns, rep.algebraproducts, rep.setup);
+            for j in [1..Nrows(evecs_a)] do 
+                a := CertainRows(evecs_a, [j]);
+                for k in [1..Nrows(evecs_b)] do 
+                    b := CertainRows(evecs_b, [k]);
+                    if CertainColumns(a, [t+1..dim]) = CertainColumns(b, [t+1..dim]) then 
                     
-                    for l in [1..Nrows(rep.evecs[i][1])] do 
-                        c := CertainRows(rep.evecs[i][1], [l]); 
+                        lhs := MAJORANA_SeparateAlgebraProduct(u, a - b, unknowns, rep.algebraproducts, rep.setup);
                         
-                        rhs := MAJORANA_SeparateAlgebraProduct(-(1/4)*b, c, unknowns, rep.algebraproducts, rep.setup);
-                        
-                        if rhs[1]!.indices <> [] then 
-                            mat := UnionOfRows(mat, lhs[1] - rhs[1]);
-                            vec := UnionOfRows(vec, rhs[2] - lhs[2]);
-                        fi;
-                    od;
-                fi;
+                        for l in [1..Nrows(rep.evecs[i][1])] do 
+                            c := CertainRows(rep.evecs[i][1], [l]); 
+                            
+                            rhs := MAJORANA_SeparateAlgebraProduct(-ev*b, c, unknowns, rep.algebraproducts, rep.setup);
+                            
+                            if evals[1] = 2 then 
+                                y := MAJORANA_InnerProduct(a, c, rep.innerproducts, rep.setup);
+                                
+                                if y <> false then 
+                                    AddToEntry(rhs[2], 1, i, ev*y);
+                                else
+                                    rhs[1]!.indices := [];
+                                fi;
+                                
+                            fi;
+                            
+                            if rhs[1]!.indices <> [] then 
+                                mat := UnionOfRows(mat, lhs[1] - rhs[1]);
+                                vec := UnionOfRows(vec, rhs[2] - lhs[2]);
+                            fi;
+                        od;
+                    fi;
+                od;
             od;
         od;
     od;
