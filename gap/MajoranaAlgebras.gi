@@ -508,8 +508,10 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
                                                         setup);
 
                     if x[1]!.indices[1] <> [] then
-                        mat := UnionOfRows(mat, x[1]);
-                        vec := UnionOfRows(vec, x[2]);
+                        if not _IsRowOfSparseMatrix(mat, x[1]) then 
+                            mat := UnionOfRows(mat, x[1]);
+                            vec := UnionOfRows(vec, x[2]);
+                        fi;
                     fi;
                     
                 od;
@@ -584,8 +586,10 @@ function(innerproducts, algebraproducts, evecs, setup)
                         if unknowns = [] then return; fi;
                         
                     elif x[1]!.indices[1] <> [] then 
-                        mat := UnionOfRows(mat, x[1]);
-                        vec := UnionOfRows(vec, x[2]);                    
+                        if not _IsRowOfSparseMatrix(mat, x[1]) then
+                            mat := UnionOfRows(mat, x[1]);
+                            vec := UnionOfRows(vec, x[2]);   
+                        fi;                 
                     fi;                
                 od;
             od;
@@ -661,8 +665,10 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                         sum := sum - z[2];
                         
                         if row!.indices[1] <> [] then 
-                            mat := UnionOfRows(mat, row);
-                            vec := UnionOfRows(vec, sum);
+                            if not _IsRowOfSparseMatrix(mat, row) then
+                                mat := UnionOfRows(mat, row);
+                                vec := UnionOfRows(vec, sum);
+                            fi;
                         fi;
                     fi;     
                 od;
@@ -933,11 +939,19 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
                                     
                                     if unknowns = [] then return; fi;
                                 else
-                                    mat := UnionOfRows(mat, x[1]);
-                                    vec := UnionOfRows(vec, x[2]);
+                                    if not _IsRowOfSparseMatrix(mat, x[1]) then
+                                        mat := UnionOfRows(mat, x[1]);
+                                        vec := UnionOfRows(vec, x[2]);
+                                    fi;
                                 fi;
                             fi;
                         od;
+                        
+                        if Nrows(mat) > Ncols(mat) then 
+                            x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
+    
+                            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+                        fi;
                     fi;
                 od;
             od;
@@ -1142,8 +1156,10 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                     if unknowns = [] then return; fi;
                     
                 elif x[1]!.indices[1] <> [] then 
-                    mat := UnionOfRows(mat, x[1]);
-                    vec := UnionOfRows(vec, x[2]);                    
+                    if not _IsRowOfSparseMatrix(mat, x[1]) then
+                        mat := UnionOfRows(mat, x[1]);
+                        vec := UnionOfRows(vec, x[2]);
+                    fi;
                 fi;               
             od;
         fi;
@@ -1248,8 +1264,10 @@ InstallGlobalFunction( MAJORANA_Resurrection,
                                                             
                         conj[2] := MAJORANA_ConjugateVector(    sum,g[2],
                                                                 setup );
-                        mat := UnionOfRows(mat, conj[1]);
-                        vec := UnionOfRows(vec, conj[2]);
+                        if not _IsRowOfSparseMatrix(mat, conj[1]) then
+                            mat := UnionOfRows(mat, conj[1]);
+                            vec := UnionOfRows(vec, conj[2]);
+                        fi;
                     od;
                 fi;
             fi;
@@ -1700,3 +1718,6 @@ function(input,index)
     od;
     
     end );
+
+
+    

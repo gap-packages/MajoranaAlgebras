@@ -302,6 +302,8 @@ InstallGlobalFunction(_IsRowOfSparseMatrix,
     
     if mat!.entries[pos] = row!.entries[1] then 
         return true;
+    else
+        return false;
     fi;
     
     end);
