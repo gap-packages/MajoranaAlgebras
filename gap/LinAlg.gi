@@ -288,3 +288,20 @@ InstallGlobalFunction(_FoldList2,
     return res[ k * s ];
 end );
 
+InstallGlobalFunction(_IsRowOfSparseMatrix,
+
+    function(mat, row)
+
+    local pos;
+    
+    pos := Position(mat!.indices, row!.indices[1]);
+    
+    if pos = fail then 
+        return false; 
+    fi;
+    
+    if mat!.entries[pos] = row!.entries[1] then 
+        return true;
+    fi;
+    
+    end);
