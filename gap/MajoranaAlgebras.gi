@@ -131,6 +131,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
 
     local   i,
             j,
+            k,
             a,
             b,
             dim,
@@ -157,7 +158,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
             new := [0,0,0];
             
             for j in [1..3] do 
-                new[j] := SparseMatrix(0, dim, [], [], Rationals);
+                new[j] := evecs[i][j];
             od;
             
             other_mat := SparseMatrix(0, dim, [], [], Rationals);
@@ -182,9 +183,23 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
                             
                             MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, innerproducts, algebraproducts, setup);
                             
-                        od;
+                        od;                        
                     od;
+                
+                    for k in [1..3] do 
+                        if Nrows(new[k]) > dim then 
+                            new[k] := EchelonMatDestructive(new[k]).vectors;
+                        fi;
+                    od;
+                    if Sum(List(new, x -> Nrows(x))) + Nrows(nullspace) >= dim - 1 then 
+                        break;
+                    fi;
                 od;
+                
+                if Sum(List(new, x -> Nrows(x))) + Nrows(nullspace) >= dim - 1 then 
+                    break;
+                fi;
+                                
             od;
             
             if other_mat <> [] then 
@@ -206,7 +221,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
             if ForAll(new, x -> x!.indices = []) then return; fi;
         
             for j in [1..3] do 
-                evecs[i][j] := UnionOfRows(evecs[i][j], new[j]);
+                evecs[i][j] := new[j];
                 evecs[i][j] := MAJORANA_BasisOfEvecs(evecs[i][j]);
             od;
         fi;        
