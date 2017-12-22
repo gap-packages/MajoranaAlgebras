@@ -62,6 +62,8 @@ DeclareGlobalFunction( "MAJORANA_SolveSingleSolution" );
 
 DeclareGlobalFunction( "MAJORANA_RemoveKnownAlgProducts" );
 
+DeclareGlobalFunction( "MAJORANA_RemoveKnownInnProducts" );
+
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
 DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );

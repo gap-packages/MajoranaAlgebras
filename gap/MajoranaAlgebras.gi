@@ -701,6 +701,15 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
                 od;
             fi;
         od;
+        
+        if Nrows(mat) > Ncols(mat) then 
+            x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, innerproducts);
+            
+            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+            
+            if unknowns = [] then return; fi;
+        fi;
+        
     od;
     
     MAJORANA_SolutionInnerProducts(mat,vec,unknowns,innerproducts);
@@ -1494,6 +1503,43 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     
     end );
     
+InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
+
+    function(mat, vec, unknowns, innerproducts)
+
+    local   unsolved, 
+            i, j, 
+            elm,
+            prod;
+
+    unsolved := [];
+    
+    for i in [1..Size(unknowns)] do 
+        prod := innerproducts[unknowns[i]];
+        
+        if prod <> false then 
+            for j in [1..Nrows(vec)] do 
+                elm := GetEntry(mat, j, i);
+                
+                if elm <> 0 then 
+                    AddToEntry(vec, j, 1, -elm*prod);
+                fi;
+            od;
+        else
+            Add(unsolved, i);
+        fi;
+    od;
+        
+    mat := CertainColumns(mat, unsolved);
+    unknowns := unknowns{unsolved};
+    
+    return rec( mat := mat, 
+                vec := vec, 
+                unknowns := unknowns);
+                
+    end );
+        
+    
 InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     
     # Takes a system [mat, vec] of unknown algebra products and removes 
@@ -1512,7 +1558,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             new,
             prod;
             
-    if mat = [] then 
+    if Nrows(mat) = 0 then 
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
@@ -1583,17 +1629,18 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     
 InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
 
-    function( mat, vec, UnknownInnerProducts, innerproducts)
+    function( mat, vec, unknowns, innerproducts)
     
     local   sol,    # solution of system
-            i,      # loop over <UnknownInnerProducts>
-            x;      # element of <UnknownInnerProducts>    
+            i,      # loop over <unknowns>
+            x,      # element of <unknowns> 
+            nonzero;   
 
     sol := MAJORANA_SolutionMatVecs(mat,vec);                   
         
     for i in [1..Size(sol.solutions)] do
         if sol.solutions[i] <> fail then
-            x := UnknownInnerProducts[i]; 
+            x := unknowns[i]; 
             if sol.solutions[i]!.entries[1] = [] then 
                 innerproducts[x] := 0;
             else
@@ -1602,7 +1649,23 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
         fi;
     od;
     
-    return [true];
+    x := MAJORANA_RemoveKnownInnProducts(   sol.mat, sol.vec,
+                                            unknowns, innerproducts );
+                                                    
+    nonzero := [];
+    
+    for i in [1..Nrows(x.mat)] do              
+        if x.mat!.indices[i] <> [] then 
+            Add(nonzero,i);
+        fi;
+    od;
+    
+    x.mat := CertainRows(x.mat, nonzero);
+    x.vec := CertainRows(x.vec, nonzero);
+                                        
+    return rec( mat := x.mat,
+                vec := x.vec,
+                unknowns := x.unknowns    );
     
     end );
     
