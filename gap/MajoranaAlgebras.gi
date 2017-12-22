@@ -942,6 +942,18 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
     
     if unknowns = [] then return; fi;
     
+    if Nrows(rep.nullspace) > 0 then 
+    
+        x := MAJORANA_NullspaceUnknowns(    mat, vec, unknowns, 
+                                            rep.algebraproducts, 
+                                            rep.setup, rep.nullspace, 
+                                            rep.group);
+    
+        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+    
+        if unknowns = [] then return; fi;
+    fi;
+    
     Info(   InfoMajorana, 50, "Building resurrection");
     
     for evals in [[1,2],[2,1],[1,3],[2,3]] do     
@@ -1034,14 +1046,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts1,
     od;
     
     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
-    
-    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-    
-    if unknowns = [] then return; fi;
-    
-    if Nrows(rep.nullspace) = 0 then return; fi;
-    
-    MAJORANA_NullspaceUnknowns(mat, vec, unknowns, rep.algebraproducts, rep.setup, rep.nullspace, rep.group);
     
     end );
 
@@ -1243,6 +1247,8 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     od;
 
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+    
+    return rec( mat := y.mat, vec := y.vec, unknowns := y.unknowns);
     
     end );
     
