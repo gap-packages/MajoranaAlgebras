@@ -814,7 +814,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
                         y[2] := MAJORANA_ThreeClosedConjugateVector(x[2] + table[j]*v, g[1], NewProductList, unknowns); 
                         y[2] := [MAJORANA_ThreeClosedRemoveNullspace( y[2], NewProductList[6])]; 
                         
-                        MAJORANA_Append(y,mat,vec);
+                        # MAJORANA_Append(y,mat,vec);
                     od;
                 fi;
             od;
@@ -1031,7 +1031,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
                                         z[1] := [MAJORANA_ThreeClosedConjugateRow(row, g[1],  NewProductList, new_unknowns, unknowns)];
                                         z[2] := [MAJORANA_ThreeClosedConjugateVector(sum, g[1], NewProductList, unknowns)];
                                         
-                                        MAJORANA_Append(z, mat, vec);
+                                        # MAJORANA_Append(z, mat, vec);
             
                                     od;
                                 fi;
