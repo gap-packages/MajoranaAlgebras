@@ -12,8 +12,6 @@ DeclareGlobalFunction( "MajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
 
-DeclareGlobalFunction( "MAJORANA_Append" );
-
 DeclareGlobalFunction( "MAJORANA_ConjugateVector" );
 
 DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
@@ -44,15 +42,11 @@ DeclareGlobalFunction( "MAJORANA_RecordSolution" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
-DeclareGlobalFunction( "MAJORANA_SingleSolutions" );
-
-DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts1" );
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 
 DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
-DeclareGlobalFunction( "MAJORANA_Resurrection1" );
 
 DeclareGlobalFunction( "MAJORANA_OutputError" );
 
@@ -72,6 +66,5 @@ DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
 DeclareInfoClass( "InfoMajorana" );
 
-DeclareInfoClass( "InfoMajoranaMainLoop" );
 
 
