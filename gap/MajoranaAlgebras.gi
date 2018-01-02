@@ -1135,8 +1135,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             if Size(setup.coords) = 176 then
                 y := algebraproducts[setup.pairorbit[x[1]][x[2]]];
                 
-                if y = false then 
-                   # Error("pause");
+                if false then 
+                   Error("pause");
                 fi;
             fi;
             
@@ -1186,7 +1186,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     x := x/elm;
     
     if Size(setup.coords) = 176 then 
-   # Error("pause single");
+        Error("pause single");
     fi;
     
     MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.indices[1][1]],
@@ -1330,6 +1330,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
                             
             if prod <> false then 
             
+                # if y = 48 then Error("pause"); fi;
+            
                 switch := true;
                 
                 g := setup.pairconj[x[1]][x[2]][1];
@@ -1341,12 +1343,16 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
                 for j in [1..Nrows(vec)] do 
                     elm := GetEntry(mat, j, i);
                     if elm <> 0 then
-                        new!.indices[i] := prod!.indices[1];
-                        new!.entries[i] := -sign*elm*prod!.entries[1];
+                        new!.indices[j] := prod!.indices[1];
+                        new!.entries[j] := -sign*elm*prod!.entries[1];
                     fi;
                 od;
                 
+                # if y = 48 then Error("pause"); fi;
+                
                 vec := vec + new;
+                
+                # if y = 48 then Error("pause"); fi;
                 
             else
                 Add(unsolved,i);
