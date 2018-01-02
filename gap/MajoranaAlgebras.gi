@@ -1047,7 +1047,11 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                                                         
                     mat := y.mat; vec := y.vec; unknowns := y.unknowns;
                                                         
-                    if unknowns = [] then return; fi;
+                    if unknowns = [] then 
+                        return rec( mat := SparseMatrix(0, 0, [], [], Rationals),
+                                    vec := SparseMatrix(0, 0, [], [], Rationals),
+                                    unknowns := []); 
+                    fi;
                     
                 elif x[1]!.indices[1] <> [] then 
                     if not _IsRowOfSparseMatrix(mat, x[1]) then
