@@ -1266,7 +1266,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             sign,
             g,
             new,
-            switch,
+            pos,
             prod;
             
     if Nrows(mat) = 0 then 
@@ -1277,67 +1277,50 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
+
+    unsolved := [];
     
-    switch := true;
-
-    # while switch = true do 
+    for i in [1..Size(unknowns)] do 
     
-        switch := false;
-
-        unsolved := [];
+        x := unknowns[i]; 
+                    
+        y := setup.pairorbit[x[1]][x[2]];
         
-        for i in [1..Size(unknowns)] do 
-        
-            x := unknowns[i]; 
-                        
-            y := setup.pairorbit[x[1]][x[2]];
-            
-            if y > 0 then 
-                sign := 1;
-            else
-                sign := -1;
-                y := -y;
-            fi;
-            
-            prod := algebraproducts[y];
-                            
-            if prod <> false then 
-            
-                switch := true;
-                
-                g := setup.pairconj[x[1]][x[2]][1];
-                
-                prod := MAJORANA_ConjugateVector(prod,g,setup);
-                
-                new := SparseZeroMatrix(Nrows(vec), Ncols(vec), Rationals);
-                
-                for j in [1..Nrows(vec)] do 
-                    elm := GetEntry(mat, j, i);
-                    if elm <> 0 then
-                        new!.indices[j] := prod!.indices[1];
-                        new!.entries[j] := -sign*elm*prod!.entries[1];
-                    fi;
-                od;
-                
-                vec := vec + new;
-                
-            else
-                Add(unsolved,i);
-            fi;
-        od;
-
-        mat := CertainColumns(mat, unsolved);
-        unknowns := unknowns{unsolved};
-        
-        if false then 
-        
-            x := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, algebraproducts, setup); 
-            
-            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-            
+        if y > 0 then 
+            sign := 1;
+        else
+            sign := -1;
+            y := -y;
         fi;
         
-    # od;
+        prod := algebraproducts[y];
+                        
+        if prod <> false then 
+            
+            g := setup.pairconj[x[1]][x[2]][1];
+            
+            prod := MAJORANA_ConjugateVector(prod,g,setup);
+            
+            new := SparseZeroMatrix(Nrows(vec), Ncols(vec), Rationals);
+            
+            for j in [1..Nrows(vec)] do 
+                pos := Position(mat!.indices[j], i);
+                if pos <> fail then
+                    elm := mat!.entries[j][pos];
+                    new!.indices[j] := prod!.indices[1];
+                    new!.entries[j] := -sign*elm*prod!.entries[1];
+                fi;
+            od;
+            
+            vec := vec + new;
+            
+        else
+            Add(unsolved,i);
+        fi;
+    od;
+
+    mat := CertainColumns(mat, unsolved);
+    unknowns := unknowns{unsolved};
 
     return rec( mat := mat, 
                 vec := vec, 
