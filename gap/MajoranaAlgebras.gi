@@ -1269,7 +1269,6 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             y,
             sign,
             g,
-            new,
             pos,
             prod;
             
@@ -1305,19 +1304,14 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             prod := MAJORANA_ConjugateVector(prod,g,setup);
             
-            new := SparseZeroMatrix(Nrows(vec), Ncols(vec), Rationals);
-            
             for j in [1..Nrows(vec)] do 
                 pos := Position(mat!.indices[j], i);
                 if pos <> fail then
                     elm := mat!.entries[j][pos];
-                    new!.indices[j] := prod!.indices[1];
-                    new!.entries[j] := -sign*elm*prod!.entries[1];
+                    AddRow( prod!.indices[1],-sign*elm*prod!.entries[1], 
+                            vec!.indices, vec!.entries, j);
                 fi;
-            od;
-            
-            vec := vec + new;
-            
+            od;            
         else
             Add(unsolved,i);
         fi;
