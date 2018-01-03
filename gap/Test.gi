@@ -76,29 +76,33 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                     ev_b := evecs[i][b];
                     
                     ev := MAJORANA_FusionTable[a + 1][b + 1];
-
+                    
                     for j in [1..Nrows(ev_a)] do  
                         v := CertainRows(ev_a, [j]);
-                        for k in [1..Nrows(ev_b)] do
-                            w := CertainRows(ev_b, [k]);
-                        
-                            x := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
+                        if MAJORANA_InnerProduct(v, v, innerproducts, setup) <> 0 then 
+                            for k in [1..Nrows(ev_b)] do
+                                w := CertainRows(ev_b, [k]);
+                                if MAJORANA_InnerProduct(w, w, innerproducts, setup) <> 0 then 
                             
-                            if x <> false then
-                                y:=MAJORANA_AlgebraProduct(u,x,algebraproducts,setup);
-                                
-                                if y <> false and y <> ev * x then 
+                                    x := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
                                     
-                                    test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, innerproducts, setup);
-                                    
-                                    if not test in [0, false] then 
-                                        Error("Fusion");
-                                    
-                                        Add(errorfusion,[i,a,b,v,w]);
+                                    if x <> false then
+                                        y:=MAJORANA_AlgebraProduct(u,x,algebraproducts,setup);
+                                        
+                                        if y <> false and y <> ev * x then 
+                                            
+                                            test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, innerproducts, setup);
+                                            
+                                            if not test in [0, false] then 
+                                                Error("Fusion");
+                                            
+                                                Add(errorfusion,[i,a,b,v,w]);
+                                            fi;
+                                        fi;
                                     fi;
                                 fi;
-                            fi;
-                        od;
+                            od;
+                        fi;
                     od;
                     
                 # 1/4,1/4 fusion is special
@@ -112,32 +116,35 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                     
                     for j in [1..Nrows(ev_a)] do  
                         v := CertainRows(ev_a, [j]);
-                        for k in [1..Nrows(ev_b)] do
-                            w := CertainRows(ev_b, [k]);
-                        
-                            x := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
-                            
-                            if x <> false then
+                        if MAJORANA_InnerProduct(v, v, innerproducts, setup) <> 0 then 
+                            for k in [1..Nrows(ev_b)] do
+                                if MAJORANA_InnerProduct(w, w, innerproducts, setup) <> 0 then 
+                                    w := CertainRows(ev_b, [k]);
                                 
-                                z := MAJORANA_InnerProduct(u,x,innerproducts, setup);
+                                    x := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
                                     
-                                if z <> false then 
-                                    
-                                    x := x - z*u;
-                                    y := MAJORANA_AlgebraProduct(u,x,algebraproducts,setup);
-                                    
-                                    if y <> false and y <> ev * x then 
-                                        test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, innerproducts, setup);
-                                    
-                                        if not test in [0, false] then 
-                                            Error("Fusion");
-                                            Add(errorfusion,[i,a,b,v,w]);
+                                    if x <> false then
+                                        
+                                        z := MAJORANA_InnerProduct(u,x,innerproducts, setup);
+                                            
+                                        if z <> false then 
+                                            
+                                            x := x - z*u;
+                                            y := MAJORANA_AlgebraProduct(u,x,algebraproducts,setup);
+                                            
+                                            if y <> false and y <> ev * x then 
+                                                test := MAJORANA_InnerProduct(y - ev*x, y - ev*x, innerproducts, setup);
+                                            
+                                                if not test in [0, false] then 
+                                                    Error("Fusion");
+                                                    Add(errorfusion,[i,a,b,v,w]);
+                                                fi;
+                                            fi;
                                         fi;
                                     fi;
-                                    
                                 fi;
-                            fi;
-                        od;
+                            od;
+                        fi;
                     od;
                 
                 # 1/32,1/32 fusion is even more special
@@ -151,39 +158,43 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                     
                     for j in [1..Nrows(ev_a)] do  
                         v := CertainRows(ev_a, [j]);
-                        for k in [1..Nrows(ev_b)] do
-                            w := CertainRows(ev_b, [k]);
-                        
-                            x := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
+                        if MAJORANA_InnerProduct(v, v, innerproducts, setup) <> 0 then 
+                            for k in [1..Nrows(ev_b)] do
+                                w := CertainRows(ev_b, [k]);
+                                if MAJORANA_InnerProduct(w,w, innerproducts, setup) <> 0 then 
                             
-                            if x <> false then 
-                            
-                                x0 := MAJORANA_AlgebraProduct(u,x,algebraproducts,setup);
-                                
-                                if x0 <> false then 
-                                
-                                    y := MAJORANA_InnerProduct(u,x,innerproducts,setup);
-                
-                                    if y <> false then 
-                                        
-                                        x0 := x0 - y*u;
-                                        
-                                        z := MAJORANA_AlgebraProduct(u,x0,algebraproducts,setup);
-                                        
-                                        if (z <> false) and (z <> x0*(1/4)) then  
-                                        
-                                            test := MAJORANA_InnerProduct(z - x0*(1/4),z - x0*(1/4), innerproducts, setup);
+                                    x := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
                                     
-                                            if not test in [0, false] then 
-                                                Error("Fusion");
-                                                Add(errorfusion,[i,a,b,v,w]);
-                                            fi;
+                                    if x <> false then 
+                                    
+                                        x0 := MAJORANA_AlgebraProduct(u,x,algebraproducts,setup);
                                         
+                                        if x0 <> false then 
+                                        
+                                            y := MAJORANA_InnerProduct(u,x,innerproducts,setup);
+                        
+                                            if y <> false then 
+                                                
+                                                x0 := x0 - y*u;
+                                                
+                                                z := MAJORANA_AlgebraProduct(u,x0,algebraproducts,setup);
+                                                
+                                                if (z <> false) and (z <> x0*(1/4)) then  
+                                                
+                                                    test := MAJORANA_InnerProduct(z - x0*(1/4),z - x0*(1/4), innerproducts, setup);
+                                            
+                                                    if not test in [0, false] then 
+                                                        Error("Fusion");
+                                                        Add(errorfusion,[i,a,b,v,w]);
+                                                    fi;
+                                                
+                                                fi;
+                                            fi;
                                         fi;
                                     fi;
                                 fi;
-                            fi;
-                        od;
+                            od;
+                        fi;
                     od;
                 fi;
             od;
