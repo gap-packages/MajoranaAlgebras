@@ -148,9 +148,10 @@ BindGlobal("3S7",function()
     G := Group(z1,z2);
     C := ConjugacyClasses(G);
     C := Filtered(C,x -> Order(Representative(x)) = 2);
+    C := Filtered(C,x -> Size(x) in [63, 105]); 
     T := [];
     Append(T,AsList(C[1]));
-    Append(T,AsList(C[3]));
+    Append(T,AsList(C[2]));
     ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);;
     return  ex;
     end );
