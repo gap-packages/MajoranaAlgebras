@@ -1347,14 +1347,12 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             prod := MAJORANA_ConjugateVector(prod,g,setup);
             
-            for j in [1..Nrows(vec)] do 
-                if Size(mat!.indices[j]) > 1 then 
-                    pos := Position(mat!.indices[j], i);
-                    if pos <> fail then
-                        elm := mat!.entries[j][pos];
-                        AddRow( prod!.indices[1],-sign*elm*prod!.entries[1], 
-                                vec!.indices, vec!.entries, j);
-                    fi;
+            for j in [1..Nrows(vec)] do  
+                pos := Position(mat!.indices[j], i);
+                if pos <> fail then
+                    elm := mat!.entries[j][pos];
+                    AddRow( prod!.indices[1],-sign*elm*prod!.entries[1], 
+                            vec!.indices, vec!.entries, j);
                 fi;
             od;            
         else
