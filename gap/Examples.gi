@@ -141,6 +141,57 @@ BindGlobal("3A7",function()
     return  ex;
     end );
     
+BindGlobal("L34",function()
+    local G, T, ex;
+    G := PSL(3,4);;
+    T := Filtered(G, x -> Order(x) = 2);;
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);;
+    return ex;
+    end );
+    
+BindGlobal("L42",function()
+    local G, T, C, ex;
+    G := PSL(4,2);
+    C := ConjugacyClasses(G);
+    C := Filtered(C, x -> Order(Representative(x)) = 2);
+    C := Filtered(C, x -> Size(x) = 210);
+    T := ShallowCopy(AsList(C[1]));
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return ex;
+    end );
+
+BindGlobal("U33",function()
+    local G, T, ex;
+    G := PSU(3,3);
+    T := Filtered(G, x -> Order(x) = 2);
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return(ex); 
+    end);
+    
+BindGlobal("U42T1",function()
+    local G, T, C, ex;
+    G := PSU(4,2);
+    C := ConjugacyClasses(G);
+    C := Filtered(C, x -> Order(Representative(x)) = 2);
+    C := Filtered(C, x -> Size(x) = 45);
+    T := ShallowCopy(AsList(C[1]));
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return ex;
+    end );
+    
+BindGlobal("U42T2",function()
+    local G, T, C, ex;
+    G := PSU(4,2);
+    C := ConjugacyClasses(G);
+    C := Filtered(C, x -> Order(Representative(x)) = 2);
+    C := Filtered(C, x -> Size(x) = 270);
+    T := ShallowCopy(AsList(C[1]));
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return ex;
+    end );
+    
+    
+    
 BindGlobal("3S7",function()
     local z1, z2, G, T, C, ex;
     z1 := PermList([ 1,6,5,9,3,2,11,8,4,14,7,17,20,10,23,25,12,30,29,13,34,36,15,39,16, 42,43,28,19,18,40,46,33,21,50,22,37,44,24,31,49,26,27,38,55,32,56,48,41,35, 58,52,53,54,45,47,62,51,63,60,61,57,59]);
