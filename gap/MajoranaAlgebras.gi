@@ -1200,6 +1200,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     
     local   elm, 
             y,
+            switch,
             nonzero,
             i;
             
@@ -1224,13 +1225,51 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
             fi;
         od;
         
-        y.mat := CertainRows(y.mat, nonzero);
-        y.vec := CertainRows(y.vec, nonzero);
+        mat := CertainRows(y.mat, nonzero);
+        vec := CertainRows(y.vec, nonzero);
+        unknowns := y.unknowns;
+        
+        switch := true;
+    
+        while switch = true do 
+        
+            switch := false;
+
+            for i in [1..Nrows(mat)] do 
+                if Size(mat!.indices[i]) = 1 then 
+                    Info( InfoMajorana, 60, "Solved a new single solution");
+                    switch := true;
+                    elm := mat!.entries[i][1];
+                    MAJORANA_RecordSolution(    CertainRows(vec, [i])*(1/elm), 
+                                                unknowns[mat!.indices[i][1]], 
+                                                algebraproducts, setup);
+                fi;;
+            od;
+            
+            x := MAJORANA_RemoveKnownAlgProducts(   mat,
+                                                    vec,
+                                                    unknowns,
+                                                    algebraproducts,
+                                                    setup         );
+                                                            
+            nonzero := [];
+            
+            for i in [1..Nrows(x.mat)] do              
+                if x.mat!.indices[i] <> [] then 
+                    Add(nonzero,i);
+                fi;
+            od;
+            
+            mat := CertainRows(x.mat, nonzero);
+            vec := CertainRows(x.vec, nonzero);
+            unknowns := x.unknowns;
+        od;
+        
     fi;
                                         
-    return rec( mat := y.mat,
-                vec := y.vec,
-                unknowns := y.unknowns    );
+    return rec( mat := mat,
+                vec := vec,
+                unknowns := unknowns    );
     
     end );
     
@@ -1358,10 +1397,10 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             Add(unsolved,i);
         fi;
     od;
-
+    
     mat := CertainColumns(mat, unsolved);
     unknowns := unknowns{unsolved};
-
+    
     return rec( mat := mat, 
                 vec := vec, 
                 unknowns := unknowns);
