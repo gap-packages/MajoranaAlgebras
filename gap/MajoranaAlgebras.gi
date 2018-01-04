@@ -85,7 +85,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     function(a, b, i, evals, other_mat, new, innerproducts, algebraproducts, setup)
     
     local   dim,
-            u,
+            u, 
             test,
             new_ev,
             pos,
@@ -131,7 +131,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
 
     local   i,
             j,
-            k,
+            k, l,
             a,
             b,
             dim,
@@ -158,7 +158,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
             new := [0,0,0];
             
             for j in [1..3] do 
-                new[j] := evecs[i][j];
+                new[j] := CopyMat(evecs[i][j]);
             od;
             
             other_mat := SparseMatrix(0, dim, [], [], Rationals);
@@ -187,10 +187,11 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
                     od;
                 
                     for k in [1..3] do 
-                        if Nrows(new[k]) > dim then 
+                        if Nrows(new[k]) > dim then                             
                             new[k] := EchelonMatDestructive(new[k]).vectors;
                         fi;
                     od;
+                    
                     if Sum(List(new, x -> Nrows(x))) + Nrows(nullspace) >= dim - 1 then 
                         break;
                     fi;
@@ -202,7 +203,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
                                 
             od;
             
-            if other_mat <> [] then 
+            if Nrows(other_mat) > 0 then 
                 u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
                 bad := MAJORANA_FindBadIndices(u,algebraproducts, setup );
@@ -1100,6 +1101,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             prod,
             perm,
             nonzero,
+            elm,
+            switch,
             j;
     
     if ForAll(mat!.indices, x -> x = []) then
@@ -1143,12 +1146,50 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         fi;
     od;
     
-    x.mat := CertainRows(x.mat, nonzero);
-    x.vec := CertainRows(x.vec, nonzero);
+    mat := CertainRows(x.mat, nonzero);
+    vec := CertainRows(x.vec, nonzero);
+    unknowns := x.unknowns;
+
+    # TODO fix this
+
+    switch := true;
+    
+    while false do 
+    
+        switch := false;
+
+        for i in [1..Nrows(mat)] do 
+            if Size(mat!.indices[i]) = 1 then 
+                switch := true;
+                elm := mat!.entries[i][1];
+                MAJORANA_RecordSolution(    CertainRows(vec, [i])*(1/elm), 
+                                            unknowns[i], algebraproducts,
+                                            setup);
+            fi;;
+        od;
+        
+        x := MAJORANA_RemoveKnownAlgProducts(   mat,
+                                                vec,
+                                                unknowns,
+                                                algebraproducts,
+                                                setup         );
+                                                        
+        nonzero := [];
+        
+        for j in [1..Nrows(x.mat)] do              
+            if x.mat!.indices[j] <> [] then 
+                Add(nonzero,j);
+            fi;
+        od;
+        
+        mat := CertainRows(x.mat, nonzero);
+        vec := CertainRows(x.vec, nonzero);
+        unknowns := x.unknowns;
+    od;
                                         
-    return rec( mat := x.mat,
-                vec := x.vec,
-                unknowns := x.unknowns    );
+    return rec( mat := mat,
+                vec := vec,
+                unknowns := unknowns    );
     
     end );
     
