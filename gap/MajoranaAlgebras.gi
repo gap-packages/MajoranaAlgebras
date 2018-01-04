@@ -1237,7 +1237,6 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
 
             for i in [1..Nrows(mat)] do 
                 if Size(mat!.indices[i]) = 1 then 
-                    Info( InfoMajorana, 60, "Solved a new single solution");
                     switch := true;
                     elm := mat!.entries[i][1];
                     MAJORANA_RecordSolution(    CertainRows(vec, [i])*(1/elm), 
@@ -1245,6 +1244,10 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
                                                 algebraproducts, setup);
                 fi;;
             od;
+            
+            if switch = true then 
+                Info( InfoMajorana, 60, "Solved a new single solution"); 
+            fi;
             
             x := MAJORANA_RemoveKnownAlgProducts(   mat,
                                                     vec,
