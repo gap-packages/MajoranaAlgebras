@@ -183,6 +183,7 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
                             
                             MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, innerproducts, algebraproducts, setup);
                             
+                            
                         od;                        
                     od;
                 
@@ -334,7 +335,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            vec := vec + MAJORANA_ConjugateVector(vecs[i],elts[i], list);
+            x := MAJORANA_ConjugateVector(vecs[i],elts[i],list);
+            AddRow(x!.indices[1],x!.entries[1],vec!.indices,vec!.entries,1);
         od;
                 
         return vec;
