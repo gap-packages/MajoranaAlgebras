@@ -1152,21 +1152,20 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     vec := CertainRows(x.vec, nonzero);
     unknowns := x.unknowns;
 
-    # TODO fix this
-
     switch := true;
     
-    while false do 
+    while switch = true do 
     
         switch := false;
 
         for i in [1..Nrows(mat)] do 
             if Size(mat!.indices[i]) = 1 then 
+                Info( InfoMajorana, 60, "Solved a new single solution");
                 switch := true;
                 elm := mat!.entries[i][1];
                 MAJORANA_RecordSolution(    CertainRows(vec, [i])*(1/elm), 
-                                            unknowns[i], algebraproducts,
-                                            setup);
+                                            unknowns[mat!.indices[i][1]], 
+                                            algebraproducts, setup);
             fi;;
         od;
         
