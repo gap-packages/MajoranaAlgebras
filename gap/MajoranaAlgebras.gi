@@ -114,7 +114,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         if y <> false and z <> false then 
             new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
             new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
-        elif y <> false then 
+        elif other_mat <> false and y <> false then 
             other_mat := UnionOfRows(other_mat, x - (1/32)*u*y);
         fi;  
     else
