@@ -957,7 +957,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             fi;
                         od;
                         
-                        if Nrows(mat) > Ncols(mat) then 
+                        if Nrows(mat) > Ncols(mat)/2 then 
                         
                             x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
@@ -1115,6 +1115,12 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
     Info(   InfoMajorana, 40, 
             STRINGIFY("Solving a ", Nrows(mat), " x ", Ncols(mat), " matrix") );
+            
+    for i in [1..Nrows(mat)] do 
+        x := _FoldList2(mat!.entries[i], DenominatorRat, LcmInt);
+        mat!.entries[i] := mat!.entries[i]*x;
+        vec!.entries[i] := vec!.entries[i]*x;
+    od;
     
     sol := MAJORANA_SolutionMatVecs(mat,vec);
     
