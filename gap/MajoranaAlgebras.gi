@@ -100,25 +100,27 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
-                    
-    if evals = [2,2] then 
-        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
-        
-        if y <> false then 
-            new[1] := UnionOfRows(new[1], x - (1/4)*u*y);
+    
+    if x <> false then
+        if evals = [2,2] then 
+            y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+            
+            if y <> false then 
+                new[1] := UnionOfRows(new[1], x - (1/4)*u*y);
+            fi;
+        elif evals = [3,3] then 
+            y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+            z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
+            
+            if y <> false and z <> false then 
+                new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
+                new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
+            elif other_mat <> false and y <> false then 
+                other_mat := UnionOfRows(other_mat, x - (1/32)*u*y);
+            fi;  
+        else
+            new[pos] := UnionOfRows(new[pos],x);
         fi;
-    elif evals = [3,3] then 
-        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
-        z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
-        
-        if y <> false and z <> false then 
-            new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
-            new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
-        elif other_mat <> false and y <> false then 
-            other_mat := UnionOfRows(other_mat, x - (1/32)*u*y);
-        fi;  
-    else
-        new[pos] := UnionOfRows(new[pos],x);
     fi;
     
     end );
