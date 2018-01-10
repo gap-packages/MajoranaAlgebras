@@ -179,9 +179,9 @@ function(innerproducts, algebraproducts, evecs, setup, nullspace)
                             null := SparseIdentityMatrix(Nrows(evecs[i][ev_b]));
                         fi;
                         
-                        for j in [1..Nrows(null)] do 
+                        for k in [1..Nrows(null)] do 
                             
-                            b := CertainRows(null, [j])*evecs[i][ev_b];
+                            b := CertainRows(null, [k])*evecs[i][ev_b];
                             
                             MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, innerproducts, algebraproducts, setup);
                             
@@ -960,7 +960,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         od;
                         
                         if Nrows(mat) > Ncols(mat)/2 then 
-                        
                             x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
                             mat := x.mat; vec := x.vec; unknowns := x.unknowns;
