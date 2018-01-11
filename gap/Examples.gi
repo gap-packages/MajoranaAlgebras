@@ -252,3 +252,14 @@ BindGlobal("2wr2", function()
     ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
     return ex;
     end);
+
+BindGlobal("thesis", function()
+    local a, b, c, T, G, ex;
+    a := (1,2)(3,4);;
+    b := (5,6)(7,8);;
+    c := (1,3)(5,7);;
+    G := Group(a,b,c);;
+    T := [a, a^c, b, b^c, c, c^a, c^b, c^(a*b), a*b, (a*b)^c];;
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return ex;
+    end );
