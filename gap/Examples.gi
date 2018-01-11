@@ -9,8 +9,8 @@ BindGlobal("PSL211",function()
     
 BindGlobal("2XD8",function()
     local G, T, input, res;
-    T:=[ (1,2)(5,6), (3,4)(5,6), (1,3)(2,4)(5,6), (1,4)(2,3)(5,6), (1,3)(2,4), (1,4)(2,3) ];
-    G := Group(T);
+    T:=[ (5,7)(6,8), (3,4)(5,7), (3,6)(4,8), (3,8)(4,6), (1,2)(6,8), (1,2)(3,4) ];
+    G := Group([ (1,2)(6,8), (5,7)(6,8), (3,6)(4,8) ]);
     input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
     res := MajoranaRepresentation(input,1);
     return res;
@@ -189,8 +189,6 @@ BindGlobal("U42T2",function()
     ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
     return ex;
     end );
-    
-    
     
 BindGlobal("3S7",function()
     local z1, z2, G, T, C, ex;
