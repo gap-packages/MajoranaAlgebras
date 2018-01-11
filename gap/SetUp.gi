@@ -64,6 +64,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         elif Order(x[1]*x[2])=6 then
             shape[i]:="6A";
             Add(RepsSquares6A,(x[1]*x[2])^2);
+        else 
+            Error("This is not a 6-transposition group");
         fi;
     od;
 
