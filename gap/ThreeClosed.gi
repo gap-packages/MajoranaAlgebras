@@ -117,7 +117,7 @@ InstallGlobalFunction(ThreeClosedMajorana,
         newfalsecount[2] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(new.innerproducts));
         
         if falsecount[1] <> 0 and newfalsecount[2] = 0 then 
-            new.nullspace := NullspaceMat(new.innerproducts);
+            new.nullspace := SparseMatrix(NullspaceMat(new.innerproducts), Rationals);
         fi;
     
         Display([falsecount,newfalsecount]);
