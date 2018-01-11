@@ -1,3 +1,5 @@
+DeclareGlobalFunction( "MAJORANA_ThreeClosedSetUp" );
+
 DeclareGlobalFunction( "ThreeClosedMajorana" );
 
 DeclareGlobalFunction( "MAJORANA_ThreeClosedFusion" );
