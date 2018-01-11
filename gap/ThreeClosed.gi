@@ -116,7 +116,7 @@ InstallGlobalFunction(ThreeClosedMajorana,
         newfalsecount[1] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(new.algebraproducts));
         newfalsecount[2] := Size(MAJORANA_ThreeClosedExtractUnknownProducts(new.innerproducts));
         
-        if falsecount[1] <> 0 and newfalsecount[2] = 0 then 
+        if falsecount[2] <> 0 and newfalsecount[2] = 0 then 
             new.nullspace := SparseMatrix(NullspaceMat(new.innerproducts), Rationals);
         fi;
     
@@ -296,12 +296,12 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
     dim := new_dim - Size(unknowns);
     
     for i in [1..dim] do 
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
         
         for j in [1..Size(unknowns)] do 
             if NewGramMatrix[i][dim + j] = false then 
-                v := SparseMatrix(1, dim, [[unknowns[j][1]]], [[1]], Rationals);
-                w := SparseMatrix(1, dim, [[unknowns[j][2]]], [[1]], Rationals);
+                v := SparseMatrix(1, new_dim, [[unknowns[j][1]]], [[1]], Rationals);
+                w := SparseMatrix(1, new_dim, [[unknowns[j][2]]], [[1]], Rationals);
                 
                 x := MAJORANA_ThreeClosedProduct(u, v, NewAlgebraProducts);
                 
@@ -439,7 +439,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
         
         u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
         
-        for evals in [[1,1],[1,2],[1,3],[2,1],[2,3],[3,1],[3,2]] do
+        for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
     
             new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
             pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
