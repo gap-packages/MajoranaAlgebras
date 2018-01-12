@@ -74,6 +74,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     od;
     
     return rec( unknowns := unknowns,
+                setup := rep.setup,
                 group := rep.group, 
                 shape := rep.shape, 
                 involutions := rep.involutions,
@@ -101,15 +102,15 @@ InstallGlobalFunction(ThreeClosedMajorana,
     
     while true do 
     
-        MAJORANA_ThreeClosedAxiomM1(new.innerproducts, new.algebraproducts, rep.setup, new.unknowns);
+        MAJORANA_ThreeClosedAxiomM1(new);
         
-        MAJORANA_ThreeClosedFusion(new.innerproducts, new.algebraproducts, rep.evecs, rep.setup, new.unknowns);
+        MAJORANA_ThreeClosedFusion(new);
         
-        x := MAJORANA_ThreeClosedEigenvectorsAlgebraUnknowns(new.algebraproducts, rep.evecs,  rep.setup, new.unknowns, new.nullspace);
+        x := MAJORANA_ThreeClosedEigenvectorsAlgebraUnknowns(new);
         
-        MAJORANA_ThreeClosedResurrection(x[1],x[2],new.innerproducts, new.algebraproducts, rep.evecs, rep.setup, new.unknowns);
+        MAJORANA_ThreeClosedResurrection(x[1],x[2],new);
         
-        MAJORANA_ThreeClosedOrthogonality(new.innerproducts, rep.evecs, rep.setup, new.unknowns);
+        MAJORANA_ThreeClosedOrthogonality(new);
     
         newfalsecount := [0,0];
         
@@ -279,7 +280,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSeparateProduct,
     
 InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
 
-    function(NewGramMatrix, NewAlgebraProducts, setup, unknowns)
+    function(new)
     
     local   dim,
             new_dim,
@@ -292,35 +293,35 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
             x,
             y;
 
-    new_dim := Size(setup.coords);
-    dim := new_dim - Size(unknowns);
+    new_dim := Size(new.setup.coords);
+    dim := new_dim - Size(new.unknowns);
     
     for i in [1..dim] do 
         u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
         
-        for j in [1..Size(unknowns)] do 
-            if NewGramMatrix[i][dim + j] = false then 
-                v := SparseMatrix(1, new_dim, [[unknowns[j][1]]], [[1]], Rationals);
-                w := SparseMatrix(1, new_dim, [[unknowns[j][2]]], [[1]], Rationals);
+        for j in [1..Size(new.unknowns)] do 
+            if new.innerproducts[i][dim + j] = false then 
+                v := SparseMatrix(1, new_dim, [[new.unknowns[j][1]]], [[1]], Rationals);
+                w := SparseMatrix(1, new_dim, [[new.unknowns[j][2]]], [[1]], Rationals);
                 
-                x := MAJORANA_ThreeClosedProduct(u, v, NewAlgebraProducts);
+                x := MAJORANA_ThreeClosedProduct(u, v, new.algebraproducts);
                 
                 if x <> false then
-                    NewGramMatrix[i][dim + j] := MAJORANA_ThreeClosedProduct(x,w,NewGramMatrix);
-                    NewGramMatrix[dim + j][i] := MAJORANA_ThreeClosedProduct(x,w,NewGramMatrix);
+                    new.innerproducts[i][dim + j] := MAJORANA_ThreeClosedProduct(x,w,new.innerproducts);
+                    new.innerproducts[dim + j][i] := MAJORANA_ThreeClosedProduct(x,w,new.innerproducts);
                 fi; 
                 
-                if NewGramMatrix[i][dim + j] = false then
-                    x := MAJORANA_ThreeClosedProduct(u,w,NewAlgebraProducts);
+                if new.innerproducts[i][dim + j] = false then
+                    x := MAJORANA_ThreeClosedProduct(u,w,new.algebraproducts);
                     
                     if x <> false then 
                         
-                        y := MAJORANA_ThreeClosedProduct(x,v,NewGramMatrix);
+                        y := MAJORANA_ThreeClosedProduct(x,v,new.innerproducts);
                         
                         if y <> false then 
                             
-                          NewGramMatrix[i][dim + j] := y;
-                          NewGramMatrix[dim + j][i] := y;
+                          new.innerproducts[i][dim + j] := y;
+                          new.innerproducts[dim + j][i] := y;
                           
                         fi;
                     fi;
@@ -329,23 +330,23 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
         od;
     od;
     
-    for i in [1..Size(unknowns)] do 
-        for j in [1..Size(unknowns)] do 
+    for i in [1..Size(new.unknowns)] do 
+        for j in [1..Size(new.unknowns)] do 
             for k in [[1,2],[2,1]] do 
-                if NewGramMatrix[dim + i][dim + j] = false then 
+                if new.innerproducts[dim + i][dim + j] = false then 
                     
-                    u := SparseMatrix(1, new_dim, [[unknowns[i][k[1]]]], [[1]], Rationals);
-                    v := SparseMatrix(1, new_dim, [[unknowns[i][k[2]]]], [[1]], Rationals);
+                    u := SparseMatrix(1, new_dim, [[new.unknowns[i][k[1]]]], [[1]], Rationals);
+                    v := SparseMatrix(1, new_dim, [[new.unknowns[i][k[2]]]], [[1]], Rationals);
                     w := SparseMatrix(1, new_dim, [[dim + j]], [[1]], Rationals);
                     
-                    x := MAJORANA_ThreeClosedProduct(v,w,NewAlgebraProducts);
+                    x := MAJORANA_ThreeClosedProduct(v,w,new.algebraproducts);
                     
                     if x <> false then 
-                        y := MAJORANA_ThreeClosedProduct(x,u,NewGramMatrix);
+                        y := MAJORANA_ThreeClosedProduct(x,u,new.innerproducts);
                        
                         if y <> false then 
-                            NewGramMatrix[dim + i][dim + j] := y;
-                            NewGramMatrix[dim + j][dim + i] := y;
+                            new.innerproducts[dim + i][dim + j] := y;
+                            new.innerproducts[dim + j][dim + i] := y;
                         fi;
                     fi;
                 fi;
@@ -356,7 +357,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
     end );
     
 InstallGlobalFunction(MAJORANA_ThreeClosedFuseEigenvectors,
-    function(a, b, i, evals, new, NewGramMatrix, NewAlgebraProducts, setup)
+    function(a, b, i, evals, fusion, innerproducts, algebraproducts)
     
     local   x,
             y,
@@ -366,32 +367,32 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFuseEigenvectors,
             new_ev,
             pos;
     
-    new_dim := Size(setup.coords);
+    new_dim := Size(algebraproducts);
     
     u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
     
     new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
     
-    x := MAJORANA_ThreeClosedProduct(a, b, NewAlgebraProducts);
+    x := MAJORANA_ThreeClosedProduct(a, b, algebraproducts);
     
     if x <> false then 
         if evals = [2,2] then 
-            y := MAJORANA_ThreeClosedProduct(a,b,NewGramMatrix);
+            y := MAJORANA_ThreeClosedProduct(a,b,innerproducts);
             
             if y <> false then 
-                new[1] := UnionOfRows(new[1], x - (1/4)*u*y);
+                fusion[1] := UnionOfRows(fusion[1], x - (1/4)*u*y);
             fi;
         elif evals = [3,3] then 
-            y := MAJORANA_ThreeClosedProduct(a,b,NewGramMatrix);
-            z := MAJORANA_ThreeClosedProduct(u,x,NewAlgebraProducts);
+            y := MAJORANA_ThreeClosedProduct(a,b,innerproducts);
+            z := MAJORANA_ThreeClosedProduct(u,x,algebraproducts);
             
             if y <> false and z <> false then 
-                new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
-                new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
+                fusion[2] := UnionOfRows(fusion[2], z - (1/32)*u*y);
+                fusion[1] := UnionOfRows(fusion[1], x + (3/32)*u*y - 4*z);            
             fi;
         else
-            new[pos] := UnionOfRows(new[pos],x);
+            fusion[pos] := UnionOfRows(fusion[pos],x);
         fi;
     fi;    
     
@@ -399,64 +400,61 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFuseEigenvectors,
     
 InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
 
-    function(NewGramMatrix, NewAlgebraProducts, evecs, setup, unknowns)
+    function(new)
     
     local   new_dim,
-            t,
             bad,
             null,
             evals,
             i,
             j,
             k,
-            new,
+            fusion,
             a,
             b;
             
-    new_dim := Size(setup.coords);
+    new_dim := Size(new.setup.coords);
 
-    t := Size(evecs);
-
-    for i in [1..t] do
+    for i in [1..Size(new.evecs)] do
         
-        new := [ [], [], [] ];
+        fusion := [ [], [], [] ];
         
         for j in [1..3] do 
-            new[j] := SparseMatrix(0, new_dim, [], [], Rationals);
+            fusion[j] := SparseMatrix(0, new_dim, [], [], Rationals);
         od;
         
         for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
             
-            for j in [1..Nrows(evecs[i][evals[1]])] do 
+            for j in [1..Nrows(new.evecs[i][evals[1]])] do 
             
-                a := CertainRows(evecs[i][evals[1]], [j]);
+                a := CertainRows(new.evecs[i][evals[1]], [j]);
                 
-                bad := MAJORANA_ThreeClosedFindBadIndices(a, NewAlgebraProducts, setup);
+                bad := MAJORANA_ThreeClosedFindBadIndices(a, new.algebraproducts, new.setup);
                 
                 if bad <> [] then 
-                    null := KernelMat(CertainColumns(evecs[i][evals[2]], bad)).relations;
+                    null := KernelMat(CertainColumns(new.evecs[i][evals[2]], bad)).relations;
                 else
-                    null := SparseIdentityMatrix(Nrows(evecs[i][evals[2]]));
+                    null := SparseIdentityMatrix(Nrows(new.evecs[i][evals[2]]));
                 fi;
                 
                 for k in [1..Nrows(null)] do 
-                    b := CertainRows(null, [k])*evecs[i][evals[2]];
+                    b := CertainRows(null, [k])*new.evecs[i][evals[2]];
                     
-                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, new, NewGramMatrix, NewAlgebraProducts, setup);
+                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, fusion, new.innerproducts, new.algebraproducts);
                     
                 od;
             od;
         od;
         
         for j in [1..3] do             
-            evecs[i][j] := UnionOfRows(evecs[i][j], new[j]);
-            evecs[i][j] := MAJORANA_BasisOfEvecs(evecs[i][j]);
+            new.evecs[i][j] := UnionOfRows(new.evecs[i][j], fusion[j]);
+            new.evecs[i][j] := MAJORANA_BasisOfEvecs(new.evecs[i][j]);
         od;    
     od;
             
     end );
     
-    InstallGlobalFunction( MAJORANA_ThreeClosedFindBadIndices,
+InstallGlobalFunction( MAJORANA_ThreeClosedFindBadIndices,
     
     function(v, NewAlgebraProducts, setup)
     
@@ -479,15 +477,14 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
     
     end);
     
-    InstallGlobalFunction( MAJORANA_ThreeClosedEigenvectorsAlgebraUnknowns,
+InstallGlobalFunction( MAJORANA_ThreeClosedEigenvectorsAlgebraUnknowns,
 
-    function(NewAlgebraProducts,evecs,setup, unknowns, nullspace)
+    function(new)
     
     local   mat,
             vec,
             table,
             new_dim,
-            dim,
             new_unknowns,
             i,
             j,
@@ -502,23 +499,22 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
     
     table := [0,1/4,1/32];
     
-    new_dim := Size(setup.coords);
-    dim := new_dim - Size(unknowns);
+    new_dim := Size(new.setup.coords);
     
-    new_unknowns := MAJORANA_ThreeClosedExtractUnknownProducts(NewAlgebraProducts);
+    new_unknowns := MAJORANA_ThreeClosedExtractUnknownProducts(new.algebraproducts);
     
     mat := SparseMatrix(0, Size(new_unknowns), [], [], Rationals);
     vec := SparseMatrix(0, new_dim, [], [], Rationals);
     
-    for i in [1..Size(evecs)] do 
+    for i in [1..Size(new.evecs)] do 
         u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
     
         for j in [1..3] do 
-            for k in [1..Nrows(evecs[i][j])] do 
+            for k in [1..Nrows(new.evecs[i][j])] do 
                 
-                v := CertainRows(evecs[i][j], [k]);
+                v := CertainRows(new.evecs[i][j], [k]);
             
-                x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, NewAlgebraProducts);
+                x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, new.algebraproducts);
             
                 if x[1]!.indices <> [] then 
                     mat := UnionOfRows(mat, x[1]);
@@ -530,10 +526,10 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
     
     for i in [1..new_dim] do 
         u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
-        for j in [1..Nrows(nullspace)] do 
-            v := CertainRows(nullspace, [j]);
+        for j in [1..Nrows(new.nullspace)] do 
+            v := CertainRows(new.nullspace, [j]);
             
-            x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, NewAlgebraProducts);
+            x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, new.algebraproducts);
             
             if x[1]!.indices <> [] then 
                 mat := UnionOfRows(mat, x[1]);
@@ -548,7 +544,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
             
 InstallGlobalFunction( MAJORANA_ThreeClosedSolutionProducts,
 
-    function(mat,vec,products,setup,new_unknowns,unknowns)
+    function(mat,vec,products,new_unknowns)
     
     local   sol,
             i,
@@ -581,7 +577,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedSolutionProducts,
 
 InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
 
-    function( mat, vec, NewGramMatrix, NewAlgebraProducts, evecs, setup, unknowns)
+    function( mat, vec, new)
 
     local   pos,
             new_dim,
@@ -605,44 +601,44 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
             row,
             sum;
     
-    new_dim := Size(setup.coords);
+    new_dim := Size(new.setup.coords);
     
-    new_unknowns := MAJORANA_ThreeClosedExtractUnknownProducts(NewAlgebraProducts);
+    new_unknowns := MAJORANA_ThreeClosedExtractUnknownProducts(new.algebraproducts);
     
-    for i in [1..Size(evecs)] do 
+    for i in [1..Size(new.evecs)] do 
         
         u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
     
         for evals in [[1,2],[2,1],[1,3],[2,3]] do
-            for j in [1..Nrows(evecs[i][evals[2]])] do 
-                beta := CertainRows(evecs[i][evals[2]], [j]);
-                for k in [1..Nrows(evecs[i][evals[1]])] do 
-                    gamma := CertainRows(evecs[i][evals[1]], [k]);
+            for j in [1..Nrows(new.evecs[i][evals[2]])] do 
+                beta := CertainRows(new.evecs[i][evals[2]], [j]);
+                for k in [1..Nrows(new.evecs[i][evals[1]])] do 
+                    gamma := CertainRows(new.evecs[i][evals[1]], [k]);
                      
-                    if MAJORANA_ThreeClosedProduct(beta,gamma,NewAlgebraProducts) = false then
+                    if MAJORANA_ThreeClosedProduct(beta,gamma,new.algebraproducts) = false then
                 
                         ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
-                        x := ev*MAJORANA_ThreeClosedSeparateProduct(beta, gamma, new_unknowns, NewAlgebraProducts);
+                        x := ev*MAJORANA_ThreeClosedSeparateProduct(beta, gamma, new_unknowns, new.algebraproducts);
                         
-                        for l in [1..Nrows(evecs[i][evals[1]])] do 
+                        for l in [1..Nrows(new.evecs[i][evals[1]])] do 
                         
-                            alpha := CertainRows(evecs[i][evals[1]], [l]);
+                            alpha := CertainRows(new.evecs[i][evals[1]], [l]);
                         
                             row := SparseMatrix(0, Size(new_unknowns), [], [], Rationals); 
                             sum := SparseMatrix(0, new_dim, [], [], Rationals);
                         
-                            y := MAJORANA_ThreeClosedProduct(alpha - beta, gamma, NewAlgebraProducts);
+                            y := MAJORANA_ThreeClosedProduct(alpha - beta, gamma, new.algebraproducts);
                             
                             if y <> false then 
                             
                                 row := row + x[1]; sum := sum + x[2];
                             
-                                z := MAJORANA_ThreeClosedSeparateProduct(u, y, new_unknowns, NewAlgebraProducts);
+                                z := MAJORANA_ThreeClosedSeparateProduct(u, y, new_unknowns, new.algebraproducts);
                                 
                                 row := row + z[1]; sum := sum + z[2];
                                 
                                 if evals[1] = 2 then 
-                                    w := MAJORANA_ThreeClosedProduct(alpha,gamma,NewGramMatrix);
+                                    w := MAJORANA_ThreeClosedProduct(alpha,gamma,new.innerproducts);
                                     
                                     if w <> false then 
                                         sum := sum + (1/4)*u*w;
@@ -667,16 +663,15 @@ InstallGlobalFunction( MAJORANA_ThreeClosedResurrection,
 
     Display("Resurrection");
 
-    MAJORANA_ThreeClosedSolutionProducts(mat, vec, NewAlgebraProducts,setup,new_unknowns,unknowns);
+    MAJORANA_ThreeClosedSolutionProducts(mat, vec, new.algebraproducts, new_unknowns);
 
     end );
 
 InstallGlobalFunction( MAJORANA_ThreeClosedOrthogonality,
 
-    function(NewGramMatrix, evecs, setup, unknowns)
+    function(new)
     
     local   new_dim,
-            dim,
             new_unknowns,
             mat,
             vec,
@@ -689,23 +684,22 @@ InstallGlobalFunction( MAJORANA_ThreeClosedOrthogonality,
             v,
             x;
             
-    new_dim := Size(setup.coords);
-    dim := new_dim - Size(unknowns);
+    new_dim := Size(new.setup.coords);
     
-    new_unknowns := MAJORANA_ThreeClosedExtractUnknownProducts(NewGramMatrix);
+    new_unknowns := MAJORANA_ThreeClosedExtractUnknownProducts(new.innerproducts);
     
     mat := SparseMatrix(0, Size(new_unknowns), [], [], Rationals);
     vec := SparseMatrix(0, 1, [], [], Rationals);
     
-    for i in [1..Size(evecs)] do 
+    for i in [1..Size(new.evecs)] do 
         for j in [1..3] do 
             for k in [j + 1.. 3] do 
-                for l in [1..Nrows(evecs[i][j])] do
-                    u := CertainRows(evecs[i][j],[l]);
-                    for m in [1..Nrows(evecs[i][k])] do 
-                        v := CertainRows(evecs[i][k], [m]); 
-                        if MAJORANA_ThreeClosedProduct(u,v,NewGramMatrix) = false then
-                            x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, NewGramMatrix);
+                for l in [1..Nrows(new.evecs[i][j])] do
+                    u := CertainRows(new.evecs[i][j],[l]);
+                    for m in [1..Nrows(new.evecs[i][k])] do 
+                        v := CertainRows(new.evecs[i][k], [m]); 
+                        if MAJORANA_ThreeClosedProduct(u,v,new.innerproducts) = false then
+                            x := MAJORANA_ThreeClosedSeparateProduct(u, v, new_unknowns, new.innerproducts);
                             
                             mat := UnionOfRows(mat, x[1]);
                             vec := UnionOfRows(vec, x[2]);
@@ -717,7 +711,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedOrthogonality,
         od;
     od;
 
-    MAJORANA_ThreeClosedSolutionProducts(mat,vec,NewGramMatrix,setup,new_unknowns,unknowns);
+    MAJORANA_ThreeClosedSolutionProducts(mat, vec, new.innerproducts, new_unknowns);
     
     end );        
 
@@ -771,4 +765,106 @@ InstallGlobalFunction(MAJORANA_ThreeClosedTestEvecs,
     
     end );
                 
+InstallGlobalFunction(MAJORANA_ThreeClosedTestAxiomM1,
+
+    function(new)
+    
+    local   new_dim, i, j, k, u, v, w, x, y, z, a;
+    
+    new_dim := Size(new.algebraproducts);
+    
+    for i in [1..new_dim] do 
+        for j in [1..new_dim] do 
+            for k in [1..new_dim] do 
+                u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
+                v := SparseMatrix(1, new_dim, [[j]], [[1]], Rationals);
+                w := SparseMatrix(1, new_dim, [[k]], [[1]], Rationals);
+                
+                x := MAJORANA_ThreeClosedProduct(u, v, new.algebraproducts);
+                
+                if x <> false then 
+                    y := MAJORANA_ThreeClosedProduct(x, w, new.innerproducts);
+                else 
+                    y := false;
+                fi;
+                
+                z := MAJORANA_ThreeClosedProduct(v, w, new.algebraproducts);
+                
+                if z <> false then 
+                    a := MAJORANA_ThreeClosedProduct(z, u, new.innerproducts);
+                else 
+                    a := false;
+                fi;
+                
+                if a <> false and y <> false and a <> y then 
+                    Error("Axiom M1");
+                fi;
+            od;
+        od;
+    od;
+                
+    end );
+    
+InstallGlobalFunction(MAJORANA_ThreeClosedTestFusion,
+
+    function(new)
+    
+    local new_dim, evals, ev, u, i, j, k, fusion, a, b, x, y;
+    
+    new_dim := Size(new.setup.coords);
+
+    for i in [1..Size(new.evecs)] do
+    
+        u := SparseMatrix(1, new_dim, [[i]], [[1]], Rationals);
         
+        fusion := [ [], [], [] ];
+        
+        for j in [1..3] do 
+            fusion[j] := SparseMatrix(0, new_dim, [], [], Rationals);
+        od;
+        
+        for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
+            for j in [1..Nrows(new.evecs[i][evals[1]])] do 
+                a := CertainRows(new.evecs[i][evals[1]], [j]);
+                for k in [1..Nrows(new.evecs[i][evals[2]])] do 
+                    b := CertainRows(new.evecs[i][evals[2]], [k]);
+                    
+                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, fusion, new.innerproducts, new.algebraproducts);
+                    
+                od;
+            od;
+        od;  
+
+        for j in [1..3] do 
+            ev := MAJORANA_FusionTable[1][j + 1];
+                
+            fusion[j] := EchelonMatDestructive(fusion[j]).vectors;
+            
+            for k in [1..Nrows(fusion[j])] do 
+                a := CertainRows(fusion[j], [k]);
+                x := MAJORANA_ThreeClosedProduct(u, a, new.algebraproducts);
+                if x <> ev*a and x <> false then 
+                    y := MAJORANA_ThreeClosedProduct(x - ev*a, x - ev*a, new.innerproducts);
+                    if y <> 0 and y <> false then 
+                        Error("Algebra does not obey the fusion rules");
+                    fi;
+                fi;
+            od;
+        od;
+    od;
+
+    end );
+        
+InstallGlobalFunction(ThreeClosedAlgebraTest,
+
+    function(new);
+    
+    MAJORANA_ThreeClosedTestEvecs(new);
+    
+    MAJORANA_ThreeClosedAxiomM1(new);
+    
+    MAJORANA_ThreeClosedTestOrthogonality(new);
+    
+    MAJORANA_ThreeClosedTestFusion(new);
+    
+    end );

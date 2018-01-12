@@ -29,3 +29,9 @@ DeclareGlobalFunction( "MAJORANA_ThreeClosedAllEvecs" );
 DeclareGlobalFunction( "MAJORANA_ThreeClosedTestOrthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_ThreeClosedTestEvecs" );
+
+DeclareGlobalFunction( "MAJORANA_ThreeClosedTestAxiomM1" );
+
+DeclareGlobalFunction( "MAJORANA_ThreeClosedTestFusion" );
+
+DeclareGlobalFunction( "ThreeClosedAlgebraTest" );
