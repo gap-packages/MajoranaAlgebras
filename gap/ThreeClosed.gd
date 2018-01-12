@@ -25,3 +25,7 @@ DeclareGlobalFunction( "MAJORANA_ThreeClosedFuseEigenvectors" );
 DeclareGlobalFunction( "MAJORANA_ThreeClosedFindBadIndices" );
 
 DeclareGlobalFunction( "MAJORANA_ThreeClosedAllEvecs" );
+
+DeclareGlobalFunction( "MAJORANA_ThreeClosedTestOrthogonality" );
+
+DeclareGlobalFunction( "MAJORANA_ThreeClosedTestEvecs" );
