@@ -1360,6 +1360,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             y,
             sign,
             g,
+            switch,
             pos,
             prod;
             
@@ -1373,6 +1374,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     fi;
 
     unsolved := [];
+    
+    switch := false;
     
     for i in [1..Size(unknowns)] do 
     
@@ -1390,6 +1393,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         prod := algebraproducts[y];
                         
         if prod <> false then 
+            
+            switch := true;
             
             g := setup.pairconj[x[1]][x[2]][1];
             
@@ -1410,6 +1415,14 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     
     mat := CertainColumns(mat, unsolved);
     unknowns := unknowns{unsolved};
+    
+    if switch = true then
+        x := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, algebraproducts, setup);
+        
+        mat := x.mat;
+        vec := x.vec; 
+        unknowns := x.unknowns;
+    fi;
     
     return rec( mat := mat, 
                 vec := vec, 
