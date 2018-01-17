@@ -927,6 +927,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                                         rep.innerproducts,
                                                         rep.algebraproducts,
                                                         rep.setup);
+                                                        
+                                # Error("pause");
                                 
                                 if x <> false and x[1]!.indices[1] <> [] then 
                                     if Size(x[1]!.indices[1]) = 1 then 
@@ -959,7 +961,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             fi;
                         od;
                         
-                        if Nrows(mat) > Ncols(mat)/2 then 
+                        if Nrows(mat) > Ncols(mat) then 
                             x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
                             mat := x.mat; vec := x.vec; unknowns := x.unknowns;
