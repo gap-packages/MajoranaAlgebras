@@ -12,7 +12,7 @@ DeclareGlobalFunction( "MajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
 
-DeclareGlobalFunction( "MAJORANA_ConjugateVector" );
+DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
 
 DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 

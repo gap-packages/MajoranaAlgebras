@@ -166,7 +166,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedAllEvecs,
             
             for j in [1..3] do 
                 g := MAJORANA_FindVectorPermutation(elts[pos], setup);
-                evecs[i][j] := MAJORANA_ConjugateVector(evecs[pos][j], g, setup);
+                evecs[i][j] := MAJORANA_ConjugateVec(evecs[pos][j], g, setup);
             od;
         fi;
     od;
