@@ -357,13 +357,13 @@ InstallGlobalFunction( MAJORANA_ThreeClosedAxiomM1,
     end );
     
 InstallGlobalFunction(MAJORANA_ThreeClosedFuseEigenvectors,
-    function(a, b, i, evals, fusion, innerproducts, algebraproducts)
+    function(a, b, i, evals, fusion, innerproducts, algebraproducts, evecs)
     
     local   x,
             y,
             z,
             new_dim,
-            u,
+            u, v, k, j, l, m,
             new_ev,
             pos;
     
@@ -395,6 +395,25 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFuseEigenvectors,
             fusion[pos] := UnionOfRows(fusion[pos],x);
         fi;
     fi;    
+    
+    if evecs <> false then 
+    
+    for j in [1..3] do 
+        for k in [1..Nrows(fusion[j])] do 
+            u := CertainRows(fusion[j], [k]);
+            for l in Difference([1..3], [j]) do 
+                for m in [1..Nrows(evecs[i][l])] do 
+                    v := CertainRows(evecs[i][l], [m]);
+                    
+                    if not MAJORANA_ThreeClosedProduct(u, v, innerproducts) in [0, false] then 
+                        Error("Orthogonality in fusion");
+                    fi;
+                od;
+            od;
+        od;
+    od;
+    
+    fi;
     
     end);
     
@@ -440,7 +459,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedFusion,
                 for k in [1..Nrows(null)] do 
                     b := CertainRows(null, [k])*new.evecs[i][evals[2]];
                     
-                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, fusion, new.innerproducts, new.algebraproducts);
+                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, fusion, new.innerproducts, new.algebraproducts, new.evecs);
                     
                 od;
             od;
@@ -728,7 +747,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedTestOrthogonality,
                 for k in [1..Nrows(new.evecs[i][evals[2]])] do 
                     v := CertainRows(new.evecs[i][evals[2]],[k]);
                     
-                    if MAJORANA_ThreeClosedProduct(u, v, new.innerproducts) <> 0 then 
+                    if not MAJORANA_ThreeClosedProduct(u, v, new.innerproducts) in [0, false] then 
                         Error("Orthogonality");
                     fi;
                 od;
@@ -829,7 +848,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedTestFusion,
                 for k in [1..Nrows(new.evecs[i][evals[2]])] do 
                     b := CertainRows(new.evecs[i][evals[2]], [k]);
                     
-                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, fusion, new.innerproducts, new.algebraproducts);
+                    MAJORANA_ThreeClosedFuseEigenvectors(a, b, i, evals, fusion, new.innerproducts, new.algebraproducts, false);
                     
                 od;
             od;
@@ -861,7 +880,7 @@ InstallGlobalFunction(ThreeClosedAlgebraTest,
     
     MAJORANA_ThreeClosedTestEvecs(new);
     
-    MAJORANA_ThreeClosedAxiomM1(new);
+    MAJORANA_ThreeClosedTestAxiomM1(new);
     
     MAJORANA_ThreeClosedTestOrthogonality(new);
     
