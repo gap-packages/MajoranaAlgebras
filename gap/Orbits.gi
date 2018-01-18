@@ -93,7 +93,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
             h,
             g,
             q,
-            x,
             y,
             table,
             gen,
@@ -121,7 +120,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 
                 count := 0;
                 
-                x := List(pnt, Order);
                 y := Size(SetUp.pairreps);
                 
                 SetUp.pairorbit[i][j] := y;
