@@ -1,5 +1,7 @@
 DeclareGlobalFunction( "MAJORANA_ThreeClosedSetUp" );
 
+DeclareGlobalFunction( "MAJORANA_ThreeClosedFindVectorPermutation" );
+
 DeclareGlobalFunction( "ThreeClosedMajorana" );
 
 DeclareGlobalFunction( "MAJORANA_ThreeClosedFusion" );
