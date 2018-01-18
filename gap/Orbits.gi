@@ -140,11 +140,11 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             pos_1 := Position(setup.longcoords,q[1]);
                             pos_2 := Position(setup.longcoords,q[2]);
                         elif Size(q) = 3 then 
-                            pos_1 := Position(setup.longcoordinates, q[1]);
-                            pos_2 := Position(setup.longcoordinates, q{[2,3]});
+                            pos_1 := Position(setup.longcoords, q[1]);
+                            pos_2 := Position(setup.longcoords, q{[2,3]});
                         else
-                            pos_1 := Position(setup.longcoordinates, q{[1,2]});
-                            pos_2 := Position(setup.longcoordinates, q{[3,4]});
+                            pos_1 := Position(setup.longcoords, q{[1,2]});
+                            pos_2 := Position(setup.longcoords, q{[3,4]});
                         fi;
                         
                         pos_1 := setup.poslist[pos_1];
