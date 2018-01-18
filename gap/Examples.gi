@@ -261,3 +261,11 @@ BindGlobal("thesis", function()
     ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
     return ex;
     end );
+    
+BindGlobal("M12", function()
+    local G, T, ex;
+    G := MathieuGroup(12);;
+    T := ShallowCopy(ConjugacyClass(G, (1,11)(2,7)(3,5)(4,6)(8,9)(10,12)));
+    ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);;
+    return ex; 
+    end );
