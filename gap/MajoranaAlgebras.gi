@@ -480,6 +480,10 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
             vec,        # vector of known values   
             unknowns;     
     
+    if not false in innerproducts then 
+        return;
+    fi;
+    
     dim := Size(setup.coords);
     
     unknowns := Positions(innerproducts,false);
@@ -527,7 +531,11 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
     
     if Nrows(mat) > 1 then 
         MAJORANA_SolutionInnerProducts(mat,vec, unknowns, innerproducts);
-    fi;        
+    fi;      
+    
+    if not false in innerproducts then 
+        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+    fi;  
 
     end );    
     
@@ -627,13 +635,13 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
             sum,
             pos,
             unknowns;
+            
+    if not false in innerproducts then 
+        return;
+    fi;
     
     dim := Size(setup.coords);
     unknowns := Positions(innerproducts, false);
-    
-    if unknowns = [] then 
-        return;
-    fi;
     
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
     vec := SparseMatrix(0, 1, [], [], Rationals);
@@ -691,6 +699,10 @@ InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
     od;
     
     MAJORANA_SolutionInnerProducts(mat,vec,unknowns,innerproducts);
+    
+    if not false in rep.innerproducts then 
+        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+    fi;
     
     end );
 
@@ -1524,50 +1536,17 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
 InstallGlobalFunction(MAJORANA_MainLoop,
 
     function(rep)
-    
-    local   x, 
-            dim,
-            maindimensions,
-            i,
-            evecs;
-            
-    dim := Size(rep.setup.coords);
-    
-                                ## STEP 5: INNER PRODUCTS M1 ##
                                 
     MAJORANA_UnknownsAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
-    
-    if IsMutable(rep.innerproducts) and not false in rep.innerproducts then 
-        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        MakeImmutable(rep.innerproducts);
-    fi;
-                                
-                                    ## STEP 6: FUSION ## 
                                     
     MAJORANA_Fusion(rep.innerproducts, rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
-    
-                        ## STEP 8: RESURRECTION PRINCIPLE I ##
             
     MAJORANA_UnknownAlgebraProducts(rep);
 
-    
-                                ## STEP 9: MORE EVECS II ##
-
-    # Check if we have full espace decomp, if not find it
-
     MAJORANA_MoreEigenvectors(rep.algebraproducts,rep.evecs,rep.setup, rep.nullspace);
-
-                        ## STEP 10: INNER PRODUCTS FROM ORTHOGONALITY ##
-       
-    # Use orthogonality of eigenspaces to write system of unknown variables for missing inner products
     
     MAJORANA_Orthogonality(rep.evecs,rep.innerproducts, rep.setup);
-        
-    if IsMutable(rep.innerproducts) and not false in rep.innerproducts then 
-        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        MakeImmutable(rep.innerproducts);
-    fi;
-    
+
     end);
     
 InstallGlobalFunction(MajoranaRepresentation,
