@@ -170,52 +170,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
         od;
     od;
     
-    for i in [1 .. dim] do 
-    
-        o := Order(SetUp.coords[i]);
-        
-        for j in [1 .. dim] do 
-            if Order(SetUp.coords[j]) = 5 then 
-            
-                sign := 1;
-                
-                g := SetUp.pairconj[i][j];
-                x := SetUp.pairorbit[i][j];
-                
-                if x < 0 then x := -x; fi;
-                
-                p := SetUp.coords{SetUp.pairreps[x]};
-                q := OnPairs(p, g);
-
-                if SetUp.coords[j] in [q[2]^2,q[2]^3,q[1]^2,q[1]^3] then 
-                    sign := -sign;
-                elif not SetUp.coords[j] in [q[2],q[2]^4,q[1],q[1]^4] then 
-                    Error("setup conj 1");
-                fi;
-                
-                if o = 5 then 
-                    if SetUp.coords[i] in [q[2]^2,q[2]^3,q[1]^2,q[1]^3] then 
-                        sign := -sign;
-                    elif not SetUp.coords[i] in [q[2],q[2]^4,q[1],q[1]^4] then 
-                        Error("setup conj 2");
-                    fi;
-                fi; 
-            
-                if sign < 0 then 
-                    if SetUp.pairorbit[i][j] > 0 then 
-                        Error("Setup sign error");
-                    fi;
-                else
-                    if SetUp.pairorbit[i][j] < 0 then 
-                        Error("Setup sign error");
-                    fi;
-                fi;
-                
-            fi;
-            
-        od;
-    od;
-    
     end );
     
 InstallGlobalFunction( MAJORANA_OrbitalsT,
