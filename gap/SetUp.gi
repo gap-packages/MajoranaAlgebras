@@ -437,22 +437,14 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     
     function(g,setup)
     
-    local   dim,        # size of coordinates
-            i,          # loop over group elements
-            j,          # loop over coordinates
-            list,       # list to build permutation
-            perm,       # the permutation
-            signlist,   # corrects signs of 5A axes
-            pos;
+    local   dim, j, list, pos;
     
     dim := Size(setup.coords);
     list := [1..dim]*0;
     
     if g = () then 
         return ();
-    else
-        list := [1..dim]*0;
-        
+    else        
         for j in [1..dim] do 
             pos := Position(setup.longcoords,setup.coords[j]^g); 
             list[j] := setup.poslist[pos];
