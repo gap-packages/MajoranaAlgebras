@@ -78,7 +78,7 @@ InstallGlobalFunction(MAJORANA_Orbits,
    
 InstallGlobalFunction(MAJORANA_Orbitals,
 
-    function(G,t,SetUp)
+    function(G,t,setup)
     
     local   dim,
             gens,
@@ -100,33 +100,31 @@ InstallGlobalFunction(MAJORANA_Orbitals,
             pos_2,
             sign;
     
-    dim := Size(SetUp.coords);
-    
-    table := [[], [1], [1,2], [1,3], [1,2,3,4]];
+    dim := Size(setup.coords);
 
     gens := GeneratorsOfGroup(G);
 
     for i in [1..dim] do 
         for j in [Maximum(i,t + 1)..dim] do 
 
-            if SetUp.pairorbit[i][j] = 0 then 
+            if setup.pairorbit[i][j] = 0 then 
                 
-                Add(SetUp.pairreps, [i,j]);
+                Add(setup.pairreps, [i,j]);
                 
-                pnt := Immutable(SetUp.coords{[i,j]});
+                pnt := Immutable(Flat(setup.coords{[i,j]}));
                 
                 orb := [pnt];
                 elts := [()];
                 
                 count := 0;
                 
-                y := Size(SetUp.pairreps);
+                y := Size(setup.pairreps);
                 
-                SetUp.pairorbit[i][j] := y;
-                SetUp.pairorbit[j][i] := y;
+                setup.pairorbit[i][j] := y;
+                setup.pairorbit[j][i] := y;
                 
-                SetUp.pairconj[i][j] := ();
-                SetUp.pairconj[j][i] := ();
+                setup.pairconj[i][j] := ();
+                setup.pairconj[j][i] := ();
                 
                 for p in orb do 
                     
@@ -135,30 +133,38 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                     
                     for gen in gens do 
                     
-                        q := OnPairs(p,gen);
+                        q := OnTuples(p,gen);
                         g := h*gen;
                         
-                        pos_1 := Position(SetUp.longcoords,q[1]);
-                        pos_2 := Position(SetUp.longcoords,q[2]);
+                        if Size(q) = 2 then 
+                            pos_1 := Position(setup.longcoords,q[1]);
+                            pos_2 := Position(setup.longcoords,q[2]);
+                        elif Size(q) = 3 then 
+                            pos_1 := Position(setup.longcoordinates, q[1]);
+                            pos_2 := Position(setup.longcoordinates, q{[2,3]});
+                        else
+                            pos_1 := Position(setup.longcoordinates, q{[1,2]});
+                            pos_2 := Position(setup.longcoordinates, q{[3,4]});
+                        fi;
                         
-                        pos_1 := SetUp.poslist[pos_1];
-                        pos_2 := SetUp.poslist[pos_2];
+                        pos_1 := setup.poslist[pos_1];
+                        pos_2 := setup.poslist[pos_2];
                         
                         sign := 1;
                         
                         if pos_1 < 0 then pos_1 := -pos_1; sign := -sign; fi;
                         if pos_2 < 0 then pos_2 := -pos_2; sign := -sign; fi;
                         
-                        if SetUp.pairorbit[pos_1][pos_2] = 0 then 
+                        if setup.pairorbit[pos_1][pos_2] = 0 then 
                         
                             Add( orb, q );
                             Add( elts, g);
                             
-                            SetUp.pairorbit[pos_1][pos_2] := sign*y;
-                            SetUp.pairorbit[pos_2][pos_1] := sign*y;
+                            setup.pairorbit[pos_1][pos_2] := sign*y;
+                            setup.pairorbit[pos_2][pos_1] := sign*y;
                             
-                            SetUp.pairconj[pos_1][pos_2] := g;
-                            SetUp.pairconj[pos_2][pos_1] := g;
+                            setup.pairconj[pos_1][pos_2] := g;
+                            setup.pairconj[pos_2][pos_1] := g;
                             
                         fi;
                     od;
