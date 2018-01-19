@@ -857,7 +857,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     function(rep)
     
-    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj, list, evecs_a, evecs_b, index; 
+    local   dim, t, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj, list, evecs_a, evecs_b, index, new_mat, new_vec, nonzero; 
             
     t := Size(rep.involutions);
     dim := Size(rep.setup.coords);
@@ -968,20 +968,49 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             
     if unknowns = [] then return; fi;
     
-    for i in [1..Nrows(mat)] do        
-        for g in rep.setup.conjelts do
-            conj := [,];
+    new_mat := CopyMat(mat);
+    new_vec := CopyMat(vec);
+    
+    for i in [1..Nrows(mat)] do 
+        if mat!.indices[i] <> [] then 
+            for g in rep.setup.conjelts do
+                conj := [,];
+                
+                conj[1] := MAJORANA_ConjugateRow(   CertainRows(mat, [i]), 
+                                                    g[1], unknowns,
+                                                    rep.setup );
+                                                    
+                conj[2] := MAJORANA_ConjugateVec(   CertainRows(vec, [i]), 
+                                                    g[2], rep.setup );
+                                                    
+                new_mat := UnionOfRows(new_mat, conj[1]);
+                new_vec := UnionOfRows(new_vec, conj[2]);
+            od;
             
-            conj[1] := MAJORANA_ConjugateRow(   CertainRows(mat, [i]), 
-                                                g[1], unknowns,
-                                                rep.setup );
-                                                
-            conj[2] := MAJORANA_ConjugateVec(   CertainRows(vec, [i]), 
-                                                g[2], rep.setup );
-                                                
-            mat := UnionOfRows(mat, conj[1]);
-            vec := UnionOfRows(vec, conj[2]);
-        od;
+            if Nrows(new_mat) > Ncols(new_mat) then 
+                x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
+                
+                if x.unknowns = [] then 
+                    return;
+                fi;
+                
+                nonzero := [];
+    
+                for j in [1..Nrows(x.mat)] do              
+                    if x.mat!.indices[j] <> [] then 
+                        Add(nonzero,j);
+                    fi;
+                od;
+                
+                new_mat := CertainRows(x.mat, nonzero);
+                new_vec := CertainRows(x.vec, nonzero);
+                
+                y := MAJORANA_RemoveKnownAlgProducts(mat, vec, unknowns, rep.algebraproducts, rep.setup);
+                
+                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                
+            fi;
+        fi;
     od;
     
     MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
