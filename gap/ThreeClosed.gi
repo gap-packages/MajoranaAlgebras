@@ -12,6 +12,8 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     dim := Size(rep.setup.coords);
     new_dim := dim + Size(unknowns);
 
+    MAJORANA_ThreeClosedExtendPerm(unknowns, rep.setup);
+
     for x in unknowns do 
         
         elts := rep.setup.coords{x};
@@ -120,6 +122,56 @@ InstallGlobalFunction( MAJORANA_ThreeClosedFindVectorPermutation,
         
         return list;
     fi;
+    
+    end);
+    
+InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
+
+    function(unknowns, setup)
+    
+    local x, im, sign, pos, i, j, k , dim, perm;
+    
+    dim := Size(setup.coords);
+    
+    for i in [1..dim] do 
+        for j in [i..dim] do 
+            for k in [1,2] do  
+                
+                perm := ShallowCopy(setup.pairconj[i][j][k]);
+                           
+                if perm <> () then 
+                    for x in unknowns do 
+                        im := perm{x};
+                        
+                        if im[1]*im[2] < 0 then 
+                            sign := -1; 
+                            if im[1] < 0 then 
+                                im[1] := -im[1];
+                            else
+                                im[2] := -im[2];
+                            fi;
+                        else
+                            sign := 1;
+                            if im[1] < 0 then 
+                                im := -im;
+                            fi;
+                        fi;
+                        
+                        if im[1] > im[2] then 
+                            im := im{[2,1]};
+                        fi;
+                        
+                        pos := Position(unknowns, im);
+
+                        Add(perm, sign*pos);
+                    od;
+                fi;
+                
+               setup.pairconj[i][j][k] := ShallowCopy(perm);
+               setup.pairconj[j][i][k] := ShallowCopy(perm);
+            od;
+        od;
+    od;
     
     end);
 
