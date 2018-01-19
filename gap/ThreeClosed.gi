@@ -129,19 +129,16 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
 
     function(unknowns, setup)
     
-    local x, im, sign, pos, i, j, k , dim, perm;
+    local x, im, sign, pos, i, j, k , dim;
     
     dim := Size(setup.coords);
     
     for i in [1..dim] do 
         for j in [i..dim] do 
-            for k in [1,2] do  
-                
-                perm := ShallowCopy(setup.pairconj[i][j][k]);
-                           
-                if perm <> () then 
+            for k in [1,2] do                            
+                if setup.pairconj[i][j][k] <> () then 
                     for x in unknowns do 
-                        im := perm{x};
+                        im := setup.pairconj[i][j][k]{x};
                         
                         if im[1]*im[2] < 0 then 
                             sign := -1; 
@@ -163,14 +160,13 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
                         
                         pos := Position(unknowns, im);
 
-                        Add(perm, sign*pos);
+                        Add(setup.pairconj[i][j][k], sign*(dim + pos));
+                        Add(setup.pairconj[j][i][k], sign*(dim + pos));
                     od;
                 fi;
-                
-               setup.pairconj[i][j][k] := ShallowCopy(perm);
-               setup.pairconj[j][i][k] := ShallowCopy(perm);
+               
             od;
         od;
-    od;
+    od;    
     
     end);
