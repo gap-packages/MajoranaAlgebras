@@ -48,8 +48,6 @@ DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
-DeclareGlobalFunction( "MAJORANA_OutputError" );
-
 DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
 DeclareGlobalFunction( "MAJORANA_SolveSingleSolution" );

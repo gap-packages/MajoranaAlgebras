@@ -20,7 +20,7 @@ function(algebraproducts, setup)
     dim := Size(setup.coords);
     
     for i in [1..dim] do
-        for j in [i + 1..dim] do 
+        for j in [i..dim] do 
             
             k := setup.pairorbit[i][j];
         
@@ -805,8 +805,17 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             
             x := [0,0];
             
-            pos_1 := Position(setup.longcoords,(setup.coords[j])^g);
-            pos_2 := Position(setup.longcoords,(setup.coords[k])^g);
+            if IsRowVector(setup.coords[j]) then
+                pos_1 := Position(setup.longcoords,OnPairs(setup.coords[j],g));
+            else
+                pos_1 := Position(setup.longcoords,(setup.coords[j])^g);
+            fi;
+            
+            if IsRowVector(setup.coords[k]) then 
+                pos_2 := Position(setup.longcoords,OnPairs(setup.coords[k],g));
+            else
+                pos_2 := Position(setup.longcoords,(setup.coords[k])^g);
+            fi;
             
             x[1] := setup.poslist[pos_1];
             x[2] := setup.poslist[pos_2];
@@ -987,7 +996,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 new_vec := UnionOfRows(new_vec, conj[2]);
             od;
             
-            if Nrows(new_mat) > Ncols(new_mat) then 
+            if Nrows(new_mat) > Ncols(new_mat)/2 then 
                 x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
                 
                 if x.unknowns = [] then 
@@ -1110,23 +1119,6 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
     
     return rec( mat := y.mat, vec := y.vec, unknowns := y.unknowns);
-    
-    end );
-
-InstallGlobalFunction( MAJORANA_OutputError,
-
-    function(message, error, OutputList)
-    
-    local   output,         # output vector
-            i;              # loop over output list
-            
-    output := ["Error", message, error];
-    
-    for i in [1..5] do 
-        Add(output, OutputList[i]);
-    od;
-    
-    return StructuralCopy(output);
     
     end );
     
