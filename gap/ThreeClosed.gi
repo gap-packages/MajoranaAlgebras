@@ -134,38 +134,38 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
     dim := Size(setup.coords);
     
     for i in [1..dim] do 
-        for j in [i..dim] do 
-            for k in [1,2] do                            
-                if setup.pairconj[i][j][k] <> () then 
-                    for x in unknowns do 
-                        im := setup.pairconj[i][j][k]{x};
-                        
-                        if im[1]*im[2] < 0 then 
-                            sign := -1; 
-                            if im[1] < 0 then 
-                                im[1] := -im[1];
+        for j in [i..dim] do
+            if setup.pairconj[i][j][1] <> () then 
+                if Size(setup.pairconj[i][j][1]) <= dim + Size(unknowns) then
+                    for k in [1,2] do   
+                        for x in unknowns do 
+                            im := setup.pairconj[i][j][k]{x};
+                            
+                            if im[1]*im[2] < 0 then 
+                                sign := -1; 
+                                if im[1] < 0 then 
+                                    im[1] := -im[1];
+                                else
+                                    im[2] := -im[2];
+                                fi;
                             else
-                                im[2] := -im[2];
+                                sign := 1;
+                                if im[1] < 0 then 
+                                    im := -im;
+                                fi;
                             fi;
-                        else
-                            sign := 1;
-                            if im[1] < 0 then 
-                                im := -im;
+                            
+                            if im[1] > im[2] then 
+                                im := im{[2,1]};
                             fi;
-                        fi;
-                        
-                        if im[1] > im[2] then 
-                            im := im{[2,1]};
-                        fi;
-                        
-                        pos := Position(unknowns, im);
+                            
+                            pos := Position(unknowns, im);
 
-                        Add(setup.pairconj[i][j][k], sign*(dim + pos));
-                        Add(setup.pairconj[j][i][k], sign*(dim + pos));
+                            Add(setup.pairconj[i][j][k], sign*(dim + pos));
+                        od;
                     od;
                 fi;
-               
-            od;
+            fi;
         od;
     od;    
     
