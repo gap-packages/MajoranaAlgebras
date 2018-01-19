@@ -169,4 +169,34 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
         od;
     od;    
     
+    for i in [1..Size(setup.conjelts)] do 
+        for x in unknowns do 
+            if setup.conjelts[i][1] <> () then 
+                im := setup.conjelts[i][2]{x};
+                            
+                if im[1]*im[2] < 0 then 
+                    sign := -1; 
+                    if im[1] < 0 then 
+                        im[1] := -im[1];
+                    else
+                        im[2] := -im[2];
+                    fi;
+                else
+                    sign := 1;
+                    if im[1] < 0 then 
+                        im := -im;
+                    fi;
+                fi;
+                
+                if im[1] > im[2] then 
+                    im := im{[2,1]};
+                fi;
+                
+                pos := Position(unknowns, im);
+
+                Add(setup.conjelts[i][2], sign*(dim + pos));
+            fi;
+        od;
+    od;
+    
     end);
