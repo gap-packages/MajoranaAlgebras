@@ -5,7 +5,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, perms, gp, pos, g;
     
     orders := [[], [1], [1,2], [1,3], [1,2,3,4]];
-    signs := [[], [1], [1, 1], [1, 1], [1,-1,-1,1]];
+    signs := [[], [1], [1, 1], [1,1,1], [1,-1,-1,1]];
 
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(rep.algebraproducts, rep.setup);
     
@@ -23,6 +23,8 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
         o1 := Order(elts[1]); o2 := Order(elts[2]);
         
         k := Size(rep.setup.coords);
+        
+        # TODO fix this, no index 3 in signs[4] for example
         
         for i in orders[o1] do 
             for j in orders[o2] do 
@@ -81,7 +83,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     od;
     
     for i in rep.setup.orbitreps do 
-        rep.evecs[i] := List(rep.evecs[1], 
+        rep.evecs[i] := List(rep.evecs[i], 
         x -> SparseMatrix(Nrows(x), new_dim, x!.indices, x!.entries, Rationals));
     od;
     
