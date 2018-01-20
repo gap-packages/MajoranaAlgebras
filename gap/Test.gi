@@ -135,7 +135,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     # Check that all triples obey Fusion
 
-    error := MAJORANA_AxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
+    error := MAJORANA_TestAxiomM1(rep.innerproducts,rep.algebraproducts,rep.setup);
 
     if Size(error)>0 then
         return ["Algebra does not obey Fusion", error];
@@ -238,7 +238,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         
 # Checks if bilinear and algebra products obey Fusion, outputs a list which is empty if they do obey the axiom
 
-InstallGlobalFunction(MAJORANA_AxiomM1,
+InstallGlobalFunction(MAJORANA_TestAxiomM1,
 
     function(innerproducts,algebraproducts,setup) 
 

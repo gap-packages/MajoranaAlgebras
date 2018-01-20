@@ -34,7 +34,7 @@ DeclareGlobalFunction( "MAJORANA_MoreEigenvectors" );
 
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
-DeclareGlobalFunction( "MAJORANA_UnknownsAxiomM1" );
+DeclareGlobalFunction( "MAJORANA_AxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 

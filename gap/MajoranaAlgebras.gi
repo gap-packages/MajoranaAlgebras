@@ -615,7 +615,7 @@ function(innerproducts, algebraproducts, evecs, setup)
     
     end);
     
-InstallGlobalFunction(MAJORANA_UnknownsAxiomM1,
+InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(rep)
     
@@ -1558,7 +1558,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     function(rep)
                                 
-    MAJORANA_UnknownsAxiomM1(rep);
+    MAJORANA_AxiomM1(rep);
                                     
     MAJORANA_Fusion(rep);
             
