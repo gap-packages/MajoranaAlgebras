@@ -1022,7 +1022,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         fi;
     od;
     
-    MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
+    MAJORANA_SolutionAlgProducts(new_mat,new_vec,unknowns, rep.algebraproducts, rep.setup);
     
     end );
 

@@ -47,7 +47,11 @@ InstallGlobalFunction(MAJORANA_Orbits,
                 
                 for gen in gens do 
                 
-                    q := OnPoints(p, gen);
+                    if IsRowVector(p) then 
+                        q := OnTuples(p, gen);
+                    else
+                        q := OnPoints(p, gen);
+                    fi;
                     g := h*gen;
                     
                     MakeImmutable(q);
