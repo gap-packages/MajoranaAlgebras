@@ -356,7 +356,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
-    rep.setup.pairconjelts := [];
+    rep.setup.pairconjelts := [()];
     
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
     

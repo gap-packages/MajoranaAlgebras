@@ -128,8 +128,8 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 setup.pairorbit[i][j] := y;
                 setup.pairorbit[j][i] := y;
                 
-                setup.pairconj[i][j] := ();
-                setup.pairconj[j][i] := ();
+                setup.pairconj[i][j] := 1;
+                setup.pairconj[j][i] := 1;
                 
                 for p in orb do 
                     
