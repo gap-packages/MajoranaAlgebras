@@ -977,7 +977,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             
     if unknowns = [] then return; fi;
     
-    Info(   InfoMajorana, 50, "All conjugates") 
+    Info(   InfoMajorana, 50, "All conjugates"); 
     
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);

@@ -356,6 +356,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
+    rep.setup.pairconjelts := [];
     
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
     
@@ -459,37 +460,14 @@ InstallGlobalFunction( MAJORANA_FindAllPermutations,
 
     function(G, setup)
     
-    local   gp,
-            perms,
-            dim,
-            i,
-            j,
-            g,
-            pos;
+    local   i, g;
             
-    gp      := AsSet(G);
-    perms   := List(gp, x -> MAJORANA_FindVectorPermutation(x, setup)); 
-    
-    dim := Size(setup.coords);
-    
-    for i in [1..dim] do
-        for j in [i..dim] do 
-    
-            g := setup.pairconj[i][j];
-            
-            pos := [Position(gp, g)];
-            pos[2] := Position(gp, Inverse(g));
-            
-            setup.pairconj[i][j] := perms{pos};
-            setup.pairconj[j][i] := perms{pos};
-        od;
-    od;
+    setup.pairconjelts := List(setup.pairconjelts, x -> [   MAJORANA_FindVectorPermutation(x, setup),
+                                                            MAJORANA_FindVectorPermutation(Inverse(x), setup) ]); 
     
     for i in [1..Size(setup.conjelts)] do 
-        
         g := setup.conjelts[i];
-        pos := Position(gp, g);
-        setup.conjelts[i] := [g, perms[pos]];
+        setup.conjelts[i] := [g, MAJORANA_FindVectorPermutation(g, setup)];
     od;
     
     end );
