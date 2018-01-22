@@ -977,6 +977,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             
     if unknowns = [] then return; fi;
     
+    Info(   InfoMajorana, 50, "All conjugates") 
+    
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);
     
@@ -996,7 +998,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 new_vec := UnionOfRows(new_vec, conj[2]);
             od;
             
-            if Nrows(new_mat) > Ncols(new_mat)/2 then 
+            if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
                 x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
                 
                 if x.unknowns = [] then 
