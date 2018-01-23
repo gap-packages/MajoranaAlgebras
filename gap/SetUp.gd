@@ -12,4 +12,6 @@ DeclareGlobalFunction( "MAJORANA_FindAllPermutations" );
 
 DeclareGlobalFunction( "MAJORANA_FindVectorPermutation" );
 
-DeclareGlobalFunction( "MAJORANA_CheckSetup" );
+DeclareGlobalFunction( "SP_Product" );
+
+DeclareGlobalFunction( "SP_Inverse" );

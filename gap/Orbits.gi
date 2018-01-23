@@ -82,32 +82,24 @@ InstallGlobalFunction(MAJORANA_Orbits,
    
 InstallGlobalFunction(MAJORANA_Orbitals,
 
-    function(G,t,setup)
+    function(gens,t,setup)
     
     local   dim,
-            gens,
-            i,j,k,l,
+            i,j,
             pnt,
-            d,
             orb,
             elts,
             count,
-            o,
             p,
             h,
             g,
             q,
             y,
-            table,
             gen,
-            pos_1,
-            pos_2,
             pos,
             sign;
     
     dim := Size(setup.coords);
-
-    gens := GeneratorsOfGroup(G);
 
     for i in [1..dim] do 
         for j in [Maximum(i,t + 1)..dim] do 
@@ -116,10 +108,10 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 
                 Add(setup.pairreps, [i,j]);
                 
-                pnt := Immutable(Flat(setup.coords{[i,j]}));
+                pnt := [i,j];
                 
                 orb := [pnt];
-                elts := [()];
+                elts := [[1..dim]];
                 
                 count := 0;
                 
@@ -138,35 +130,21 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                     
                     for gen in gens do 
                     
-                        q := OnTuples(p,gen);
-                        g := h*gen;
-                        
-                        if Size(q) = 2 then 
-                            pos_1 := Position(setup.longcoords,q[1]);
-                            pos_2 := Position(setup.longcoords,q[2]);
-                        elif Size(q) = 3 then 
-                            pos_1 := Position(setup.longcoords, q[1]);
-                            pos_2 := Position(setup.longcoords, q{[2,3]});
-                        else
-                            pos_1 := Position(setup.longcoords, q{[1,2]});
-                            pos_2 := Position(setup.longcoords, q{[3,4]});
-                        fi;
-                        
-                        pos_1 := setup.poslist[pos_1];
-                        pos_2 := setup.poslist[pos_2];
+                        q := gen{p};
+                        g := SP_Product(h,gen);
                         
                         sign := 1;
                         
-                        if pos_1 < 0 then pos_1 := -pos_1; sign := -sign; fi;
-                        if pos_2 < 0 then pos_2 := -pos_2; sign := -sign; fi;
+                        if q[1] < 0 then q[1] := -q[1]; sign := -sign; fi;
+                        if q[2] < 0 then q[2] := -q[2]; sign := -sign; fi;
                         
-                        if setup.pairorbit[pos_1][pos_2] = 0 then 
+                        if setup.pairorbit[q[1]][q[2]] = 0 then 
                         
                             Add( orb, q );
                             Add( elts, g);
                             
-                            setup.pairorbit[pos_1][pos_2] := sign*y;
-                            setup.pairorbit[pos_2][pos_1] := sign*y;
+                            setup.pairorbit[q[1]][q[2]] := sign*y;
+                            setup.pairorbit[q[2]][q[1]] := sign*y;
                             
                             pos := Position(setup.pairconjelts, g);
                             
@@ -175,8 +153,8 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                                 pos := Size(setup.pairconjelts);
                             fi;
                             
-                            setup.pairconj[pos_1][pos_2] := pos;
-                            setup.pairconj[pos_2][pos_1] := pos;
+                            setup.pairconj[q[1]][q[2]] := pos;
+                            setup.pairconj[q[2]][q[1]] := pos;
                         fi;
                     od;
                 od; 

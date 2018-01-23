@@ -929,37 +929,56 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
     
     end );
     
-#InstallGlobalFunction( MAJORANA_CheckSetup,
+InstallGlobalFunction(SP_Product,    
+    
+    function( perm1, perm2)
+    
+    local l1, l2, prod, i;
+    
+    l1 := Length(perm1);
+    l2 := Length(perm2);
+    
+    # Make perms the same length
+    
+    if l1 < l2 then
+        Append(perm1, [l1 + 1 .. l2]);
+    else
+        Append(perm2, [l2 + 1 .. l1]);
+    fi;
+    
+    prod := [];
+    
+    for i in perm1 do 
+        if i > 0 then 
+            Add(prod, perm2[i]);
+        else
+            Add(prod, -perm2[-i]);
+        fi;
+    od;
+    
+    return prod;
+    
+    end );
+    
+InstallGlobalFunction(SP_Inverse,
 
-#    function(rep)
+    function(perm)
     
-#    local   dim,
-#            i,
-#            j,
-#            k,
-#            g;
-            
-#    table := [[], [1], [1,2], [1,3], [1,2,3,4]];
+    local l, inv, i;
     
-#    dim := Size(rep.setup.coords);
+    l := Length(perm);
     
-#    for i in [1..dim] do 
-#        for j in [1..dim] do 
-            
-#            k := rep.setup.pairorbit[i][j];
-#            g := rep.setup.pairconj[i][j][1];
-            
-#            x := rep.setup.pairreps[k];
-            
-#            im1 := rep.setup.coords[k[1]^g];
-#            im2 := k[2]^g;
-            
-#            o := List(rep.setup.coords{x}, y -> Order(y));
-            
-            
-            
-#        od;
-#    od;
+    inv := [1..l];
     
-#    end );
-            
+    for i in [1..l] do 
+        if perm[i] > 0 then 
+            inv[perm[i]] := i;
+        else
+            inv[-perm[i]] := -i;
+        fi;
+    od;
+    
+    return inv;
+    
+    end);
+    
