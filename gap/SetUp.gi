@@ -291,6 +291,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
             g,
             y,
             res,
+            gens,
             dim,            # size of coordinates
             s;              # number of orbits of G on T x T
             
@@ -359,8 +360,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
     
-    rep.setup.pairconjelts := ShallowCopy(input.pairconjelts);
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
+    rep.setup.pairconjelts := List(input.pairconjelts, 
+        x -> MAJORANA_FindVectorPermutation(x, rep.setup));
     
     for i in [1..t] do 
         for j in [1..t] do 
@@ -369,14 +371,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
         od;
     od;    
 
-    x := MAJORANA_Orbits(input.group, t, rep.setup);
+    gens := GeneratorsOfGroup(input.group);
+    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
+
+    x := MAJORANA_Orbits(gens, t, rep.setup);
 
     rep.setup.conjelts := x.conjelts;
     rep.setup.orbitreps := x.orbitreps;
 
-    MAJORANA_Orbitals(input.group, t, rep.setup);
-
-    MAJORANA_FindAllPermutations(input.group, rep.setup);
+    MAJORANA_Orbitals(gens, t, rep.setup);
     
                                 ## STEP 3: PRODUCTS AND EVECS I ##
                                 

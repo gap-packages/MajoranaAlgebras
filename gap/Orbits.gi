@@ -38,7 +38,7 @@ InstallGlobalFunction(MAJORANA_Orbits,
                 h := elts[count];
                 
                 for gen in gens do 
-                    q := gen{p};
+                    q := gen[p];
                     g := SP_Product(h,gen);
                     
                     if q < 0 then q := -q; fi;
