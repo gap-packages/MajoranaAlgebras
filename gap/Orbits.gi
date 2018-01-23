@@ -199,6 +199,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
             pairorbit,
             pairconj,
             pairreps,
+            pairconjelts,
             pnt,
             d,
             gen,
@@ -221,7 +222,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
     pairconj  := NullMat(t,t);
     pairreps  := [];
     orbs      := [];
-    
+    pairconjelts := [()];
     
     for i in [1..t] do 
         for j in [i..t] do 
@@ -234,8 +235,8 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                 pairorbit[i][j] := k;
                 pairorbit[j][i] := k;
                 
-                pairconj[i][j] := ();
-                pairconj[j][i] := ();
+                pairconj[i][j] := 1;
+                pairconj[j][i] := 1;
                 
                 pnt := Immutable(T{[i,j]});
                 
@@ -267,8 +268,15 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                             pairorbit[pos_1][pos_2] := k;
                             pairorbit[pos_2][pos_1] := k;
                             
-                            pairconj[pos_1][pos_2] := g;
-                            pairconj[pos_2][pos_1] := g;
+                            pos := Position(pairconjelts, g);
+                            
+                            if pos = fail then 
+                                Add(setup.pairconjelts, g);
+                                pos := Size(setup.pairconjelts);
+                            fi;
+                            
+                            pairconj[pos_1][pos_2] := pos;
+                            pairconj[pos_2][pos_1] := pos;
                             
                         fi;
                     od;
@@ -279,6 +287,8 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
             fi;
         od;
     od;
+    
+    # This is error checking, remove
     
     for i in [1..t] do 
         for j in [1..t] do
@@ -295,6 +305,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
     res := rec( pairorbit := pairorbit,
                 pairconj  := pairconj,
                 pairreps  := pairreps,
+                pairconjelts := pairconjelts,
                 orbitals  := orbs   );
                 
     return res;

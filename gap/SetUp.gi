@@ -105,7 +105,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
                     shapes      := shapeslist,
                     pairreps    := orbs.pairreps,
                     pairorbit   := orbs.pairorbit,
-                    pairconj    := orbs.pairconj     );
+                    pairconj    := orbs.pairconj,
+                    pairconjelts := orbs.pairconjelts     );
     
     return input;
 
@@ -270,7 +271,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
                     shapes      := shapeslist,
                     pairreps    := orbs.pairreps,
                     pairorbit   := orbs.pairorbit,
-                    pairconj    := orbs.pairconj     );
+                    pairconj    := orbs.pairconj,
+                    pairconjelts := orbs.pairconjelts     );
     
     return input;
 
