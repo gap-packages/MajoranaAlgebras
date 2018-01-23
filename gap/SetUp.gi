@@ -463,9 +463,11 @@ InstallGlobalFunction( MAJORANA_FindAllPermutations,
     function(G, setup)
     
     local   i, g;
-            
-    setup.pairconjelts := List(setup.pairconjelts, x -> [   MAJORANA_FindVectorPermutation(x, setup),
-                                                            MAJORANA_FindVectorPermutation(Inverse(x), setup) ]); 
+    
+    for i in [1..Size(setup.pairconjelts) do 
+        g := setup.pairconjelts[i];
+        setup.pairconjelts[i] := List([g, Inverse(g)], x ->  MAJORANA_FindVectorPermutation(x, setup));
+    od;
     
     for i in [1..Size(setup.conjelts)] do 
         g := setup.conjelts[i];
