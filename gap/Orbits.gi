@@ -286,20 +286,6 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                 
             fi;
         od;
-    od;
-    
-    # This is error checking, remove
-    
-    for i in [1..t] do 
-        for j in [1..t] do
-            k := pairorbit[i][j];
-            g := pairconj[i][j];
-            p := T{pairreps[k]}; 
-            q := OnPairs(p,g);
-            if not T{[i,j]} in [q,Reversed(q)] 
-                then Error("pause");
-            fi; 
-        od; 
     od; 
     
     res := rec( pairorbit := pairorbit,
