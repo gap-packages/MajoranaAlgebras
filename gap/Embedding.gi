@@ -216,7 +216,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
             k := -k;
         fi;
         
-        g := rep.setup.pairconj[pos1][pos2][2];
+        g := rep.setup.pairconjelts[rep.setup.pairconj[pos1][pos2]][2];
         
         if rep.algebraproducts[k] = false then 
             if subrep.algebraproducts[i] <> false then 
