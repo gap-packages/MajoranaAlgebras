@@ -46,20 +46,11 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     
     MAJORANA_Orbitals(rep.group, dim, rep.setup);
     
-    gp      := AsSet(rep.group);
-    perms   := List(gp, x -> MAJORANA_ThreeClosedFindVectorPermutation(x, unknowns, rep.setup));
-    
-    for i in [1..new_dim] do 
-        for j in [Maximum(i, dim + 1) .. new_dim] do
-            g := rep.setup.pairconj[i][j];
-            
-            pos := [Position(gp, g)];
-            pos[2] := Position(gp, Inverse(g));
-            
-            rep.setup.pairconj[i][j] := perms{pos};
-            rep.setup.pairconj[j][i] := perms{pos};
-            
-        od;
+    for i in [2..Size(rep.setup.pairconjelts)] do 
+        if not IsMatrix(rep.setup.pairconjelts[i]) then 
+            g := rep.setup.pairconjelts[i];
+            rep.setup.pairconjelts[i] := List([g, Inverse(g)], x -> MAJORANA_ThreeClosedFindVectorPermutation(x, unknowns, rep.setup));
+        fi;
     od;
     
     for i in [1..Size(rep.algebraproducts)] do 
@@ -131,44 +122,40 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
 
     function(unknowns, setup)
     
-    local x, im, sign, pos, i, j, k , dim;
+    local x, im, sign, pos, i, j, dim;
     
     dim := Size(setup.coords);
     
-    for i in [1..dim] do 
-        for j in [i..dim] do
-            if setup.pairconj[i][j][1] <> () then 
-                if Size(setup.pairconj[i][j][1]) <= dim + Size(unknowns) then
-                    for k in [1,2] do   
-                        for x in unknowns do 
-                            im := setup.pairconj[i][j][k]{x};
-                            
-                            if im[1]*im[2] < 0 then 
-                                sign := -1; 
-                                if im[1] < 0 then 
-                                    im[1] := -im[1];
-                                else
-                                    im[2] := -im[2];
-                                fi;
-                            else
-                                sign := 1;
-                                if im[1] < 0 then 
-                                    im := -im;
-                                fi;
-                            fi;
-                            
-                            if im[1] > im[2] then 
-                                im := im{[2,1]};
-                            fi;
-                            
-                            pos := Position(unknowns, im);
+    for i in [2..Size(setup.pairconjelts)] do 
+        if Size(setup.pairconjelts[i][1]) <= dim + Size(unknowns) then
+            for j in [1,2] do   
+                for x in unknowns do 
+                    im := setup.pairconjelts[i][j]{x};
+                    
+                    if im[1]*im[2] < 0 then 
+                        sign := -1; 
+                        if im[1] < 0 then 
+                            im[1] := -im[1];
+                        else
+                            im[2] := -im[2];
+                        fi;
+                    else
+                        sign := 1;
+                        if im[1] < 0 then 
+                            im := -im;
+                        fi;
+                    fi;
+                    
+                    if im[1] > im[2] then 
+                        im := im{[2,1]};
+                    fi;
+                    
+                    pos := Position(unknowns, im);
 
-                            Add(setup.pairconj[i][j][k], sign*(dim + pos));
-                        od;
-                    od;
-                fi;
-            fi;
-        od;
+                    Add(setup.pairconjelts[i][j], sign*(dim + pos));
+                od;
+            od;
+        fi;
     od;    
     
     for i in [1..Size(setup.conjelts)] do 
