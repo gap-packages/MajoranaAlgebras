@@ -319,7 +319,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 
                 if x <> false then
                     
-                    g := list.pairconj[u!.indices[1][i]][v!.indices[1][j]][1];
+                    g := list.pairconj[u!.indices[1][i]][v!.indices[1][j]];
                     
                     pos := Position(elts,g);
                     
@@ -337,7 +337,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            x := MAJORANA_ConjugateVec(vecs[i],elts[i],list);
+            x := MAJORANA_ConjugateVec(vecs[i],list.pairconjelts[elts[i]][1],list);
             AddRow(x!.indices[1],x!.entries[1],vec!.indices,vec!.entries,1);
         od;
                 
@@ -749,7 +749,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             
             if x <> false then 
                                         
-                g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]][1];
+                g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]];
                 
                 pos := Position(elts,g);
                 
@@ -771,7 +771,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     od;
     
     for i in [1..Size(elts)] do 
-        sum := sum + MAJORANA_ConjugateVec(vecs[i],elts[i],setup);
+        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]][1],setup);
     od;
        
     return [row,sum];
@@ -1305,7 +1305,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
             sign;
     
     y := setup.pairorbit[x[1]][x[2]];
-    g := setup.pairconj[x[1]][x[2]][2];
+    g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]][2];
     
     if y > 0 then 
         sign := 1;
@@ -1408,7 +1408,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             switch := true;
             
-            g := setup.pairconj[x[1]][x[2]][1];
+            g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]][1];
             
             prod := MAJORANA_ConjugateVec(prod,g,setup);
             

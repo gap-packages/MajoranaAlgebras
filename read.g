@@ -23,3 +23,5 @@ ReadPackage( "MajoranaAlgebras", "gap/Orbits.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gi");
 
+ReadPackage( "MajoranaAlgebras", "gap/Pickle.gi");
+
