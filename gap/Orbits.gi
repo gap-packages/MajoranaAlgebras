@@ -1,44 +1,36 @@
  
 InstallGlobalFunction(MAJORANA_Orbits,
 
-    function(G, t, setup)
+    function(gens, t, setup)
     
-    local   gens,
-            conjelts,
+    local   conjelts,
             orbitreps,
             i,
-            pnt,
-            d,
             orb,
             gen,
             elts,
             count,
+            dim,
             p,
             q,
             h,
-            g,
-            pos;
-    
-    gens := GeneratorsOfGroup(G);
+            g;
+
     conjelts := [1..t]*0;
     orbitreps := [];
+    
+    dim := Size(setup.coords);
     
     for i in [1..t] do 
         if conjelts[i] = 0 then 
             
             Add(orbitreps, i);
-            conjelts[i] := ();
-        
-            pnt := Immutable(setup.coords[i]);
+            conjelts[i] := [1..dim];
             
-            d := NewDictionary(pnt, false);
-            
-            orb := [pnt];
-            elts := [()];
+            orb := [i];
+            elts := [[1..dim]];
             
             count := 0;
-            
-            AddDictionary(d, pnt);
             
             for p in orb do 
             
@@ -46,27 +38,15 @@ InstallGlobalFunction(MAJORANA_Orbits,
                 h := elts[count];
                 
                 for gen in gens do 
-                
-                    if IsRowVector(p) then 
-                        q := OnTuples(p, gen);
-                    else
-                        q := OnPoints(p, gen);
-                    fi;
-                    g := h*gen;
+                    q := gen{p};
+                    g := SP_Product(h,gen);
                     
-                    MakeImmutable(q);
+                    if q < 0 then q := -q; fi;
                     
-                    if not KnowsDictionary(d,q) then 
+                    if conjelts[q] = 0 then 
                         Add(orb, q);
-                        AddDictionary(d,q);
                         Add(elts, g);
-                        
-                        pos := Position(setup.longcoords, q);
-                        pos := setup.poslist[pos];
-                        
-                        if pos < 0 then pos := -pos; fi;
-                        
-                        conjelts[pos] := g;
+                        conjelts[q] := g;
                     fi;
                 od;
             od;
