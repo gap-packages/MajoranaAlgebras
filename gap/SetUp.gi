@@ -381,6 +381,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_Orbitals(gens, t, rep.setup);
     
+    rep.setup.conjelts[1] := [];
+    
                                 ## STEP 3: PRODUCTS AND EVECS I ##
                                 
     s := Size(rep.setup.pairreps);
@@ -449,7 +451,7 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     list := [1..dim]*0;
     
     if g = () then 
-        return ();
+        return [];
     else        
         for j in [1..dim] do 
             pos := Position(setup.longcoords,setup.coords[j]^g); 
@@ -968,6 +970,8 @@ InstallGlobalFunction(SP_Inverse,
     function(perm)
     
     local l, inv, i;
+    
+    if perm = [] then return []; fi;
     
     l := Length(perm);
     

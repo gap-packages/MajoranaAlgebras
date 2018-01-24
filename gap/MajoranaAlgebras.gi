@@ -246,7 +246,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
             res,            
             pos;
     
-    if g <> () then 
+    if g <> [] then 
         
         nrows := Nrows(mat);
         ncols := Ncols(mat);
@@ -337,7 +337,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            x := MAJORANA_ConjugateVec(vecs[i],list.pairconjelts[elts[i]][1],list);
+            x := MAJORANA_ConjugateVec(vecs[i],list.pairconjelts[elts[i]],list);
             AddRow(x!.indices[1],x!.entries[1],vec!.indices,vec!.entries,1);
         od;
                 
@@ -771,7 +771,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     od;
     
     for i in [1..Size(elts)] do 
-        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]][1],setup);
+        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]],setup);
     od;
        
     return [row,sum];
@@ -785,58 +785,28 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     local   output,     # output row
             len,        # length of row
             i,          # loop over length of row
-            j,          # first elt of original product
-            k,          # second elt of original product
-            x,          # new product
-            pos_1,      # position of first element conjugated
-            pos_2,      # position of second element conjugated
+            x,y,
             sign,       # corrects sign of 5A axis
             pos;        # position of new product
     
-    if g <> () then 
+    if g <> [] then 
     
         len     := Ncols(row);
         output  := SparseZeroMatrix(1, len, Rationals);
         
         for i in [1..Size(row!.indices[1])] do
         
-            j := unknowns[row!.indices[1][i]][1];
-            k := unknowns[row!.indices[1][i]][2];
+            x := unknowns[row!.indices[1][i]];
+            y := g{x};
             
-            x := [0,0];
+            sign := 1;
             
-            if IsRowVector(setup.coords[j]) then
-                pos_1 := Position(setup.longcoords,OnPairs(setup.coords[j],g));
-            else
-                pos_1 := Position(setup.longcoords,(setup.coords[j])^g);
-            fi;
+            if y[1] < 0 then sign := -sign; y[1] := -y[1]; fi;
+            if y[2] < 0 then sign := -sign; y[2] := -y[2]; fi;
             
-            if IsRowVector(setup.coords[k]) then 
-                pos_2 := Position(setup.longcoords,OnPairs(setup.coords[k],g));
-            else
-                pos_2 := Position(setup.longcoords,(setup.coords[k])^g);
-            fi;
+            Sort(y);
             
-            x[1] := setup.poslist[pos_1];
-            x[2] := setup.poslist[pos_2];
-            
-            if x[1]*x[2] < 0 then 
-                sign := -1;
-                if x[1] < 0 then 
-                    x[1] := -x[1];
-                else
-                    x[2] := -x[2];
-                fi;
-            else
-                sign := 1;
-                if x[1] < 0 then 
-                    x := -x;
-                fi;
-            fi;
-            
-            Sort(x);
-            
-            pos := Position(unknowns,x);
+            pos := Position(unknowns,y);
             SetEntry(output, 1, pos, sign*row!.entries[1][i]);
         od;
     
@@ -988,11 +958,11 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 conj := [,];
                 
                 conj[1] := MAJORANA_ConjugateRow(   CertainRows(mat, [i]), 
-                                                    g[1], unknowns,
+                                                    g, unknowns,
                                                     rep.setup );
                                                     
                 conj[2] := MAJORANA_ConjugateVec(   CertainRows(vec, [i]), 
-                                                    g[2], rep.setup );
+                                                    g, rep.setup );
                                                     
                 new_mat := UnionOfRows(new_mat, conj[1]);
                 new_vec := UnionOfRows(new_vec, conj[2]);
@@ -1066,7 +1036,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     function(mat, vec, unknowns, algebraproducts, setup, nullspace, group)
     
-    local   i,j,
+    local   i,j, gens,
             list,
             u,
             v,
@@ -1078,7 +1048,10 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     
     dim := Size(setup.coords);
     
-    x := MAJORANA_Orbits(group, dim, setup);
+    gens := GeneratorsOfGroup(group);
+    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, setup));
+    
+    x := MAJORANA_Orbits(gens, dim, setup);
 
     for i in x.orbitreps do 
     
@@ -1305,7 +1278,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
             sign;
     
     y := setup.pairorbit[x[1]][x[2]];
-    g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]][2];
+    g := SP_Inverse(setup.pairconjelts[setup.pairconj[x[1]][x[2]]]);
     
     if y > 0 then 
         sign := 1;
@@ -1408,7 +1381,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             switch := true;
             
-            g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]][1];
+            g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]];
             
             prod := MAJORANA_ConjugateVec(prod,g,setup);
             
