@@ -159,8 +159,10 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
 
         if newfalsecount = [0,0] then
             Info( InfoMajorana, 10, "Success" );
+            return;
         elif newfalsecount = falsecount then
             Info( InfoMajorana, 10, "Fail" );
+            return;
         else
             falsecount := StructuralCopy(newfalsecount);
         fi;
