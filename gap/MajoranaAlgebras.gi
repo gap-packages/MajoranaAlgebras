@@ -388,32 +388,28 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
 InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
-function(innerproducts, setup)
+function(range, innerproducts, setup)
 
-    local   i,                  # loop over setup.coords
-            j,                  # loop over setup.coords
-            k,                  # pair orbit index
-            dim,                # size of setup.coords
-            GramMatrixFull;     # output matrix
+    local   i, j, k, mat, l;
+
+    l := Length(range);
     
-    dim := Size(setup.coords);
+    mat := SparseZeroMatrix(l, l, Rationals);
     
-    GramMatrixFull := SparseZeroMatrix(dim, dim, Rationals);
-    
-    for i in [1..dim] do 
-        for j in [1..dim] do
+    for i in [1..l] do 
+        for j in [1..l] do
             
-            k := setup.pairorbit[i][j];
+            k := setup.pairorbit[range[i]][range[j]];
             
             if k > 0 then 
-                SetEntry(GramMatrixFull, i, j, innerproducts[k]);
+                SetEntry(mat, i, j, innerproducts[k]);
             else
-                SetEntry(GramMatrixFull, i, j, -innerproducts[-k]);
+                SetEntry(mat, i, j, -innerproducts[-k]);
             fi;
         od;
     od;
 
-    return GramMatrixFull;
+    return mat;
 
     end
 
@@ -1453,15 +1449,24 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
 
     function(innerproducts,setup)
     
-    local   gram,     # full gram matrix
-            null;     # nullspace of gram matrix
+    local   dim, gram, null, unknowns, list;
     
-        if ForAll(innerproducts, x -> x <> false) then 
-            gram := MAJORANA_FillGramMatrix(innerproducts, setup);
-            null := KernelMat(gram).relations;; 
-        fi;
-        
+    dim := Size(setup.coords);
+    
+    if not false in innerproducts then 
+        gram := MAJORANA_FillGramMatrix([1..dim], innerproducts, setup);
+        null := KernelMat(gram).relations;; 
         return null;
+    fi;
+    
+    unknowns := Positions(innerproducts, false);
+    list := Filtered([1..dim], i -> Intersection(setup.pairorbit[i], unknowns) = []);
+    
+    gram := MAJORANA_FillGramMatrix(list, innerproducts, setup);
+    null := KernelMat(gram).relations;;
+    null := SparseMatrix( Nrows(null), dim, List(null!.indices, x -> List(x,  i -> list[i])), null!.entries, Rationals);
+    
+    return null;
     
     end );
         
@@ -1568,6 +1573,10 @@ function(input,index)
 
         newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
         newfalsecount[2] := Size(Positions(rep.innerproducts,false));
+        
+        if newfalsecount[2] < falsecount[2] then 
+            rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+        fi;
 
         Info(InfoMajorana, 20,
             STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
