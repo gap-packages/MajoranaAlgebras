@@ -1549,17 +1549,11 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(input,index)
 
-    local   i,
-            j,
-            rep,
-            falsecount,
-            newfalsecount;  
+    local   rep, falsecount, newfalsecount;  
 
     rep :=  MAJORANA_SetUp(input,index);
     
-    if Size(rep.group) > 120 then 
-        MAJORANA_AllEmbeddings(rep);
-    fi;
+    if Size(rep.group) > 120 then MAJORANA_AllEmbeddings(rep); fi;
     
     falsecount := [0,0];
     
@@ -1592,6 +1586,3 @@ function(input,index)
     od;
     
     end );
-
-
-    
