@@ -449,8 +449,13 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     list := [1..dim]*0;
         
     for j in [1..dim] do 
-        pos := Position(setup.longcoords,setup.coords[j]^g); 
-        list[j] := setup.poslist[pos];
+        if IsRowVector(setup.coords[j]) then 
+            pos := Position(setup.longcoords,OnTuples(setup.coords[j],g)); 
+            list[j] := setup.poslist[pos];
+        else 
+            pos := Position(setup.longcoords,OnPoints(setup.coords[j],g)); 
+            list[j] := setup.poslist[pos];
+        fi;
     od;
 
     return list;
