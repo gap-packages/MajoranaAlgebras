@@ -531,6 +531,12 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
     
     if not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+        
+        for i in rep.setup.orbitreps do 
+            for j in [1..3] do 
+                rep.evecs[i][j] := UnionOfRows(rep.evecs[i][j], rep.nullspace);
+            od;
+        od;
     fi;  
 
     end );    
@@ -698,6 +704,13 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     
     if not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+        
+        for i in rep.setup.orbitreps do 
+            for j in [1..3] do 
+                rep.evecs[i][j] := UnionOfRows(rep.evecs[i][j], rep.nullspace);
+            od;
+        od;
+        
     fi;
     
     end );
@@ -1518,9 +1531,15 @@ InstallGlobalFunction(MAJORANA_MoreEigenvectors,
                 
             od;
             
-            MakeImmutable(rep.evecs[i]);
+            # MakeImmutable(rep.evecs[i]);
         fi;
     od;
+    
+    for i in rep.setup.orbitreps do 
+            for j in [1..3] do 
+                rep.evecs[i][j] := UnionOfRows(rep.evecs[i][j], rep.nullspace);
+            od;
+        od;
     
     end);
 
