@@ -216,7 +216,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
             k := -k;
         fi;
         
-        g := rep.setup.pairconjelts[rep.setup.pairconj[pos1][pos2]][2];
+        g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[pos1][pos2]]);
         
         if rep.algebraproducts[k] = false then 
             if subrep.algebraproducts[i] <> false then 
@@ -240,22 +240,18 @@ InstallGlobalFunction( "MAJORANA_Embed",
     for i in subrep.setup.orbitreps do 
         
         im1 := Image(emb, subrep.setup.coords[i]);
+        pos1 := Position(rep.setup.coords, im1);
         
-        for g in List(rep.setup.conjelts, x -> Inverse(x[1])) do 
-        
-            pos1 := Position(rep.setup.coords, im1^g);
-            
-            if pos1 in rep.setup.orbitreps then 
+        for g in List(rep.setup.conjelts, x -> SP_Inverse(x)) do
+            if g[pos1] in rep.setup.orbitreps then 
                 break; 
             fi;
         od;
         
-        perm := MAJORANA_FindVectorPermutation(g, rep.setup); 
-        
         for j in [1..3] do 
 
             im2 := MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep);
-            im2 := MAJORANA_ConjugateVec(im2, perm, rep.setup);
+            im2 := MAJORANA_ConjugateVec(im2, g, rep.setup);
             
             UnionOfRows(rep.evecs[pos1][j], im2);
         od;

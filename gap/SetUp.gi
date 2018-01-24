@@ -381,8 +381,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_Orbitals(gens, t, rep.setup);
     
-    rep.setup.conjelts[1] := [];
-    
                                 ## STEP 3: PRODUCTS AND EVECS I ##
                                 
     s := Size(rep.setup.pairreps);
