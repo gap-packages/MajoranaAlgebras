@@ -1,4 +1,3 @@
- 
 InstallGlobalFunction(MAJORANA_Orbits,
 
     function(gens, t, setup)

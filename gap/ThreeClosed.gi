@@ -2,7 +2,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
 
     function(rep)
     
-    local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, perms, gp, pos, g;
+    local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, gens, pos;
     
     orders := [[], [1], [1,2], [1,3], [1,2,3,4]];
     signs := [[], [1], [1, 1], [1,1,1], [1,-1,-1,1]];
@@ -44,29 +44,23 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     Append(rep.setup.pairorbit, NullMat(new_dim - dim, new_dim));
     Append(rep.setup.pairconj, NullMat(new_dim - dim, new_dim));
     
-    MAJORANA_Orbitals(rep.group, dim, rep.setup);
+    gens := GeneratorsOfGroup(rep.group);
+    gens := List(gens, x -> MAJORANA_ThreeClosedFindVectorPermutation(x, unknowns, rep.setup));
     
-    for i in [2..Size(rep.setup.pairconjelts)] do 
-        if not IsMatrix(rep.setup.pairconjelts[i]) then 
-            g := rep.setup.pairconjelts[i];
-            rep.setup.pairconjelts[i] := List([g, Inverse(g)], x -> MAJORANA_ThreeClosedFindVectorPermutation(x, unknowns, rep.setup));
-        fi;
-    od;
+    MAJORANA_Orbitals(gens, dim, rep.setup);
     
     for i in [1..Size(rep.algebraproducts)] do 
-        if rep.algebraproducts[i] <> false then 
-            rep.algebraproducts[i] := SparseMatrix( 1, new_dim, 
-                                                    rep.algebraproducts[i]!.indices, 
-                                                    rep.algebraproducts[i]!.entries, 
-                                                    Rationals);
-        else
+        if rep.algebraproducts[i] = false then 
             pos := Position(unknowns, rep.setup.pairreps[i]);
-            rep.algebraproducts[i] := SparseMatrix( 1, new_dim, [[dim + pos]], [[1]], Rationals);
+            rep.algebraproducts[i] := SparseMatrix(     1, new_dim, [[dim + pos]], 
+                                                        [[1]], Rationals    );
         fi;
     od;
     
-    rep.algebraproducts := List(rep.algebraproducts, 
-    x -> SparseMatrix(1, new_dim, x!.indices, x!.entries, Rationals));
+    rep.algebraproducts := List(rep.algebraproducts, x -> SparseMatrix( 1, new_dim, 
+                                                                        x!.indices, 
+                                                                        x!.entries, 
+                                                                        Rationals)  );
     
     for i in [Size(rep.algebraproducts) + 1 .. Size(rep.setup.pairreps)] do 
         rep.algebraproducts[i] := false;
@@ -78,11 +72,8 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
         x -> SparseMatrix(Nrows(x), new_dim, x!.indices, x!.entries, Rationals));
     od;
     
-    rep.nullspace := SparseMatrix(  Nrows(rep.nullspace), new_dim, 
-                                    rep.nullspace!.indices,
-                                    rep.nullspace!.entries,
-                                    Rationals);
-    
+    rep.nullspace := SparseMatrix(  Nrows(rep.nullspace), new_dim, rep.nullspace!.indices,
+                                    rep.nullspace!.entries, Rationals);
     end );
     
 InstallGlobalFunction( MAJORANA_ThreeClosedFindVectorPermutation, 
@@ -126,34 +117,32 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
     
     dim := Size(setup.coords);
     
-    for i in [2..Size(setup.pairconjelts)] do 
-        if Size(setup.pairconjelts[i][1]) <= dim + Size(unknowns) then
-            for j in [1,2] do   
-                for x in unknowns do 
-                    im := setup.pairconjelts[i][j]{x};
-                    
-                    if im[1]*im[2] < 0 then 
-                        sign := -1; 
-                        if im[1] < 0 then 
-                            im[1] := -im[1];
-                        else
-                            im[2] := -im[2];
-                        fi;
+    for i in [1..Size(setup.pairconjelts)] do 
+        if Size(setup.pairconjelts[i]) <= dim + Size(unknowns) then 
+            for x in unknowns do 
+                im := setup.pairconjelts[i]{x};
+                
+                if im[1]*im[2] < 0 then 
+                    sign := -1; 
+                    if im[1] < 0 then 
+                        im[1] := -im[1];
                     else
-                        sign := 1;
-                        if im[1] < 0 then 
-                            im := -im;
-                        fi;
+                        im[2] := -im[2];
                     fi;
-                    
-                    if im[1] > im[2] then 
-                        im := im{[2,1]};
+                else
+                    sign := 1;
+                    if im[1] < 0 then 
+                        im := -im;
                     fi;
-                    
-                    pos := Position(unknowns, im);
+                fi;
+                
+                if im[1] > im[2] then 
+                    im := im{[2,1]};
+                fi;
+                
+                pos := Position(unknowns, im);
 
-                    Add(setup.pairconjelts[i][j], sign*(dim + pos));
-                od;
+                Add(setup.pairconjelts[i], sign*(dim + pos));
             od;
         fi;
     od;    
@@ -161,7 +150,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
     for i in [1..Size(setup.conjelts)] do 
         for x in unknowns do 
             if setup.conjelts[i][1] <> () then 
-                im := setup.conjelts[i][2]{x};
+                im := setup.conjelts[i]{x};
                             
                 if im[1]*im[2] < 0 then 
                     sign := -1; 
@@ -183,7 +172,7 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
                 
                 pos := Position(unknowns, im);
 
-                Add(setup.conjelts[i][2], sign*(dim + pos));
+                Add(setup.conjelts[i], sign*(dim + pos));
             fi;
         od;
     od;

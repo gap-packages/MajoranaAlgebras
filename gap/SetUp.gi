@@ -447,37 +447,15 @@ InstallGlobalFunction( MAJORANA_FindVectorPermutation,
     
     dim := Size(setup.coords);
     list := [1..dim]*0;
-    
-    if g = () then 
-        return [];
-    else        
-        for j in [1..dim] do 
-            pos := Position(setup.longcoords,setup.coords[j]^g); 
-            list[j] := setup.poslist[pos];
-        od;
-    
-        return list;
-    fi;
+        
+    for j in [1..dim] do 
+        pos := Position(setup.longcoords,setup.coords[j]^g); 
+        list[j] := setup.poslist[pos];
+    od;
+
+    return list;
     
     end);
-    
-InstallGlobalFunction( MAJORANA_FindAllPermutations,
-
-    function(G, setup)
-    
-    local   i, g;
-    
-    for i in [1..Size(setup.pairconjelts)] do 
-        g := setup.pairconjelts[i];
-        setup.pairconjelts[i] := List([g, Inverse(g)], x ->  MAJORANA_FindVectorPermutation(x, setup));
-    od;
-    
-    for i in [1..Size(setup.conjelts)] do 
-        g := setup.conjelts[i];
-        setup.conjelts[i] := [g, MAJORANA_FindVectorPermutation(g, setup)];
-    od;
-    
-    end );
     
 InstallGlobalFunction(MAJORANA_DihedralProducts,
 

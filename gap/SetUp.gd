@@ -8,8 +8,6 @@ DeclareGlobalFunction( "MAJORANA_MakeVector" );
 
 DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
 
-DeclareGlobalFunction( "MAJORANA_FindAllPermutations" );
-
 DeclareGlobalFunction( "MAJORANA_FindVectorPermutation" );
 
 DeclareGlobalFunction( "SP_Product" );
