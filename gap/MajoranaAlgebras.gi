@@ -1108,7 +1108,6 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
             perm,
             nonzero,
             elm,
-            switch,
             j;
     
     if ForAll(mat!.indices, x -> x = []) then
@@ -1130,6 +1129,10 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     
     Info(   InfoMajorana, 40, "Solved it!" );
     
+    if ForAll(sol.solutions, x -> x = fail) then 
+        return rec( mat := sol.mat, vec := sol.vec, unknowns := unknowns);
+    fi;
+    
     for i in [1..Size(unknowns)] do
     
         if sol.solutions[i] <> fail then  
@@ -1141,14 +1144,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
                                         setup );
         fi;
     od;
-    
+
     Unbind(sol.solutions);
     
-    x := MAJORANA_RemoveKnownAlgProducts(   sol.mat,
-                                            sol.vec,
-                                            unknowns,
-                                            algebraproducts,
-                                            setup         );
+    x := MAJORANA_RemoveKnownAlgProducts(   sol.mat, sol.vec, unknowns,
+                                            algebraproducts, setup    );
                                                     
     nonzero := [];
     
@@ -1158,27 +1158,17 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         fi;
     od;
     
-    if Size(unknowns) > Size(x.unknowns) then 
-        switch := true;
-    else
-        switch := false;
-    fi;
-    
     mat := CertainRows(x.mat, nonzero);
     vec := CertainRows(x.vec, nonzero);
     unknowns := x.unknowns;
 
-    if switch = true then
-        x := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, algebraproducts, setup);
-        
-        mat := x.mat;
-        vec := x.vec; 
-        unknowns := x.unknowns;
-    fi;
+    x := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, algebraproducts, setup);
+    
+    mat := x.mat;
+    vec := x.vec; 
+    unknowns := x.unknowns;
                                         
-    return rec( mat := mat,
-                vec := vec,
-                unknowns := unknowns    );
+    return rec( mat := mat, vec := vec, unknowns := unknowns );
     
     end );
     
