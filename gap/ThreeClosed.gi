@@ -45,7 +45,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     Append(rep.setup.pairconj, NullMat(new_dim - dim, new_dim));
     
     gens := GeneratorsOfGroup(rep.group);
-    gens := List(gens, x -> MAJORANA_ThreeClosedFindVectorPermutation(x, unknowns, rep.setup));
+    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
     
     MAJORANA_Orbitals(gens, dim, rep.setup);
     
@@ -76,39 +76,6 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
                                     rep.nullspace!.entries, Rationals);
     end );
     
-InstallGlobalFunction( MAJORANA_ThreeClosedFindVectorPermutation, 
-    
-    function(g, unknowns, setup)
-    
-    local   new_dim,
-            dim,        # size of coordinates
-            j,          # loop over coordinates
-            list,       # list to build permutation
-            pos;
-    
-    new_dim := Size(setup.coords);
-    dim := new_dim - Size(unknowns);
-    
-    list := [1..new_dim]*0;
-    
-    if g = () then 
-        return ();
-    else        
-        for j in [1..dim] do 
-            pos := Position(setup.longcoords,setup.coords[j]^g); 
-            list[j] := setup.poslist[pos];
-        od;
-        
-        for j in [dim + 1 .. new_dim] do 
-            pos := Position(setup.longcoords, OnPairs(setup.coords[j], g));
-            list[j] := setup.poslist[pos];
-        od; 
-        
-        return list;
-    fi;
-    
-    end);
-    
 InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
 
     function(unknowns, setup)
@@ -121,20 +88,10 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
         if Size(setup.pairconjelts[i]) <= dim + Size(unknowns) then 
             for x in unknowns do 
                 im := setup.pairconjelts[i]{x};
+                sign := 1;
                 
-                if im[1]*im[2] < 0 then 
-                    sign := -1; 
-                    if im[1] < 0 then 
-                        im[1] := -im[1];
-                    else
-                        im[2] := -im[2];
-                    fi;
-                else
-                    sign := 1;
-                    if im[1] < 0 then 
-                        im := -im;
-                    fi;
-                fi;
+                if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
+                if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
                 
                 if im[1] > im[2] then 
                     im := im{[2,1]};
@@ -151,20 +108,10 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
         for x in unknowns do 
             if setup.conjelts[i][1] <> () then 
                 im := setup.conjelts[i]{x};
-                            
-                if im[1]*im[2] < 0 then 
-                    sign := -1; 
-                    if im[1] < 0 then 
-                        im[1] := -im[1];
-                    else
-                        im[2] := -im[2];
-                    fi;
-                else
-                    sign := 1;
-                    if im[1] < 0 then 
-                        im := -im;
-                    fi;
-                fi;
+                sign := 1;
+                
+                if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
+                if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
                 
                 if im[1] > im[2] then 
                     im := im{[2,1]};
