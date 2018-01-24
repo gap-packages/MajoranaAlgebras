@@ -125,3 +125,43 @@ InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
     od;
     
     end);
+    
+InstallGlobalFunction( ThreeClosedMajoranaRepresentation, 
+
+    function(rep)
+    
+    local falsecount, newfalsecount;
+    
+    MAJORANA_ThreeClosedSetUp(rep);
+    
+    falsecount := [0,0];
+    
+    falsecount[1] := Size(Positions(rep.algebraproducts,false));
+    falsecount[2] := Size(Positions(rep.innerproducts,false));
+    
+    while true do
+                                
+        MAJORANA_MainLoop(rep);
+        
+        newfalsecount := [0,0];
+
+        newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
+        newfalsecount[2] := Size(Positions(rep.innerproducts,false));
+
+        Info(InfoMajorana, 20,
+            STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
+        Info(InfoMajorana, 20,
+            STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
+
+        if newfalsecount = [0,0] then
+            Info( InfoMajorana, 10, "Success" );
+            return rep;
+        elif newfalsecount = falsecount then
+            Info( InfoMajorana, 10, "Fail" );
+            return rep;
+        else
+            falsecount := StructuralCopy(newfalsecount);
+        fi;
+    od;
+    
+    end );
