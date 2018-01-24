@@ -65,7 +65,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
     
     local   dim,
             i,j,
-            pnt,
             orb,
             elts,
             count,
@@ -87,9 +86,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                 
                 Add(setup.pairreps, [i,j]);
                 
-                pnt := [i,j];
-                
-                orb := [pnt];
+                orb := [[i,j]];
                 elts := [[1..dim]];
                 
                 count := 0;
@@ -110,17 +107,22 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                     for gen in gens do 
                     
                         q := gen{p};
-                        g := SP_Product(h,gen);
                         
-                        sign := 1;
-                        
-                        if q[1] < 0 then q[1] := -q[1]; sign := -sign; fi;
-                        if q[2] < 0 then q[2] := -q[2]; sign := -sign; fi;
+                        if q[1] < 0 then q[1] := -q[1]; fi;
+                        if q[2] < 0 then q[2] := -q[2]; fi;
                         
                         if setup.pairorbit[q[1]][q[2]] = 0 then 
                         
+                            g := SP_Product(h,gen);
+                        
                             Add( orb, q );
                             Add( elts, g);
+                            
+                            if Product(g{orb[1]}) < 0 then 
+                                sign := -1;
+                            else
+                                sign := 1;
+                            fi;
                             
                             setup.pairorbit[q[1]][q[2]] := sign*y;
                             setup.pairorbit[q[2]][q[1]] := sign*y;
