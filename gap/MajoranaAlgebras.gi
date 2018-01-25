@@ -525,11 +525,6 @@ function(innerproducts, algebraproducts, evecs, setup)
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
             y,          # result of SolutionAlgProducts
-            z,          # to be added to mat vec system
-            g,          # conjugating element
-            conj,
-            list,
-            pos,
             dim;        # size of setup.coords
     
     dim := Size(setup.coords);
@@ -542,10 +537,8 @@ function(innerproducts, algebraproducts, evecs, setup)
     Info( InfoMajorana, 50, "Building eigenvector unknowns");
     
     for i in setup.orbitreps do 
-        
-        list := Filtered(unknowns, x -> i in x);
-    
-        if list <> [] then 
+
+        if ForAny(unknowns, x -> i in x) then 
          
             for ev in [1..3] do 
                 
