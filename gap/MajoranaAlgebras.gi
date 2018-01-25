@@ -380,14 +380,16 @@ function(range, innerproducts, setup)
     mat := SparseZeroMatrix(l, l, Rationals);
     
     for i in [1..l] do 
-        for j in [1..l] do
+        for j in [i..l] do
             
             k := setup.pairorbit[range[i]][range[j]];
             
             if k > 0 then 
                 SetEntry(mat, i, j, innerproducts[k]);
+                SetEntry(mat, j, i, innerproducts[k]);
             else
                 SetEntry(mat, i, j, -innerproducts[-k]);
+                SetEntry(mat, j, i, -innerproducts[-k]);
             fi;
         od;
     od;
