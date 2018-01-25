@@ -24,9 +24,7 @@ function(algebraproducts, setup)
             
             k := setup.pairorbit[i][j];
         
-            if k < 0 then 
-                k := -k;
-            fi;
+            if k < 0 then k := -k; fi;
         
             if algebraproducts[k] = false then 
                 Add(unknowns,[i,j]);
@@ -57,18 +55,13 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     for i in v!.indices[1] do
         for j in list do 
             k :=  setup.pairorbit[i][j];
-           
-            if k > 0 then 
-                if algebraproducts[k] = false then 
-                    Add(bad,j);
-                    list := Difference(list,[j]);
-                fi;
-            else
-                if algebraproducts[-k] = false then 
-                    Add(bad,j);
-                    list := Difference(list,[j]);
-                fi;
-            fi;                
+            
+            if k < 0 then k := -k; fi;
+
+            if algebraproducts[k] = false then 
+                Add(bad,j);
+                list := Difference(list,[j]);
+            fi;               
         od;
     od;
 
@@ -155,7 +148,7 @@ function(rep)
     
     for i in rep.setup.orbitreps do 
     
-        if IsMutable(rep.evecs[i]) then 
+        if not MAJORANA_CheckBasis(dim, rep.evecs[i], rep.nullspace) then 
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
@@ -187,9 +180,7 @@ function(rep)
                             
                             b := CertainRows(null, [k])*evecs_b;
                             
-                            MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, rep.innerproducts, rep.algebraproducts, rep.setup);
-                            
-                            
+                            MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
                         od;                        
                     od;
                 
@@ -199,18 +190,16 @@ function(rep)
                         fi;
                     od;
                     
-                    if Sum(List(new, x -> Nrows(x))) + Nrows(rep.nullspace) >= dim - 1 then 
-                        break;
-                    fi;
+                    if MAJORANA_CheckBasis(dim, new, rep.nullspace) then break; fi;
                 od;
                 
-                if Sum(List(new, x -> Nrows(x))) + Nrows(rep.nullspace) >= dim - 1 then 
-                    break;
-                fi;
-                                
+                if MAJORANA_CheckBasis(dim, new, rep.nullspace) then break; fi;
             od;
             
             if Nrows(other_mat) > 0 then 
+                
+                Info(   InfoMajorana, 50, "Other mat used") ;
+            
                 u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
                 bad := MAJORANA_FindBadIndices(u,rep.algebraproducts, rep.setup );
@@ -232,10 +221,37 @@ function(rep)
                 rep.evecs[i][j] := new[j];
                 rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
             od;
-        fi;        
+        fi;
     od;
     
     end );     
+
+# Returns true if we have full eigenspace decomposition, returns false otherwise
+
+InstallGlobalFunction( MAJORANA_CheckBasis,
+
+    function(dim, evecs, nullspace)
+    
+    local basis;
+    
+    if Sum(List(evecs, Nrows)) + Nrows(nullspace) < dim - 1 then 
+        return false;
+    fi;
+    
+    basis := SparseZeroMatrix(1, dim, Rationals);
+    
+    basis := UnionOfRows(basis, evecs[1]);
+    basis := UnionOfRows(basis, evecs[2]);
+    basis := UnionOfRows(basis, evecs[3]);
+    basis := UnionOfRows(basis, nullspace);
+    
+    if Nrows(EchelonMat(basis).vectors) < dim - 1 then 
+        return false;
+    else
+        return true;
+    fi;
+    
+    end );
     
 InstallGlobalFunction( MAJORANA_ConjugateVec, 
 
@@ -1561,10 +1577,6 @@ function(input,index)
         newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
         newfalsecount[2] := Size(Positions(rep.innerproducts,false));
         
-        if newfalsecount[2] < falsecount[2] then 
-            rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        fi;
-
         Info(InfoMajorana, 20,
             STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
         Info(InfoMajorana, 20,

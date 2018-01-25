@@ -24,6 +24,8 @@ DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
 
 DeclareGlobalFunction( "MAJORANA_Fusion" );
 
+DeclareGlobalFunction( "MAJORANA_CheckBasis" );
+
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
