@@ -945,9 +945,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     
     res := MAJORANA_SeparateAlgebraProduct(b, c, unknowns, algebraproducts, setup);
     
-    if res[1]!.indices[1] = [] then 
-        return false;
-    fi;
+    if res[1]!.indices[1] = [] then return false; fi;
     
     ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     
@@ -1047,15 +1045,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     local   sol,        # solution of system
             sign,       # correct sign of 5A axes
             i,          # loop over <unknowns>
-            x,          # element of <unknowns>
-            y,          # orbit of x
-            g,          # conj element of x
-            unsolved,
-            prod,
-            perm,
-            nonzero,
-            elm,
-            j;
+            x,
+            nonzero;
     
     if ForAll(mat!.indices, x -> x = []) then
         return rec( mat := SparseMatrix(0, Ncols(mat), [], [], Rationals), 
@@ -1083,10 +1074,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     for i in [1..Size(unknowns)] do
     
         if sol.solutions[i] <> fail then  
-        
-            x := unknowns[i]; 
             
-            MAJORANA_RecordSolution(    sol.solutions[i], x,
+            MAJORANA_RecordSolution(    sol.solutions[i], unknowns[i],
                                         algebraproducts, setup );
         fi;
     od;
@@ -1175,8 +1164,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     return rec( mat := mat, vec := vec, unknowns := unknowns );
     
     end );
-    
-    
+
 InstallGlobalFunction( MAJORANA_RecordSolution,
 
     function( v, x, algebraproducts, setup)
@@ -1188,12 +1176,9 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     y := setup.pairorbit[x[1]][x[2]];
     g := SP_Inverse(setup.pairconjelts[setup.pairconj[x[1]][x[2]]]);
     
-    if y > 0 then 
-        sign := 1;
-    else
-        sign := -1;
-        y := -y;
-    fi;
+    sign := 1;
+    
+    if y < 0 then sign := -1; y := -y; fi;
     
     if algebraproducts[y] = false then 
         algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g,setup);              
@@ -1231,9 +1216,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
     mat := CertainColumns(mat, unsolved);
     unknowns := unknowns{unsolved};
     
-    return rec( mat := mat, 
-                vec := vec, 
-                unknowns := unknowns);
+    return rec( mat := mat, vec := vec, unknowns := unknowns);
                 
     end );
     
@@ -1275,12 +1258,9 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
                     
         y := setup.pairorbit[x[1]][x[2]];
         
-        if y > 0 then 
-            sign := 1;
-        else
-            sign := -1;
-            y := -y;
-        fi;
+        sign := 1;
+        
+        if y < 0 then sign := -1; y := -y; fi;
         
         prod := algebraproducts[y];
                         
@@ -1308,9 +1288,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     mat := CertainColumns(mat, unsolved);
     unknowns := unknowns{unsolved};
     
-    return rec( mat := mat, 
-                vec := vec, 
-                unknowns := unknowns);
+    return rec( mat := mat, vec := vec, unknowns := unknowns);
         
     end );
     
@@ -1344,9 +1322,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     x.mat := CertainRows(x.mat, nonzero);
     x.vec := CertainRows(x.vec, nonzero);
                                         
-    return rec( mat := x.mat,
-                vec := x.vec,
-                unknowns := x.unknowns    );
+    return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns );
     
     end );
     
