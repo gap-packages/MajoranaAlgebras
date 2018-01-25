@@ -160,37 +160,33 @@ function(rep)
             
             other_mat := SparseMatrix(0, dim, [], [], Rationals);
         
-            for ev_a in [1..3] do
-                evecs_a := rep.evecs[i][ev_a];
-                for ev_b in [ev_a..3] do 
-                    evecs_b := rep.evecs[i][ev_b];
-                    for j in [1..Nrows(evecs_a)] do
-                        
-                        a := CertainRows(evecs_a, [j]);
-
-                        bad := MAJORANA_FindBadIndices(a,rep.algebraproducts,rep.setup);
-                        
-                        if bad <> [] then  
-                            null := KernelMat(CertainColumns(evecs_b, bad)).relations;
-                        else
-                            null := SparseIdentityMatrix(Nrows(evecs_b));
-                        fi;
-                        
-                        for k in [1..Nrows(null)] do 
-                            
-                            b := CertainRows(null, [k])*evecs_b;
-                            
-                            MAJORANA_FuseEigenvectors(a, b, i, [ev_a, ev_b], other_mat, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
-                        od;                        
-                    od;
-                
-                    for k in [1..3] do 
-                        if Nrows(new[k]) > dim then                             
-                            new[k] := EchelonMatDestructive(new[k]).vectors;
-                        fi;
-                    od;
+            for evals in [[1,1], [1,2], [1,3], [2,3], [2,2], [3,3]] do
+                evecs_a := rep.evecs[i][evals[1]];
+                evecs_b := rep.evecs[i][evals[2]];
+                for j in [1..Nrows(evecs_a)] do
                     
-                    if MAJORANA_CheckBasis(dim, new, rep.nullspace) then break; fi;
+                    a := CertainRows(evecs_a, [j]);
+
+                    bad := MAJORANA_FindBadIndices(a,rep.algebraproducts,rep.setup);
+                    
+                    if bad <> [] then  
+                        null := KernelMat(CertainColumns(evecs_b, bad)).relations;
+                    else
+                        null := SparseIdentityMatrix(Nrows(evecs_b));
+                    fi;
+                    
+                    for k in [1..Nrows(null)] do 
+                        
+                        b := CertainRows(null, [k])*evecs_b;
+                        
+                        MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
+                    od;                        
+                od;
+            
+                for k in [1..3] do 
+                    if Nrows(new[k]) > dim then                             
+                        new[k] := EchelonMatDestructive(new[k]).vectors;
+                    fi;
                 od;
                 
                 if MAJORANA_CheckBasis(dim, new, rep.nullspace) then break; fi;
