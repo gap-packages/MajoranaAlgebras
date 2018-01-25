@@ -396,9 +396,7 @@ function(range, innerproducts, setup)
 
     return mat;
 
-    end
-
-    );
+    end );
     
 InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
 
@@ -465,13 +463,8 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
         return;
     fi;
     
-    dim := Size(rep.setup.coords);
-    
+    dim := Size(rep.setup.coords);    
     unknowns := Positions(rep.innerproducts,false);
-    
-    if Size(unknowns) = 0 then
-        return;
-    fi; 
     
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
     vec := SparseMatrix(0, 1, [], [], Rationals);
@@ -479,8 +472,7 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
     for i in rep.setup.orbitreps do        
         for ev in Combinations([0..3],2) do  
             if ev[1] = 0 then 
-                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals); 
-                evecs_a := u;  
+                evecs_a := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             else
                 evecs_a := rep.evecs[i][ev[1]];
             fi;
@@ -493,8 +485,7 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
                     u := CertainRows(evecs_a, [j]);
                     v := CertainRows(evecs_b, [k]);
 
-                    x := MAJORANA_SeparateInnerProduct( u, v,
-                                                        unknowns,
+                    x := MAJORANA_SeparateInnerProduct( u, v, unknowns,
                                                         rep.innerproducts,
                                                         rep.setup);
 
@@ -510,7 +501,7 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
         od;
     od;
     
-    if Nrows(mat) > 1 then 
+    if Nrows(mat) > 0 then 
         MAJORANA_SolutionInnerProducts(mat,vec, unknowns, rep.innerproducts);
     fi;      
     
