@@ -690,14 +690,17 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
             x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, rep.innerproducts);
             
             mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+            
+            if unknowns = [] then 
+                rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+                return;
+            fi;
         fi;
         
     od;
-    
-    if unknowns <> [] then 
-        MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
-    fi;
-    
+
+    MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
+
     if not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
     fi;
@@ -1266,7 +1269,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     
     if algebraproducts[y] = false then 
         algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g,setup);              
-    fi;      
+    fi; 
     
     end );
     
@@ -1524,7 +1527,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
             
     MAJORANA_UnknownAlgebraProducts(rep);
 
-    MAJORANA_MoreEigenvectors(rep);
+    # MAJORANA_MoreEigenvectors(rep);
     
     MAJORANA_Orthogonality(rep);
 
