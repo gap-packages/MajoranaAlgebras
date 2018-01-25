@@ -517,12 +517,10 @@ function(innerproducts, algebraproducts, evecs, setup)
 
     local   i,          # loop over representatives
             j,
-            t,
             ev,         # loop over eigenvalues
             unknowns,   # unknown algebra products
             mat,        # matrix of unknowns
             vec,        # vector of knowns
-            table,      # table of eigenvalues
             u,          # vector with 1 in j th position
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
@@ -535,9 +533,7 @@ function(innerproducts, algebraproducts, evecs, setup)
             dim;        # size of setup.coords
     
     dim := Size(setup.coords);
-    t := Size(evecs);
-    
-    table := [0, 1/4, 1/32];    
+ 
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(algebraproducts,setup);
     
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
@@ -561,7 +557,7 @@ function(innerproducts, algebraproducts, evecs, setup)
                     
                     x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                     
-                    x[2] := x[2] + table[ev]*v;
+                    x[2] := x[2] + MAJORANA_FusionTable[1][ev + 1]*v;
                     
                     if Size(x[1]!.indices[1]) = 1 then 
                         y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
