@@ -133,12 +133,10 @@ function(rep)
             unknowns,
             new,
             u,
-            ev_a, evecs_a,
-            ev_b, evecs_b,
-            new_ev,
-            new_dim,
-            pos,
-            z,
+            x,
+            evals,
+            evecs_a,
+            evecs_b,
             null,
             bad,
             other_mat;
@@ -205,13 +203,11 @@ function(rep)
                     
                     b := CertainRows(null, [j])*other_mat;
                 
-                    z := MAJORANA_AlgebraProduct(u,b,rep.algebraproducts, rep.setup);
-                    new[2] := UnionOfRows(new[2], z);
-                    new[1] := UnionOfRows(new[1], b - 4*z);
+                    x := MAJORANA_AlgebraProduct(u,b,rep.algebraproducts, rep.setup);
+                    new[2] := UnionOfRows(new[2], x);
+                    new[1] := UnionOfRows(new[1], b - 4*x);
                 od;
             fi;
-        
-            if ForAll(new, x -> x!.indices = []) then return; fi;
         
             for j in [1..3] do 
                 rep.evecs[i][j] := new[j];
