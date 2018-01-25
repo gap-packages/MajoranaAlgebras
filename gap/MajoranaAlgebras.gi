@@ -580,21 +580,11 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(rep)
     
-    local   dim,
-            mat,
-            vec,
-            i,
-            j,
-            k,
-            u,
-            v,
-            w,
-            x,
-            y,
-            z,
-            row,
-            sum,
-            pos,
+    local   dim, mat, vec,
+            i, j, k,
+            u, v, w,
+            x, y, z,
+            row, sum, pos,
             unknowns;
             
     if not false in rep.innerproducts then 
