@@ -79,8 +79,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                     for k in [1..Nrows(ev_b)] do
                         b := CertainRows(ev_b, [k]);
                         if MAJORANA_InnerProduct(b, b, innerproducts, setup) <> 0 then 
-                            MAJORANA_FuseEigenvectors(  a, b, i, evals, 
-                                                        false, new, 
+                            MAJORANA_FuseEigenvectors(  a, b, i, evals, new, 
                                                         innerproducts,
                                                         algebraproducts,
                                                         setup );

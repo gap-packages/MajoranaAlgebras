@@ -75,7 +75,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
-    function(a, b, i, evals, other_mat, new, innerproducts, algebraproducts, setup)
+    function(a, b, i, evals, new, innerproducts, algebraproducts, setup)
     
     local   dim,
             u, 
@@ -108,8 +108,6 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             if y <> false and z <> false then 
                 new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
                 new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
-            elif other_mat <> false and y <> false then 
-                other_mat := UnionOfRows(other_mat, x - (1/32)*u*y);
             fi;  
         else
             new[pos] := UnionOfRows(new[pos],x);
@@ -126,20 +124,18 @@ function(rep)
 
     local   i,
             j,
-            k, l,
+            k,
             a,
             b,
             dim,
             unknowns,
             new,
             u,
-            x,
             evals,
             evecs_a,
             evecs_b,
             null,
-            bad,
-            other_mat;
+            bad;
     
     dim := Size(rep.setup.coords);
     unknowns := MAJORANA_ExtractUnknownAlgebraProducts(rep.algebraproducts, rep.setup);
@@ -177,7 +173,8 @@ function(rep)
                         
                         b := CertainRows(null, [k])*evecs_b;
                         
-                        MAJORANA_FuseEigenvectors(a, b, i, evals, other_mat, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
+                        MAJORANA_FuseEigenvectors(a, b, i, evals, new, 
+                        rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
             
@@ -189,25 +186,6 @@ function(rep)
                 
                 if MAJORANA_CheckBasis(dim, new, rep.nullspace) then break; fi;
             od;
-            
-            if Nrows(other_mat) > 0 then 
-                
-                Info(   InfoMajorana, 50, "Other mat used") ;
-            
-                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-            
-                bad := MAJORANA_FindBadIndices(u,rep.algebraproducts, rep.setup );
-                null := KernelMat(CertainColumns(other_mat, bad)).relations;
-                
-                for j in [1..Nrows(null)] do 
-                    
-                    b := CertainRows(null, [j])*other_mat;
-                
-                    x := MAJORANA_AlgebraProduct(u,b,rep.algebraproducts, rep.setup);
-                    new[2] := UnionOfRows(new[2], x);
-                    new[1] := UnionOfRows(new[1], b - 4*x);
-                od;
-            fi;
         
             for j in [1..3] do 
                 rep.evecs[i][j] := new[j];
