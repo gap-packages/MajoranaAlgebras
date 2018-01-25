@@ -151,8 +151,6 @@ function(rep)
             for j in [1..3] do 
                 new[j] := CopyMat(rep.evecs[i][j]);
             od;
-            
-            other_mat := SparseMatrix(0, dim, [], [], Rationals);
         
             for evals in [[1,1], [1,2], [1,3], [2,3], [2,2], [3,3]] do
                 evecs_a := rep.evecs[i][evals[1]];
@@ -202,7 +200,7 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
 
     function(dim, evecs, nullspace)
     
-    local basis;
+    local i, basis;
     
     if Sum(List(evecs, Nrows)) + Nrows(nullspace) < dim - 1 then 
         return false;
@@ -210,9 +208,10 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
     
     basis := SparseZeroMatrix(1, dim, Rationals);
     
-    basis := UnionOfRows(basis, evecs[1]);
-    basis := UnionOfRows(basis, evecs[2]);
-    basis := UnionOfRows(basis, evecs[3]);
+    for i in [1..3] do 
+        basis := UnionOfRows(basis, evecs[i]);
+    od;
+    
     basis := UnionOfRows(basis, nullspace);
     
     if Nrows(EchelonMat(basis).vectors) < dim - 1 then 
