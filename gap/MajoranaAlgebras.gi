@@ -267,7 +267,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
 
 InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
-        function(u,v,algebraproducts,list) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
+        function(u,v,algebraproducts,setup) # If all the relevant products are known, returns the algebra product of u and v. If not, returns 0
 
         local   i,      # loop over u 
                 j,      # loop over v
@@ -295,7 +295,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
                 
-                k := list.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+                k := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
                 
                 if k > 0 then 
                     sign := 1;
@@ -308,7 +308,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 
                 if x <> false then
                     
-                    g := list.pairconj[u!.indices[1][i]][v!.indices[1][j]];
+                    g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]];
                     
                     pos := Position(elts,g);
                     
@@ -326,15 +326,13 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            x := MAJORANA_ConjugateVec(vecs[i],list.pairconjelts[elts[i]],list);
+            x := MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]],setup);
             AddRow(x!.indices[1],x!.entries[1],vec!.indices,vec!.entries,1);
         od;
                 
         return vec;
         
-        end
-
-        );
+        end );
 
 InstallGlobalFunction(  MAJORANA_InnerProduct,
 
