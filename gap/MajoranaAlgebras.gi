@@ -801,17 +801,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     if unknowns = [] then return; fi;
     
-    if Nrows(rep.nullspace) > 0 then 
+    x := MAJORANA_NullspaceUnknowns(    mat, vec, unknowns, rep.algebraproducts, 
+                                        rep.setup, rep.nullspace, rep.group);
     
-        x := MAJORANA_NullspaceUnknowns(    mat, vec, unknowns, 
-                                            rep.algebraproducts, 
-                                            rep.setup, rep.nullspace, 
-                                            rep.group);
-    
-        mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-    
-        if unknowns = [] then return; fi;
-    fi;
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+
+    if unknowns = [] then return; fi;
     
     Info(   InfoMajorana, 50, "Building resurrection");
     
@@ -923,17 +918,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
                 x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
                 
-                if x.unknowns = [] then 
-                    return;
-                fi;
+                if x.unknowns = [] then return; fi;
                 
-                nonzero := [];
-    
-                for j in [1..Nrows(x.mat)] do              
-                    if x.mat!.indices[j] <> [] then 
-                        Add(nonzero,j);
-                    fi;
-                od;
+                nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
                 
                 new_mat := CertainRows(x.mat, nonzero);
                 new_vec := CertainRows(x.vec, nonzero);
@@ -995,6 +982,10 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             x,
             y,
             dim;
+            
+    if Nrows(nullspace) = 0 then
+        return rec( mat := mat, vec := vec, unknowns := unknowns);
+    fi;
     
     Info( InfoMajorana, 50, "Building nullspace unknowns" );
     
@@ -1105,13 +1096,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     x := MAJORANA_RemoveKnownAlgProducts(   sol.mat, sol.vec, unknowns,
                                             algebraproducts, setup    );
                                                     
-    nonzero := [];
-    
-    for j in [1..Nrows(x.mat)] do              
-        if x.mat!.indices[j] <> [] then 
-            Add(nonzero,j);
-        fi;
-    od;
+    nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
     
     mat := CertainRows(x.mat, nonzero);
     vec := CertainRows(x.vec, nonzero);
@@ -1149,13 +1134,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
                                             algebraproducts, setup );
                                         
     if Nrows(y.mat) > 0 then 
-        nonzero := [];
-                        
-        for i in [1..Nrows(y.mat)] do              
-            if y.mat!.indices[i] <> [] then 
-                Add(nonzero,i);
-            fi;
-        od;
+        nonzero := Filtered([1..Nrows(y.mat)], j -> y.mat!.indices[j] <> []);
         
         mat := CertainRows(y.mat, nonzero);
         vec := CertainRows(y.vec, nonzero);
@@ -1184,13 +1163,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
             x := MAJORANA_RemoveKnownAlgProducts(   mat, vec, unknowns,
                                                     algebraproducts, setup );
                                                             
-            nonzero := [];
-            
-            for i in [1..Nrows(x.mat)] do              
-                if x.mat!.indices[i] <> [] then 
-                    Add(nonzero,i);
-                fi;
-            od;
+            nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
             
             mat := CertainRows(x.mat, nonzero);
             vec := CertainRows(x.vec, nonzero);
@@ -1366,13 +1339,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     x := MAJORANA_RemoveKnownInnProducts(   sol.mat, sol.vec,
                                             unknowns, innerproducts );
                                                     
-    nonzero := [];
-    
-    for i in [1..Nrows(x.mat)] do              
-        if x.mat!.indices[i] <> [] then 
-            Add(nonzero,i);
-        fi;
-    od;
+    nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
     
     x.mat := CertainRows(x.mat, nonzero);
     x.vec := CertainRows(x.vec, nonzero);
