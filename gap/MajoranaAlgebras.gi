@@ -161,7 +161,7 @@ function(rep)
             other_mat := SparseMatrix(0, dim, [], [], Rationals);
         
             for ev_a in [1..3] do
-                evecs_a := UnionOfRows(rep.evecs[i][ev_a], rep.nullspace);
+                evecs_a := rep.evecs[i][ev_a];
                 for ev_b in [ev_a..3] do 
                     evecs_b := rep.evecs[i][ev_b];
                     for j in [1..Nrows(evecs_a)] do
