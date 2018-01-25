@@ -156,6 +156,8 @@ function(rep)
     for i in rep.setup.orbitreps do 
     
         if IsMutable(rep.evecs[i]) then 
+        
+            Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
             new := [0,0,0];
             
@@ -637,6 +639,8 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     if not false in rep.innerproducts then 
         return;
     fi;
+    
+    Info(   InfoMajorana, 50, "Axiom M1");
     
     dim := Size(rep.setup.coords);
     unknowns := Positions(rep.innerproducts, false);
