@@ -148,9 +148,9 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
         newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
         newfalsecount[2] := Size(Positions(rep.innerproducts,false));
 
-        #if newfalsecount[2] < falsecount[2] then 
-        #    rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        #fi;
+        if newfalsecount[2] < falsecount[2] then 
+            rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+        fi;
 
         Info(InfoMajorana, 20,
             STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );

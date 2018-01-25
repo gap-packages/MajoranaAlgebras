@@ -699,7 +699,9 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
-    rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+    if not false in rep.innerproducts then 
+        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+    fi;
     
     end );
 
