@@ -1350,70 +1350,6 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     return null;
     
     end );
-        
-InstallGlobalFunction(MAJORANA_MoreEigenvectors,
-
-    function(rep)
-    
-    local   i,
-            j,
-            dim,
-            list,
-            a,
-            b,
-            d,
-            mat,
-            x,
-            table,
-            ev;
-            
-    dim := Size(rep.setup.coords);
-    
-    table := [0,1/4,1/32];
-
-    for i in rep.setup.orbitreps do
-        
-        if IsMutable(rep.evecs[i]) then 
-        
-            a := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-        
-            mat := SparseZeroMatrix(dim, dim, Rationals);
-
-            for j in [1..dim] do
-            
-                b := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
-                
-                x := MAJORANA_AlgebraProduct(a,b,rep.algebraproducts,rep.setup);
-                
-                if x <> false then
-                    mat!.indices[j] := x!.indices[1];
-                    mat!.entries[j] := x!.entries[1];
-                else
-                    mat := fail;
-                    break;
-                fi;
-            od;
-
-            if mat = fail then 
-                return;
-            fi;
-            
-            for ev in [1..3] do
-             
-                Info(   InfoMajorana, 50, 
-                        STRINGIFY( "Finding ", table[ev], " eigenvectors for axis ", i) ); 
-                        
-                rep.evecs[i][ev] := KernelMat( mat - SparseIdentityMatrix(dim, Rationals)*table[ev]).relations;
-                
-                rep.evecs[i][ev] := MAJORANA_BasisOfEvecs(rep.evecs[i][ev]);
-                
-            od;
-            
-            # MakeImmutable(rep.evecs[i]);
-        fi;
-    od;
-    
-    end);
 
 InstallGlobalFunction(MAJORANA_MainLoop,
 
@@ -1424,8 +1360,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     MAJORANA_Fusion(rep);
             
     MAJORANA_UnknownAlgebraProducts(rep);
-
-    # MAJORANA_MoreEigenvectors(rep);
     
     MAJORANA_Orthogonality(rep);
 
