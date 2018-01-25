@@ -342,10 +342,8 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 j,              # loop over v
                 k,              # pair orbit index
                 sign,           # correct for 5A axes
-                sum,            # output value
-                unknowns,
-                x;
-        
+                sum;            # output value
+
         sum := 0;
 
         for i in Reversed([1..Size(u!.indices[1])]) do
@@ -369,9 +367,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
         
         return sum;
         
-        end 
-        
-        );
+        end );
 
 InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
