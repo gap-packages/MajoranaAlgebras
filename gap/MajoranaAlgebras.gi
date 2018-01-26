@@ -227,35 +227,26 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
     function(mat,g,setup)
     
     local   i,
-            j,
-            nrows,
-            ncols,
-            indices,
-            entries,
+            k,
+            sign,
             res,            
             pos;
     
     if g <> [] then 
         
-        nrows := Nrows(mat);
-        ncols := Ncols(mat);
+        res := SparseMatrix(1, Ncols(mat), [[]], [[]], Rationals);
         
-        indices := IndicesOfSparseMatrix(mat);
-        entries := EntriesOfSparseMatrix(mat);
-        
-        res := SparseZeroMatrix(nrows, ncols, Rationals);
-        
-        for i in [1..nrows] do 
-            for j in [1..Size(indices[i])] do 
-                
-                pos := g[indices[i][j]];
-        
-                if pos < 0 then 
-                    SetEntry(res, i, -pos, -entries[i][j]); 
-                else
-                    SetEntry(res, i, pos, entries[i][j]);
-                fi;
-            od;
+        for i in [1..Size(mat!.indices[1])] do 
+            
+            k := g[mat!.indices[1][i]];
+            sign := 1;
+            
+            if k < 0 then k := -k; sign := -1; fi;
+    
+            pos := PositionSorted(res!.indices[1], k);
+            
+            Add(res!.indices[1], k, pos);
+            Add(res!.entries[1], sign*mat!.entries[1][i], pos);
         od;
         
         return res;
@@ -742,6 +733,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             len,        # length of row
             i,          # loop over length of row
             x,y,
+            k,
             sign,       # corrects sign of 5A axis
             pos;        # position of new product
     
@@ -762,8 +754,11 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             
             Sort(y);
             
-            pos := Position(unknowns,y);
-            SetEntry(output, 1, pos, sign*row!.entries[1][i]);
+            k := Position(unknowns,y);
+            pos := PositionSorted(output!.indices[1], k);
+            
+            Add(output!.indices[1], k, pos);
+            Add(output!.entries[1], sign*row!.entries[1][i], pos);
         od;
     
         return output;
