@@ -1,22 +1,16 @@
  
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
-function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns a list of size four if system is inconsistent, otherwise returns a list of size 4
+function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns record where solutions[i] gives the value of unknown variable i if found, and fail otherwise
 
-    local   m,
-            n,
-            lcm,
-            x,
+    local   n,
             res,
             sol,
-            unsolved,
-            heads,
             i,
             pos,
             elm,
             rowlist;
     
-    m := Nrows(mat);
     n := Ncols(mat);
 
     res := EchelonMatTransformationDestructive(mat);
@@ -24,29 +18,19 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
     vec := res.coeffs*vec;
     
     sol := [1..n]*0;
-    unsolved := [];
     rowlist := [];
-    
-    heads := res.heads;
     
     for i in Reversed([1 .. n]) do 
     
-        pos := heads[i];
+        pos := res.heads[i];
         
-        if pos = 0 then 
-            Add(unsolved,i);   
+        if pos = 0 then   
             sol[i] := fail;             
+        elif Size(mat!.indices[pos]) > 1 then 
+            Add(rowlist, pos);
+            sol[i] := fail;
         else
-            if Size(mat!.indices[pos]) > 1 then 
-                Add(rowlist, pos);
-                Add(unsolved,i);
-            fi;
-            
-            if not i in unsolved then 
-                sol[i] := CertainRows(vec, [pos]);
-            else
-                sol[i] := fail;
-            fi;
+            sol[i] := CertainRows(vec, [pos]);
         fi;
     od;
     
