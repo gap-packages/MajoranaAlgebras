@@ -12,8 +12,6 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
             unsolved,
             heads,
             i,
-            j,
-            k,
             pos,
             elm,
             rowlist;
@@ -39,21 +37,10 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
             Add(unsolved,i);   
             sol[i] := fail;             
         else
-            for j in [i + 1 .. n] do
-                if GetEntry(mat, pos, j) <> 0 then 
-                    if j in unsolved then
-                        Add(rowlist, pos);
-                        Add(unsolved,i);
-                        break;
-                    else
-                        elm := GetEntry(mat, pos, j);
-                        for k in sol[j]!.indices[1] do 
-                            AddToEntry(vec, pos, k, -elm*GetEntry(sol, j, k));  
-                        od;
-                        SetEntry(mat, pos, j, 0);
-                    fi;
-                fi;
-            od; 
+            if Size(mat!.indices[pos]) > 1 then 
+                Add(rowlist, pos);
+                Add(unsolved,i);
+            fi;
             
             if not i in unsolved then 
                 sol[i] := CertainRows(vec, [pos]);
