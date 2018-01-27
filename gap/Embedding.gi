@@ -41,17 +41,7 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                             
                             subrep := MajoranaRepresentation(ex,i);
                             
-                            for emb in embs do 
-                                g := MAJORANA_CheckEmbedding(rep, subrep, emb);
-                                
-                                if g <> false then 
-                                
-                                    g := CompositionMapping2(emb, g);
-                                    
-                                    MAJORANA_Embed(rep,subrep,g);
-                                    
-                                fi;
-                            od;    
+                            MAJORANA_EmbedKnownRep(rep, subrep);    
                         fi;    
                     od;                
                 fi;
@@ -72,7 +62,38 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     fi;
     
     end );
+    
+InstallGlobalFunction( "MAJORANA_MaximalSubgps",
 
+    function(rep)
+    
+    local   max, inv, i, j, ex, subrep;
+    
+    max := ConjugacyClassesMaximalSubgroups(rep.group);
+    max := List(max, Representative);
+    
+    inv := List(max, x -> Intersection(AsList(x), rep.involutions));
+    inv := Filtered(inv, x -> x <> []);
+    
+    max := List(inv, Group);
+    
+    for i in [1..Size(max)] do 
+        ex := ShapesOfMajoranaRepresentationAxiomM8(max[i], inv[i]);
+        for j in [1..Size(ex.shapes)] do 
+            if IsSubsetSet(AsSet(rep.shape), AsSet(ex.shapes[j])) then 
+                            
+                Info(   InfoMajorana, 10, 
+                        STRINGIFY("Constructing subrep of ", StructureDescription(ex.group) ) );
+                
+                subrep := MajoranaRepresentation(ex,j);
+                
+                MAJORANA_EmbedKnownRep(rep, subrep);    
+            fi;    
+        od;
+    od;
+            
+    end );
+    
 InstallGlobalFunction( "MAJORANA_CheckEmbedding",
 
     function(rep, subrep,emb)
@@ -97,8 +118,6 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
         im_gp  := Image(aut_emb, subrep.group);
     
         check := IsSubsetSet(AsSet(rep.involutions), im_inv); 
-        
-        #and Size(Intersection(rep.involutions, im_gp)) = Size(im_inv);
         
         if check and ForAll(list, i -> MAJORANA_CheckShape(rep, subrep, aut_emb, i)) then 
             return g;
@@ -150,7 +169,6 @@ InstallGlobalFunction( "MAJORANA_EmbedKnownRep",
             i,
             g,
             emb;
-            
     
     embs := IsomorphicSubgroups(rep.group, subrep.group);
     

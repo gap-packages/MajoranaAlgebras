@@ -4,6 +4,8 @@ DeclareGlobalFunction( "MAJORANA_ImageVector" );
 
 DeclareGlobalFunction( "MAJORANA_CheckEmbedding" );
 
+DeclareGlobalFunction( "MAJORANA_MaximalSubgps" );
+
 DeclareGlobalFunction( "MAJORANA_EmbedKnownRep" );
 
 DeclareGlobalFunction( "MAJORANA_CheckShape" );
