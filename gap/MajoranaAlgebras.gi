@@ -920,7 +920,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         fi;
     od;
     
-    MAJORANA_SolutionAlgProducts(new_mat,new_vec,unknowns, rep.algebraproducts, rep.setup);
+    x := MAJORANA_SolutionAlgProducts(new_mat,new_vec,unknowns, rep.algebraproducts, rep.setup);
+    
+    return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
     
     end );
 
@@ -1339,16 +1341,20 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     end );
 
 InstallGlobalFunction(MAJORANA_MainLoop,
-
+    
     function(rep)
+    
+    local x;
                                 
     MAJORANA_AxiomM1(rep);
                                     
     MAJORANA_Fusion(rep);
             
-    MAJORANA_UnknownAlgebraProducts(rep);
+    x := MAJORANA_UnknownAlgebraProducts(rep);
     
     MAJORANA_Orthogonality(rep);
+
+    return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
 
     end);
     
@@ -1356,7 +1362,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(input,index)
 
-    local   rep, falsecount, newfalsecount;  
+    local   rep, falsecount, newfalsecount, x;  
 
     rep :=  MAJORANA_SetUp(input,index);
     
@@ -1369,7 +1375,7 @@ function(input,index)
     
     while true do
                                 
-        MAJORANA_MainLoop(rep);
+        x := MAJORANA_MainLoop(rep);
         
         newfalsecount := [0,0];
 
@@ -1386,6 +1392,9 @@ function(input,index)
             return rep;
         elif newfalsecount = falsecount then
             Info( InfoMajorana, 10, "Fail" );
+            
+            rep.mat := x.mat; rep.vec := x.vec; rep.unknowns := x.unknowns;
+            
             return rep;
         else
             falsecount := StructuralCopy(newfalsecount);
