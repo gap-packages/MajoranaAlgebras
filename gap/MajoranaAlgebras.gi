@@ -143,7 +143,7 @@ function(rep)
     for i in rep.setup.orbitreps do 
     
         if false in rep.innerproducts or  
-            MAJORANA_CheckBasis(dim, rep.evecs[i], rep.nullspace) then 
+            not MAJORANA_CheckBasis(dim, rep.evecs[i], rep.nullspace) then 
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
