@@ -7,7 +7,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     orders := [[], [1], [1,2], [1,3], [1,2,3,4]];
     signs := [[], [1], [1, 1], [1,1,1], [1,-1,-1,1]];
 
-    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(rep.algebraproducts, rep.setup);
+    unknowns := rep.unknowns;
     
     dim := Size(rep.setup.coords);
     new_dim := dim + Size(unknowns);
@@ -74,6 +74,9 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     
     rep.nullspace := SparseMatrix(  Nrows(rep.nullspace), new_dim, rep.nullspace!.indices,
                                     rep.nullspace!.entries, Rationals);
+                                    
+    rep.nullspace := UnionOfRows( rep.nullspace, UnionOfColumns(rep.vec, -rep.mat));
+    
     end );
     
 InstallGlobalFunction( MAJORANA_ThreeClosedExtendPerm,
