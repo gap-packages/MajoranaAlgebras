@@ -332,6 +332,10 @@ InstallGlobalFunction(MAJORANA_AxiomM2,
         od;
     od;
     
-    return MAJORANA_PositiveDefinite(B);
+    if MAJORANA_PositiveDefinite(B) < 0 then 
+        return false; 
+    else 
+        return true; 
+    fi;
 
     end );
