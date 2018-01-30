@@ -288,52 +288,50 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
 
 InstallGlobalFunction(MAJORANA_AxiomM2,
 
-        function(innerproducts,algebraproducts,setup) # Tests that the algebra obeys axiom M2
+    function(rep) # Tests that the algebra obeys axiom M2
 
-        local   B,      # matrix of inner products
-                dim,    # size of setup.coords
-                j,      # loop through setup.coords
-                k,      # 
-                l,      #
-                m,      #
-                a,      # vectors
-                b,      #
-                c,      #
-                d,      #
-                x0,     # products
-                x1,     #
-                x2,     #
-                x3;     #
+    local   B,      # matrix of inner products
+            dim,    # size of setup.coords
+            j,      # loop through setup.coords
+            k,      # 
+            l,      #
+            m,      #
+            a,      # vectors
+            b,      #
+            c,      #
+            d,      #
+            x0,     # products
+            x1,     #
+            x2,     #
+            x3;     #
 
-        dim:=Size(algebraproducts[1]);
+    dim:=Size(rep.setup.coords);
 
-        B:=NullMat(dim^2,dim^2);
+    B:=NullMat(dim^2,dim^2);
 
-        for j in [1..dim] do
-            for k in [1..dim] do
-                for l in [1..dim] do
-                    for m in [1..dim] do
-                        
-                        a := [1..dim]*0; a[j] := 1; 
-                        b := [1..dim]*0; b[k] := 1;
-                        c := [1..dim]*0; c[l] := 1;
-                        d := [1..dim]*0; d[m] := 1;
-                        
-                        x0 := MAJORANA_AlgebraProduct(a,c,algebraproducts,setup);
-                        x1 := MAJORANA_AlgebraProduct(b,d,algebraproducts,setup);
-                        x2 := MAJORANA_AlgebraProduct(b,c,algebraproducts,setup);
-                        x3 := MAJORANA_AlgebraProduct(a,d,algebraproducts,setup);
+    for j in [1..dim] do
+        for k in [1..dim] do
+            for l in [1..dim] do
+                for m in [1..dim] do
                     
-                        B[dim*(j-1) + k][dim*(l-1) +m]:=
-                              MAJORANA_InnerProduct(x0,x1,innerproducts, setup)
-                            - MAJORANA_InnerProduct(x2,x3,innerproducts, setup);
-                    od;
+                    a := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
+                    b := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
+                    c := SparseMatrix(1, dim, [[l]], [[1]], Rationals);
+                    d := SparseMatrix(1, dim, [[m]], [[1]], Rationals);
+
+                    x0 := MAJORANA_AlgebraProduct(a,c,rep.algebraproducts,rep.setup);
+                    x1 := MAJORANA_AlgebraProduct(b,d,rep.algebraproducts,rep.setup);
+                    x2 := MAJORANA_AlgebraProduct(b,c,rep.algebraproducts,rep.setup);
+                    x3 := MAJORANA_AlgebraProduct(a,d,rep.algebraproducts,rep.setup);
+                
+                    B[dim*(j-1) + k][dim*(l-1) +m]:=
+                          MAJORANA_InnerProduct(x0,x1,rep.innerproducts, rep.setup)
+                        - MAJORANA_InnerProduct(x2,x3,rep.innerproducts, rep.setup);
                 od;
             od;
         od;
-        
-        return MAJORANA_PositiveDefinite(B);
+    od;
+    
+    return MAJORANA_PositiveDefinite(B);
 
-        end
-
-        );
+    end );
