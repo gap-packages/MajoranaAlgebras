@@ -134,7 +134,7 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
 
     function(rep)
     
-    local falsecount, newfalsecount;
+    local falsecount, newfalsecount, pos;
     
     MAJORANA_ThreeClosedSetUp(rep, Position(rep.algebraproducts, false));
     
@@ -165,8 +165,13 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
             Info( InfoMajorana, 10, "Success" );
             return;
         elif newfalsecount = falsecount then
-            Info( InfoMajorana, 10, "Fail" );
-            return;
+            pos := Position(rep.algebraproducts, false);
+            if not IsRowVector(rep.setup.coords[rep.setup.pairreps[pos][1]]) then # this is ugly
+                MAJORANA_ThreeClosedSetUp(rep, pos);
+            else
+                Info( InfoMajorana, 10, "Fail" );
+                return;
+            fi;
         else
             falsecount := StructuralCopy(newfalsecount);
         fi;
