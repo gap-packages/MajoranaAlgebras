@@ -1,16 +1,23 @@
 InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
 
-    function(rep)
+    function(rep, index)
     
     local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, gens, pos;
     
     orders := [[], [1], [1,2], [1,3], [1,2,3,4]];
     signs := [[], [1], [1, 1], [1,1,1], [1,-1,-1,1]];
-
-    unknowns := rep.unknowns;
     
     dim := Size(rep.setup.coords);
-    new_dim := dim + Size(unknowns);
+    
+    unknowns := [];
+    
+    for i in [1..dim] do 
+        for j in [i..dim] do 
+            if rep.setup.pairorbit[i][j] = index then 
+                Add(unknowns, [i,j]);
+            fi;
+        od;
+    od;
 
     MAJORANA_ThreeClosedExtendPerm(unknowns, rep.setup);
 
@@ -24,8 +31,6 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
         
         k := Size(rep.setup.coords);
         
-        # TODO fix this, no index 3 in signs[4] for example
-        
         for i in orders[o1] do 
             for j in orders[o2] do 
                 Add(rep.setup.longcoords, [elts[1]^i, elts[2]^j]);
@@ -35,6 +40,8 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
             od;
         od;
     od;
+    
+    new_dim := Size(rep.setup.coords);
     
     for i in [1..dim] do 
         Append(rep.setup.pairorbit[i], [dim + 1 .. new_dim]*0);
@@ -49,11 +56,11 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     
     MAJORANA_Orbitals(gens, dim, rep.setup);
     
+    pos := Position(unknowns, rep.setup.pairreps[index]);    
+    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[dim + pos]], [[1]], Rationals);
+    
     for i in [1..Size(rep.algebraproducts)] do 
-        if rep.algebraproducts[i] = false then 
-            pos := Position(unknowns, rep.setup.pairreps[i]);
-            rep.algebraproducts[i] := SparseMatrix(1, new_dim, [[dim + pos]], [[1]], Rationals);
-        else
+        if rep.algebraproducts[i] <> false then 
             rep.algebraproducts[i]!.ncols := new_dim;
         fi;
     od;
@@ -70,7 +77,6 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     od;
     
     rep.nullspace!.ncols := new_dim;
-    rep.nullspace := UnionOfRows( rep.nullspace, UnionOfColumns(rep.vec, -rep.mat));
     
     end );
     
@@ -130,7 +136,7 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
     
     local falsecount, newfalsecount;
     
-    MAJORANA_ThreeClosedSetUp(rep);
+    MAJORANA_ThreeClosedSetUp(rep, Position(rep.algebraproducts, false));
     
     falsecount := [0,0];
     
