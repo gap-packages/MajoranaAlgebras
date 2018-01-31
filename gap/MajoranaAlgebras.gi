@@ -176,6 +176,12 @@ function(rep)
                         rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
+                
+                for j in [1..3] do 
+                    if Nrows(new[j]) > dim then                             
+                        new[j] := MAJORANA_BasisOfEvecs(new[j]);
+                    fi;
+                od;                
             od;
         
             for j in [1..3] do 
@@ -485,7 +491,10 @@ InstallGlobalFunction(MAJORANA_Orthogonality,
     od;
     
     if Nrows(mat) > 0 then 
-        MAJORANA_SolutionInnerProducts(mat,vec, unknowns, rep.innerproducts);
+        x := MAJORANA_SolutionInnerProducts(mat,vec, unknowns, rep.innerproducts);
+        
+        return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
+        
     fi;      
     
     if not false in rep.innerproducts then 
@@ -637,7 +646,9 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         
     od;
 
-    MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
+    x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
+
+    return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
 
     if not false in rep.innerproducts then 
         rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
@@ -786,14 +797,14 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
     
-    if unknowns = [] then return; fi;
+    if unknowns = [] then return true; fi;
     
     x := MAJORANA_NullspaceUnknowns(    mat, vec, unknowns, rep.algebraproducts, 
                                         rep.setup, rep.nullspace, rep.group);
     
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
 
-    if unknowns = [] then return; fi;
+    if unknowns = [] then return true; fi;
     
     Info(   InfoMajorana, 50, "Building resurrection");
     
@@ -852,7 +863,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                         
                                         mat := y.mat; vec := y.vec; unknowns := y.unknowns;
                                         
-                                        if unknowns = [] then return; fi;
+                                        if unknowns = [] then return true; fi;
                                     elif not _IsRowOfSparseMatrix(mat, x[1]) then
                                         mat := UnionOfRows(mat, x[1]);
                                         vec := UnionOfRows(vec, x[2]);
@@ -866,7 +877,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
                             mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                             
-                            if unknowns = [] then return; fi;                            
+                            if unknowns = [] then return true; fi;                            
                         fi;
                         
                     od;
@@ -879,7 +890,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                             
-    if unknowns = [] then return; fi;
+    if unknowns = [] then return true; fi;
     
     Info(   InfoMajorana, 50, "All conjugates") ;
     
@@ -905,7 +916,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
                 x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
                 
-                if x.unknowns = [] then return; fi;
+                if x.unknowns = [] then return true; fi;
                 
                 nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
                 
@@ -1354,7 +1365,11 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
     MAJORANA_Orthogonality(rep);
 
-    return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
+    if x <> true then 
+        return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns); 
+    else
+        return true;
+    fi;
 
     end);
     
