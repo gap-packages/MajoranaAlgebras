@@ -52,15 +52,11 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     for i in [1..Size(rep.algebraproducts)] do 
         if rep.algebraproducts[i] = false then 
             pos := Position(unknowns, rep.setup.pairreps[i]);
-            rep.algebraproducts[i] := SparseMatrix(     1, new_dim, [[dim + pos]], 
-                                                        [[1]], Rationals    );
+            rep.algebraproducts[i] := SparseMatrix(1, new_dim, [[dim + pos]], [[1]], Rationals);
+        else
+            rep.algebraproducts[i]!.ncols := new_dim;
         fi;
     od;
-    
-    rep.algebraproducts := List(rep.algebraproducts, x -> SparseMatrix( 1, new_dim, 
-                                                                        x!.indices, 
-                                                                        x!.entries, 
-                                                                        Rationals)  );
     
     for i in [Size(rep.algebraproducts) + 1 .. Size(rep.setup.pairreps)] do 
         rep.algebraproducts[i] := false;
@@ -68,13 +64,12 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     od;
     
     for i in rep.setup.orbitreps do 
-        rep.evecs[i] := List(rep.evecs[i], 
-        x -> SparseMatrix(Nrows(x), new_dim, x!.indices, x!.entries, Rationals));
+        for j in [1..3] do 
+            rep.evecs[i][j]!.ncols := new_dim;
+        od;
     od;
     
-    rep.nullspace := SparseMatrix(  Nrows(rep.nullspace), new_dim, rep.nullspace!.indices,
-                                    rep.nullspace!.entries, Rationals);
-                                    
+    rep.nullspace!.ncols := new_dim;
     rep.nullspace := UnionOfRows( rep.nullspace, UnionOfColumns(rep.vec, -rep.mat));
     
     end );
