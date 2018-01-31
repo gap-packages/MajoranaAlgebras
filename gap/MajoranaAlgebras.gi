@@ -1306,7 +1306,10 @@ function(input,index)
 
     rep :=  MAJORANA_SetUp(input,index);
     
-    if Size(rep.group) > 120 then MAJORANA_AllEmbeddings(rep); fi;
+    if Size(rep.group) > 120 then 
+        MAJORANA_MaximalSubgps(rep);
+        MAJORANA_AllEmbeddings(rep); 
+    fi;
     
     falsecount := [0,0];
     

@@ -71,6 +71,7 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
     
     max := ConjugacyClassesMaximalSubgroups(rep.group);
     max := List(max, Representative);
+    max := Filtered(max, x -> Size(x) > 12);
     
     inv := List(max, x -> Intersection(AsList(x), rep.involutions));
     inv := Filtered(inv, x -> x <> []);
@@ -91,6 +92,18 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
             fi;    
         od;
     od;
+    
+    for i in rep.setup.orbitreps do 
+        for j in [1..3] do 
+            if Nrows(rep.evecs[i][j]) > 0 then 
+                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            fi;
+        od;
+    od;
+    
+    if Nrows(rep.nullspace) > 0 then 
+        rep.nullspace := ShallowCopy(MAJORANA_BasisOfEvecs(rep.nullspace));
+    fi;
             
     end );
     
