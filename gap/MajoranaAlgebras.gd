@@ -30,8 +30,6 @@ DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
 
 DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
 
-DeclareGlobalFunction( "MAJORANA_Orthogonality" );
-
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_AxiomM1" );
