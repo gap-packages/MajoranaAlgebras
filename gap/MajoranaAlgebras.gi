@@ -181,7 +181,7 @@ function(rep)
                     if Nrows(new[j]) > dim then                             
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
                     fi;
-                od;                
+                od;
             od;
         
             for j in [1..3] do 
@@ -429,80 +429,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     return [row,sum];
 
     end );
-    
-InstallGlobalFunction(MAJORANA_Orthogonality,
 
-    function(rep)
-    
-    local   i,          # loop over T
-            j, 
-            k,
-            ev,         # loop over eigenvalues
-            evecs_a,    #
-            evecs_b,    #
-            u,
-            v,
-            dim,
-            x,          # res of orthogonality
-            mat,        # matrix of unknown values
-            vec,        # vector of known values   
-            unknowns;     
-    
-    if not false in rep.innerproducts then 
-        return;
-    fi;
-    
-    dim := Size(rep.setup.coords);    
-    unknowns := Positions(rep.innerproducts,false);
-    
-    mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
-    vec := SparseMatrix(0, 1, [], [], Rationals);
-    
-    for i in rep.setup.orbitreps do        
-        for ev in Combinations([0..3],2) do  
-            if ev[1] = 0 then 
-                evecs_a := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-            else
-                evecs_a := rep.evecs[i][ev[1]];
-            fi;
-            
-            evecs_b := rep.evecs[i][ev[2]];
-                
-            for j in [1..Nrows(evecs_a)] do
-                for k in [1..Nrows(evecs_b)] do
-
-                    u := CertainRows(evecs_a, [j]);
-                    v := CertainRows(evecs_b, [k]);
-
-                    x := MAJORANA_SeparateInnerProduct( u, v, unknowns,
-                                                        rep.innerproducts,
-                                                        rep.setup);
-
-                    if x[1]!.indices[1] <> [] then
-                        if not _IsRowOfSparseMatrix(mat, x[1]) then 
-                            mat := UnionOfRows(mat, x[1]);
-                            vec := UnionOfRows(vec, x[2]);
-                        fi;
-                    fi;
-                    
-                od;
-            od;
-        od;
-    od;
-    
-    if Nrows(mat) > 0 then 
-        x := MAJORANA_SolutionInnerProducts(mat,vec, unknowns, rep.innerproducts);
-        
-        return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
-        
-    fi;      
-    
-    if not false in rep.innerproducts then 
-        rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-    fi;  
-
-    end );    
-    
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
 function(innerproducts, algebraproducts, evecs, setup)
@@ -1338,7 +1265,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
         gram := MAJORANA_FillGramMatrix([1..dim], innerproducts, setup);
         null := KernelMat(gram).relations;; 
         return null;
-    fi;
+    fi; 
     
     unknowns := Positions(innerproducts, false);
     list := Filtered([1..dim], i -> Intersection(setup.pairorbit[i], unknowns) = []);
@@ -1362,8 +1289,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     MAJORANA_Fusion(rep);
             
     x := MAJORANA_UnknownAlgebraProducts(rep);
-    
-    MAJORANA_Orthogonality(rep);
 
     if x <> true then 
         return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns); 
