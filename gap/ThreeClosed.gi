@@ -166,7 +166,7 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
             return;
         elif newfalsecount = falsecount then
             pos := Position(rep.algebraproducts, false);
-            if not IsRowVector(rep.setup.coords[rep.setup.pairreps[pos][1]]) then # this is ugly
+            if not IsRowVector(rep.setup.coords[rep.setup.pairreps[pos][2]]) then # this is ugly
                 MAJORANA_ThreeClosedSetUp(rep, pos);
             else
                 Info( InfoMajorana, 10, "Fail" );
