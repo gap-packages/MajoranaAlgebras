@@ -354,6 +354,22 @@ InstallGlobalFunction( MAJORANA_SetUp,
                 fi;
                 
             od;
+        elif rep.shape[i] = ['4','B'] then 
+            for j in [1..Size(input.orbitals[i])] do
+            
+                x := (input.orbitals[i][j][1]*input.orbitals[i][j][2])^2;
+                
+                if x in input.involutions then break; fi;
+                
+                if not x in rep.setup.longcoords then 
+                    Add(rep.setup.coords,x);
+                
+                    k := Size(rep.setup.coords);
+                
+                    Append(rep.setup.poslist, [k]);
+                    Append(rep.setup.longcoords, [x]);
+                fi;
+            od;
         elif rep.shape[i]=['5','A'] then
             for j in [1..Size(input.orbitals[i])] do
             
@@ -367,6 +383,22 @@ InstallGlobalFunction( MAJORANA_SetUp,
                     Append(rep.setup.poslist, [k,-k,-k,k]);
                     Append(rep.setup.longcoords, [x, x^2, x^3, x^4]);
                 fi;    
+            od;
+        elif rep.shape[i] = ['6','A'] then 
+            for j in [1..Size(input.orbitals[i])] do
+            
+                x := (input.orbitals[i][j][1]*input.orbitals[i][j][2])^3;
+                
+                if x in input.involutions then break; fi;
+                
+                if not x in rep.setup.longcoords then 
+                    Add(rep.setup.coords,x);
+                
+                    k := Size(rep.setup.coords);
+                
+                    Append(rep.setup.poslist, [k]);
+                    Append(rep.setup.longcoords, [x]);
+                fi;
             od;
         fi;
     od;
@@ -587,7 +619,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     pos := [i, j, 0, 0, 0];
                     pos[3] := Position(T, T[i]*T[j]*T[i]);
                     pos[4] := Position(T, T[j]*T[i]*T[j]);
-                    pos[5] := Position(T, (T[i]*T[j])^2);
+                    pos[5] := Position(rep.setup.coords, (T[i]*T[j])^2);
                     
                     vals := [-1/32, 1, 1, 1/8, -1/8];
 
@@ -641,7 +673,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                     pos[4] := Position(T, T[j]*T[i]*T[j]);
                     pos[5] := Position(T, T[i]*T[j]*T[i]*T[j]*T[i]);
                     pos[6] := Position(T, T[j]*T[i]*T[j]*T[i]*T[j]);
-                    pos[7] := Position(T, (T[i]*T[j])^3);
+                    pos[7] := Position(rep.setup.coords, (T[i]*T[j])^3);
                     pos[8] := rep.setup.poslist[Position(rep.setup.longcoords,(T[i]*T[j])^2)];
 
                     vals := [2/45, -256/45, -256/45, -32/45, -32/45, -32/45, 32/45, 1];
@@ -771,7 +803,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 pos := [j, k, 0, 0, 0];
                 pos[3] := Position(T,T[j]*T[k]*T[j]);
                 pos[4] := Position(T,T[k]*T[j]*T[k]);
-                pos[5] := Position(T,(T[j]*T[k])^2);
+                pos[5] := Position(rep.setup.coords,(T[j]*T[k])^2);
 
                 vals := [1/64, 1/64, -1/64, -1/64, 1/64];
 
@@ -807,7 +839,7 @@ InstallGlobalFunction(MAJORANA_DihedralProducts,
                 pos[4] := Position(T,T[k]*T[j]*T[k]);
                 pos[5] := Position(T,T[j]*T[k]*T[j]*T[k]*T[j]);
                 pos[6] := Position(T,T[k]*T[j]*T[k]*T[j]*T[k]);
-                pos[7] := Position(T,(T[j]*T[k])^3);
+                pos[7] := Position(rep.setup.coords,(T[j]*T[k])^3);
                 pos[8] := rep.setup.poslist[Position(rep.setup.longcoords,(T[j]*T[k])^2)];
                 
                 vals := [1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048];
