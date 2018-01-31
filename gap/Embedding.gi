@@ -253,7 +253,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
     im1 := MAJORANA_ImageVector( subrep.nullspace, emb, rep, subrep);
 
-    UnionOfRows(rep.nullspace, im1);
+    rep.nullspace := UnionOfRows(rep.nullspace, im1);
     
     for i in subrep.setup.orbitreps do 
         
