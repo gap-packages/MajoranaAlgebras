@@ -2,7 +2,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
 
     function(rep, index)
     
-    local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, gens, pos;
+    local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, gens, pos, sign, new;
     
     orders := [[], [1], [1,2], [1,3], [1,2,3,4]];
     signs := [[], [1], [1, 1], [1,1,1], [1,-1,-1,1]];
@@ -73,6 +73,24 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
             rep.evecs[i][j]!.ncols := new_dim;
+        od;
+    od;
+    
+    # 1/32 evecs from conjugation
+    
+    for i in rep.setup.orbitreps do 
+        for j in [dim + 1 .. new_dim] do 
+            x := OnPairs(rep.setup.coords[j], rep.setup.coords[i]);
+            pos := Position(rep.setup.longcoords, x);
+            pos := rep.setup.poslist[pos];
+            
+            sign := 1;
+            if pos < 0 then sign := -1; pos := -pos; fi;
+            
+            new := SparseMatrix(1, new_dim, [[j, pos]], [[1, -sign]], Rationals);
+            Sort(new!.indices[1]);
+            
+            rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 
         od;
     od;
     
