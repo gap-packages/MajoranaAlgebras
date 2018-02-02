@@ -1287,7 +1287,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     if not false in innerproducts then 
         gram := MAJORANA_FillGramMatrix([1..dim], innerproducts, setup);
-        null := KernelMat(gram).relations;; 
+        null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
         return null;
     fi; 
     
@@ -1296,7 +1296,8 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     gram := MAJORANA_FillGramMatrix(list, innerproducts, setup);
     null := KernelMat(gram).relations;;
-    null := SparseMatrix( Nrows(null), dim, List(null!.indices, x -> List(x,  i -> list[i])), null!.entries, Rationals);
+    null!.ncols := dim;
+    null!.indices := List(null!.indices, x -> List(x,  i -> list[i]));
     
     return null;
     
