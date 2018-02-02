@@ -98,7 +98,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         if evals = [2,2] then 
             y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
             
-            if y <> false then 
+            if y <> false and not _IsRowOfSparseMatrix(new[1], x - (1/4)*u*y) then 
                 new[1] := UnionOfRows(new[1], x - (1/4)*u*y);
             fi;
         elif evals = [3,3] then 
@@ -106,11 +106,17 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
             
             if y <> false and z <> false then 
-                new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
-                new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);            
+                if not _IsRowOfSparseMatrix(new[2], z - (1/32)*u*y) then 
+                    new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
+                fi;
+                if not _IsRowOfSparseMatrix(new[1], x + (3/32)*u*y - 4*z) then
+                    new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);          
+                fi;  
             fi;  
         else
-            new[pos] := UnionOfRows(new[pos],x);
+            if not _IsRowOfSparseMatrix(new[pos], x) then 
+                new[pos] := UnionOfRows(new[pos],x);
+            fi;
         fi;
     fi;
     
