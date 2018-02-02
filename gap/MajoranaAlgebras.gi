@@ -732,9 +732,9 @@ InstallGlobalFunction(MAJORANA_BasisOfEvecs,
     
     dim := Ncols(mat);
     
-    ech := EchelonMatTransformation(CertainColumns(mat, [dim, dim - 1..1]));
+    ech := EchelonMatDestructive(CertainColumns(mat, [dim, dim - 1..1]));
     
-    return ech.coeffs*mat;
+    return CertainColumns(ech.vectors, [dim, dim - 1..1]);
     
     end);
     
