@@ -87,10 +87,12 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
             sign := 1;
             if pos < 0 then sign := -1; pos := -pos; fi;
             
-            new := SparseMatrix(1, new_dim, [[j, pos]], [[1, -sign]], Rationals);
-            Sort(new!.indices[1]);
+            if pos <> j then 
+                new := SparseMatrix(1, new_dim, [[j, pos]], [[1, -sign]], Rationals);
+                Sort(new!.indices[1]);
             
-            rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 
+                rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 
+            fi;
         od;
     od;
     
