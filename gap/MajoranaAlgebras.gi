@@ -160,6 +160,16 @@ function(rep)
     
         if false in rep.innerproducts or  
             not MAJORANA_CheckBasis(dim, rep.evecs[i], rep.nullspace) then 
+            
+            for j in [1..3] do 
+                for k in [1..Nrows(rep.evecs[i][j])] do 
+                    a := CertainRows(rep.evecs[i][j], [k]);
+                    if MAJORANA_InnerProduct(a, a, rep.innerproducts, rep.setup) = 0 then 
+                        Remove(rep.evecs[i][j]!.indices, k);
+                        Remove(rep.evecs[i][j]!.entries, k);
+                    fi;
+                od;
+            od;
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
