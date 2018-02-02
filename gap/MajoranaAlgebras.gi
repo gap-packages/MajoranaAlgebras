@@ -71,6 +71,22 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     
     end );        
     
+InstallGlobalFunction(MAJORANA_AddEvec,
+
+    function(mat, x)
+    
+    if x!.indices = [] then return mat; fi;
+    
+    x!.entries[1] := x!.entries[1]/x!.entries[1][Size(x!.entries[1])];
+    
+    if _IsRowOfSparseMatrix(mat, x) then 
+        return mat;
+    else
+        return UnionOfRows(mat, x);
+    fi;
+    
+    end);
+    
 # given two eigenvectors, if possible, finds product and adds it to appropriate set of evecs
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
@@ -98,25 +114,19 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         if evals = [2,2] then 
             y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
             
-            if y <> false and not _IsRowOfSparseMatrix(new[1], x - (1/4)*u*y) then 
-                new[1] := UnionOfRows(new[1], x - (1/4)*u*y);
+            if y <> false then 
+                new[1] := MAJORANA_AddEvec(new[1], x - (1/4)*u*y);
             fi;
         elif evals = [3,3] then 
             y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
             z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
             
             if y <> false and z <> false then 
-                if not _IsRowOfSparseMatrix(new[2], z - (1/32)*u*y) then 
-                    new[2] := UnionOfRows(new[2], z - (1/32)*u*y);
-                fi;
-                if not _IsRowOfSparseMatrix(new[1], x + (3/32)*u*y - 4*z) then
-                    new[1] := UnionOfRows(new[1], x + (3/32)*u*y - 4*z);          
-                fi;  
+                new[2] := MAJORANA_AddEvec(new[2], z - (1/32)*u*y);
+                new[1] := MAJORANA_AddEvec(new[1], x + (3/32)*u*y - 4*z);
             fi;  
         else
-            if not _IsRowOfSparseMatrix(new[pos], x) then 
-                new[pos] := UnionOfRows(new[pos],x);
-            fi;
+            new[pos] := MAJORANA_AddEvec(new[pos],x);
         fi;
     fi;
     

@@ -20,6 +20,8 @@ DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
 DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
 
+DeclareGlobalFunction( "MAJORANA_AddEvec" );
+
 DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
 
 DeclareGlobalFunction( "MAJORANA_Fusion" );
