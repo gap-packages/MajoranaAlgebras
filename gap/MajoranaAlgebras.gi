@@ -75,7 +75,7 @@ InstallGlobalFunction(MAJORANA_AddEvec,
 
     function(mat, x)
     
-    if x!.indices = [] then return mat; fi;
+    if x!.indices[1] = [] then return mat; fi;
     
     x!.entries[1] := x!.entries[1]/x!.entries[1][Size(x!.entries[1])];
     
