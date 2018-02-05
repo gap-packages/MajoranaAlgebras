@@ -1,10 +1,15 @@
-gap> SetInfoLevel(InfoPackageLoading,0);
+gap> SetInfoLevel(InfoPackageLoading,0);;
 gap> LoadPackage("MajoranaAlgebras");;
-gap> SetInfoLevel(InfoMajorana, 0);
+gap> SetInfoLevel(InfoMajorana, 0);;
 gap> ex := A5();;
 gap> rep := MajoranaRepresentation(ex,1);;
-gap> MajoranaAlgebraTest(rep); 
-true
+gap> MajoranaAlgebraTest(rep);;
 gap> rep := MajoranaRepresentation(ex,2);;
-gap> MajoranaAlgebraTest(rep);            
-true
+gap> MajoranaAlgebraTest(rep);;
+gap> ex := thesis();;
+gap> rep := MajoranaRepresentation(ex,1);;
+gap> ThreeClosedMajoranaRepresentation(rep);;
+gap> MajoranaAlgebraTest(rep);;
+gap> ex := S4();;
+gap> rep := MajoranaRepresentation(ex,2);;
+gap> MajoranaAlgebraTest(rep);;
