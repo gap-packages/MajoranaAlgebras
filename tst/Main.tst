@@ -1,4 +1,5 @@
 gap> SetInfoLevel(InfoPackageLoading,0);;
+gap> SetInfoLevel(InfoPerformance,0);;
 gap> LoadPackage("MajoranaAlgebras");;
 gap> SetInfoLevel(InfoMajorana, 0);;
 gap> ex := A5();;
@@ -12,4 +13,11 @@ gap> ThreeClosedMajoranaRepresentation(rep);;
 gap> MajoranaAlgebraTest(rep);;
 gap> ex := S4();;
 gap> rep := MajoranaRepresentation(ex,2);;
+gap> ThreeClosedMajoranaRepresentation(rep);;
 gap> MajoranaAlgebraTest(rep);;
+gap> ex := PSL211();;
+gap> rep := MajoranaRepresentation(ex,1);;
+gap> MAJORANA_TestAxiomM1(rep.innerproducts, rep.algebraproducts, rep.setup);;
+gap> ex := A7();;
+gap> rep := MajoranaRepresentation(ex,2);;
+gap> MAJORANA_TestAxiomM1(rep.innerproducts, rep.algebraproducts, rep.setup);;
