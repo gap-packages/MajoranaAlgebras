@@ -180,7 +180,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
     setup.pairconj  := NullMat(t,t);
     setup.pairreps  := [];
     setup.orbitals  := [];
-    setup.pairconjelts := [()];
+    setup.pairconjelts := [Identity(G)];
     
     for i in [1..t] do 
         for j in [i..t] do 
@@ -199,7 +199,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                 pnt := Immutable(T{[i,j]});
                 
                 orb := [pnt];
-                elts := [()];
+                elts := [Identity(G)];
                 
                 count := 0;
                 
