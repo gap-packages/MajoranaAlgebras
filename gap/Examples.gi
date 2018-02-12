@@ -242,11 +242,10 @@ BindGlobal("2wr2", function()
     b := (1,3)(2,4)(5,6)(7,8);; 
     c := (1,5)(2,7);;
     G := Group(a,b,c);;
-    T := [];
-    Append(T, AsList(ConjugacyClass(G,a)));
-    Append(T, AsList(ConjugacyClass(G,b)));
-    Append(T, AsList(ConjugacyClass(G,c)));
-    Append(T, AsList(ConjugacyClass(G,a*b)));
+    T := [ (1,2)(3,4), (3,4)(5,7), (1,2)(6,8), (5,7)(6,8), (1,3)(2,4)(5,6)(7,8), 
+        (1,6)(2,8)(3,5)(4,7), (1,8)(2,6)(3,7)(4,5), (1,4)(2,3)(5,8)(6,7), (1,5)(2,7), 
+        (1,7)(2,5), (3,6)(4,8), (3,8)(4,6), (1,4)(2,3)(5,6)(7,8), (1,6)(2,8)(3,7)(4,5),
+        (1,8)(2,6)(3,5)(4,7), (1,3)(2,4)(5,8)(6,7) ];;
     ex := ShapesOfMajoranaRepresentationAxiomM8(G,T);
     return ex;
     end);
