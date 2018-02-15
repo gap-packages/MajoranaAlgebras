@@ -252,7 +252,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
         if rep.algebraproducts[k] = false then 
             if subrep.algebraproducts[i] <> false then 
                 v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
-                rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g,rep.setup);
+                rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g);
             fi;
         fi;
         
@@ -282,7 +282,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
         for j in [1..3] do 
             if Nrows(subrep.evecs[i][j]) > 0 then 
                 im2 := MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep);
-                im2 := MAJORANA_ConjugateVec(im2, g, rep.setup);
+                im2 := MAJORANA_ConjugateVec(im2, g);
             
                 UnionOfRows(rep.evecs[g[pos1]][j], im2);
             fi;

@@ -238,7 +238,7 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
     
 InstallGlobalFunction( MAJORANA_ConjugateVec, 
 
-    function(mat,g,setup)
+    function(mat,g)
     
     local   i,
             k,
@@ -331,7 +331,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            x := MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]],setup);
+            x := MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
             AddRow(x!.indices[1],x!.entries[1],vec!.indices,vec!.entries,1);
         od;
                 
@@ -577,6 +577,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         od;
         
         if Nrows(mat) > Ncols(mat) then 
+        
             x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, rep.innerproducts);
             
             mat := x.mat; vec := x.vec; unknowns := x.unknowns;
@@ -588,7 +589,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         fi;
         
     od;
-
+    
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
@@ -664,7 +665,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     od;
     
     for i in [1..Size(elts)] do 
-        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]],setup);
+        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
     od;
        
     return [row,sum];
@@ -673,7 +674,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     
 InstallGlobalFunction(MAJORANA_ConjugateRow,
 
-    function(row, g, unknowns, setup)
+    function(row, g, unknowns)
     
     local   output,     # output row
             len,        # length of row
@@ -797,8 +798,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                                         rep.setup);
                                 
                                 if x <> false and x[1]!.indices[1] <> [] then 
-                                    if Size(x[1]!.indices[1]) = 1 then 
-                                    
+                                    if Size(x[1]!.indices[1]) = 1 then
+                                        
                                         y := MAJORANA_SolveSingleSolution( x, 
                                                             mat, vec, unknowns, 
                                                             rep.algebraproducts,
@@ -845,12 +846,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             for g in rep.setup.conjelts do
                 conj := [,];
                 
-                conj[1] := MAJORANA_ConjugateRow(   CertainRows(mat, [i]), 
-                                                    g, unknowns,
-                                                    rep.setup );
-                                                    
-                conj[2] := MAJORANA_ConjugateVec(   CertainRows(vec, [i]), 
-                                                    g, rep.setup );
+                conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
+                conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
                                                     
                 new_mat := UnionOfRows(new_mat, conj[1]);
                 new_vec := UnionOfRows(new_vec, conj[2]);
@@ -1122,7 +1119,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     if y < 0 then sign := -1; y := -y; fi;
     
     if algebraproducts[y] = false then 
-        algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g,setup);              
+        algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g);  
     fi; 
     
     end );
@@ -1211,7 +1208,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]];
             
-            prod := MAJORANA_ConjugateVec(prod,g,setup);
+            prod := MAJORANA_ConjugateVec(prod,g);
             
             for j in [1..Nrows(vec)] do  
                 pos := Position(mat!.indices[j], i);
