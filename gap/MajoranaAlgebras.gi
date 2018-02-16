@@ -967,6 +967,16 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                     fi;
                 fi;               
             od;
+            
+            if Nrows(mat) > 8000 then 
+                y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+                
+                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+               
+                if unknowns = [] then 
+                    return rec( mat := mat, vec := vec, unknowns := unknowns);
+                fi;
+            fi;
         fi;
     od;
 
