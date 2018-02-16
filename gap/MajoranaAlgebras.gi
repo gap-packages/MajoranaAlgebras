@@ -816,7 +816,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             fi;
                         od;
                         
-                        if Nrows(mat) > Ncols(mat) then 
+                        if Nrows(mat) > Ncols(mat) or Nrows(mat) > 1000 then 
                             x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
                             mat := x.mat; vec := x.vec; unknowns := x.unknowns;
