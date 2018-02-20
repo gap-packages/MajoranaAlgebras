@@ -110,6 +110,17 @@ BindGlobal("M11",function()
     end
     );
     
+BindGlobal("Mathieu12",function()
+    local G, T, C, input;
+    G:=MathieuGroup(12);
+    C := Filtered(ConjugacyClasses(G), x -> Order(Representative(x)) = 2);;
+    C := Filtered(C, x -> Size(x) = 396);;
+    T := ShallowCopy(AsList(C[1]));
+    input := ShapesOfMajoranaRepresentationAxiomM8(G,T);
+    return(input);
+    end
+    );
+    
 BindGlobal("3A6",function()
     local z1,z2,G,T,ex;
     z1 := (2,6)(4,11)(7,9)(8,13)(10,14)(12,16);;
