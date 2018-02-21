@@ -19,8 +19,8 @@ BindGlobal("2XD8",function()
     
 BindGlobal("S3S3", function()
     local G, T, ex;
-    G := Group((1,2),(1,3),(4,5)(4,6));;
-    T := [(1,2),(1,3),(2,3),(4,5)(4,6),(5,6)];;
+    G := Group((1,2),(1,3),(4,5),(4,6));;
+    T := [(1,2),(1,3),(2,3),(4,5),(4,6),(5,6)];;
     ex := ShapesOfMajoranaRepresentation(G,T);;
     return ex;
     end
