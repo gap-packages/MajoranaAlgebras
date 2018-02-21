@@ -137,47 +137,37 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
 
     function(rep)
     
-    local falsecount, newfalsecount, pos;
+    local products, unknowns;
+
+    products := Positions(rep.algebraproducts, false);
     
-    MAJORANA_ThreeClosedSetUp(rep, Position(rep.algebraproducts, false));
+    MAJORANA_ThreeClosedSetUp(rep, products[1]);
     
-    falsecount := [0,0];
-    
-    falsecount[1] := Size(Positions(rep.algebraproducts,false));
-    falsecount[2] := Size(Positions(rep.innerproducts,false));
+    Remove(products, 1);
     
     while true do
+    
+        unknowns := Positions(rep.algebraproducts, false);
                                 
         MAJORANA_MainLoop(rep);
-        
-        newfalsecount := [0,0];
 
-        newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
-        newfalsecount[2] := Size(Positions(rep.innerproducts,false));
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(unknowns), " unknown algebra products ") );
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
 
-        if newfalsecount[2] < falsecount[2] then 
-            rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-        fi;
-
-        Info(InfoMajorana, 20,
-            STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
-        Info(InfoMajorana, 20,
-            STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
-
-        if newfalsecount = [0,0] then
+        if not false in rep.algebraproducts then 
             Info( InfoMajorana, 10, "Success" );
             return;
-        elif newfalsecount = falsecount then
-            pos := Position(rep.algebraproducts, false);
-            if not IsRowVector(rep.setup.coords[rep.setup.pairreps[pos][2]]) then # this is ugly
-                MAJORANA_ThreeClosedSetUp(rep, pos);
-                falsecount := StructuralCopy(newfalsecount);
-            else
+        fi;
+
+        if ForAll(rep.algebraproducts{unknowns}, x -> x = false) then
+            products := Filtered(products, x -> rep.algebraproducts[x] = false);
+            
+            if products = [] then 
                 Info( InfoMajorana, 10, "Fail" );
                 return;
+            else
+                MAJORANA_ThreeClosedSetUp(rep, products[1]);
             fi;
-        else
-            falsecount := StructuralCopy(newfalsecount);
         fi;
     od;
     
