@@ -17,6 +17,15 @@ BindGlobal("2XD8",function()
     end
     );
     
+BindGlobal("S3S3", function()
+    local G, T, input;
+    G := Group((1,2),(1,3),(4,5)(4,6));;
+    T := [(1,2),(1,3),(2,3),(4,5)(4,6),(5,6)];;
+    ex := ShapesOfMajoranaRepresentation(G,T);;
+    return ex;
+    end
+    );
+
 BindGlobal("S5",function()
     local G, T, ex;
     G:=SymmetricGroup(5);
