@@ -110,24 +110,27 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
     
-    if x <> false then
-        if evals = [2,2] then 
-            y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
-            
-            if y <> false then 
-                new[1] := MAJORANA_AddEvec(new[1], x - (1/4)*u*y);
-            fi;
-        elif evals = [3,3] then 
-            y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
-            z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
-            
-            if y <> false and z <> false then 
-                new[2] := MAJORANA_AddEvec(new[2], z - (1/32)*u*y);
-                new[1] := MAJORANA_AddEvec(new[1], x + (3/32)*u*y - 4*z);
-            fi;  
-        else
-            new[pos] := MAJORANA_AddEvec(new[pos],x);
-        fi;
+    if x = false then return; fi;
+    
+    if evals = [2,2] then 
+        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+        
+        if y = false then return; fi;
+        
+        new[1] := MAJORANA_AddEvec(new[1], x - (1/4)*u*y);
+    elif evals = [3,3] then 
+        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+        
+        if y = false then return; fi;
+        
+        z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
+        
+        if z = false then return; fi;
+        
+        new[2] := MAJORANA_AddEvec(new[2], z - (1/32)*u*y);
+        new[1] := MAJORANA_AddEvec(new[1], x + (3/32)*u*y - 4*z); 
+    else
+        new[pos] := MAJORANA_AddEvec(new[pos],x);
     fi;
     
     end );
@@ -799,7 +802,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                                 
                                 if x <> false and x[1]!.indices[1] <> [] then 
                                     if Size(x[1]!.indices[1]) = 1 then
-                                        
                                         y := MAJORANA_SolveSingleSolution( x, 
                                                             mat, vec, unknowns, 
                                                             rep.algebraproducts,
