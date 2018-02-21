@@ -143,8 +143,6 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
     
     MAJORANA_ThreeClosedSetUp(rep, products[1]);
     
-    Remove(products, 1);
-    
     while true do
     
         unknowns := Positions(rep.algebraproducts, false);

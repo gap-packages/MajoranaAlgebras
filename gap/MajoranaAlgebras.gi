@@ -1317,7 +1317,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
 InstallGlobalFunction(MajoranaRepresentation,
 
-function(input,index)
+function(input, index)
 
     local   rep, falsecount, newfalsecount;  
 
