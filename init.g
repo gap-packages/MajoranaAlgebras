@@ -14,7 +14,7 @@ ReadPackage( "MajoranaAlgebras", "gap/SetUp.gd" );
 
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
 
-ReadPackage( "MajoranaAlgebras", "gap/ThreeClosed.gd");
+ReadPackage( "MajoranaAlgebras", "gap/NClosed.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Orbits.gd");
 
