@@ -151,7 +151,7 @@ InstallGlobalFunction( ThreeClosedMajoranaRepresentation,
                                 
         MAJORANA_MainLoop(rep);
 
-        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(unknowns), " unknown algebra products ") );
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
 
         if not false in rep.algebraproducts then 
