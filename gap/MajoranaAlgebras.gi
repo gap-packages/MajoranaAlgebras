@@ -1319,7 +1319,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(input, index)
 
-    local   rep, falsecount, newfalsecount;  
+    local   rep, unknowns;  
 
     rep :=  MAJORANA_SetUp(input,index);
     
@@ -1328,33 +1328,21 @@ function(input, index)
         MAJORANA_AllEmbeddings(rep); 
     fi;
     
-    falsecount := [0,0];
-    
-    falsecount[1] := Size(Positions(rep.algebraproducts,false));
-    falsecount[2] := Size(Positions(rep.innerproducts,false));
-    
     while true do
+        
+        unknowns := Positions(rep.algebraproducts, false);
                                 
         MAJORANA_MainLoop(rep);
         
-        newfalsecount := [0,0];
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
 
-        newfalsecount[1] := Size(Positions(rep.algebraproducts,false));
-        newfalsecount[2] := Size(Positions(rep.innerproducts,false));
-        
-        Info(InfoMajorana, 20,
-            STRINGIFY( "There are ", newfalsecount[1], " unknown algebra products ") );
-        Info(InfoMajorana, 20,
-            STRINGIFY( "There are ", newfalsecount[2], " unknown inner products ") );
-
-        if newfalsecount = [0,0] then
+        if not false in rep.algebraproducts then
             Info( InfoMajorana, 10, "Success" );
             return rep;
-        elif newfalsecount = falsecount then
+        elif ForAll(rep.algebraproducts{unknowns}, x -> x = false) then 
             Info( InfoMajorana, 10, "Fail" );
             return rep;
-        else
-            falsecount := StructuralCopy(newfalsecount);
         fi;
     od;
     
