@@ -129,11 +129,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             
                             pos := Position(setup.pairconjelts, g);
                             
-                            if pos = fail then 
-                                Add(setup.pairconjelts, g);
-                                pos := Size(setup.pairconjelts);
-                            fi;
-                            
                             setup.pairconj[q[1]][q[2]] := pos;
                             setup.pairconj[q[2]][q[1]] := pos;
                         fi;
@@ -180,7 +175,7 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
     setup.pairconj  := NullMat(t,t);
     setup.pairreps  := [];
     setup.orbitals  := [];
-    setup.pairconjelts := [Identity(G)];
+    setup.pairconjelts := AsList(G);
     
     for i in [1..t] do 
         for j in [i..t] do 
@@ -227,11 +222,6 @@ InstallGlobalFunction( MAJORANA_OrbitalsT,
                             setup.pairorbit[pos_2][pos_1] := k;
                             
                             pos := Position(setup.pairconjelts, g);
-                            
-                            if pos = fail then 
-                                Add(setup.pairconjelts, g);
-                                pos := Size(setup.pairconjelts);
-                            fi;
                             
                             setup.pairconj[pos_1][pos_2] := pos;
                             setup.pairconj[pos_2][pos_1] := pos;

@@ -2,10 +2,7 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
 
     function(rep, index)
     
-    local   orders, signs, unknowns, dim, new_dim, x, elts, o1, o2, k, i, j, gens, pos, sign, new;
-    
-    orders := [[], [1], [1,2], [1,3], [1,2,3,4]];
-    signs := [[], [1], [1, 1], [1,1,1], [1,-1,-1,1]];
+    local   unknowns, dim, new_dim, x, elts, k, i, j, gens, pos, sign, new;
     
     dim := Size(rep.setup.coords);
     
@@ -26,19 +23,6 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
         elts := rep.setup.coords{x};
         
         Add(rep.setup.coords, elts);
-        
-        o1 := Order(elts[1]); o2 := Order(elts[2]);
-        
-        k := Size(rep.setup.coords);
-        
-        for i in orders[o1] do 
-            for j in orders[o2] do 
-                Add(rep.setup.longcoords, [elts[1]^i, elts[2]^j]);
-                Add(rep.setup.poslist, signs[o1][i]*signs[o2][j]*k);
-                Add(rep.setup.longcoords, [elts[2]^i, elts[1]^j]);
-                Add(rep.setup.poslist, signs[o1][i]*signs[o2][j]*k);
-            od;
-        od;
     od;
     
     new_dim := Size(rep.setup.coords);
@@ -52,7 +36,8 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     Append(rep.setup.pairconj, NullMat(new_dim - dim, new_dim));
     
     gens := GeneratorsOfGroup(rep.group);
-    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
+    gens := List(gens, x -> Position(AsList(rep.group), x));
+    gens := rep.setup.pairconjelts{gens};
     
     MAJORANA_Orbitals(gens, dim, rep.setup);
     
@@ -79,16 +64,14 @@ InstallGlobalFunction(MAJORANA_ThreeClosedSetUp,
     # 1/32 evecs from conjugation
     
     for i in rep.setup.orbitreps do 
+        pos := Position(AsList(rep.group), rep.involutions[i]);
+        x := rep.setup.pairconjelts[pos];
+        
         for j in [dim + 1 .. new_dim] do 
-            x := OnPairs(rep.setup.coords[j], rep.setup.coords[i]);
-            pos := Position(rep.setup.longcoords, x);
-            pos := rep.setup.poslist[pos];
+            if x[j] < 0 then sign := -1; else sign := 1; fi;
             
-            sign := 1;
-            if pos < 0 then sign := -1; pos := -pos; fi;
-            
-            if pos <> j then 
-                new := SparseMatrix(1, new_dim, [[j, pos]], [[1, -sign]], Rationals);
+            if sign*x[j] <> j then 
+                new := SparseMatrix(1, new_dim, [[j, sign*x[j]]], [[1, -sign]], Rationals);
                 Sort(new!.indices[1]);
             
                 rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 

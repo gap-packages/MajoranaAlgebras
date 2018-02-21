@@ -930,7 +930,8 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     dim := Size(setup.coords);
     
     gens := GeneratorsOfGroup(group);
-    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, setup));
+    gens := List(gens, x -> Position(AsList(group), x));
+    gens := setup.pairconjelts{gens};
     
     x := MAJORANA_Orbits(gens, dim, setup);
 
