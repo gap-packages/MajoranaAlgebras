@@ -1,5 +1,3 @@
-# TODO check with Sasha what happens when we have g,t \in T st 
-# \ll a_t, a_g \rr is of type 2A but tg \notin T and implement
 
 InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     
@@ -280,15 +278,16 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
 InstallGlobalFunction( MAJORANA_SetUpNoAxioms, 
 
-    function(input, indices)
+    function(input, index)
     
-    local   rep, t, 
-    
-    t := Size(rep.involutions);
+    local   rep, t, T, i, j, k, pos, x, im, sign, gens, dim;
     
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
                         shape       := input.shapes[index] );
+                        
+    T := rep.involutions;
+    t := Size(T);
                         
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
@@ -300,34 +299,146 @@ InstallGlobalFunction( MAJORANA_SetUpNoAxioms,
     rep.setup.pairconjelts := List(input.pairconjelts, 
         x -> MAJORANA_FindVectorPermutation(x, rep.setup));
     
+    # Add axes from 6A algebras    
     
     for i in [1..t] do 
         for j in [i + 1..t] do 
             k := rep.setup.pairorbit[i][j];
-            
-            if rep.shape[k][2] = 'A' then 
-                Add(rep.setup.coords, [i,j]);
+            if rep.shape[k] = ['6','A'] then 
+                pos := [0, 0, 0, 0];
+                pos[1] := Position(T, T[j]*T[i]*T[j]);
+                pos[2] := Position(T, T[j]*T[i]*T[j]*T[i]*T[j]);
+                pos[3] := Position(T, T[i]*T[j]*T[i]*T[j]*T[i]);
+                pos[4] := Position(T, T[i]*T[j]*T[i]);
+                
+                # Add the 3A axes
+                
+                if not SortedList([i, pos[1]]) in rep.setup.longcoords then 
+                    Add(rep.setup.coords, SortedList([i, pos[1]]));
+                    
+                    x := [  [i, pos[1]], [i, pos[3]], [j, pos[2]], [j, pos[4]],
+                            [pos[1], pos[3]], [pos[2], pos[4]]];
+                    
+                    Append(rep.setup.longcoords, List(x, SortedList));
+                    Append(rep.setup.poslist, [1, 1, 1, 1, 1, 1]*Size(rep.setup.coords)); 
+                fi;
+                
+                # Add the 2A axes
+                
+                if not SortedList([i, pos[2]]) in rep.setup.longcoords then
+                    
+                    x := [[i, pos[2]], [j, pos[3]], [pos[1], pos[4]]];
+                    
+                    Append(rep.setup.longcoords, List(x, SortedList));
+                    
+                    x := Position(T, (T[i]*T[j])^3); 
+                    
+                    if x = fail then 
+                        Add(rep.setup.coords, SortedList([i, pos[2]]));
+                        Append(rep.setup.poslist, [1, 1, 1]*Size(rep.setup.coords));
+                    else
+                        Append(rep.setup.poslist, [1, 1, 1]*x);
+                    fi;
+                fi;
+                
+                x := Position(T, (T[i]*T[j])^3); 
+                
+                if x <> fail and not SortedList([x,i]) in rep.setup.longcoords then 
+                    Append(rep.setup.longcoords, List([[x, i], [x,j]], SortedList)); 
+                    Append(rep.setup.poslist, pos{[2,3]});
+                    Append(rep.setup.longcoords, List(Cartesian( [x], pos), SortedList)); 
+                    Append(rep.setup.poslist, [pos[4], i, j, pos[1]]);
+                fi;
+                
             fi;
+        od;
+    od;
+    
+    # Add axes from 4B algebra
+    
+    for i in [1..t] do 
+        for j in [i + 1..t] do 
+            k := rep.setup.pairorbit[i][j];
+            if rep.shape[k] = ['4','B'] then
+                pos := [0, 0];
+                pos[1] := Position(T, T[j]*T[i]*T[j]);
+                pos[2] := Position(T, T[i]*T[j]*T[i]);
+                
+                x := Position(T, (T[i]*T[j])^2);
+                
+                if not SortedList([i, pos[1]]) in rep.setup.longcoords then 
+                    
+                    Append(rep.setup.longcoords, List([[i, pos[1]], [j, pos[2]]], SortedList));
+
+                    if x = fail then 
+                        Add(rep.setup.coords, SortedList([i, pos[1]]));
+                        Append(rep.setup.poslist, [1, 1]*Size(rep.setup.coords));
+                    else
+                        Append(rep.setup.poslist, [1, 1]*x);
+                    fi;
+                fi;
+                
+                # TODO finish this 
+                
+                if x <> fail and not SortedList([x,i]) in rep.setup.longcoords then 
+                    
+                fi;
+                
+            fi;
+        od;
+    od;
+ 
+    for i in [1..t] do 
+        for j in [i + 1 .. t] do 
+            if not [i,j] in rep.setup.longcoords then
             
-            if rep.setup.pairreps[k] = [i,j] and rep.shape[k][2] = 'A' then 
-                dim := Size(rep.setup.coords);
-                rep.algebraproducts[k] := SparseMatrix(1, dim, [[dim]], [[1]], Rationals);
+                k := rep.setup.pairorbit[i][j];
+                
+                if rep.shape[k] = ['2','A'] then 
+                    Add(rep.setup.coords, [i,j]);
+                    Add(rep.setup.longcoords, [i,j]);
+                    Add(rep.setup.poslist, Size(rep.setup.coords));
+                elif rep.shape[k] = ['3','A'] then
+                    pos := Position(T, T[j]*T[i]*T[j]);
+                    Add(rep.setup.coords, [i,j]);
+                    Append(rep.setup.longcoords, [[i,j], [i,pos], [j,pos]]);
+                    Append(rep.setup.poslist, [1, 1, 1]*Size(rep.setup.coords));
+                elif rep.shape[k] = ['4', 'A'] then 
+                    pos := [0,0];
+                    pos[1] := Position(T, T[j]*T[i]*T[j]);
+                    pos[2] := Position(T, T[i]*T[j]*T[i]);
+                    Add(rep.setup.coords, [i,j]);
+                    Add(rep.setup.longcoords, [[i, pos[1]], SortedList([i, pos[2]])]);
+                elif rep.shape[k] = ['5','A'] then 
+                    pos := [0, 0, 0];
+                    pos[1] := Position(T, T[j]*T[i]*T[j]);
+                    pos[2] := Position(T, T[j]*T[i]*T[j]*T[i]*T[j]);
+                    pos[3] := Position(T, T[i]*T[j]*T[i]);
+                    Add(rep.setup.coords, [i,j]);
+                    Append(rep.setup.longcoords, [[i,j], [i, pos[1]], [i, pos[2]], [i, pos[3]]]);
+                    Append(rep.setup.poslist, [1, -1, -1, 1]*Size(rep.setup.coords));
+                    Append(rep.setup.longcoords, [[j, pos[1]], [j, pos[2]], [j, pos[3]]]);
+                    Append(rep.setup.poslist, [1, -1, -1]*Size(rep.setup.coords));
+                    Append(rep.setup.longcoords, List([[pos[1], pos[2]], [pos[1], pos[3]], [pos[2], pos[3]]], SortedList));
+                    Append(rep.setup.poslist, [1, -1, 1]*Size(rep.setup.coords));
+                fi;
             fi;
         od;
     od;
     
     dim := Size(rep.setup.coords);
     
-    for i in [1..Size(rep.algebraproducts)] do 
-        if rep.algebraproducts[i] <> false then 
-            rep.algebraproducts[i]!.ncols := dim;
-        fi;
-    od;
+    # Extend pairconjelts permutations
     
     for i in [1..Size(rep.setup.pairconjelts)] do 
         for j in [t + 1 .. dim] do 
             x := rep.setup.coords[j];
-            im := x{rep.setup.pairconjelts[i]};
+            im := rep.setup.pairconjelts[i]{x};
+            
+            sign := 1;
+                
+            if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
+            if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
             
             if im[1] > im[2] then im := im{[2,1]}; fi;
             
@@ -351,55 +462,9 @@ InstallGlobalFunction( MAJORANA_SetUpNoAxioms,
     
     MAJORANA_Orbitals(gens, dim, rep.setup);
     
+    return rep;
     
-            
-            
-    
-                
-InstallGlobalFunction( MAJORANA_DihedralProductsNoAxioms, 
-
-    function(i, j, k, rep)
-    
-    local
-    
-    T := rep.involutions;
-    
-    dim := Size(rep.setup.coords);
-    
-    for i in [Size(rep.algebraproducts) + 1..Size(rep.setup.pairreps)] do 
-
-        if ForAll(rep.setup.pairreps[i], x -> x <= t) then
-            j := rep.setup.pairreps[i][1];
-            k := rep.setup.pairreps[i][2];
-            
-            if rep.shape[i] = ['1','A'] then 
-                rep.algebraproducts[i] := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
-                rep.innerproducts[i] := 1;
-            elif rep.shape[i] = ['2','A'] then 
-                rep.innerproducts[i] := 1/8;
-            elif rep.shape[i] = ['2','B'] then
-                rep.algebraproducts[i] := SparseMatrix(1, dim, [[]], [[]], Rationals);
-                rep.innerproducts[i] := 0;
-            elif rep.shape[i] = ['3','A'] then 
-                rep.innerproducts[i] := 13/256;
-            elif rep.shape[i] = ['3','C'] then
-                pos := [j, k, Position(T, T[j]^T[k])];  
-                vals := [1, 1, -1]*(1/64);
-                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
-                rep.innerproducts[i] := 1/64;
-            elif rep.shape[i] = ['4', 'A'] then
-                rep.innerproducts[i] := 1/32;
-            elif rep.shape[i] = ['4', 'B'] then
-                pos := [j, k, Position(T, T[j]^T[k]), Position(T, T[k]^T[j])];
-                pos[5] := Position(rep.setup.coords, SortedList(pos{[1,3]}));
-                vals := [1, 1, -1, -1, 1]*(1/64);
-                rep.algebraproducts[i] := MAJORANA_MakeVector(pos, vals, dim);
-                rep.innerproducts[i] := 1/64;
-            elif rep.shape[i] = ['5','A'] then 
-                
-                
-                
-                
+    end );
 
 InstallGlobalFunction( MAJORANA_SetUp,
     
