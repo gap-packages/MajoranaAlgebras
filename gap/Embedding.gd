@@ -18,3 +18,5 @@ DeclareGlobalFunction( "MAJORANA_ImagePair" );
 
 DeclareGlobalFunction( "MAJORANA_EmbedDihedral" );
 
+DeclareGlobalFunction( "MAJORANA_RecordCoords" );
+

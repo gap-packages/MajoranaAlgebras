@@ -352,12 +352,10 @@ InstallGlobalFunction( MAJORANA_ImagePair,
     
     end );
 
-InstallGlobalFunction( MAJORANA_EmbedDihedral,
+InstallGlobalFunction( MAJORANA_RecordCoords,
 
     function(involutions, shape, rep)
-    
-    local pos, gens, emb, t, i, j, x, sign, subrep, im, list; 
-    
+
     subrep := MAJORANA_DihedralAlgebras.(shape);
     
     gens := GeneratorsOfGroup(subrep.group);
@@ -388,6 +386,22 @@ InstallGlobalFunction( MAJORANA_EmbedDihedral,
         fi;
     od;
     
+    end );
+
+InstallGlobalFunction( MAJORANA_EmbedDihedral,
+
+    function(involutions, shape, rep)
+    
+    local pos, gens, emb, t, i, j, x, sign, subrep, im, list; 
+    
+    subrep := MAJORANA_DihedralAlgebras.(shape);
+    
+    gens := GeneratorsOfGroup(subrep.group);
+    
+    emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, involutions);
+    
+    t := Size(subrep.involutions);
+    
     # Record alg and inner products
     
     for i in [1..Size(subrep.setup.pairreps)] do 
@@ -417,9 +431,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedral,
     for i in subrep.setup.orbitreps do
         im := Image(emb, subrep.setup.coords[i]);
         
-        x := Position(rep.involutions, im);
-        
-        pos := Position(rep.setup.orbitreps, x);
+        pos := Position(rep.involutions, im);
         
         if pos in rep.setup.orbitreps then 
             for j in [1..3] do 

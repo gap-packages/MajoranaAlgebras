@@ -301,107 +301,27 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
-                        poslist     := [1..t]               );
-    
-    # Create coordinates lists
+                        poslist     := [1..t]               );                           
 
-    for i in [1..Size(input.orbitals)] do
-        
-        if rep.shape[i] = ['2','A'] then 
-            for j in [1..Size(input.orbitals[i])] do
-            
-                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
-                
-                if x in input.involutions then break; fi;
-                
-                if not x in rep.setup.longcoords then 
-                    Add(rep.setup.coords,x);
-                
-                    k := Size(rep.setup.coords);
-                
-                    Append(rep.setup.poslist, [k]);
-                    Append(rep.setup.longcoords, [x]);
-                fi;
-            od;
-        elif rep.shape[i]=['3','A'] then
-            for j in [1..Size(input.orbitals[i])] do
-            
-                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
-                
-                if not x in rep.setup.longcoords then 
-                    Add(rep.setup.coords,x);
-                
-                    k := Size(rep.setup.coords);
-                
-                    Append(rep.setup.poslist, [k,k]);
-                    Append(rep.setup.longcoords, [x, x^2]);
-                fi;
-            od;
-        elif rep.shape[i]=['4','A'] then
-            for j in [1..Size(input.orbitals[i])] do
-            
-                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
-                
-                if not x in rep.setup.longcoords then 
-                    Add(rep.setup.coords,x);
-                    
-                    k := Size(rep.setup.coords);
-                    
-                    Append(rep.setup.poslist, [k,k]);
-                    Append(rep.setup.longcoords, [x, x^3]);
-                fi;
-                
-            od;
-        elif rep.shape[i] = ['4','B'] then 
-            for j in [1..Size(input.orbitals[i])] do
-            
-                x := (input.orbitals[i][j][1]*input.orbitals[i][j][2])^2;
-                
-                if x in input.involutions then break; fi;
-                
-                if not x in rep.setup.longcoords then 
-                    Add(rep.setup.coords,x);
-                
-                    k := Size(rep.setup.coords);
-                
-                    Append(rep.setup.poslist, [k]);
-                    Append(rep.setup.longcoords, [x]);
-                fi;
-            od;
-        elif rep.shape[i]=['5','A'] then
-            for j in [1..Size(input.orbitals[i])] do
-            
-                x := input.orbitals[i][j][1]*input.orbitals[i][j][2];
-                
-                if not x in rep.setup.longcoords then 
-                    Add(rep.setup.coords,x);
-                    
-                    k := Size(rep.setup.coords);
-                    
-                    Append(rep.setup.poslist, [k,-k,-k,k]);
-                    Append(rep.setup.longcoords, [x, x^2, x^3, x^4]);
-                fi;    
-            od;
-        elif rep.shape[i] = ['6','A'] then 
-            for j in [1..Size(input.orbitals[i])] do
-            
-                x := (input.orbitals[i][j][1]*input.orbitals[i][j][2])^3;
-                
-                if x in input.involutions then break; fi;
-                
-                if not x in rep.setup.longcoords then 
-                    Add(rep.setup.coords,x);
-                
-                    k := Size(rep.setup.coords);
-                
-                    Append(rep.setup.poslist, [k]);
-                    Append(rep.setup.longcoords, [x]);
-                fi;
-            od;
-        fi;
-    od;
+    gens := GeneratorsOfGroup(input.group);
+    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
+
+    x := MAJORANA_Orbits(gens, t, rep.setup);
+
+    rep.setup.conjelts := x.conjelts;
+    rep.setup.orbitreps := x.orbitreps;
+
+    rep.algebraproducts := [];
+    rep.innerproducts   := [];
+    rep.evecs           := NullMat(t,3);
+    rep.nullspace       := SparseMatrix(0, dim, [], [], Rationals); 
     
-    dim := Size(rep.setup.coords);
+    for i in [1..t] do
+        for j in [i + 1 .. t] do 
+            k := rep.setup.pairorbit[i][j];
+            MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep);
+         od;
+    od;
 
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
@@ -426,17 +346,11 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup.orbitreps := x.orbitreps;
 
     MAJORANA_Orbitals(gens, t, rep.setup);
-    
-                                ## STEP 3: PRODUCTS AND EVECS I ##
-                                
-    s := Size(rep.setup.pairreps);
-
-    # Set up rep record
 
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
     rep.evecs           := NullMat(t,3);
-    rep.nullspace       := SparseMatrix(0, dim, [], [], Rationals);               
+    rep.nullspace := SparseMatrix(0, dim, [], [], Rationals);
 
     # Set up eigenvector matrix
 
@@ -451,22 +365,27 @@ InstallGlobalFunction( MAJORANA_SetUp,
             od;
         fi;
     od;
-    
-    # Start filling in values and products!
 
-    for i in [1..t] do
-        for j in [i + 1 .. t] do 
-            k := rep.setup.pairorbit[i][j];
+    # Embed dihedral algebras
+    
+    for i in [1..t] do 
+        for j in [1..t] do 
             
-            MAJORANA_EmbedDihedral(rep.involutions{[i,j]}, rep.shape[k], rep);
-         od;
+            k := rep.setup.pairreps[i][j];
+            
+            subrep := MAJORANA_DihedralAlgebras.(rep.shape[k]);
+            gens := GeneratorsOfGroup(subrep.group);
+            
+            emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
+            
+            MAJORANA_Embed(rep, subrep, emb);
+            
+        od;
     od;
 
     for i in rep.setup.orbitreps do
         for j in [1..3] do 
-            if rep.evecs[i][j] <> [] then 
-                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
-            fi;
+            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
         od; 
     od;
     
