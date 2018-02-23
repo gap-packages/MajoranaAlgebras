@@ -355,6 +355,8 @@ InstallGlobalFunction( MAJORANA_ImagePair,
 InstallGlobalFunction( MAJORANA_RecordCoords,
 
     function(involutions, shape, rep)
+    
+    local subrep, gens, emb, t, i, k, x, im, list;
 
     subrep := MAJORANA_DihedralAlgebras.(shape);
     
@@ -377,12 +379,22 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
         fi;
             
         if not im in rep.setup.longcoords then 
-            Add(rep.setup.coords, x);
+            Add(rep.setup.coords, im);
+            k := Size(rep.setup.coords);
             
             list := Positions(subrep.setup.poslist, i);
-            Append(list, Positions(subrep.setup.poslist, -i));
-            Append(rep.setup.longcoords, subrep.setup.longcoords{list});
-            Append(rep.setup.poslist, subrep.setup.poslist{list}); 
+            x := List(subrep.setup.longcoords{list}, y -> Image(emb, y));
+            
+            Append(rep.setup.longcoords, x);
+            Append(rep.setup.poslist, List(list, y -> k));
+            
+            if shape = ['5', 'A'] then 
+                list := Positions(subrep.setup.poslist, -i);
+                x := List(subrep.setup.longcoords{list}, y -> Image(emb, y));
+                
+                Append(rep.setup.longcoords, x);
+                Append(rep.setup.poslist, List(list, y -> -k));
+            fi;             
         fi;
     od;
     

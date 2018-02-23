@@ -289,6 +289,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
             g,
             y,
             res,
+            subrep,
+            emb,
             gens,
             dim,            # size of coordinates
             s;              # number of orbits of G on T x T
@@ -309,33 +311,30 @@ InstallGlobalFunction( MAJORANA_SetUp,
     x := MAJORANA_Orbits(gens, t, rep.setup);
 
     rep.setup.conjelts := x.conjelts;
-    rep.setup.orbitreps := x.orbitreps;
-
-    rep.algebraproducts := [];
-    rep.innerproducts   := [];
-    rep.evecs           := NullMat(t,3);
-    rep.nullspace       := SparseMatrix(0, dim, [], [], Rationals); 
+    rep.setup.orbitreps := x.orbitreps;    
     
     for i in [1..t] do
         for j in [i + 1 .. t] do 
-            k := rep.setup.pairorbit[i][j];
+            k := input.pairorbit[i][j];
             MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep);
          od;
     od;
-
+    
+    dim := Size(rep.setup.coords);
+    
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
-    
-    rep.setup.pairreps  := ShallowCopy(input.pairreps);
-    rep.setup.pairconjelts := List(input.pairconjelts, 
-        x -> MAJORANA_FindVectorPermutation(x, rep.setup));
     
     for i in [1..t] do 
         for j in [1..t] do 
             rep.setup.pairorbit[i][j] := input.pairorbit[i][j];
             rep.setup.pairconj[i][j]  := input.pairconj[i][j];
         od;
-    od;    
+    od;
+
+    rep.setup.pairreps  := ShallowCopy(input.pairreps);
+    rep.setup.pairconjelts := List(input.pairconjelts, 
+        x -> MAJORANA_FindVectorPermutation(x, rep.setup));
 
     gens := GeneratorsOfGroup(input.group);
     gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
@@ -346,7 +345,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup.orbitreps := x.orbitreps;
 
     MAJORANA_Orbitals(gens, t, rep.setup);
-
+    
+    s := Size(rep.setup.pairreps);
+    
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
     rep.evecs           := NullMat(t,3);
@@ -369,9 +370,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
     # Embed dihedral algebras
     
     for i in [1..t] do 
-        for j in [1..t] do 
+        for j in [i + 1..t] do 
             
-            k := rep.setup.pairreps[i][j];
+            k := rep.setup.pairorbit[i][j];
             
             subrep := MAJORANA_DihedralAlgebras.(rep.shape[k]);
             gens := GeneratorsOfGroup(subrep.group);
