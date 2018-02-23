@@ -337,3 +337,105 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
     return res;
     
     end );
+    
+InstallGlobalFunction( MAJORANA_ImagePair,
+
+    function(rep, subrep, emb, x)
+    
+    local y, pos;
+    
+    y := subrep.setup.coords{x};
+    
+    pos := List(y, i -> Position(rep.setup.longcoords, Image(emb, i))); # TODO what if one of y is a row vector
+    
+    return SortedList(rep.setup.poslist{pos});
+    
+    end );
+
+InstallGlobalFunction( MAJORANA_EmbedDihedral,
+
+    function(involutions, shape, rep)
+    
+    local pos, gens, emb, t, i, j, x, sign, subrep, im, list; 
+    
+    subrep := MAJORANA_DihedralAlgebras.(shape);
+    
+    gens := GeneratorsOfGroup(subrep.group);
+    
+    emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, involutions);
+    
+    t := Size(subrep.involutions);
+    
+    # Add extra basis vectors
+    
+    for i in [t + 1.. Size(subrep.setup.coords)] do 
+        
+        x := subrep.setup.coords[i];
+    
+        if not IsRowVector(x) then 
+            im := Image(emb, x);
+        else 
+            im := MAJORANA_ImagePair(rep, subrep, emb, x);
+        fi;
+            
+        if not im in rep.setup.longcoords then 
+            Add(rep.setup.coords, x);
+            
+            list := Positions(subrep.setup.poslist, i);
+            Append(list, Positions(subrep.setup.poslist, -i));
+            Append(rep.setup.longcoords, subrep.setup.longcoords{list});
+            Append(rep.setup.poslist, subrep.setup.poslist{list}); 
+        fi;
+    od;
+    
+    # Record alg and inner products
+    
+    for i in [1..Size(subrep.setup.pairreps)] do 
+        
+        im := MAJORANA_ImagePair(subrep.setup.pairreps[i]); sign := 1;
+        
+        if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
+        if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
+        
+        pos := Position(rep.setup.pairreps, im);
+        
+        if pos = fail then 
+            Add(rep.setup.pairreps, im);
+            Add(rep.innerproducts, sign*subrep.innerproducts[i]);
+            Add(rep.algebraproducts, sign*MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep));
+        elif rep.algebraproducts[pos] = false then 
+            rep.innerproducts[pos] :=  sign*subrep.innerproducts[i];
+            rep.algebraproducts[pos] := sign*MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
+        fi;
+    
+    od;
+    
+    # Record evecs
+    
+    for i in subrep.setup.orbitreps do
+        im := Image(emb, subrep.setup.coords[i]);
+        
+        x := Position(rep.involutions, im);
+        
+        pos := Position(x, rep.setup.pairreps);
+        
+        if pos in rep.setup.orbitreps then 
+            for j in [1..3] do 
+                rep.evecs[pos][j] := UnionOfRows(MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep));
+            od;
+        fi;
+    od;
+    
+    end );
+    
+    
+             
+            
+             
+            
+            
+            
+
+
+
+        

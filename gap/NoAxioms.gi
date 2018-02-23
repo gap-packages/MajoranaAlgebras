@@ -327,3 +327,4 @@ InstallGlobalFunction(MAJORANA_DihedralProductsNoAxioms,
     od;
     
     end);
+

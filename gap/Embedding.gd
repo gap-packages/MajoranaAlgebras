@@ -14,3 +14,7 @@ DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
 
 DeclareGlobalFunction( "MAJORANA_EmbeddingFusion" );
 
+DeclareGlobalFunction( "MAJORANA_ImagePair" );
+
+DeclareGlobalFunction( "MAJORANA_EmbedDihedral" );
+
