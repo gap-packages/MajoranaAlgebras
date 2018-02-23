@@ -454,7 +454,13 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     # Start filling in values and products!
 
-    MAJORANA_DihedralProducts(input.involutions, rep);
+    for i in [1..t] do
+        for j in [i + 1 .. t] do 
+            k := rep.setup.pairorbit[i][j];
+            
+            MAJORANA_EmbedDihedral(rep.involutions{[i,j]}, rep.shape[k], rep);
+         od;
+    od;
 
     for i in rep.setup.orbitreps do
         for j in [1..3] do 

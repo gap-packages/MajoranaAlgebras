@@ -392,7 +392,9 @@ InstallGlobalFunction( MAJORANA_EmbedDihedral,
     
     for i in [1..Size(subrep.setup.pairreps)] do 
         
-        im := MAJORANA_ImagePair(subrep.setup.pairreps[i]); sign := 1;
+        im := MAJORANA_ImagePair(rep, subrep, emb, subrep.setup.pairreps[i]); 
+        
+        sign := 1;
         
         if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
         if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
@@ -417,11 +419,12 @@ InstallGlobalFunction( MAJORANA_EmbedDihedral,
         
         x := Position(rep.involutions, im);
         
-        pos := Position(x, rep.setup.pairreps);
+        pos := Position(rep.setup.orbitreps, x);
         
         if pos in rep.setup.orbitreps then 
             for j in [1..3] do 
-                rep.evecs[pos][j] := UnionOfRows(MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep));
+                rep.evecs[pos][j] := UnionOfRows(rep.evecs[pos][j],
+                    MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep));
             od;
         fi;
     od;
