@@ -201,6 +201,10 @@ function(rep)
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
                     fi;
                 od;
+                
+                if MAJORANA_CheckBasis(dim, new, rep.nullspace) = true then
+                    break;
+                fi;
             od;
         
             for j in [1..3] do 
