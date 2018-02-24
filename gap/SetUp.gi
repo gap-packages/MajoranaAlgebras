@@ -306,7 +306,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         poslist     := [1..t]               );                           
 
     gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep.setup));
 
     x := MAJORANA_Orbits(gens, t, rep.setup);
 
@@ -333,11 +333,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
     od;
 
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
-    rep.setup.pairconjelts := List(input.pairconjelts, 
-        x -> MAJORANA_FindVectorPermutation(x, rep.setup));
+    rep.setup.pairconjelts := List(input.pairconjelts, x -> MAJORANA_FindPerm(x, rep.setup));
 
     gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindVectorPermutation(x, rep.setup));
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep.setup));
 
     x := MAJORANA_Orbits(gens, t, rep.setup);
 
@@ -411,7 +410,7 @@ InstallGlobalFunction(MAJORANA_MakeVector,
     
     end);
     
-InstallGlobalFunction( MAJORANA_FindVectorPermutation, 
+InstallGlobalFunction( MAJORANA_FindPerm, 
     
     function(g,setup)
     
