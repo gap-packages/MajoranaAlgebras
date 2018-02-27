@@ -306,7 +306,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         poslist     := [1..t]               );                           
 
     gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep.setup));
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
 
     x := MAJORANA_Orbits(gens, t, rep.setup);
 
@@ -333,10 +333,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
     od;
 
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
-    rep.setup.pairconjelts := List(input.pairconjelts, x -> MAJORANA_FindPerm(x, rep.setup));
+    rep.setup.pairconjelts := List(input.pairconjelts, x -> MAJORANA_FindPerm(x, rep, rep));
 
     gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep.setup));
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
 
     x := MAJORANA_Orbits(gens, t, rep.setup);
 
@@ -412,20 +412,20 @@ InstallGlobalFunction(MAJORANA_MakeVector,
     
 InstallGlobalFunction( MAJORANA_FindPerm, 
     
-    function(g,setup)
+    function(g, rep, subrep)
     
     local   dim, j, list, pos;
     
-    dim := Size(setup.coords);
+    dim := Size(subrep.setup.coords);
     list := [1..dim]*0;
         
     for j in [1..dim] do 
-        if IsRowVector(setup.coords[j]) then 
-            pos := Position(setup.longcoords,OnTuples(setup.coords[j],g)); 
-            list[j] := setup.poslist[pos];
+        if IsRowVector(subrep.setup.coords[j]) then 
+            pos := Position(rep.setup.longcoords,OnTuples(subrep.setup.coords[j],g)); 
+            list[j] := rep.setup.poslist[pos];
         else 
-            pos := Position(setup.longcoords,OnPoints(setup.coords[j],g)); 
-            list[j] := setup.poslist[pos];
+            pos := Position(rep.setup.longcoords,OnPoints(subrep.setup.coords[j],g)); 
+            list[j] := rep.setup.poslist[pos];
         fi;
     od;
 
