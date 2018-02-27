@@ -414,14 +414,25 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     
     function(g, rep, subrep)
     
-    local   dim, j, list, pos;
+    local   dim, j, list, pos, im, sign;
     
     dim := Size(subrep.setup.coords);
     list := [1..dim]*0;
         
     for j in [1..dim] do 
         if IsRowVector(subrep.setup.coords[j]) then 
-            pos := Position(rep.setup.longcoords,OnTuples(subrep.setup.coords[j],g)); 
+        
+            im := list{subrep.setup.coords[j]};
+            
+            sign := 1;
+            
+            if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;
+            if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
+            
+            if im[1] > im[2] then im := im{[2,1]}; fi;
+            
+            pos := Position(rep.setup.longcoords,im); 
+
             list[j] := rep.setup.poslist[pos];
         else 
             pos := Position(rep.setup.longcoords,OnPoints(subrep.setup.coords[j],g)); 
@@ -453,25 +464,21 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
         
         x := subrep.setup.coords[i];
     
-        if not IsRowVector(x) then 
-            im := Image(emb, x);
-        else 
-            im := MAJORANA_ImagePair(rep, subrep, emb, x);
-        fi;
+        im := MAJORANA_Image(rep, subrep, emb, x);
             
         if not im in rep.setup.longcoords then 
             Add(rep.setup.coords, im);
             k := Size(rep.setup.coords);
             
             list := Positions(subrep.setup.poslist, i);
-            x := List(subrep.setup.longcoords{list}, y -> Image(emb, y));
+            x := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
             
             Append(rep.setup.longcoords, x);
             Append(rep.setup.poslist, List(list, y -> k));
             
             if shape = ['5', 'A'] then 
                 list := Positions(subrep.setup.poslist, -i);
-                x := List(subrep.setup.longcoords{list}, y -> Image(emb, y));
+                x := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
                 
                 Append(rep.setup.longcoords, x);
                 Append(rep.setup.poslist, List(list, y -> -k));

@@ -231,7 +231,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
                 break; 
             fi;
         od;
-        
+
         for j in [1..3] do 
             if Nrows(subrep.evecs[i][j]) > 0 then 
                 im := MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep);
@@ -287,16 +287,20 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
     
     end );
     
-InstallGlobalFunction( MAJORANA_ImagePair,
+InstallGlobalFunction( MAJORANA_Image,
 
     function(rep, subrep, emb, x)
     
     local y, pos;
     
-    y := subrep.setup.coords{x};
-    
-    pos := List(y, i -> Position(rep.setup.longcoords, Image(emb, i))); # TODO what if one of y is a row vector
-    
-    return SortedList(rep.setup.poslist{pos});
+    if IsRowVector(x) then
+        y := subrep.setup.coords{x};
+        
+        pos := List(y, i -> Position(rep.setup.longcoords, Image(emb, i))); # TODO fix signs 
+        
+        return SortedList(rep.setup.poslist{pos});
+    else 
+        return Image(emb, x);
+    fi;
     
     end );

@@ -10,7 +10,7 @@ DeclareGlobalFunction( "MAJORANA_EmbedKnownRep" );
 
 DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
 
-DeclareGlobalFunction( "MAJORANA_ImagePair" );
+DeclareGlobalFunction( "MAJORANA_Image" );
 
 DeclareGlobalFunction( "MAJORANA_EmbedDihedral" );
 
