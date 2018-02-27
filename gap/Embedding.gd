@@ -8,15 +8,11 @@ DeclareGlobalFunction( "MAJORANA_MaximalSubgps" );
 
 DeclareGlobalFunction( "MAJORANA_EmbedKnownRep" );
 
-DeclareGlobalFunction( "MAJORANA_CheckShape" );
-
 DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
-
-DeclareGlobalFunction( "MAJORANA_EmbeddingFusion" );
 
 DeclareGlobalFunction( "MAJORANA_ImagePair" );
 
 DeclareGlobalFunction( "MAJORANA_EmbedDihedral" );
 
-DeclareGlobalFunction( "MAJORANA_RecordCoords" );
+
 

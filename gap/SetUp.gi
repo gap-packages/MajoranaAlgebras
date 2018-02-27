@@ -433,6 +433,54 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     
     end);
     
+InstallGlobalFunction( MAJORANA_RecordCoords,
+
+    function(involutions, shape, rep)
+    
+    local subrep, gens, emb, t, i, k, x, im, list;
+
+    subrep := MAJORANA_DihedralAlgebras.(shape);
+    
+    gens := GeneratorsOfGroup(subrep.group);
+    
+    emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, involutions);
+    
+    t := Size(subrep.involutions);
+    
+    # Add extra basis vectors
+    
+    for i in [t + 1.. Size(subrep.setup.coords)] do 
+        
+        x := subrep.setup.coords[i];
+    
+        if not IsRowVector(x) then 
+            im := Image(emb, x);
+        else 
+            im := MAJORANA_ImagePair(rep, subrep, emb, x);
+        fi;
+            
+        if not im in rep.setup.longcoords then 
+            Add(rep.setup.coords, im);
+            k := Size(rep.setup.coords);
+            
+            list := Positions(subrep.setup.poslist, i);
+            x := List(subrep.setup.longcoords{list}, y -> Image(emb, y));
+            
+            Append(rep.setup.longcoords, x);
+            Append(rep.setup.poslist, List(list, y -> k));
+            
+            if shape = ['5', 'A'] then 
+                list := Positions(subrep.setup.poslist, -i);
+                x := List(subrep.setup.longcoords{list}, y -> Image(emb, y));
+                
+                Append(rep.setup.longcoords, x);
+                Append(rep.setup.poslist, List(list, y -> -k));
+            fi;             
+        fi;
+    od;
+    
+    end );
+    
 InstallGlobalFunction(SP_Product,    
     
     function( perm1, perm2)
