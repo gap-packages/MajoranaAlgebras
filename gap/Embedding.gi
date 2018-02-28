@@ -2,26 +2,13 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
 
     function(rep, axioms)
     
-    local   unknowns,
-            x,
-            y,
-            gens,
-            subgp,
-            T,
-            subrep,
-            ex,
-            i,
-            j,
-            emb,
-            g;
-            
-    unknowns  := Positions(rep.algebraproducts, false);
+    local   x, gens, subgp, T, subrep, ex, i, j;
     
-    for x in unknowns do
+    for x in Positions(rep.algebraproducts, false) do
         if rep.algebraproducts[x] = false then 
     
-            y := rep.setup.pairreps[x];
-            gens := rep.setup.coords{y};
+            gens := rep.setup.coords{rep.setup.pairreps[x]};
+            gens := List(gens, y -> MAJORANA_Image(rep, rep, IdentityMapping(rep.group), y)) ;
             
             subgp := Subgroup(rep.group,gens);
             
@@ -39,6 +26,8 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                                     STRINGIFY("Constructing subrep of ", StructureDescription(subgp) ) );
                             
                             subrep := MajoranaRepresentation(ex,i,axioms);
+                            
+                            Error("AllEmbeddings used");
                             
                             MAJORANA_EmbedKnownRep(rep, subrep);    
                         fi;    
