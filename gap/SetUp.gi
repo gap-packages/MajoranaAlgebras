@@ -373,13 +373,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
             
             k := rep.setup.pairorbit[i][j];
             
-            subrep := algebras.(rep.shape[k]);
-            gens := GeneratorsOfGroup(subrep.group);
+            if rep.algebraproducts[k] = false then 
             
-            emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
-            
-            MAJORANA_Embed(rep, subrep, emb);
-            
+                subrep := algebras.(rep.shape[k]);
+                gens := GeneratorsOfGroup(subrep.group);
+                
+                emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
+                
+                MAJORANA_Embed(rep, subrep, emb);
+            fi;
         od;
     od;
 
