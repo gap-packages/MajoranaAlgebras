@@ -1325,10 +1325,11 @@ function(arg)
         algebras := MAJORANA_DihedralAlgebras;
     elif arg[3] = "NoAxioms" then 
         algebras := MAJORANA_DihedralAlgebrasNoAxioms;
+    elif arg[3] = "AxiomM8" then 
+        algebras := MAJORANA_DihedralAlgebrasAxiomM8;
     fi;
     
-    input := arg[1];
-    index := arg[2];
+    input := arg[1]; index := arg[2];
 
     rep :=  MAJORANA_SetUp(input,index,algebras);
     
