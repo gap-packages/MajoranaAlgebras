@@ -31,8 +31,6 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                             
                             subrep := MajoranaRepresentation(ex,i,axioms);
                             
-                            Error("AllEmbeddings used");
-                            
                             MAJORANA_EmbedKnownRep(rep, subrep);    
                         fi;    
                     od;                

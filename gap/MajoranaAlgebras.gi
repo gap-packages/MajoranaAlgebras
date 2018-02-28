@@ -1338,7 +1338,7 @@ function(arg)
     
     if Size(rep.group) > 120 then 
         MAJORANA_MaximalSubgps(rep, arg[3]);
-        MAJORANA_AllEmbeddings(rep, arg[3]); 
+        # MAJORANA_AllEmbeddings(rep, arg[3]); 
     fi;
     
     while true do
