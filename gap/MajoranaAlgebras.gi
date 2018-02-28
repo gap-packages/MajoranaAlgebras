@@ -708,7 +708,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             
             Sort(y);
             
-            k := Position(unknowns,y);
+            k := Position(unknowns,y); if k = fail then Error("pause"); fi;
             pos := PositionSorted(output!.indices[1], k);
             
             Add(output!.indices[1], k, pos);
@@ -1321,15 +1321,28 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
 InstallGlobalFunction(MajoranaRepresentation,
 
-function(input, index)
+function(arg)
 
-    local   rep, unknowns;  
+    local   rep, unknowns, input, index, algebras;  
 
-    rep :=  MAJORANA_SetUp(input,index);
+    if Size(arg) = 2 then  
+        arg[3] := "AllAxioms";
+        algebras := MAJORANA_DihedralAlgebras;    
+    elif arg[3] = "AllAxioms" then
+        algebras := MAJORANA_DihedralAlgebras;
+    elif arg[3] = "NoAxioms" then 
+        algebras := MAJORANA_DihedralAlgebrasNoAxioms;
+    elif arg[3] = "AxiomM8" then 
+        algebras := MAJORANA_DihedralAlgebrasAxiomM8;
+    fi;
+    
+    input := arg[1]; index := arg[2];
+
+    rep :=  MAJORANA_SetUp(input,index,algebras);
     
     if Size(rep.group) > 120 then 
-        MAJORANA_MaximalSubgps(rep);
-        MAJORANA_AllEmbeddings(rep); 
+        MAJORANA_MaximalSubgps(rep, arg[3]);
+        # MAJORANA_AllEmbeddings(rep, arg[3]); 
     fi;
     
     while true do

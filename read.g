@@ -5,6 +5,12 @@
 #
 #
 
+ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebras.gi");
+
+ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasNoAxioms.gi");
+
+ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasAxiomM8.gi");
+
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/LinAlgPadic.gi");
@@ -22,6 +28,3 @@ ReadPackage( "MajoranaAlgebras", "gap/NClosed.gi");
 ReadPackage( "MajoranaAlgebras", "gap/Orbits.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gi");
-
-ReadPackage( "MajoranaAlgebras", "gap/Pickle.gi");
-

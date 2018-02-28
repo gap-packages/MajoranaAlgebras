@@ -6,10 +6,10 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_MakeVector" );
 
-DeclareGlobalFunction( "MAJORANA_DihedralProducts" );
-
-DeclareGlobalFunction( "MAJORANA_FindVectorPermutation" );
+DeclareGlobalFunction( "MAJORANA_FindPerm" );
 
 DeclareGlobalFunction( "SP_Product" );
 
 DeclareGlobalFunction( "SP_Inverse" );
+
+DeclareGlobalFunction( "MAJORANA_RecordCoords" );

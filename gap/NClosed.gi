@@ -6,23 +6,20 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
     dim := Size(rep.setup.coords);
     
-    unknowns := [];
-    
     for i in [1..dim] do 
         for j in [i..dim] do 
             if rep.setup.pairorbit[i][j] = index then 
-                Add(unknowns, [i,j]);
+                Add(rep.setup.coords, [i,j]);
             fi;
         od;
     od;
-
-    MAJORANA_NClosedExtendPerm(unknowns, rep.setup);
-
-    for x in unknowns do 
-        
-        elts := rep.setup.coords{x};
-        
-        Add(rep.setup.coords, elts);
+    
+    for x in rep.setup.pairconjelts do 
+        MAJORANA_NClosedExtendPerm(x, rep.setup);
+    od;
+    
+    for x in rep.setup.conjelts do 
+        MAJORANA_NClosedExtendPerm(x, rep.setup);
     od;
     
     new_dim := Size(rep.setup.coords);
@@ -41,8 +38,8 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
     MAJORANA_Orbitals(gens, dim, rep.setup);
     
-    pos := Position(unknowns, rep.setup.pairreps[index]);    
-    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[dim + pos]], [[1]], Rationals);
+    pos := Position(rep.setup.coords, rep.setup.pairreps[index]);    
+    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], Rationals);
     
     for i in [1..Size(rep.algebraproducts)] do 
         if rep.algebraproducts[i] <> false then 
@@ -85,52 +82,29 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
 InstallGlobalFunction( MAJORANA_NClosedExtendPerm,
 
-    function(unknowns, setup)
+    function(perm, setup)
     
-    local x, im, sign, pos, i, j, dim;
+    local dim, new_dim, i, im, sign, pos;
     
-    dim := Size(setup.coords);
+    new_dim := Size(setup.coords);
+    dim := Size(perm);
     
-    for i in [1..Size(setup.pairconjelts)] do 
-        if Size(setup.pairconjelts[i]) <= dim + Size(unknowns) then 
-            for x in unknowns do 
-                im := setup.pairconjelts[i]{x};
-                sign := 1;
-                
-                if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
-                if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
-                
-                if im[1] > im[2] then 
-                    im := im{[2,1]};
-                fi;
-                
-                pos := Position(unknowns, im);
-
-                Add(setup.pairconjelts[i], sign*(dim + pos));
-            od;
+    for i in [dim + 1 .. new_dim] do 
+        im := perm{setup.coords[i]};
+        sign := 1;
+            
+        if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
+        if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
+        
+        if im[1] > im[2] then 
+            im := im{[2,1]};
         fi;
-    od;    
-    
-    for i in [1..Size(setup.conjelts)] do 
-        for x in unknowns do 
-            if setup.conjelts[i][1] <> () then 
-                im := setup.conjelts[i]{x};
-                sign := 1;
-                
-                if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
-                if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
-                
-                if im[1] > im[2] then 
-                    im := im{[2,1]};
-                fi;
-                
-                pos := Position(unknowns, im);
+        
+        pos := Position(setup.coords, im);
 
-                Add(setup.conjelts[i], sign*(dim + pos));
-            fi;
-        od;
+        Add(perm, sign*pos);
     od;
-    
+   
     end);
     
 InstallGlobalFunction( NClosedMajoranaRepresentation, 
