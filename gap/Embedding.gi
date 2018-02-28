@@ -7,8 +7,12 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     for x in Positions(rep.algebraproducts, false) do
         if rep.algebraproducts[x] = false then 
     
-            gens := rep.setup.coords{rep.setup.pairreps[x]};
-            gens := List(gens, y -> MAJORANA_Image(rep, rep, IdentityMapping(rep.group), y)) ;
+            gens := ShallowCopy(rep.setup.coords{rep.setup.pairreps[x]});
+            
+            if IsRowVector(gens[1]) then gens[1] := rep.setup.coords{gens[1]}; fi;
+            if IsRowVector(gens[2]) then gens[2] := rep.setup.coords{gens[2]}; fi;
+            
+            gens := Flat(gens);
             
             subgp := Subgroup(rep.group,gens);
             
