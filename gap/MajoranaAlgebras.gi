@@ -1321,7 +1321,10 @@ function(arg)
 
     local   rep, unknowns, input, index, algebras;  
 
-    if Size(arg) = 2 or Size(arg) = 3 and arg[3] = "AllAxioms" then
+    if Size(arg) = 2 then  
+        arg[3] := "AllAxioms";
+        algebras := MAJORANA_DihedralAlgebras;    
+    elif arg[3] = "AllAxioms" then
         algebras := MAJORANA_DihedralAlgebras;
     elif arg[3] = "NoAxioms" then 
         algebras := MAJORANA_DihedralAlgebrasNoAxioms;
@@ -1334,8 +1337,8 @@ function(arg)
     rep :=  MAJORANA_SetUp(input,index,algebras);
     
     if Size(rep.group) > 120 then 
-        MAJORANA_MaximalSubgps(rep);
-        MAJORANA_AllEmbeddings(rep); 
+        MAJORANA_MaximalSubgps(rep, arg[3]);
+        MAJORANA_AllEmbeddings(rep, arg[3]); 
     fi;
     
     while true do

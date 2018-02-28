@@ -1,6 +1,6 @@
 InstallGlobalFunction( "MAJORANA_AllEmbeddings",
 
-    function(rep)
+    function(rep, axioms)
     
     local   unknowns,
             x,
@@ -38,7 +38,7 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
                             Info(   InfoMajorana, 10, 
                                     STRINGIFY("Constructing subrep of ", StructureDescription(subgp) ) );
                             
-                            subrep := MajoranaRepresentation(ex,i);
+                            subrep := MajoranaRepresentation(ex,i,axioms);
                             
                             MAJORANA_EmbedKnownRep(rep, subrep);    
                         fi;    
@@ -64,7 +64,7 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     
 InstallGlobalFunction( "MAJORANA_MaximalSubgps",
 
-    function(rep)
+    function(rep,axioms)
     
     local   max, inv, i, j, ex, subrep;
     
@@ -85,7 +85,7 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
                 Info(   InfoMajorana, 10, 
                         STRINGIFY("Constructing subrep of ", StructureDescription(ex.group) ) );
                 
-                subrep := MajoranaRepresentation(ex,j);
+                subrep := MajoranaRepresentation(ex,j,axioms);
                 
                 MAJORANA_EmbedKnownRep(rep, subrep);    
             fi;    
