@@ -1317,11 +1317,20 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
 InstallGlobalFunction(MajoranaRepresentation,
 
-function(input, index)
+function(arg)
 
-    local   rep, unknowns;  
+    local   rep, unknowns, input, index, algebras;  
 
-    rep :=  MAJORANA_SetUp(input,index);
+    if Size(arg) = 2 or Size(arg) = 3 and arg[3] = "AllAxioms" then
+        algebras := MAJORANA_DihedralAlgebras;
+    elif arg[3] = "NoAxioms" then 
+        algebras := MAJORANA_DihedralAlgebrasNoAxioms;
+    fi;
+    
+    input := arg[1];
+    index := arg[2];
+
+    rep :=  MAJORANA_SetUp(input,index,algebras);
     
     if Size(rep.group) > 120 then 
         MAJORANA_MaximalSubgps(rep);

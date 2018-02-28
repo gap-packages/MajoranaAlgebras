@@ -278,7 +278,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
 InstallGlobalFunction( MAJORANA_SetUp,
     
-    function(input, index)
+    function(input, index, algebras)
     
     local   rep,
             t,              # size of T
@@ -316,7 +316,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     for i in [1..t] do
         for j in [i + 1 .. t] do 
             k := input.pairorbit[i][j];
-            MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep);
+            MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep, algebras);
          od;
     od;
     
@@ -373,7 +373,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
             
             k := rep.setup.pairorbit[i][j];
             
-            subrep := MAJORANA_DihedralAlgebras.(rep.shape[k]);
+            subrep := algebras.(rep.shape[k]);
             gens := GeneratorsOfGroup(subrep.group);
             
             emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
@@ -446,11 +446,11 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     
 InstallGlobalFunction( MAJORANA_RecordCoords,
 
-    function(involutions, shape, rep)
+    function(involutions, shape, rep, algebras)
     
     local subrep, gens, emb, t, i, k, x, im, list;
 
-    subrep := MAJORANA_DihedralAlgebras.(shape);
+    subrep := algebras.(shape);
     
     gens := GeneratorsOfGroup(subrep.group);
     
