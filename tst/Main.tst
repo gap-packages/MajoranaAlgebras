@@ -3,6 +3,7 @@ gap> SetInfoLevel(InfoPerformance,0);;
 gap> LoadPackage("MajoranaAlgebras");;
 gap> LoadPackage("Gauss");;
 gap> SetInfoLevel(InfoMajorana, 0);;
+gap> UnionOfRows := UnionOfRowsOp;;
 gap> ex := A5();;
 gap> rep := MajoranaRepresentation(ex,1);;
 gap> MajoranaAlgebraTest(rep);;
