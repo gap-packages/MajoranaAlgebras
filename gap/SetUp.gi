@@ -488,7 +488,7 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
             pos := rep.setup.poslist[Position(rep.setup.longcoords, x)];
                         
             Append(rep.setup.longcoords, im); 
-            Append(rep.setup.poslist, List(list, y -> pos));
+            Append(rep.setup.poslist, List(im, y -> pos));
         fi;
     od;
     

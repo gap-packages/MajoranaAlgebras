@@ -704,7 +704,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             
             Sort(y);
             
-            k := Position(unknowns,y);
+            k := Position(unknowns,y); if k = fail then Error("pause"); fi;
             pos := PositionSorted(output!.indices[1], k);
             
             Add(output!.indices[1], k, pos);
