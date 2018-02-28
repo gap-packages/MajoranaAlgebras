@@ -312,7 +312,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.setup.conjelts := x.conjelts;
     rep.setup.orbitreps := x.orbitreps;    
-    
+
     for i in [1..t] do
         for j in [i + 1 .. t] do 
             k := input.pairorbit[i][j];
@@ -367,40 +367,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
     od;
 
     # Embed dihedral algebras
-    
-    for i in [1..t] do 
-        for j in [i + 1..t] do 
-            
-            k := rep.setup.pairorbit[i][j];
-            
-            if rep.algebraproducts[k] = false and rep.shape[k] = ['6','A'] then 
-            
-                subrep := algebras.(rep.shape[k]);
-                gens := GeneratorsOfGroup(subrep.group);
-                
-                emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
-                
-                MAJORANA_Embed(rep, subrep, emb);
-            fi;
-        od;
-    od;
-
-    for i in [1..t] do 
-        for j in [i + 1..t] do 
-            
-            k := rep.setup.pairorbit[i][j];
-            
-            if rep.algebraproducts[k] = false and rep.shape[k] = ['4','B'] then 
-            
-                subrep := algebras.(rep.shape[k]);
-                gens := GeneratorsOfGroup(subrep.group);
-                
-                emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
-                
-                MAJORANA_Embed(rep, subrep, emb);
-            fi;
-        od;
-    od;
     
     for i in [1..t] do 
         for j in [i + 1..t] do 
@@ -484,7 +450,7 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
 
     function(involutions, shape, rep, algebras)
     
-    local subrep, gens, emb, t, i, k, x, im, list;
+    local subrep, gens, emb, t, i, k, x, im, list, pos;
 
     subrep := algebras.(shape);
     
@@ -498,27 +464,31 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     for i in [t + 1.. Size(subrep.setup.coords)] do 
         
-        x := subrep.setup.coords[i];
-    
-        im := MAJORANA_Image(rep, subrep, emb, x);
+        list := Positions(subrep.setup.poslist, i);
+        im := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
+        
+        x := First(im, y -> y in rep.setup.longcoords);
             
-        if not im in rep.setup.longcoords then 
-            Add(rep.setup.coords, im);
+        if x = fail then 
+            Add(rep.setup.coords, im[1]);
             k := Size(rep.setup.coords);
             
-            list := Positions(subrep.setup.poslist, i);
-            x := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
+            Append(rep.setup.longcoords, im);
+            Append(rep.setup.poslist, List(im, y -> k));
             
-            Append(rep.setup.longcoords, x);
-            Append(rep.setup.poslist, List(list, y -> k));
-            
-            if shape = ['5', 'A'] then 
+            if shape = "5A" then 
                 list := Positions(subrep.setup.poslist, -i);
                 x := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
                 
                 Append(rep.setup.longcoords, x);
                 Append(rep.setup.poslist, List(list, y -> -k));
-            fi;             
+            fi;
+        elif shape in ["6A","4B"] then
+            im := Filtered(im, y -> not y in rep.setup.longcoords);
+            pos := rep.setup.poslist[Position(rep.setup.longcoords, x)];
+                        
+            Append(rep.setup.longcoords, im); 
+            Append(rep.setup.poslist, List(list, y -> pos));
         fi;
     od;
     
