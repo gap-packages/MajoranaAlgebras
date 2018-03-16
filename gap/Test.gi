@@ -200,8 +200,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                     x := MAJORANA_InnerProduct(u, v, innerproducts, setup);
                     
                     if (x <> false) and (x <> 0) then 
-                    
-                        Error("Orthog");
+
                         Add(errorortho, [i,0,a,u,v]);
                     fi;
                 od;
@@ -220,7 +219,6 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                             x := MAJORANA_InnerProduct(v, w, innerproducts, setup);
                             
                             if (x <> false) and (x <> 0) then 
-                                Error("Orthog");
                                 Add(errorortho, [i,a,b,v,w]);
                             fi;
                         od;
@@ -228,6 +226,9 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                 od;
             od;
         od;
+        
+        if Size(errorortho) > 0 then Error("Orthog"); fi;
+        if Size(errorortho) > 0 then Error("Orthog"); fi;
         
         return errorortho;
         
@@ -244,6 +245,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
     local   ErrorM1,    # setup of indices which do not obey Fusion
             j,          # loop over algebra products
             k,          # loop over setup.coords
+            l,
             p,          # second product
             dim,        # size of setup.coords
             x,          # first inner product
@@ -259,23 +261,25 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
     for j in [1..Size(algebraproducts)] do
         if algebraproducts[j] <> false then
             for k in [1..dim] do 
-            
-                u := SparseMatrix(1, dim, [[setup.pairreps[j][1]]], [[1]], Rationals);
-                v := SparseMatrix(1, dim, [[setup.pairreps[j][2]]], [[1]], Rationals);
-                w := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
-                
-                p := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
-                
-                if p <> false then
-                    x := MAJORANA_InnerProduct(u,p,innerproducts, setup);
-                    y := MAJORANA_InnerProduct(algebraproducts[j],w,innerproducts, setup);
+                for l in [setup.pairreps[j], Reversed(setup.pairreps[j])] do  
                     
-                    if x <> false and y <> false and x <> y then 
-                        # Error("Axiom M1");
-                        Add(ErrorM1,[j,k]);
+                    u := SparseMatrix(1, dim, [[l[1]]], [[1]], Rationals);
+                    v := SparseMatrix(1, dim, [[l[2]]], [[1]], Rationals);
+                    w := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
+                    
+                    p := MAJORANA_AlgebraProduct(v,w,algebraproducts,setup);
+                    
+                    if p <> false then
+                        x := MAJORANA_InnerProduct(u,p,innerproducts, setup);
+                        y := MAJORANA_InnerProduct(algebraproducts[j],w,innerproducts, setup);
+                        
+                        if x <> false and y <> false and x <> y then 
+                            # Error("Axiom M1");
+                            Add(ErrorM1,[l[1], l[2] ,k]);
+                        fi;
+                        
                     fi;
-                    
-                fi;
+                od;
             od;
         fi;
     od;

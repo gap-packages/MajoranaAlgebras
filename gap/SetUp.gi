@@ -316,7 +316,18 @@ InstallGlobalFunction( MAJORANA_SetUp,
     for i in [1..t] do
         for j in [i + 1 .. t] do 
             k := input.pairorbit[i][j];
-            MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep, algebras);
+            if rep.shape[k] in ["4B", "6A"] then 
+                MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep, algebras);
+            fi;
+         od;
+    od;
+    
+    for i in [1..t] do
+        for j in [i + 1 .. t] do 
+            k := input.pairorbit[i][j];
+            if not rep.shape[k] in ["4B", "6A"] then 
+                MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep, algebras);
+            fi;
          od;
     od;
     

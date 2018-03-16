@@ -130,10 +130,11 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         new[2] := MAJORANA_AddEvec(new[2], z - (1/32)*u*y);
         new[1] := MAJORANA_AddEvec(new[1], x + (3/32)*u*y - 4*z); 
     else
-        new[pos] := MAJORANA_AddEvec(new[pos],x);
-    fi;
+        new[pos] := MAJORANA_AddEvec(new[pos],x);  
+    fi;    
     
     end );
+    
 
 # finds new eigenvectors using the fusion rules 
 
@@ -210,7 +211,7 @@ function(rep)
             for j in [1..3] do 
                 rep.evecs[i][j] := MAJORANA_BasisOfEvecs(new[j]);
             od;
-        fi;
+        fi;        
     od;
     
     end );     
@@ -573,6 +574,8 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                         sum := sum - z[2];
                         
                         if row!.indices[1] <> [] then 
+                            sum := sum*(1/row!.entries[1][1]);
+                            row := row*(1/row!.entries[1][1]);
                             if not _IsRowOfSparseMatrix(mat, row) then
                                 mat := UnionOfRows(mat, row);
                                 vec := UnionOfRows(vec, sum);
@@ -583,7 +586,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
             fi;
         od;
         
-        if Nrows(mat) > Ncols(mat) then 
+        if Nrows(mat) > Ncols(mat) then
         
             x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, rep.innerproducts);
             
@@ -594,7 +597,6 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                 return;
             fi;
         fi;
-        
     od;
     
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
@@ -708,7 +710,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             
             Sort(y);
             
-            k := Position(unknowns,y); if k = fail then Error("pause"); fi;
+            k := Position(unknowns,y); 
             pos := PositionSorted(output!.indices[1], k);
             
             Add(output!.indices[1], k, pos);
@@ -834,10 +836,10 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 od;
             od;
         od;
-    od;
-    
+    od;   
+
     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
-    
+
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
                             
     if unknowns = [] then return true; fi;
@@ -876,7 +878,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             fi;
         fi;
     od;
-    
+        
     MAJORANA_SolutionAlgProducts(new_mat,new_vec,unknowns, rep.algebraproducts, rep.setup);
     
     end );
@@ -1136,7 +1138,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     if y < 0 then sign := -1; y := -y; fi;
     
     if algebraproducts[y] = false then 
-        algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g);  
+        algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g); 
     fi; 
     
     end );
@@ -1144,7 +1146,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
 InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
 
     function(mat, vec, unknowns, innerproducts)
-
+        
     local   unsolved, 
             i, j, 
             elm,
