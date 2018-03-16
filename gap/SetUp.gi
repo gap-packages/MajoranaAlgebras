@@ -469,11 +469,9 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, involutions);
     
-    t := Size(subrep.involutions);
-    
     # Add extra basis vectors
     
-    for i in [t + 1.. Size(subrep.setup.coords)] do 
+    for i in [1.. Size(subrep.setup.coords)] do 
         
         list := Positions(subrep.setup.poslist, i);
         im := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
