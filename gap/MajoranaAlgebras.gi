@@ -198,7 +198,7 @@ function(rep)
                 od;
                 
                 for j in [1..3] do 
-                    if Nrows(new[j]) > dim then                             
+                    if Nrows(new[j]) > dim then
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
                     fi;
                 od;
@@ -208,7 +208,7 @@ function(rep)
                 fi;
             od;
         
-            for j in [1..3] do 
+            for j in [1..3] do
                 rep.evecs[i][j] := MAJORANA_BasisOfEvecs(new[j]);
             od;
         fi;        
@@ -506,7 +506,7 @@ function(innerproducts, algebraproducts, evecs, setup)
                         
                     elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(mat, x[1]) then
                         mat := UnionOfRows(mat, x[1]);
-                        vec := UnionOfRows(vec, x[2]);               
+                        vec := UnionOfRows(vec, x[2]);
                     fi;                
                 od;
             od;
@@ -538,7 +538,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     
     dim := Size(rep.setup.coords);
     unknowns := Positions(rep.innerproducts, false);
-    
+
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
     vec := SparseMatrix(0, 1, [], [], Rationals);
     
@@ -578,7 +578,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                             row := row*(1/row!.entries[1][1]);
                             if not _IsRowOfSparseMatrix(mat, row) then
                                 mat := UnionOfRows(mat, row);
-                                vec := UnionOfRows(vec, sum);
+                                vec := UnionOfRows(vec,sum);
                             fi;
                         fi;
                     fi;     
@@ -1256,7 +1256,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     local   sol,    # solution of system
             i,      # loop over <unknowns>
             x,      # element of <unknowns> 
-            nonzero;   
+            nonzero;
 
     sol := MAJORANA_SolutionMatVecs(mat,vec);                   
         
