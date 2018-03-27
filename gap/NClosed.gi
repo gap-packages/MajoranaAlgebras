@@ -8,7 +8,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
     for i in [1..dim] do 
         for j in [i..dim] do 
-            if rep.setup.pairorbit[i][j] = index then 
+            if rep.setup.pairorbit[i][j] in [index, -index] then 
                 Add(rep.setup.coords, [i,j]);
             fi;
         od;
