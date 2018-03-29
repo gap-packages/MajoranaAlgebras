@@ -19,5 +19,5 @@ gap> NClosedMajoranaRepresentation(rep);;
 gap> MajoranaAlgebraTest(rep);;
 gap> ex := PSL211();;
 gap> rep := MajoranaRepresentation(ex,1);;
-gap> MAJORANA_TestAxiomM1(rep.innerproducts, rep.algebraproducts, rep.setup);;
+gap> MAJORANA_TestAxiomM1(rep);;
 gap> ex := A7();;
