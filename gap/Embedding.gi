@@ -59,12 +59,11 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
     
     local   max, inv, i, j, ex, subrep;
     
-    max := ConjugacyClassesMaximalSubgroups(rep.group);
-    max := List(max, Representative);
+    max := MaximalSubgroupClassReps(rep.group);
     max := Filtered(max, x -> Size(x) > 12);
     
     inv := List(max, x -> Intersection(AsList(x), rep.involutions));
-    inv := Filtered(inv, x -> x <> []);
+    inv := Filtered(DuplicateFreeList(inv), x -> x <> []);
     
     max := List(inv, Group);
     
