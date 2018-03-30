@@ -456,7 +456,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
 
 InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 
-function(innerproducts, algebraproducts, evecs, setup)
+function(rep)
 
     local   i,          # loop over representatives
             j,
@@ -470,39 +470,38 @@ function(innerproducts, algebraproducts, evecs, setup)
             y,          # result of SolutionAlgProducts
             dim;        # size of setup.coords
     
-    dim := Size(setup.coords);
+    dim := Size(rep.setup.coords);
  
-    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(algebraproducts,setup);
+    unknowns := MAJORANA_ExtractUnknownAlgebraProducts(rep.algebraproducts, rep.setup);
     
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
     vec := SparseMatrix(0, dim, [], [], Rationals);
     
     Info( InfoMajorana, 50, "Building eigenvector unknowns");
     
-    for i in setup.orbitreps do 
+    for i in rep.setup.orbitreps do 
 
         if ForAny(unknowns, x -> i in x) then 
+        
+            u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
          
             for ev in [1..3] do 
-                
-                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-                
-                for j in [1..Nrows(evecs[i][ev])] do
+                for j in [1..Nrows(rep.evecs[i][ev])] do
                     
-                    v := CertainRows(evecs[i][ev], [j]);
+                    v := CertainRows(rep.evecs[i][ev], [j]);
                     
-                    x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                    x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
                     
                     x[2] := x[2] + MAJORANA_FusionTable[1][ev + 1]*v;
                     
                     if Size(x[1]!.indices[1]) = 1 then 
                         y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
-                                                        algebraproducts,
-                                                        setup);
+                                                        rep.algebraproducts,
+                                                        rep.setup);
+                                                        
+                        if y.unknowns = [] then return rec( unknowns := [] ); fi;
                                                         
                         mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                                                        
-                        if unknowns = [] then return; fi;
                         
                     elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(mat, x[1]) then
                         mat := UnionOfRows(mat, x[1]);
@@ -513,7 +512,7 @@ function(innerproducts, algebraproducts, evecs, setup)
         fi;
     od;
 
-    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+    y := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, rep.algebraproducts, rep.setup);
             
     return y;
     
@@ -744,18 +743,18 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     dim := Size(rep.setup.coords);
     
-    x := MAJORANA_EigenvectorsAlgebraUnknowns(rep.innerproducts, rep.algebraproducts, rep.evecs, rep.setup);
+    x := MAJORANA_EigenvectorsAlgebraUnknowns(rep);
+    
+    if x.unknowns = [] then return true; fi;
 
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-    
-    if unknowns = [] then return true; fi;
     
     x := MAJORANA_NullspaceUnknowns(    mat, vec, unknowns, rep.algebraproducts, 
                                         rep.setup, rep.nullspace, rep.group);
     
+    if x.unknowns = [] then return true; fi;
+    
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-
-    if unknowns = [] then return true; fi;
     
     Info(   InfoMajorana, 50, "Building resurrection");
     
@@ -917,8 +916,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     function(mat, vec, unknowns, algebraproducts, setup, nullspace, group)
     
-    local   i,j, gens,
-            list,
+    local   i, j, gens,
             u,
             v,
             x,
@@ -941,9 +939,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     for i in x.orbitreps do 
     
-        list := Filtered(unknowns, x -> i in x);
-    
-        if list <> [] then 
+        if ForAny(unknowns, x -> i in x) then 
         
             u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
@@ -958,14 +954,10 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                     y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
                                                         algebraproducts,
                                                         setup);
-                                                        
+                    
+                    if y.unknowns = [] then return rec( unknowns := []); fi;
+                    
                     mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                                                        
-                    if unknowns = [] then 
-                        return rec( mat := SparseMatrix(0, 0, [], [], Rationals),
-                                    vec := SparseMatrix(0, 0, [], [], Rationals),
-                                    unknowns := []); 
-                    fi;
                     
                 elif x[1]!.indices[1] <> [] then 
                     if not _IsRowOfSparseMatrix(mat, x[1]) then
@@ -978,11 +970,9 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             if Nrows(mat) > 8000 then 
                 y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
                 
+                if y.unknowns = [] then return rec( unknowns := []); fi;
+                
                 mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-               
-                if unknowns = [] then 
-                    return rec( mat := mat, vec := vec, unknowns := unknowns);
-                fi;
             fi;
         fi;
     od;
