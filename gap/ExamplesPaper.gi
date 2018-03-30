@@ -117,7 +117,7 @@ BindGlobal("3S6",function() # Shape 1
     
     end );
 
-BindGlobal("S4S3A7, function()  # Shape 8 
+BindGlobal("S4S3A7", function()  # Shape 8 
 
     local G, T;
     
