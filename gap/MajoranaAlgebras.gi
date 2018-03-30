@@ -551,8 +551,8 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     
                     if y <> false then 
 
-                        z := MAJORANA_SeparateInnerProduct(u, x, unknowns, rep.innerproducts, rep.setup); 
-                        z := z - MAJORANA_SeparateInnerProduct(y, w, unknowns, rep.innerproducts, rep.setup);
+                        z := MAJORANA_SeparateInnerProduct(w, x, unknowns, rep.innerproducts, rep.setup); 
+                        z := z - MAJORANA_SeparateInnerProduct(y, u, unknowns, rep.innerproducts, rep.setup);
                         
                         if z[1]!.indices[1] <> [] then 
                             z := z*(1/z[1]!.entries[1][1]);
