@@ -522,12 +522,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(rep)
     
-    local   dim, mat, vec,
-            i, j, k,
-            u, v, w,
-            x, y, z,
-            row, sum, pos,
-            unknowns;
+    local   dim, mat, vec, i, j, k, u, v, w, x, y, z, unknowns;
             
     if not false in rep.innerproducts then 
         return;
@@ -542,60 +537,34 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     vec := SparseMatrix(0, 1, [], [], Rationals);
     
     for i in [1..dim] do 
-        
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-    
-        for j in [1..Size(rep.algebraproducts)] do 
+        for j in [1..dim] do
+            v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
             
-            if rep.algebraproducts[j] <> false then 
+            x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
             
-                pos := rep.setup.pairreps[j];
+            if x <> false then 
+                for k in [1..dim] do 
+                    w := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
                 
-                for k in [pos,Reversed(pos)] do
-                
-                    v := SparseMatrix(1, dim, [[k[1]]], [[1]], Rationals); 
-                    w := SparseMatrix(1, dim, [[k[2]]], [[1]], Rationals); 
-                
-                    row := SparseZeroMatrix(1, Size(unknowns), Rationals);;
-                    sum := SparseZeroMatrix(1, 1, Rationals);
-                
-                    x := MAJORANA_SeparateInnerProduct(u, rep.algebraproducts[j], unknowns, rep.innerproducts, rep.setup);
-                    
-                    row := row + x[1];
-                    sum := sum + x[2];
-                
-                    y := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+                    y := MAJORANA_AlgebraProduct(v, w, rep.algebraproducts, rep.setup);
                     
                     if y <> false then 
-                        z := MAJORANA_SeparateInnerProduct(y, w, unknowns, rep.innerproducts, rep.setup);
+
+                        z := MAJORANA_SeparateInnerProduct(u, x, unknowns, rep.innerproducts, rep.setup); 
+                        z := z - MAJORANA_SeparateInnerProduct(y, w, unknowns, rep.innerproducts, rep.setup);
                         
-                        row := row - z[1];
-                        sum := sum - z[2];
-                        
-                        if row!.indices[1] <> [] then 
-                            sum := sum*(1/row!.entries[1][1]);
-                            row := row*(1/row!.entries[1][1]);
-                            if not _IsRowOfSparseMatrix(mat, row) then
-                                mat := UnionOfRows(mat, row);
-                                vec := UnionOfRows(vec,sum);
+                        if z[1]!.indices[1] <> [] then 
+                            z := z*(1/z[1]!.entries[1][1]);
+                            if not _IsRowOfSparseMatrix(mat, z[1]) then
+                                mat := UnionOfRows(mat, z[1]);
+                                vec := UnionOfRows(vec, z[2]);
                             fi;
                         fi;
                     fi;     
                 od;
             fi;
         od;
-        
-        if Nrows(mat) > Ncols(mat) then
-        
-            x := MAJORANA_SolutionInnerProducts(mat, vec, unknowns, rep.innerproducts);
-            
-            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-            
-            if unknowns = [] then 
-                rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
-                return;
-            fi;
-        fi;
     od;
     
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
@@ -763,6 +732,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         
             evecs_a := UnionOfRows(rep.evecs[i][evals[1]], rep.nullspace);
             evecs_b := UnionOfRows(rep.evecs[i][evals[2]], rep.nullspace);
+            
+            evecs_a := rep.evecs[i][evals[1]];
+            evecs_b := rep.evecs[i][evals[2]];
         
             u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
