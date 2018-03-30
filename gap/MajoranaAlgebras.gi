@@ -1090,6 +1090,10 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     
         while switch = true do 
         
+            if unknowns = [] then 
+                return rec( mat := mat, vec := vec, unknowns := unknowns );
+            fi;
+        
             switch := false;
 
             for i in [1..Nrows(mat)] do 
@@ -1314,10 +1318,10 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     function(rep)
                                 
     MAJORANA_AxiomM1(rep);
-                                    
-    MAJORANA_Fusion(rep);
             
     MAJORANA_UnknownAlgebraProducts(rep);
+    
+    MAJORANA_Fusion(rep);
 
     end);
     
