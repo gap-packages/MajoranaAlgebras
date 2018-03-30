@@ -1311,6 +1311,8 @@ InstallGlobalFunction(MAJORANA_MainLoop,
             
     MAJORANA_UnknownAlgebraProducts(rep);
     
+    if not false in rep.algebraproducts then return; fi;
+    
     MAJORANA_Fusion(rep);
     
     MAJORANA_UnknownAlgebraProducts(rep);
