@@ -522,7 +522,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     function(rep)
     
-    local   dim, mat, vec, i, j, k, u, v, w, x, y, z, unknowns;
+    local   dim, mat, vec, i, j, k, u, v, w, x, y, z, eq, unknowns;
             
     if not false in rep.innerproducts then 
         return;
@@ -551,14 +551,26 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     
                     if y <> false then 
 
-                        z := MAJORANA_SeparateInnerProduct(w, x, unknowns, rep.innerproducts, rep.setup); 
-                        z := z - MAJORANA_SeparateInnerProduct(y, u, unknowns, rep.innerproducts, rep.setup);
+                        eq := MAJORANA_SeparateInnerProduct(w, x, unknowns, rep.innerproducts, rep.setup); 
+                        eq := eq - MAJORANA_SeparateInnerProduct(y, u, unknowns, rep.innerproducts, rep.setup);
                         
-                        if z[1]!.indices[1] <> [] then 
-                            z := z*(1/z[1]!.entries[1][1]);
-                            if not _IsRowOfSparseMatrix(mat, z[1]) then
-                                mat := UnionOfRows(mat, z[1]);
-                                vec := UnionOfRows(vec, z[2]);
+                        if Size(eq[1]!.indices[1]) = 1 then 
+                            z := MAJORANA_SingleInnerSolution(  eq, mat, vec, 
+                                                                unknowns, 
+                                                                rep.innerproducts);
+                            
+                            mat := z.mat; vec := z.vec; unknowns := z.unknowns;
+                            
+                            if unknowns = [] then 
+                                MAJORANA_CheckNullSpace(rep); return;
+                            fi;
+                                
+                            
+                        elif eq[1]!.indices[1] <> [] then 
+                            eq := eq*(1/eq[1]!.entries[1][1]);
+                            if not _IsRowOfSparseMatrix(mat, eq[1]) then
+                                mat := UnionOfRows(mat, eq[1]);
+                                vec := UnionOfRows(vec, eq[2]);
                             fi;
                         fi;
                     fi;     
@@ -569,7 +581,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
-    rep.nullspace := MAJORANA_CheckNullSpace(rep.innerproducts, rep.setup);
+    MAJORANA_CheckNullSpace(rep);
 
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
     
@@ -848,7 +860,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         fi;
     od;
         
-    MAJORANA_SolutionAlgProducts(new_mat,new_vec,unknowns, rep.algebraproducts, rep.setup);
+    x := MAJORANA_SolutionAlgProducts(new_mat,new_vec,unknowns, rep.algebraproducts, rep.setup);
+    
+    return rec(mat := x.mat, vec := x.vec, unknowns := x.unknowns);
     
     end );
 
@@ -1113,10 +1127,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
 
     function(mat, vec, unknowns, innerproducts)
         
-    local   unsolved, 
-            i, j, 
-            elm,
-            prod;
+    local   unsolved, i, j, elm, prod, nonzero;
 
     unsolved := [];
     
@@ -1138,6 +1149,11 @@ InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
         
     mat := CertainColumns(mat, unsolved);
     unknowns := unknowns{unsolved};
+    
+    nonzero := Filtered([1..Nrows(mat)], j -> mat!.indices[j] <> []);
+    
+    mat := CertainRows(mat, nonzero);
+    vec := CertainRows(vec, nonzero);
     
     return rec( mat := mat, vec := vec, unknowns := unknowns);
                 
@@ -1215,6 +1231,25 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         
     end );
     
+InstallGlobalFunction( MAJORANA_SingleInnerSolution, 
+
+    function(eq, mat, vec, unknowns, innerproducts)
+    
+    local x;
+    
+    x := unknowns[eq[1]!.indices[1][1]];
+    
+    if eq[2]!.entries[1] = [] then 
+        innerproducts[x] := 0;
+    else
+        innerproducts[x] := eq[2]!.entries[1][1]/eq[1]!.entries[1][1];
+    fi;
+    
+    return MAJORANA_RemoveKnownInnProducts(mat, vec, unknowns, innerproducts);
+    
+    end );
+    
+    
 InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
 
     function( mat, vec, unknowns, innerproducts)
@@ -1237,41 +1272,36 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
         fi;
     od;
     
-    x := MAJORANA_RemoveKnownInnProducts(   sol.mat, sol.vec,
-                                            unknowns, innerproducts );
-                                                    
-    nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
-    
-    x.mat := CertainRows(x.mat, nonzero);
-    x.vec := CertainRows(x.vec, nonzero);
-                                        
-    return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns );
+    return MAJORANA_RemoveKnownInnProducts( sol.mat, sol.vec, unknowns, innerproducts);
     
     end );
     
 InstallGlobalFunction(MAJORANA_CheckNullSpace,
 
-    function(innerproducts,setup)
+    function(rep)
     
     local   dim, gram, null, unknowns, list;
     
-    dim := Size(setup.coords);
+    dim := Size(rep.setup.coords);
     
-    if not false in innerproducts then 
-        gram := MAJORANA_FillGramMatrix([1..dim], innerproducts, setup);
+    if not false in rep.innerproducts then 
+        gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
         null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
-        return null;
+        rep.nullspace := null;
     fi; 
     
-    unknowns := Positions(innerproducts, false);
-    list := Filtered([1..dim], i -> Intersection(setup.pairorbit[i], unknowns) = []);
+    unknowns := Positions(rep.innerproducts, false);
+    list := Filtered([1..dim], i -> Intersection(rep.setup.pairorbit[i], unknowns) = []);
     
-    gram := MAJORANA_FillGramMatrix(list, innerproducts, setup);
+    gram := MAJORANA_FillGramMatrix(list, rep.innerproducts, rep.setup);
     null := KernelMat(gram).relations;;
     null!.ncols := dim;
     null!.indices := List(null!.indices, x -> List(x,  i -> list[i]));
     
-    return null;
+    if Nrows(null) > 0 then 
+        rep.nullspace := UnionOfRows(rep.nullspace, null);
+        rep.nullspace := MAJORANA_BasisOfEvecs(rep.nullspace);
+    fi;
     
     end );
 
@@ -1283,11 +1313,11 @@ InstallGlobalFunction(MAJORANA_MainLoop,
             
     MAJORANA_UnknownAlgebraProducts(rep);
     
-    if not false in rep.algebraproducts then return; fi;
+    if not false in rep.algebraproducts then return true; fi;
     
     MAJORANA_Fusion(rep);
     
-    MAJORANA_UnknownAlgebraProducts(rep);
+    return MAJORANA_UnknownAlgebraProducts(rep);
 
     end);
     
@@ -1295,7 +1325,7 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(arg)
 
-    local   rep, unknowns, input, index, algebras;  
+    local   rep, unknowns, input, index, algebras, main;  
 
     if Size(arg) = 2 then  
         arg[3] := "AllAxioms";
@@ -1321,7 +1351,7 @@ function(arg)
         
         unknowns := Positions(rep.algebraproducts, false);
                                 
-        MAJORANA_MainLoop(rep);
+        main := MAJORANA_MainLoop(rep);
         
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
@@ -1331,6 +1361,7 @@ function(arg)
             return rep;
         elif ForAll(rep.algebraproducts{unknowns}, x -> x = false) then 
             Info( InfoMajorana, 10, "Fail" );
+            rep.mat := main.mat; rep.vec := main.vec; rep.unknowns := main.unknowns;
             return rep;
         fi;
     od;
