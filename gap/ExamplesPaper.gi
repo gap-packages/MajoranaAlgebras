@@ -6,7 +6,7 @@
 # the associated representation is 3-closed
 #
 
-BindGlobal("S4T1", function() # Shapes 1, 2, 3, 4
+BindGlobal("S4T1", function() # Shapes 1, 3, 5*, 8
 
     local G, T;
     
