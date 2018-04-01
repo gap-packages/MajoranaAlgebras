@@ -13,6 +13,7 @@ ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasAxiomM8.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gi");
 
+ReadPackage( "MajoranaAlgebras", "gap/PadicHelpers.gi");
 ReadPackage( "MajoranaAlgebras", "gap/LinAlgPadic.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Test.gi");
