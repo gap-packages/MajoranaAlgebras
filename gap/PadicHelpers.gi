@@ -39,8 +39,10 @@ PadicDenominator := function(number, max_iter)
     Info(InfoMajoranaPadics, 10, " n: ", number, "\n");
 
     is_int := function(n)
+        local negn;
+        negn := -n;
         return (n![2] < thresh) or
-               ((-n)![2] < thresh);
+               (negn![2] < thresh);
     end;
 
     if is_int(number) then
