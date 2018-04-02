@@ -536,46 +536,43 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
     vec := SparseMatrix(0, 1, [], [], Rationals);
     
-    for i in [1..dim] do 
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-        for j in [1..dim] do
-            v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
+    for i in Filtered([1..Size(rep.algebraproducts)], x -> rep.algebraproducts[x] <> false) do 
+        x := rep.algebraproducts[i];
+        for j in [rep.setup.pairreps[i], Reversed(rep.setup.pairreps[i])] do 
             
-            x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
-            
-            if x <> false then 
-                for k in [1..dim] do 
-                    w := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
+            u := SparseMatrix(1, dim, [[ j[1] ]], [[ 1 ]], Rationals);
+            v := SparseMatrix(1, dim, [[ j[2] ]], [[ 1 ]], Rationals);
                 
-                    y := MAJORANA_AlgebraProduct(v, w, rep.algebraproducts, rep.setup);
+            for k in [1..dim] do
+            
+                w := SparseMatrix(1, dim, [[ k ]], [[ 1 ]], Rationals);
                     
-                    if y <> false then 
+                y := MAJORANA_AlgebraProduct(v, w, rep.algebraproducts, rep.setup);
+            
+                if y <> false then 
 
-                        eq := MAJORANA_SeparateInnerProduct(w, x, unknowns, rep.innerproducts, rep.setup); 
-                        eq := eq - MAJORANA_SeparateInnerProduct(y, u, unknowns, rep.innerproducts, rep.setup);
+                    eq := MAJORANA_SeparateInnerProduct(w, x, unknowns, rep.innerproducts, rep.setup); 
+                    eq := eq - MAJORANA_SeparateInnerProduct(y, u, unknowns, rep.innerproducts, rep.setup);
+                    
+                    if Size(eq[1]!.indices[1]) = 1 then 
+                        z := MAJORANA_SingleInnerSolution(  eq, mat, vec, 
+                                                            unknowns, 
+                                                            rep.innerproducts);
                         
-                        if Size(eq[1]!.indices[1]) = 1 then 
-                            z := MAJORANA_SingleInnerSolution(  eq, mat, vec, 
-                                                                unknowns, 
-                                                                rep.innerproducts);
-                            
-                            mat := z.mat; vec := z.vec; unknowns := z.unknowns;
-                            
-                            if unknowns = [] then 
-                                MAJORANA_CheckNullSpace(rep); return;
-                            fi;
-                                
-                            
-                        elif eq[1]!.indices[1] <> [] then 
-                            eq := eq*(1/eq[1]!.entries[1][1]);
-                            if not _IsRowOfSparseMatrix(mat, eq[1]) then
-                                mat := UnionOfRows(mat, eq[1]);
-                                vec := UnionOfRows(vec, eq[2]);
-                            fi;
+                        mat := z.mat; vec := z.vec; unknowns := z.unknowns;
+                        
+                        if unknowns = [] then 
+                            MAJORANA_CheckNullSpace(rep); return;
+                        fi;
+                    elif eq[1]!.indices[1] <> [] then 
+                        eq := eq*(1/eq[1]!.entries[1][1]);
+                        if not _IsRowOfSparseMatrix(mat, eq[1]) then
+                            mat := UnionOfRows(mat, eq[1]);
+                            vec := UnionOfRows(vec, eq[2]);
                         fi;
                     fi;     
-                od;
-            fi;
+                fi;
+            od;
         od;
     od;
     
@@ -827,10 +824,10 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     Info(   InfoMajorana, 50, "All conjugates") ;
     
-    x := EchelonMatTransformationDestructive(CertainColumns(mat, [dim, dim - 1..1]));
+    #x := EchelonMatTransformationDestructive(CertainColumns(mat, [dim, dim - 1..1]));
     
-    mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
-    vec := x.coeffs*vec;
+    #mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
+    #vec := x.coeffs*vec;
     
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);
