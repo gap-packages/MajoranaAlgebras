@@ -1295,6 +1295,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
         gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
         null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
         rep.nullspace := null;
+        return;
     fi; 
     
     unknowns := Positions(rep.innerproducts, false);
