@@ -60,10 +60,10 @@ function(system)
 
     system.unsolvable_variables := Difference([1..system.number_variables], system.solvable_variables);
     system.solvable_rows := system.echelon.heads{ system.solvable_variables };
+    system.unsolvable_rows := Difference([1..system.number_equations], system.solvable_rows);
     return system;
 end );
 
-# Solve for multiple right-hand-sides
 InstallGlobalFunction(MAJORANA_SetupMatVecsSystem_Padic,
 function(mat, vecs, p, precision, max_iter)
     local system, mmults, vmults, lcm;
@@ -203,37 +203,32 @@ function(system, vi)
                      "found denominator: ", denom);
 
                 if denom = fail then
-                    Info( InfoMajoranaLinearEq, 10
-                          , "failed to find denominator trying to increase p-adic precision");
+                    Info( InfoMajoranaLinearEq, 10,
+                          "failed to find denominator trying to increase p-adic precision");
+                    Info( InfoMajoranaLinearEq, 10,
+                          "failed to solve rhs ", vi);
+                    Info( InfoMajoranaLinearEq, 10,
+                          "rhs not zero: ", system.rhns, " ", residue{ system.rhns } );
 
-                    Print("failed to solve rhs ", vi, "\n");
-                    system.rhns := Intersection( system.solvable_rows,
-                                                 PositionsProperty(residue, x -> not IsZero(x)));
-                    Print("rhs not zero: ", system.rhns, " ", residue{ system.rhns },
-                          "\n");
-
-                    Error("");
+                    Error("Failed to compute denominator");
                     # FIXME: adjust system, i.e. we could increase precision?
-                    #        no need to recurse, then, just continue...
                     # MAJORANA_SolutionIntMatVec_Padic(system);
-                    system.int_solution := soln;
-                    return true;
+                    return false;
                 elif denom = 1 then
-                    Info(InfoMajoranaLinearEq, 5,
-                         "denominator 1 should not happen, trying to solve using GAP's builtin method");
                     Error("Denominator 1 occurred. This should not happen.");
                     return false;
                 else
                     Info(InfoMajoranaLinearEq, 5,
-                         "solving system after multiplying b by denominator.");
+                         "solving system after multiplying rhs by denominator.");
 
                     system.solution_denominator := system.solution_denominator * denom;
-
-                    Print("failed to solve rhs ", vi, "\n");
                     system.rhns := Intersection( system.solvable_rows,
                                                  PositionsProperty(residue, x -> not IsZero(x)));
-                    Print("rhs not zero: ", system.rhns, " ", residue{ system.rhns },
-                          "\n");
+
+                    Info(InfoMajoranaLinearEq, 5,
+                         "failed to solve rhs ", vi);
+                    Info(InfoMajoranaLinearEq, 5,
+                         "rhs not zero: ", system.rhns, " ", residue{ system.rhns });
 
                     # try again with new denominator
                     MAJORANA_SolutionIntMatVec_Padic(system, vi);
@@ -244,7 +239,7 @@ function(system, vi)
     od;
 end );
 
-# FIXME: This has to be compatible with MAJORANA_SolutionMatVecs 
+# FIXME: This has to be compatible with MAJORANA_SolutionMatVecs
 InstallGlobalFunction( MAJORANA_SolutionMatVecs_Padic,
 function(mat, vecs)
     local vi, system, res;
@@ -253,11 +248,19 @@ function(mat, vecs)
     res.sol := [];
     system := MAJORANA_SetupMatVecsSystem_Padic( mat, vecs
                                                  , MAJORANA_Padic_Prime
-                                                 , MAJORANA_Padic_Precision );
+                                                 , MAJORANA_Padic_Precision
+                                                 , MAJORANA_Padic_Iterations );
     for vi in [1..Length(system.transposed_vecs)] do
         MAJORANA_SolutionIntMatVec_Padic(system, vi);
         Add(res.sol, system.int_solution / system.solution_denominator );
     od;
 
+    res.sol := TransposedMatMutable(res.sol);
+    res.sol{ system.unsolvable_variables } := ListWithIdenticalEntries(Length(system.unsolvable_variables), fail);
+    res.mat := system.mat{ system.unsolvable_rows };
+    res.vec := system.vecs{ system.unsolvable_rows };
+
+    # Debugging
+    res.system := system;
     return res;
 end);

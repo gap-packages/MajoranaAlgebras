@@ -15,8 +15,10 @@ DeclareGlobalFunction( "MAJORANA_SolutionIntMatVec_Padic" );
 # solve for a list of vectors (rationals)
 DeclareGlobalFunction( "MAJORANA_SolutionMatVecs_Padic" );
 
+# Some default values, used in MAJORANA_SolutionMatVecs_Padic
 BindGlobal( "MAJORANA_Padic_Prime", 191 );
 BindGlobal( "MAJORANA_Padic_Precision", 100 );
+BindGlobal( "MAJORANA_Padic_Iterations", 100 );
 
 # FIXME: Todo?
 # DeclareGlobalFunction( "MAJORANA_NullspaceIntMat_Padic" );
