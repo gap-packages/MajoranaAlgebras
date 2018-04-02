@@ -49,17 +49,21 @@ end;
 
 InstallGlobalFunction( MAJORANA_Padic_Presolve,
 function(system)
+    local v;
+    
     system.mat_mod_p := system.int_mat * Z(system.p)^0;
     ConvertToMatrixRep(system.mat_mod_p);
 
     system.echelon := EchelonMatTransformation(system.mat_mod_p);
 
-    system.solvable_variables := Concatenation( Filtered( List( system.echelon.vectors
-                                                              , x -> PositionsProperty(x, y -> not IsZero(y) ) )
+    
+    # FIXME: refactro
+    v := List( system.echelon.vectors
+             , x -> PositionsProperty(x, y -> not IsZero(y) ) );
+    system.solvable_rows := PositionsProperty( v, z -> Length(z) = 1);
+    system.solvable_variables := Concatenation( Filtered( v
                                                         , z -> Length(z) = 1) );
-
     system.unsolvable_variables := Difference([1..system.number_variables], system.solvable_variables);
-    system.solvable_rows := Filtered(system.echelon.heads, x -> x <> 0);
     system.unsolvable_rows := Difference([1..system.number_equations], system.solvable_rows);
     return system;
 end );
