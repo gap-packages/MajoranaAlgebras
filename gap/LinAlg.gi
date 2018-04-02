@@ -128,10 +128,11 @@ InstallGlobalFunction(_FoldList2,
 
 
     len := Length(list);
+    # FIXME: We don't know a default value to return here.
     if len = 0 then
-        return 1;
+        Error("Lists of length 0 are not supported by this function");
     elif len = 1 then
-        return list[1];
+        return func(list[1]);
     fi;
 
     res := List(list, func);
