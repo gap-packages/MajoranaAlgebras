@@ -59,7 +59,7 @@ function(system)
                                                         , z -> Length(z) = 1) );
 
     system.unsolvable_variables := Difference([1..system.number_variables], system.solvable_variables);
-    system.solvable_rows := system.echelon.heads{ system.solvable_variables };
+    system.solvable_rows := Filtered(system.echelon.heads, x -> x <> 0);
     system.unsolvable_rows := Difference([1..system.number_equations], system.solvable_rows);
     return system;
 end );
@@ -89,7 +89,7 @@ function(mat, vecs, p, precision, max_iter)
 
     system.p := p;
     system.precision := precision;
-    system.padic_family := PurePadicNumberFamily(p, max_iter);
+    system.padic_family := PurePadicNumberFamily(p, precision);
     system.padic_iterations := max_iter;
 
     MAJORANA_Padic_Presolve(system);
@@ -210,6 +210,13 @@ function(system, vi)
                     Info( InfoMajoranaLinearEq, 10,
                           "rhs not zero: ", system.rhns, " ", residue{ system.rhns } );
 
+                    if IsBound(system.solution_denominator) then
+                        Info( InfoMajoranaLinearEq, 10,
+                              "got a denominator, so running with that");
+                        system.int_solution := soln;
+                        return true;
+                    fi;
+
                     Error("Failed to compute denominator");
                     # FIXME: adjust system, i.e. we could increase precision?
                     # MAJORANA_SolutionIntMatVec_Padic(system);
@@ -240,25 +247,39 @@ function(system, vi)
 end );
 
 # FIXME: This has to be compatible with MAJORANA_SolutionMatVecs
+# FIXME: Make compatible with sparse matrices.
 InstallGlobalFunction( MAJORANA_SolutionMatVecs_Padic,
 function(mat, vecs)
     local vi, system, res;
 
     res := rec();
-    res.sol := [];
+    res.solutions := [];
+    res.mat := mat;
+    res.vec := vecs;
+
+    mat := ConvertSparseMatrixToMatrix(mat);
+    vecs := ConvertSparseMatrixToMatrix(vecs);
+    if Length(mat) = 0 or Length(mat[1]) = 0 then
+        return res;
+    fi;
+
+
     system := MAJORANA_SetupMatVecsSystem_Padic( mat, vecs
                                                  , MAJORANA_Padic_Prime
                                                  , MAJORANA_Padic_Precision
                                                  , MAJORANA_Padic_Iterations );
+    if Length(system.solvable_variables) > 0 then
     for vi in [1..Length(system.transposed_vecs)] do
         MAJORANA_SolutionIntMatVec_Padic(system, vi);
-        Add(res.sol, system.int_solution / system.solution_denominator );
+        Add(res.solutions, system.int_solution / system.solution_denominator );
     od;
 
-    res.sol := TransposedMatMutable(res.sol);
-    res.sol{ system.unsolvable_variables } := ListWithIdenticalEntries(Length(system.unsolvable_variables), fail);
-    res.mat := system.mat{ system.unsolvable_rows };
-    res.vec := system.vecs{ system.unsolvable_rows };
+    res.solutions := TransposedMatMutable(res.solutions);
+    res.solutions := List(res.solutions, x -> SparseMatrix([x], Rationals));
+    fi;
+    res.solutions{ system.unsolvable_variables } := ListWithIdenticalEntries(Length(system.unsolvable_variables), fail);
+    res.mat := SparseMatrix(system.mat{ system.unsolvable_rows }, Rationals);
+    res.vec := SparseMatrix(system.vecs{ system.unsolvable_rows }, Rationals);
 
     # Debugging
     res.system := system;
