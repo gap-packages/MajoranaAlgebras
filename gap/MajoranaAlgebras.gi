@@ -715,7 +715,7 @@ InstallGlobalFunction(MAJORANA_BasisOfEvecs,
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(rep)
+    function(rep, test)
     
     local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj, list, evecs_a, evecs_b, index, new_mat, new_vec, nonzero; 
 
@@ -820,14 +820,18 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
     
+    if test = 1 then 
+        return rec(mat := mat, vec := vec, unknowns := unknowns);
+    fi;
+    
     if unknowns = [] then return true; fi;
     
     Info(   InfoMajorana, 50, "All conjugates") ;
     
-    #x := EchelonMatTransformationDestructive(CertainColumns(mat, [dim, dim - 1..1]));
+    x := EchelonMatTransformationDestructive(CertainColumns(mat, [Size(unknowns), Size(unknowns) - 1..1]));
     
-    #mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
-    #vec := x.coeffs*vec;
+    mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
+    vec := x.coeffs*vec;
     
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);
@@ -844,6 +848,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         od;
         
         if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
+        
+            if Ncols(mat) > 6000 then Error("pause"); fi;
     
             x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
             
@@ -1312,13 +1318,13 @@ InstallGlobalFunction(MAJORANA_MainLoop,
                                 
     MAJORANA_AxiomM1(rep);
             
-    MAJORANA_UnknownAlgebraProducts(rep);
+    MAJORANA_UnknownAlgebraProducts(rep, 1);
     
     if not false in rep.algebraproducts then return true; fi;
     
     MAJORANA_Fusion(rep);
     
-    return MAJORANA_UnknownAlgebraProducts(rep);
+    return MAJORANA_UnknownAlgebraProducts(rep, 2);
 
     end);
     
