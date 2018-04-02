@@ -821,8 +821,10 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
+    #return rec(mat := x.mat, vec := x.vec, unknowns := x.unknowns);
+                        
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-                            
+    
     if unknowns = [] then return true; fi;
     
     Info(   InfoMajorana, 50, "All conjugates") ;
@@ -830,33 +832,31 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);
     
-    for i in [1..Nrows(mat)] do 
-        if mat!.indices[i] <> [] then 
-            for g in rep.setup.conjelts do
-                conj := [,];
-                
-                conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
-                conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
-                                                    
-                new_mat := UnionOfRows(new_mat, conj[1]);
-                new_vec := UnionOfRows(new_vec, conj[2]);
-            od;
+    for i in [1 .. Nrows(mat)] do 
+        for g in rep.setup.conjelts do
+            conj := [,];
             
-            if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
-                x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
-                
-                if x.unknowns = [] then return true; fi;
-                
-                nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
-                
-                new_mat := CertainRows(x.mat, nonzero);
-                new_vec := CertainRows(x.vec, nonzero);
-                
-                y := MAJORANA_RemoveKnownAlgProducts(mat, vec, unknowns, rep.algebraproducts, rep.setup);
-                
-                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                
-            fi;
+            conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
+            conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
+                                                
+            new_mat := UnionOfRows(new_mat, conj[1]);
+            new_vec := UnionOfRows(new_vec, conj[2]);
+        od;
+        
+        if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
+            x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
+            
+            if x.unknowns = [] then return true; fi;
+            
+            nonzero := Filtered([1..Nrows(x.mat)], j -> x.mat!.indices[j] <> []);
+            
+            new_mat := CertainRows(x.mat, nonzero);
+            new_vec := CertainRows(x.vec, nonzero);
+            
+            y := MAJORANA_RemoveKnownAlgProducts(mat, vec, unknowns, rep.algebraproducts, rep.setup);
+            
+            mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+            
         fi;
     od;
         
