@@ -820,14 +820,17 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     od;   
 
     x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
-
-    #return rec(mat := x.mat, vec := x.vec, unknowns := x.unknowns);
                         
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
     
     if unknowns = [] then return true; fi;
     
     Info(   InfoMajorana, 50, "All conjugates") ;
+    
+    x := EchelonMatTransformationDestructive(CertainColumns(mat, [dim, dim - 1..1]));
+    
+    mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
+    vec := x.coeffs*vec;
     
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);
@@ -844,6 +847,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         od;
         
         if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
+    
             x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
             
             if x.unknowns = [] then return true; fi;
