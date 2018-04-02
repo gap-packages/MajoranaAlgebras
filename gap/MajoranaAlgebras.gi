@@ -578,7 +578,9 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
-    MAJORANA_CheckNullSpace(rep);
+    if x.unknowns = [] then 
+        MAJORANA_CheckNullSpace(rep);
+    fi;
 
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
     
@@ -837,15 +839,17 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     new_vec := CopyMat(vec);
     
     for i in [1 .. Nrows(mat)] do 
-        for g in rep.setup.conjelts do
-            conj := [,];
-            
-            conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
-            conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
-                                                
-            new_mat := UnionOfRows(new_mat, conj[1]);
-            new_vec := UnionOfRows(new_vec, conj[2]);
-        od;
+        if mat!.indices[1] <> [] then 
+            for g in rep.setup.conjelts do
+                conj := [,];
+                
+                conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
+                conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
+                                                    
+                new_mat := UnionOfRows(new_mat, conj[1]);
+                new_vec := UnionOfRows(new_vec, conj[2]);
+            od;
+        fi;
         
         if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
         
@@ -1291,25 +1295,10 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     dim := Size(rep.setup.coords);
     
-    if not false in rep.innerproducts then 
-        gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
-        null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
-        rep.nullspace := null;
-        return;
-    fi; 
+    gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
+    null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
     
-    unknowns := Positions(rep.innerproducts, false);
-    list := Filtered([1..dim], i -> Intersection(rep.setup.pairorbit[i], unknowns) = []);
-    
-    gram := MAJORANA_FillGramMatrix(list, rep.innerproducts, rep.setup);
-    null := KernelMat(gram).relations;;
-    null!.ncols := dim;
-    null!.indices := List(null!.indices, x -> List(x,  i -> list[i]));
-    
-    if Nrows(null) > 0 then 
-        rep.nullspace := UnionOfRows(rep.nullspace, null);
-        rep.nullspace := MAJORANA_BasisOfEvecs(rep.nullspace);
-    fi;
+    rep.nullspace := null;
     
     end );
 
