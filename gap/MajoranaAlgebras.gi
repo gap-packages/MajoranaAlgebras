@@ -839,7 +839,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     new_vec := CopyMat(vec);
     
     for i in [1 .. Nrows(mat)] do 
-        if mat!.indices[1] <> [] then 
+        if mat!.indices[i] <> [] then 
             for g in rep.setup.conjelts do
                 conj := [,];
                 
