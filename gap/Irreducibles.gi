@@ -48,9 +48,7 @@ InstallGlobalFunction( MAJORANA_Decomposition,
 
     D := MTX.Indecomposition(M);;
     
-    Info( InfoMajorana, 50, STRINGIFY("Irreducible components have dimensions ", 
-        List(D, x -> x[2].dimension ) ) 
-    );
+    Display( STRINGIFY("Irreducible components have dimensions ", List(D, x -> x[2].dimension ) ) );
     
     return D;
     
