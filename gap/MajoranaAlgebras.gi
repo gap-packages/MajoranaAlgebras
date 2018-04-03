@@ -852,8 +852,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
         fi;
         
         if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
-        
-            if Ncols(mat) > 6000 then Error("pause"); fi;
     
             x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
             
