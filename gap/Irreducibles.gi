@@ -2,21 +2,20 @@ InstallGlobalFunction( MAJORANA_FindMatrix,
     
     function(p, null, dim)
     
-    local   mat, i;
+    local   mat, i, sign;
     
     mat := NullMat(dim, dim);
     
-    for i in [1..dim] do 
-       mat[i][AbsInt(p[i])] := 1; 
+    for i in [1..dim] do
+        if p[i] > 0 then sign := 1; else sign := -1; fi;
+       mat[i][sign*p[i]] := sign; 
     od;
     
     if null <> [] then 
-        mat := ReduceMat(mat, null).reduced_matrix;;
-        mat := mat{[Size(null) + 1 .. dim]};
-        mat := List(mat, x -> x{[Size(null) + 1 .. dim]});
+        mat := ReduceMat(mat, null.vectors).reduced_matrix;;
+        mat := mat{Positions(null.heads, 0)};
+        mat := List(mat, x -> x{Positions(null.heads, 0)});
     fi;
-    
-    mat := mat*Lcm(List(mat, x -> _FoldList2(x, DenominatorRat, LcmInt)));
     
     return mat;
     
@@ -29,7 +28,12 @@ InstallGlobalFunction( MAJORANA_Decomposition,
     local gens, null, dim, M, D, p, o, i;
     
     dim  := Size(rep.setup.coords);;
-    null := ConvertSparseMatrixToMatrix(EchelonMat(rep.nullspace).vectors);;
+    
+    if Nrows(rep.nullspace) > 0 then 
+        null := EchelonMat(ConvertSparseMatrixToMatrix(rep.nullspace));;
+    else 
+        null := [];
+    fi;
     
     p := 1;
     o := Size(rep.group);
@@ -41,14 +45,14 @@ InstallGlobalFunction( MAJORANA_Decomposition,
 
     gens := GeneratorsOfGroup(rep.group);;
     gens := List(gens, x -> Position(AsList(rep.group), x));; 
-    gens := rep.setup.pairconjelts{gens};
+    gens := rep.setup.pairconjelts{gens};;
     gens := List(gens, x -> MAJORANA_FindMatrix(x, null, dim)*Z(p)^0);;
     
     M := GModuleByMats(gens, GF(p));
 
-    D := MTX.Indecomposition(M);;
+    D := MTX.HomogeneousComponents(M);;
     
-    Display( STRINGIFY("Irreducible components have dimensions ", List(D, x -> x[2].dimension ) ) );
+    Display( STRINGIFY("Irreducible components have dimensions ", List(D, x -> x.component[2].dimension ), " with multiplicity ", List(D, x -> Size(x.indices) ) ) );
     
     return D;
     
@@ -61,7 +65,7 @@ InstallGlobalFunction( MAJORANA_Dimension,
     if false in rep.innerproducts then return fail; fi;
     
     if false in rep.algebraproducts then 
-        Info( InfoMajorana, "Warning: not all algebra products have been found!");
+        Info( InfoMajorana, 10, "Warning: not all algebra products have been found!");
     fi;
     
     return Ncols(rep.nullspace) - Nrows(rep.nullspace);  
