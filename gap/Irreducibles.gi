@@ -10,9 +10,11 @@ InstallGlobalFunction( MAJORANA_FindMatrix,
        mat[i][AbsInt(p[i])] := 1; 
     od;
     
-    mat := ReduceMat(mat, null).reduced_matrix;;
-    mat := mat{[Size(null) + 1 .. dim]};
-    mat := List(mat, x -> x{[Size(null) + 1 .. dim]});
+    if null <> [] then 
+        mat := ReduceMat(mat, null).reduced_matrix;;
+        mat := mat{[Size(null) + 1 .. dim]};
+        mat := List(mat, x -> x{[Size(null) + 1 .. dim]});
+    fi;
     
     mat := mat*Lcm(List(mat, x -> _FoldList2(x, DenominatorRat, LcmInt)));
     
