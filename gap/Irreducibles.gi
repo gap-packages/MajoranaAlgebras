@@ -53,3 +53,18 @@ InstallGlobalFunction( MAJORANA_Decomposition,
     return D;
     
     end );
+    
+InstallGlobalFunction( MAJORANA_Dimension, 
+
+    function(rep)
+    
+    if false in rep.innerproducts then return fail; fi;
+    
+    if false in rep.algebraproducts then 
+        Info( InfoMajorana, "Warning: not all algebra products have been found!");
+    fi;
+    
+    return Ncols(rep.nullspace) - Nrows(rep.nullspace);  
+    
+    end );
+    
