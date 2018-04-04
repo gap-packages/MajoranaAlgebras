@@ -49,22 +49,26 @@ end;
 
 InstallGlobalFunction( MAJORANA_Padic_Presolve,
 function(system)
-    local v;
-    
+    local v, r, i;
+
     system.mat_mod_p := system.int_mat * Z(system.p)^0;
     ConvertToMatrixRep(system.mat_mod_p);
 
     system.echelon := EchelonMatTransformation(system.mat_mod_p);
 
-    
-    # FIXME: refactro
+    # FIXME: refactor
     v := List( system.echelon.vectors
              , x -> PositionsProperty(x, y -> not IsZero(y) ) );
     system.solvable_rows := PositionsProperty( v, z -> Length(z) = 1);
+
+    system.interesting_rows := Set(Concatenation( List( system.echelon.coeffs,
+                                               r -> PositionsProperty( r, x -> not IsZero(x)) ) ));
     system.solvable_variables := Concatenation( Filtered( v
                                                         , z -> Length(z) = 1) );
     system.unsolvable_variables := Difference([1..system.number_variables], system.solvable_variables);
     system.unsolvable_rows := Difference([1..system.number_equations], system.solvable_rows);
+    system.uninteresting_rows := Difference([1..system.number_equations], system.interesting_rows);
+
     return system;
 end );
 
@@ -181,7 +185,9 @@ function(system, vi)
         soln_padic := soln_padic + List(y, c -> PadicNumber(system.padic_family, [iterations, c mod system.padic_family!.modulus ] ) );
         AddRowVector(soln, y, ppower);
 
-        residue := (residue - y * system.transposed_int_mat) / p;
+        residue := (residue - y * system.transposed_int_mat);
+        residue{ system.interesting_rows } := residue{ system.interesting_rows } / p;
+
         ppower := ppower * p;
 
         Info(InfoMajoranaLinearEq, 10, "soln:    ", soln);
@@ -189,7 +195,7 @@ function(system, vi)
         Info(InfoMajoranaLinearEq, 10, "residue: ", residue);
 
         # Solution found?
-        if IsZero( residue{ system.solvable_rows } ) then
+        if IsZero( residue ) then
             Info(InfoMajoranaLinearEq, 5,
                  "found an integer solution");
 
@@ -282,8 +288,8 @@ function(mat, vecs)
     res.solutions := List(res.solutions, x -> SparseMatrix([x], Rationals));
     fi;
     res.solutions{ system.unsolvable_variables } := ListWithIdenticalEntries(Length(system.unsolvable_variables), fail);
-    res.mat := SparseMatrix(system.mat{ system.unsolvable_rows }, Rationals);
-    res.vec := SparseMatrix(system.vecs{ system.unsolvable_rows }, Rationals);
+   # res.mat := SparseMatrix(system.mat{ system.uninteresting_rows }, Rationals);
+   # res.vec := SparseMatrix(system.vecs{ system.uninteresting_rows }, Rationals);
 
     # Debugging
     res.system := system;
