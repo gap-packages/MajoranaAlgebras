@@ -925,6 +925,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     
     end );
     
+MAJORANA_SolutionMatVecs_Whatever := MAJORANA_SolutionMatVecs;
 InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
     function( mat, vec, unknowns, algebraproducts, setup)
@@ -952,7 +953,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         vec!.entries[i] := vec!.entries[i]*x;
     od;
     
-    sol := MAJORANA_SolutionMatVecs(mat,vec);
+    sol := MAJORANA_SolutionMatVecs_Whatever(mat,vec);
     
     Info(   InfoMajorana, 40, "Solved it!" );
     
