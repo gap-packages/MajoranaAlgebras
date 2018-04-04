@@ -272,8 +272,6 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
         Add(res!.entries[1], sign*mat!.entries[1][i], pos);
     od;
     
-    if res <> MAJORANA_ConjugateVec1(mat, g) then Error(); fi;
-    
     return res;
     
     end );
@@ -666,35 +664,32 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
             sign,       # corrects sign of 5A axis
             pos;        # position of new product
     
-    if g <> [] then 
+    if ForAll(g, i -> g[i] = i) then return row; fi; 
     
-        len     := Ncols(row);
-        output  := SparseZeroMatrix(1, len, Rationals);
+    len     := Ncols(row);
+    output  := SparseZeroMatrix(1, len, Rationals);
+    
+    for i in [1..Size(row!.indices[1])] do
+    
+        x := unknowns[row!.indices[1][i]];
+        y := g{x};
         
-        for i in [1..Size(row!.indices[1])] do
+        sign := 1;
         
-            x := unknowns[row!.indices[1][i]];
-            y := g{x};
-            
-            sign := 1;
-            
-            if y[1] < 0 then sign := -sign; y[1] := -y[1]; fi;
-            if y[2] < 0 then sign := -sign; y[2] := -y[2]; fi;
-            
-            Sort(y);
-            
-            k := Position(unknowns,y); 
-            pos := PositionSorted(output!.indices[1], k);
-            
-            Add(output!.indices[1], k, pos);
-            Add(output!.entries[1], sign*row!.entries[1][i], pos);
-        od;
-    
-        return output;
-    else
-        return row;
-    fi;
-    
+        if y[1] < 0 then sign := -sign; y[1] := -y[1]; fi;
+        if y[2] < 0 then sign := -sign; y[2] := -y[2]; fi;
+        
+        Sort(y);
+        
+        k := Position(unknowns,y); 
+        pos := PositionSorted(output!.indices[1], k);
+        
+        Add(output!.indices[1], k, pos);
+        Add(output!.entries[1], sign*row!.entries[1][i], pos);
+    od;
+
+    return output;
+        
     end);     
     
 InstallGlobalFunction(MAJORANA_BasisOfEvecs,
