@@ -401,6 +401,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
         od; 
     od;
     
+    for x in rep.algebraproducts do 
+        if x <> false then x!.ncols := dim; fi;
+    od;
+    
     return rep;
     
     end );

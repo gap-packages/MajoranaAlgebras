@@ -253,28 +253,28 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
             sign,
             res,            
             pos;
+            
+    if ForAll(mat!.indices[1], i -> g[i] = i) then return mat; fi;
     
-    if g <> [] then 
-        
-        res := SparseMatrix(1, Ncols(mat), [[]], [[]], Rationals);
-        
-        for i in [1..Size(mat!.indices[1])] do 
-            
-            k := g[mat!.indices[1][i]];
-            sign := 1;
-            
-            if k < 0 then k := -k; sign := -1; fi;
+    res := SparseMatrix(1, Ncols(mat), [[]], [[]], Rationals);
     
-            pos := PositionSorted(res!.indices[1], k);
-            
-            Add(res!.indices[1], k, pos);
-            Add(res!.entries[1], sign*mat!.entries[1][i], pos);
-        od;
+    for i in [1..Size(mat!.indices[1])] do 
         
-        return res;
-    else
-        return mat;
-    fi;
+        k := g[mat!.indices[1][i]];
+            
+        sign := 1;
+    
+        if k < 0 then k := -k; sign := -1; fi;
+
+        pos := PositionSorted(res!.indices[1], k);
+        
+        Add(res!.indices[1], k, pos);
+        Add(res!.entries[1], sign*mat!.entries[1][i], pos);
+    od;
+    
+    if res <> MAJORANA_ConjugateVec1(mat, g) then Error(); fi;
+    
+    return res;
     
     end );
 
@@ -291,16 +291,12 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 vec,    # output vec
                 vecs,
                 elts,
-                pos,
-                dim;    # size of vectors 
-
-        dim := Ncols(u);
+                dim,
+                pos;
         
-        if u!.indices[1] = [] or v!.indices[1] = [] then 
-            return SparseZeroMatrix(1, dim, Rationals);
-        fi;
+        dim := Ncols(u);;
         
-        vec := SparseZeroMatrix(1, dim, Rationals);
+        vec := SparseMatrix(1, dim, [[]], [[]],  Rationals);
 
         elts := [];
         vecs := [];
@@ -325,11 +321,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                     
                     pos := Position(elts,g);
                     
-                    if pos <> fail then 
-                        vecs[pos] := vecs[pos] + sign*u!.entries[1][i]*v!.entries[1][j]*x;
+                    if pos <> fail then
+                        AddRow(x!.indices[1],  sign*u!.entries[1][i]*v!.entries[1][j]*x!.entries[1],  vecs[pos]!.indices, vecs[pos]!.entries, 1);
                     else
-                        Add(elts,g);
-                        Add(vecs,sign*u!.entries[1][i]*v!.entries[1][j]*x);
+                        Add(elts, g);
+                        Add(vecs, CopyMat(sign*u!.entries[1][i]*v!.entries[1][j]*x));
                     fi;
                 else
                     # cannot calculate product
@@ -339,8 +335,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            x := MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
-            AddRow(x!.indices[1],x!.entries[1],vec!.indices,vec!.entries,1);
+            x := MAJORANA_ConjugateVec(vecs[i], setup.pairconjelts[elts[i]]);
+            AddRow(x!.indices[1], x!.entries[1], vec!.indices, vec!.entries, 1);
         od;
                 
         return vec;
