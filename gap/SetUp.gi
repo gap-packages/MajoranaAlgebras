@@ -1,4 +1,3 @@
-
 InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     
     function(G,T)

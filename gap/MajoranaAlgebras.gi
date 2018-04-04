@@ -866,6 +866,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             
             mat := y.mat; vec := y.vec; unknowns := y.unknowns;
             
+            if unknowns = [] then return true; fi;
+            
         fi;
     od;
         
