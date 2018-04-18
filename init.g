@@ -24,4 +24,6 @@ ReadPackage( "MajoranaAlgebras", "gap/Embedding.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gd");
 
+# ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gd");
+
 

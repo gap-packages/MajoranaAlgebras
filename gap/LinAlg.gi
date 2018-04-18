@@ -186,3 +186,44 @@ InstallGlobalFunction(_IsRowOfSparseMatrix,
     fi;
     
     end);
+    
+InstallGlobalFunction(ReversedEchelonMatDestructive, 
+
+    function(mat)
+    
+    local ncols, ech;
+    
+    ncols := Ncols(mat);;
+    
+    ech := EchelonMatDestructive(CertainColumns(mat, [ncols, ncols - 1 .. 1]));
+    
+    ech.vectors := CertainColumns(ech.vectors, [ncols, ncols - 1 .. 1]);
+    ech.heads   := Reversed(ech.heads);
+    
+    return ech;
+    
+    end );
+    
+InstallGlobalFunction(RemoveMatWithHeads,
+
+    function(mat, null)
+    
+    local v, i, j, k, x;
+    
+    v := null.vectors;
+    
+    for j in PositionsProperty(null.heads, x -> x <> 0) do 
+        k := null.heads[j];
+        
+        for i in [1..Nrows(mat)] do     
+            x := -GetEntry(mat, i, j);
+            
+            if x <> 0 then 
+                AddRow(v!.indices[k], x*v!.entries[k], mat!.indices, mat!.entries, i);
+            fi;
+        od;
+    od;
+    
+    return mat;
+    
+    end );

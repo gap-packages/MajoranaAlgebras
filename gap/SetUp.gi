@@ -302,7 +302,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
-                        poslist     := [1..t]               );                           
+                        poslist     := [1..t]               ); 
+                        
+    rep.setup.nullspace := rec( heads := [], vectors := SparseMatrix(0, 0, [], [], Rationals));
 
     gens := GeneratorsOfGroup(input.group);
     gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
