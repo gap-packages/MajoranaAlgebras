@@ -179,7 +179,6 @@ function(rep)
         
             for j in [1..3] do
                 rep.evecs[i][j] := MAJORANA_BasisOfEvecs(new[j]);
-                rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], rep.setup.nullspace);
             od;
         fi;        
     od;
@@ -683,6 +682,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
     
+    x := MAJORANA_NullspaceUnknowns(mat, vec, unknowns, rep.algebraproducts, rep.setup, rep.group);
+    
+    if not false in rep.algebraproducts then return true; fi;
+
+    mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+    
     Info(   InfoMajorana, 50, "Building resurrection");
     
     for evals in [[1,2],[2,1],[1,3],[2,3]] do     
@@ -858,7 +863,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
 InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
-    function(mat, vec, unknowns, algebraproducts, setup, nullspace, group)
+    function(mat, vec, unknowns, algebraproducts, setup, group)
     
     local   i, j, gens,
             u,
@@ -867,7 +872,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             y,
             dim;
             
-    if Nrows(nullspace) = 0 then
+    if Nrows(setup.nullspace.vectors) = 0 then
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
     
@@ -884,9 +889,9 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     for i in x.orbitreps do 
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
         
-        for j in [1..Nrows(nullspace)] do
+        for j in [1..Nrows(setup.nullspace.vectors)] do
             
-            v := CertainRows(nullspace, [j]);
+            v := CertainRows(setup.nullspace.vectors, [j]);
          
             x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
             
