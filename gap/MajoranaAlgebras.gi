@@ -179,6 +179,7 @@ function(rep)
         
             for j in [1..3] do
                 rep.evecs[i][j] := MAJORANA_BasisOfEvecs(new[j]);
+                rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], rep.setup.nullspace);
             od;
         fi;        
     od;
@@ -203,7 +204,7 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
     
 InstallGlobalFunction( MAJORANA_ConjugateVec, 
 
-    function(mat,g,nullspace)
+    function(mat,g)
     
     local   i,
             k,
@@ -229,7 +230,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
         Add(res!.entries[1], sign*mat!.entries[1][i], pos);
     od;
     
-    return RemoveMatWithHeads(res, nullspace);
+    return res;
     
     end );
 
@@ -290,7 +291,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         od;
         
         for i in [1..Size(elts)] do 
-            x := MAJORANA_ConjugateVec(vecs[i], setup.pairconjelts[elts[i]], setup.nullspace);
+            x := MAJORANA_ConjugateVec(vecs[i], setup.pairconjelts[elts[i]]);
             AddRow(x!.indices[1], x!.entries[1], vec!.indices, vec!.entries, 1);
         od;
                 
@@ -604,7 +605,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     od;
     
     for i in [1..Size(elts)] do 
-        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]], setup.nullspace);
+        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
     od;
        
     return [row, RemoveMatWithHeads(sum, setup.nullspace)];
@@ -790,7 +791,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 conj := [,];
                 
                 conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
-                conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g, rep.setup.nullspace);
+                conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
                                                     
                 new_mat := UnionOfRows(new_mat, conj[1]);
                 new_vec := UnionOfRows(new_vec, conj[2]);
@@ -1073,7 +1074,8 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     if y < 0 then sign := -1; y := -y; fi;
     
     if algebraproducts[y] = false then 
-        algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g, setup.nullspace); 
+        algebraproducts[y] := sign*MAJORANA_ConjugateVec(v,g); 
+        algebraproducts[y] := RemoveMatWithHeads(algebraproducts[y], setup.nullspace);
     fi; 
     
     end );
@@ -1164,7 +1166,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]];
             
-            prod := MAJORANA_ConjugateVec(prod,g, setup.nullspace);
+            prod := MAJORANA_ConjugateVec(prod,g);
             
             for j in [1..Nrows(vec)] do  
                 pos := Position(mat!.indices[j], i);
