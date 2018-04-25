@@ -670,11 +670,13 @@ InstallGlobalFunction(MAJORANA_BasisOfEvecs,
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(rep, test)
+    function(rep)
     
-    local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, null, g, conj, list, evecs_a, evecs_b, index, new_mat, new_vec, nonzero; 
+    local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n; 
 
     dim := Size(rep.setup.coords);
+    
+    n := Size(Positions(rep.algebraproducts, false));
     
     x := MAJORANA_EigenvectorsAlgebraUnknowns(rep);
     
@@ -692,9 +694,6 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     for evals in [[1,2],[2,1],[1,3],[2,3]] do     
         for i in rep.setup.orbitreps do 
-        
-            #evecs_a := UnionOfRows(rep.evecs[i][evals[1]], rep.setup.nullspace);
-            #evecs_b := UnionOfRows(rep.evecs[i][evals[2]], rep.setup.nullspace);
             
             evecs_a := rep.evecs[i][evals[1]];
             evecs_b := rep.evecs[i][evals[2]];
@@ -774,11 +773,19 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                         
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
     
-    if test = 1 then 
+    if n = Size(Positions(rep.algebraproducts, false)) then 
+        return MAJORANA_AllConjugates(mat, vec, unknowns, rep);
+    else
         return rec(mat := mat, vec := vec, unknowns := unknowns);
     fi;
     
-    if not false in rep.algebraproducts then return true; fi;
+    end );
+    
+InstallGlobalFunction( MAJORANA_AllConjugates,
+
+    function(mat, vec, unknowns, rep)
+    
+    local x, i, new_mat, new_vec, y, nonzero, g, conj;
     
     Info(   InfoMajorana, 50, "All conjugates") ;
     
@@ -1274,15 +1281,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     
     MAJORANA_Fusion(rep);
             
-    MAJORANA_UnknownAlgebraProducts(rep, 1);
-    
-    if not false in rep.algebraproducts then return true; fi;
-    
-    MAJORANA_AxiomM1(rep);
-    
-    MAJORANA_Fusion(rep);
-    
-    return MAJORANA_UnknownAlgebraProducts(rep, 2);
+    return MAJORANA_UnknownAlgebraProducts(rep);
 
     end);
     
@@ -1308,7 +1307,7 @@ function(arg)
     rep :=  MAJORANA_SetUp(input,index,algebras);
     
     if Size(rep.group) > 120 then 
-        # MAJORANA_MaximalSubgps(rep, arg[3]);
+        MAJORANA_MaximalSubgps(rep, arg[3]);
         # MAJORANA_AllEmbeddings(rep, arg[3]); 
     fi;
     
