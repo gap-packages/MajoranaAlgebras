@@ -1270,10 +1270,14 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     function(rep)
                                 
     MAJORANA_AxiomM1(rep);
+    
+    MAJORANA_Fusion(rep);
             
     MAJORANA_UnknownAlgebraProducts(rep, 1);
     
     if not false in rep.algebraproducts then return true; fi;
+    
+    MAJORANA_AxiomM1(rep);
     
     MAJORANA_Fusion(rep);
     
@@ -1303,7 +1307,7 @@ function(arg)
     rep :=  MAJORANA_SetUp(input,index,algebras);
     
     if Size(rep.group) > 120 then 
-        MAJORANA_MaximalSubgps(rep, arg[3]);
+        # MAJORANA_MaximalSubgps(rep, arg[3]);
         # MAJORANA_AllEmbeddings(rep, arg[3]); 
     fi;
     
