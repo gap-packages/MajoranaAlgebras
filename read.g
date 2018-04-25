@@ -34,3 +34,5 @@ ReadPackage( "MajoranaAlgebras", "gap/Orbits.gi");
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gi");
+
+# ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gi");
