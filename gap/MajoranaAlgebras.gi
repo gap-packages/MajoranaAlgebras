@@ -448,7 +448,7 @@ function(rep)
                                                     rep.algebraproducts,
                                                     rep.setup);
                                                     
-                    if not false in rep.algebraproducts then return; fi;
+                    if not false in rep.algebraproducts then return true; fi;
                                                     
                     mat := y.mat; vec := y.vec; unknowns := y.unknowns;
                     
