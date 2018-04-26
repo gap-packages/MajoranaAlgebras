@@ -6,7 +6,7 @@ BindGlobal("MAJORANA_FusionTable",
             ,[  1/4,  1/4,     0, 1/32]
             ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
 
-InstallGlobalFunction(MAJORANA_EvecsTest,
+InstallGlobalFunction(MAJORANA_TestEvecs,
 
     function(rep)
     
@@ -119,7 +119,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
     local   error,
             GramMatrixFull;
     
-    MAJORANA_EvecsTest(rep);
+    MAJORANA_TestEvecs(rep);
     
     # Check bilinear form is positive definite
 
