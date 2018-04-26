@@ -8,4 +8,4 @@ DeclareGlobalFunction( "MAJORANA_TestAxiomM1" );
 
 DeclareGlobalFunction( "MAJORANA_AxiomM2" );
 
-DeclareGlobalFunction( "MAJORANA_EvecsTest" );
+DeclareGlobalFunction( "MAJORANA_TestEvecs" );
