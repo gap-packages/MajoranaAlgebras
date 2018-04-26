@@ -242,36 +242,46 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
 
     function(rep) 
 
-    local   dim, i, j, k, ErrorM1, u, v, w, x, y, a, b;
+    local   ErrorM1,    # setup of indices which do not obey Fusion
+            j,          # loop over algebra products
+            k,          # loop over setup.coords
+            l,
+            p,          # second product
+            dim,        # size of setup.coords
+            x,          # first inner product
+            y,          # second inner product
+            u,          # vectors
+            w,          #
+            v;          #
 
     dim := Size(rep.setup.coords);
 
     ErrorM1:=[];
     
-    for i in [1..dim] do 
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
-        for j in [1..dim] do 
-            v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
-            x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
-            if x <> false then 
-                for k in [1..dim] do 
+    for j in [1..Size(rep.algebraproducts)] do
+        if rep.algebraproducts[j] <> false then
+            for k in [1..dim] do 
+                for l in [rep.setup.pairreps[j], Reversed(rep.setup.pairreps[j])] do  
+                    
+                    u := SparseMatrix(1, dim, [[l[1]]], [[1]], Rationals);
+                    v := SparseMatrix(1, dim, [[l[2]]], [[1]], Rationals);
                     w := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
                     
-                    y := MAJORANA_AlgebraProduct(v, w, rep.algebraproducts, rep.setup);
+                    p := MAJORANA_AlgebraProduct(v,w,rep.algebraproducts,rep.setup);
                     
-                    if y <> false then 
-
-                        a := MAJORANA_InnerProduct(u,y,rep.innerproducts, rep.setup);
-                        b := MAJORANA_InnerProduct(x,w,rep.innerproducts, rep.setup);
+                    if p <> false then
+                        x := MAJORANA_InnerProduct(u,p,rep.innerproducts, rep.setup);
+                        y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
                         
-                        if a <> false and b <> false and a <> b then 
+                        if x <> false and y <> false and x <> y then 
                             # Error("Axiom M1");
-                            Add(ErrorM1,[i,j,k]);
-                        fi;                        
+                            Add(ErrorM1,[l[1], l[2] ,k]);
+                        fi;
+                        
                     fi;
                 od;
-            fi;
-        od;
+            od;
+        fi;
     od;
     
     if Size(ErrorM1) > 0 then Error("Axiom M1"); fi;
@@ -280,7 +290,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
 
     end
 
-    );
+);
 
 InstallGlobalFunction(MAJORANA_AxiomM2,
 
