@@ -167,7 +167,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
     function(rep, subrep, emb)
     
-    local   i, im, j, k, g, v, sign, x;
+    local   i, im, j, k, g, v, sign, x, l;
     
     emb := MAJORANA_FindPerm(emb, rep, subrep);
     
@@ -229,8 +229,11 @@ InstallGlobalFunction( "MAJORANA_Embed",
             for j in [1..3] do 
                 if Nrows(subrep.evecs[i][j]) > 0 then 
                     im := MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep);
-                    im := MAJORANA_ConjugateVec(im, g);
-                    rep.evecs[g[k]][j] := UnionOfRows(rep.evecs[g[k]][j], im);
+                    for l in [1..Nrows(im)] do 
+                        v := CertainRows(im, [l]);
+                        v := MAJORANA_ConjugateVec(v, g);
+                        rep.evecs[g[k]][j] := UnionOfRows(rep.evecs[g[k]][j], v);
+                    od;
                 fi;
             od;
         fi;
