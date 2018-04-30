@@ -202,7 +202,7 @@ BindGlobal("PSL211", function() # Shape 1n
     
     end );
     
-BindGlobal("L33", function() # Shape 2
+BindGlobal("L33", function() # Shape 3
 
     local G, T;
     
