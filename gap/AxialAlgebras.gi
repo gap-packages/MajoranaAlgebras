@@ -3,7 +3,7 @@ InstallGlobalFunction( AXIAL_FindAll3DAlgebras,
 
     function(p)
     
-    local algebras, eigenvalues, T, C, a12, a13, a23, a33, A, B, ev1, ev2;
+    local algebras, eigenvalues, T, C, a12, a13, a23, a33, A, B, ev;
 
     algebras := [];
     eigenvalues := [];
@@ -30,7 +30,12 @@ InstallGlobalFunction( AXIAL_FindAll3DAlgebras,
                     
                     A := AlgebraByStructureConstants( GF(p), T);
                     
+                    ev := Is3DAxialAlgebra(A, p);
                     
+                    if ev <> false then 
+                        Add(algebras, A);
+                        Add(eigenvalues, ev);
+                    fi;
                 od;
             od;
         od;
@@ -44,47 +49,99 @@ InstallGlobalFunction( Is3DAxialAlgebra,
     
     function(A, p)
     
-    local 
+    local B, ev, one, es, minus, plus, x, plus_ev;
     
     B := AdjointBasis( Basis (A) );
 
-    ev1 := Eigenvalues(GF(p), B[1]);
-    ev2 := Eigenvalues(GF(p), B[2]);
-
-    if AsSet(ev1) <> AsSet(ev2) then return false; fi;
+    ev := List(B, x -> Eigenvalues(GF(p), x));
+    plus_ev :=  [];
     
-    one1 := Position(ev1, Z(p)^0);
-    one2 := Position(ev2, Z(p)^0);
-    
-    if Dimension(es1[one1]) <> 1 or  Dimension(es2[one2]) <> 1 then 
-        return false;
+    if ev[1] <> ev[2] then 
+        if SortedList(ev[1]) <> SortedList(ev[2]) then 
+            return false;
+        else
+            Error("Eigenvalues are in different order");
+        fi;
     fi;
     
-    es1 := AdjointEigenspaces(GF(p), A, B[1]);
-    es2 := AdjointEigenspaces(GF(p), A, B[2]);
+    one := Positions(ev[1], Z(p)^0);
     
-    if Size(ev1) = 2 then 
-        minus1 := Difference([1, 2], one1);
-        minus2 := Difference([1, 2], one2);
-    else 
+    if Size(one) <> 1 then return false; fi;
     
-    for plus in Filtered(Combinations([1 .. 3], x -> one1 in x and x <> [1 .. 3]) do 
+    es := List(B{[1,2]}, x -> AdjointEigenspaces(GF(p), A, x));
+    
+    if Size(ev[1]) = 2 then 
+        plus  := List(es, x -> x[one[1]]);
+        minus := List(es, x -> x[Difference([1, 2], one)[1]]);
         
-        minus := Difference( [1 .. 3], plus );
+        return  AXIAL_TestFusion(GF(p), A, plus[1], minus[1]) and 
+                AXIAL_TestFusion(GF(p), A, plus[2], minus[2]);
+    fi;
+        
+    for x in Filtered(Combinations([1 .. 3]), x -> one[1] in x and not x in [[1,2,3],[]]) do 
+        plus  := List(es, y -> Union(y{x}));
+        minus := List(es, y -> Union(y{Difference([1,2,3], x)}));
+        
+        if AXIAL_TestFusion(GF(p), A, plus[1], minus[1]) and AXIAL_TestFusion(GF(p), A, plus[2], minus[2]) then 
+            Add(plus_ev, x);
+        fi;
+    od;
+    
+    if plus_ev = [] then return false; fi;
+    
+    return [ev, plus_ev];
+    
+    end );
+    
+InstallGlobalFunction( AXIAL_TestFusion,
+
+    function(F, V, plus, minus)
+    
+    local u, v;
+    
+    for u in plus do 
+        for v in plus do 
+            if not u*v in VectorSpace(F, plus, "basis") then 
+                return false;
+            fi;
+        od;
+    od;
+    
+    for u in plus do 
+        for v in minus do 
+            if not u*v in VectorSpace(F, minus, "basis") then 
+                return false;
+            fi;
+        od;
+    od;
+    
+    for u in minus do 
+        for v in minus do 
+            if not u*v in VectorSpace(F, plus, "basis") then 
+                return false;
+            fi;
+        od;
+    od;
+    
+    return true;
+    
+    end );
     
 InstallGlobalFunction( AdjointEigenspaces,
 
-    function( F, A, a);
+    function( F, V, a)
     
-    local es;
+    local es, i;
     
     es := Eigenspaces( F, a );
     
     for i in [1.. Size(es)] do 
         es[i] := List(Basis(es[i]), x -> List([1..3], i -> V.(i)*x[i]));
         es[i] := List(es[i], x -> Sum(x));
-        es[i] := VectorSpace(F, es[i], "basis");
+        # es[i] := VectorSpace(F, es[i], "basis");
     od;
+    
+    return es;
     
     end );
         
