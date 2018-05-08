@@ -564,19 +564,3 @@ InstallGlobalFunction(SP_Inverse,
     return inv;
     
     end);
-
-InstallGlobalFunction( FPGroup, 
-
-    function(gens, rels)
-    
-    local F;
-    
-    F := FreeGroup(gens);
-    
-    AssignGeneratorVariables(F);
-    
-    return F/ParseRelators(GeneratorsOfGroup(F), rels);
-    
-    end );
-    
-    
