@@ -510,26 +510,6 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     end );
     
-InstallGlobalFunction(SP_Product,    
-    
-    function( perm1, perm2) # Perms must be of same length!
-    
-    local prod, i;
-    
-    prod := [];
-    
-    for i in perm1 do 
-        if i > 0 then 
-            Add(prod, perm2[i]);
-        else
-            Add(prod, -perm2[-i]);
-        fi;
-    od;
-    
-    return prod;
-    
-    end );
-    
 InstallGlobalFunction(SP_Inverse,
 
     function(perm)
