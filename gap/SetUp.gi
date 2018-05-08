@@ -512,20 +512,9 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
 InstallGlobalFunction(SP_Product,    
     
-    function( perm1, perm2)
+    function( perm1, perm2) # Perms must be of same length!
     
-    local l1, l2, prod, i;
-    
-    l1 := Length(perm1);
-    l2 := Length(perm2);
-    
-    # Make perms the same length
-    
-    if l1 < l2 then
-        Append(perm1, [l1 + 1 .. l2]);
-    else
-        Append(perm2, [l2 + 1 .. l1]);
-    fi;
+    local prod, i;
     
     prod := [];
     
