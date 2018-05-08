@@ -468,13 +468,17 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     local subrep, gens, emb, t, i, k, x, im, list, pos;
 
+    if not shape in ["6A","4B"] and Product(involutions) in rep.setup.longcoords then 
+        return;
+    fi;
+
     subrep := algebras.(shape);
     
     gens := GeneratorsOfGroup(subrep.group);
     
     # Add extra basis vectors
     
-    for i in [1.. Size(subrep.setup.coords)] do 
+    for i in [Size(subrep.involutions) + 1.. Size(subrep.setup.coords)] do 
         
         list := Positions(subrep.setup.poslist, i);
         im := List(subrep.setup.longcoords{list}, y -> MappedWord(y, gens, involutions));
@@ -495,7 +499,7 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
                 Append(rep.setup.longcoords, x);
                 Append(rep.setup.poslist, List(list, y -> -k));
             fi;
-        elif shape in ["6A","4B"] then
+        else
             im := Filtered(im, y -> not y in rep.setup.longcoords);
             pos := rep.setup.poslist[Position(rep.setup.longcoords, x)];
                         
