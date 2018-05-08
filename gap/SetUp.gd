@@ -14,3 +14,5 @@ DeclareGlobalFunction( "SP_Inverse" );
 
 DeclareGlobalFunction( "MAJORANA_RecordCoords" );
 
+DeclareGlobalFunction( "FPGroup" );
+

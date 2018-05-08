@@ -472,14 +472,12 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     gens := GeneratorsOfGroup(subrep.group);
     
-    emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, involutions);
-    
     # Add extra basis vectors
     
     for i in [1.. Size(subrep.setup.coords)] do 
         
         list := Positions(subrep.setup.poslist, i);
-        im := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
+        im := List(subrep.setup.longcoords{list}, y -> MappedWord(y, gens, involutions));
         
         x := First(im, y -> y in rep.setup.longcoords);
             
@@ -492,7 +490,7 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
             
             if shape = "5A" then 
                 list := Positions(subrep.setup.poslist, -i);
-                x := List(subrep.setup.longcoords{list}, y -> MAJORANA_Image(rep, subrep, emb, y));
+                x := List(subrep.setup.longcoords{list}, y -> MappedWord(y, gens, involutions));
                 
                 Append(rep.setup.longcoords, x);
                 Append(rep.setup.poslist, List(list, y -> -k));
@@ -562,4 +560,19 @@ InstallGlobalFunction(SP_Inverse,
     return inv;
     
     end);
+
+InstallGlobalFunction( FPGroup, 
+
+    function(gens, rels)
+    
+    local F;
+    
+    F := FreeGroup(gens);
+    
+    AssignGeneratorVariables(F);
+    
+    return F/ParseRelators(GeneratorsOfGroup(F), rels);
+    
+    end );
+    
     
