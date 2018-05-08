@@ -4,7 +4,7 @@ InstallGlobalFunction(MAJORANA_Orbits,
     
     local   conjelts,
             orbitreps,
-            i,
+            i, j,
             orb,
             gen,
             elts,
@@ -38,7 +38,16 @@ InstallGlobalFunction(MAJORANA_Orbits,
                 
                 for gen in gens do 
                     q := gen[p];
-                    g := SP_Product(h,gen);
+                    
+                    g := [];
+    
+                    for j in h do 
+                        if j > 0 then 
+                            Add(g, gen[j]);
+                        else
+                            Add(g, -gen[-j]);
+                        fi;
+                    od;
                     
                     if q < 0 then q := -q; fi;
                     
@@ -64,7 +73,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
     function(gens,t,setup)
     
     local   dim,
-            i,j,
+            i,j,k,
             orb,
             elts,
             count,
@@ -113,7 +122,15 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         
                         if setup.pairorbit[q[1]][q[2]] = 0 then 
                         
-                            g := SP_Product(h,gen);
+                            g := [];
+    
+                            for k in h do 
+                                if k > 0 then 
+                                    Add(g, gen[k]);
+                                else
+                                    Add(g, -gen[-k]);
+                                fi;
+                            od;
                         
                             Add( orb, q );
                             Add( elts, g);
