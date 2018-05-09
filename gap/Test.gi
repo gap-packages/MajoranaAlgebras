@@ -75,17 +75,13 @@ InstallGlobalFunction(MAJORANA_TestFusion,
             
             for j in [1..Nrows(ev_a)] do  
                 a := CertainRows(ev_a, [j]);
-                if MAJORANA_InnerProduct(a, a, innerproducts, setup) <> 0 then 
-                    for k in [1..Nrows(ev_b)] do
-                        b := CertainRows(ev_b, [k]);
-                        if MAJORANA_InnerProduct(b, b, innerproducts, setup) <> 0 then 
-                            MAJORANA_FuseEigenvectors(  a, b, i, evals, new, 
-                                                        innerproducts,
-                                                        algebraproducts,
-                                                        setup );
-                        fi;
-                    od;
-                fi;
+                for k in [1..Nrows(ev_b)] do
+                    b := CertainRows(ev_b, [k]);
+                    MAJORANA_FuseEigenvectors(  a, b, i, evals, new, 
+                                                innerproducts,
+                                                algebraproducts,
+                                                setup );
+                od;
             od;
             
             for j in [1..3] do
@@ -97,10 +93,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                     a := CertainRows(new[j], [k]);
                     x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
                     if x <> ev*a and x <> false then 
-                        y := MAJORANA_InnerProduct(x - ev*a, x - ev*a, innerproducts, setup);
-                        if y <> 0 and y <> false then 
-                            Error("Algebra does not obey the fusion rules");
-                        fi;
+                        Error("Algebra does not obey the fusion rules");
                     fi;
                 od;
             od;
