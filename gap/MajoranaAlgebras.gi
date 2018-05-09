@@ -899,25 +899,29 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
         for j in [1..Nrows(setup.nullspace.vectors)] do
             
             v := CertainRows(setup.nullspace.vectors, [j]);
-         
-            x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
             
-            if Size(x[1]!.indices[1]) = 1 then 
+            if  ForAny(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] = false) and
+                ForAll(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] <> fail) then   
+         
+                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                 
-                y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
-                                                    algebraproducts,
-                                                    setup);
-                
-                if not false in algebraproducts then return true; fi;
-                
-                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-                
-            elif x[1]!.indices[1] <> [] then 
-                if not _IsRowOfSparseMatrix(mat, x[1]) then
-                    mat := UnionOfRows(mat, x[1]);
-                    vec := UnionOfRows(vec, x[2]);
-                fi;
-            fi;               
+                if Size(x[1]!.indices[1]) = 1 then 
+                    
+                    y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
+                                                        algebraproducts,
+                                                        setup);
+                    
+                    if not false in algebraproducts then return true; fi;
+                    
+                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                    
+                elif x[1]!.indices[1] <> [] then 
+                    if not _IsRowOfSparseMatrix(mat, x[1]) then
+                        mat := UnionOfRows(mat, x[1]);
+                        vec := UnionOfRows(vec, x[2]);
+                    fi;
+                fi; 
+            fi;
         od;
         
         if Nrows(mat) > 8000 then 
