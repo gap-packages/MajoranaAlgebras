@@ -484,7 +484,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
     vec := SparseMatrix(0, 1, [], [], Rationals);
     
-    for i in Filtered([1..Size(rep.algebraproducts)], x -> rep.algebraproducts[x] not in [false, fail]) do 
+    for i in Filtered([1..Size(rep.algebraproducts)], x -> not rep.algebraproducts[x] in [false, fail]) do 
         x := rep.algebraproducts[i];
         for j in [rep.setup.pairreps[i], Reversed(rep.setup.pairreps[i])] do 
             
@@ -1249,13 +1249,17 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
 
     function(rep)
     
-    local   dim, gram, null, unknowns, i, j;
+    local   dim, gram, null, unknowns, i, j, x;
     
     dim := Size(rep.setup.coords);
     
     gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
     null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
     null := ReversedEchelonMatDestructive(null);
+    
+    rep.setup.nullspace := null;
+    
+    if null.heads = [] then return; fi;
     
     for i in [1..Size(rep.setup.pairreps)] do
         x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
@@ -1267,7 +1271,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     od;
     
     for i in [1..Size(rep.algebraproducts)] do 
-        if rep.algebraproducts[i] not in [false, fail] then 
+        if not rep.algebraproducts[i] in [false, fail] then 
             rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], null);
         fi;
     od;
@@ -1277,8 +1281,6 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
             rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], null);
         od;
     od;
-    
-    rep.setup.nullspace := null;
     
     end );
 
