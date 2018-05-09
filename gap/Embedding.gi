@@ -173,39 +173,40 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
     for i in [1..Size(subrep.algebraproducts)] do 
     
-        sign := 1;
-    
-        im := emb{subrep.setup.pairreps[i]};
+        if subrep.setup.pairreps[i] <> fail then 
+            sign := 1;
         
-        if im[1] < 0 then 
-            sign := -sign; im[1] := -im[1];
-        fi;        
-        
-        if im[2] < 0 then 
-            sign := -sign; im[2] := -im[2];
-        fi;
-        
-        k := rep.setup.pairorbit[im[1]][im[2]];
-        
-        if k < 0 then 
-            sign := -sign; k := -k;
-        fi;
-        
-        g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
-        
-        if rep.algebraproducts[k] = false then 
-            if subrep.algebraproducts[i] <> false then 
-                v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
-                rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g);
+            im := emb{subrep.setup.pairreps[i]};
+            
+            if im[1] < 0 then 
+                sign := -sign; im[1] := -im[1];
+            fi;        
+            
+            if im[2] < 0 then 
+                sign := -sign; im[2] := -im[2];
+            fi;
+            
+            k := rep.setup.pairorbit[im[1]][im[2]];
+            
+            if k < 0 then 
+                sign := -sign; k := -k;
+            fi;
+            
+            g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
+            
+            if rep.algebraproducts[k] = false then 
+                if subrep.algebraproducts[i] <> false then 
+                    v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
+                    rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g);
+                fi;
+            fi;
+            
+            if rep.innerproducts[k] = false then 
+                if subrep.innerproducts[i] <> false then 
+                    rep.innerproducts[k] := sign*subrep.innerproducts[i];
+                fi;
             fi;
         fi;
-        
-        if rep.innerproducts[k] = false then 
-            if subrep.innerproducts[i] <> false then 
-                rep.innerproducts[k] := sign*subrep.innerproducts[i];
-            fi;
-        fi;
-        
     od;
     
     im := MAJORANA_ImageVector( subrep.nullspace, emb, rep, subrep);

@@ -259,7 +259,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
     ErrorM1:=[];
     
     for j in [1..Size(rep.algebraproducts)] do
-        if rep.algebraproducts[j] <> false then
+        if not rep.algebraproducts[j] in [false, fail] then
             for k in [1..dim] do 
                 for l in [rep.setup.pairreps[j], Reversed(rep.setup.pairreps[j])] do  
                     
