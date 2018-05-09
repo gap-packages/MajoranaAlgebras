@@ -39,7 +39,7 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
 
 InstallGlobalFunction(MAJORANA_TestFusion,
 
-    function(innerproducts,algebraproducts,evecs,setup) 
+    function(rep) 
         
     local   dim,            # size of setup.coords
             evals,
@@ -56,9 +56,9 @@ InstallGlobalFunction(MAJORANA_TestFusion,
             x,              # product of eigenvectors
             y;              # product of x with u
             
-    dim := Size(setup.coords);
+    dim := Size(rep.setup.coords);
 
-    for i in setup.orbitreps do        
+    for i in rep.setup.orbitreps do        
         
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
@@ -70,35 +70,35 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                 new[j] := SparseMatrix(0, dim, [], [], Rationals);
             od;
                     
-            ev_a := evecs[i][evals[1]];
-            ev_b := evecs[i][evals[2]];
+            ev_a := rep.evecs[i][evals[1]];
+            ev_b := rep.evecs[i][evals[2]];
             
             for j in [1..Nrows(ev_a)] do  
                 a := CertainRows(ev_a, [j]);
                 for k in [1..Nrows(ev_b)] do
                     b := CertainRows(ev_b, [k]);
                     MAJORANA_FuseEigenvectors(  a, b, i, evals, new, 
-                                                innerproducts,
-                                                algebraproducts,
-                                                setup );
+                                                rep.innerproducts,
+                                                rep.algebraproducts,
+                                                rep.setup );
                 od;
             od;
-            
-            for j in [1..3] do
-                ev := MAJORANA_FusionTable[1][j + 1];
-                
-                new[j] := EchelonMatDestructive(new[j]).vectors;
-                
-                for k in [1..Nrows(new[j])] do 
-                    a := CertainRows(new[j], [k]);
-                    x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
-                    if x <> ev*a and x <> false then 
-                        Error("Algebra does not obey the fusion rules");
-                    fi;
-                od;
-            od;
-            
         od;
+        
+        for j in [1..3] do
+            ev := MAJORANA_FusionTable[1][j + 1];
+            
+            new[j] := EchelonMatDestructive(new[j]).vectors;
+            
+            for k in [1..Nrows(new[j])] do 
+                a := CertainRows(new[j], [k]);
+                x := MAJORANA_AlgebraProduct(u, a, rep.algebraproducts, rep.setup);
+                if x <> ev*a and x <> false then 
+                    Error("Algebra does not obey the fusion rules");
+                fi;
+            od;
+        od;
+        
     od;
     
     end
@@ -109,50 +109,14 @@ InstallGlobalFunction(MajoranaAlgebraTest,
     
     function(rep)
     
-    local   error,
-            GramMatrixFull;
+    # Check that all triples obey Axiom M1
     
-    MAJORANA_TestEvecs(rep);
-    
-    # Check bilinear form is positive definite
-
-    if false then
-        GramMatrixFull := MAJORANA_FillGramMatrix(rep.innerproducts, rep.setup);
-        
-        if MAJORANA_PositiveDefinite(GramMatrixFull) <0 then
-            return "Gram Matrix is not positive definite";
-        fi;
- 
-    fi;
-
-    # Check that all triples obey Fusion
-
-    error := MAJORANA_TestAxiomM1(rep);
-
-    if Size(error)>0 then
-        return ["Algebra does not obey Fusion", error];
-    fi;
+    MAJORANA_TestAxiomM1(rep);
 
     # Check that eigenvectors obey the fusion rules
 
-    MAJORANA_TestFusion(rep.innerproducts,rep.algebraproducts,rep.evecs,rep.setup);
+    MAJORANA_TestFusion(rep);
 
-    # Check that the eigenspaces are orthogonal
-
-    error := MAJORANA_TestOrthogonality(rep.innerproducts,rep.evecs,rep.setup);
-
-    if Size(error) > 0 then
-        return ["Eigenspaces are not orthogonal with reppect to the inner product", error];
-    fi;
-
-    # Check M2
-
-    # error := MAJORANA_AxiomM2(rep.innerproducts,rep.algebraproducts,rep.setup);
-
-    # if error = -1 then
-    #    return "Algebra does not obey axiom M2";
-    # fi;
-    
     return true;
     
     end );
