@@ -131,8 +131,7 @@ function(rep)
     
     for i in rep.setup.orbitreps do 
     
-        if false in rep.innerproducts or  
-            not MAJORANA_CheckBasis(dim, rep.evecs[i], rep.setup.nullspace) then 
+        if false in rep.innerproducts or not MAJORANA_CheckBasis(dim, rep.evecs[i], rep.setup.nullspace) then 
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
@@ -143,30 +142,28 @@ function(rep)
             od;
         
             for evals in [[1,1], [1,2], [1,3], [2,3], [2,2], [3,3]] do
-                evecs_a := rep.evecs[i][evals[1]];
-                evecs_b := rep.evecs[i][evals[2]];
-                for j in [1..Nrows(evecs_a)] do
+                for j in [1..Nrows(rep.evecs[i][evals[1]])] do
                     
-                    a := CertainRows(evecs_a, [j]);
+                    a := CertainRows(rep.evecs[i][evals[1]], [j]);
                     
-                    for k in [1..Nrows(evecs_b)] do 
+                    for k in [1..Nrows(rep.evecs[i][evals[2]])] do 
                         
-                        b := CertainRows(evecs_b, [k]);
+                        b := CertainRows(rep.evecs[i][evals[2]], [k]);
                         
                         MAJORANA_FuseEigenvectors(a, b, i, evals, new, 
                         rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
-                if false then
-                for j in [1..3] do 
-                    if Nrows(new[j]) > dim then
-                        new[j] := MAJORANA_BasisOfEvecs(new[j]);
-                    fi;
-                od;
                 
-                if MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
-                    break;
-                fi; fi;
+                if ForAny(new, x -> Nrows(x) > dim) then 
+                    for j in [1..3] do 
+                        new[j] := MAJORANA_BasisOfEvecs(new[j]);
+                    od;
+                
+                    if not false in rep.innerproducts and MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
+                        break;
+                    fi;
+                fi;
             od;
         
             for j in [1..3] do
@@ -1275,6 +1272,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
             rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], null);
+            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
         od;
     od;
     
