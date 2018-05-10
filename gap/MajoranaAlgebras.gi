@@ -148,18 +148,10 @@ function(rep)
                 for j in [1..Nrows(evecs_a)] do
                     
                     a := CertainRows(evecs_a, [j]);
-
-                    bad := MAJORANA_FindBadIndices(a,rep.algebraproducts,rep.setup);
                     
-                    if bad <> [] then  
-                        null := KernelMat(CertainColumns(evecs_b, bad)).relations;
-                    else
-                        null := SparseIdentityMatrix(Nrows(evecs_b));
-                    fi;
-                    
-                    for k in [1..Nrows(null)] do 
+                    for k in [1..Nrows(evecs_b)] do 
                         
-                        b := CertainRows(null, [k])*evecs_b;
+                        b := CertainRows(evecs_b, [k]);
                         
                         MAJORANA_FuseEigenvectors(a, b, i, evals, new, 
                         rep.innerproducts, rep.algebraproducts, rep.setup);  
