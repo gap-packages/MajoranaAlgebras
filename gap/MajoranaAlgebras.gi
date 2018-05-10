@@ -119,7 +119,10 @@ function(rep)
     
     for i in rep.setup.orbitreps do 
     
-        if false in rep.innerproducts or not MAJORANA_CheckBasis(dim, rep.evecs[i], rep.setup.nullspace) then 
+        while true do 
+            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep.setup.nullspace) then
+                break;
+            fi;
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
@@ -148,16 +151,22 @@ function(rep)
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
                     od;
                 
-                    if not false in rep.innerproducts and MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
+                    if MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
                         break;
                     fi;
                 fi;
             od;
         
             for j in [1..3] do
-                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(new[j]);
+                new[j] := MAJORANA_BasisOfEvecs(new[j]);
             od;
-        fi;        
+        
+            if ForAll([1..3], j -> Nrows(new[j]) = Nrows(rep.evecs[i][j])) then 
+                break;
+            fi;
+        
+            rep.evecs[i] := new;
+        od;        
     od;
     
     end );     
