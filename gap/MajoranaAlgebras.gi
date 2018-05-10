@@ -1282,6 +1282,12 @@ InstallGlobalFunction(MAJORANA_MainLoop,
     MAJORANA_AxiomM1(rep);
     
     MAJORANA_Fusion(rep);
+    
+    MAJORANA_EigenvectorsAlgebraUnknowns(rep);
+    
+    MAJORANA_AxiomM1(rep);
+    
+    MAJORANA_Fusion(rep);
             
     return MAJORANA_UnknownAlgebraProducts(rep);
 
