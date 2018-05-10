@@ -157,7 +157,7 @@ function(rep)
                         rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
-                
+                if false then
                 for j in [1..3] do 
                     if Nrows(new[j]) > dim then
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
@@ -166,7 +166,7 @@ function(rep)
                 
                 if MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
                     break;
-                fi;
+                fi; fi;
             od;
         
             for j in [1..3] do
