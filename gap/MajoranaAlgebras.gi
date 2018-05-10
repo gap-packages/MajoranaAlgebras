@@ -113,19 +113,7 @@ InstallGlobalFunction( MAJORANA_Fusion,
 
 function(rep)
 
-    local   i,
-            j,
-            k,
-            a,
-            b,
-            dim,
-            new,
-            u,
-            evals,
-            evecs_a,
-            evecs_b,
-            null,
-            bad;
+    local   i, j, k, a, b, dim, new, evals;
     
     dim := Size(rep.setup.coords);
     
