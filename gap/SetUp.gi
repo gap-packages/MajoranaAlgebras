@@ -303,8 +303,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
                         poslist     := [1..t]               ); 
-                        
-    rep.setup.nullspace := rec( heads := [], vectors := SparseMatrix(0, 0, [], [], Rationals));
 
     gens := GeneratorsOfGroup(input.group);
     gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
@@ -333,6 +331,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
     od;
     
     dim := Size(rep.setup.coords);
+    
+    rep.setup.nullspace := rec( heads := [1..dim]*0, vectors := SparseMatrix(0, 0, [], [], Rationals));
     
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
@@ -481,7 +481,8 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     for i in [Size(subrep.involutions) + 1.. Size(subrep.setup.coords)] do 
         
         list := Positions(subrep.setup.poslist, i);
-        im := List(subrep.setup.longcoords{list}, y -> MappedWord(y, gens, involutions));
+        im := List(subrep.setup.longcoords{list}, 
+                y -> MAJORANA_MappedWord(rep, subrep, y, gens, involutions));
         
         x := First(im, y -> y in rep.setup.longcoords);
             
@@ -494,7 +495,8 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
             
             if shape = "5A" then 
                 list := Positions(subrep.setup.poslist, -i);
-                x := List(subrep.setup.longcoords{list}, y -> MappedWord(y, gens, involutions));
+                x := List(subrep.setup.longcoords{list}, 
+                        y -> MAJORANA_MappedWord(rep, subrep, y, gens, involutions));
                 
                 Append(rep.setup.longcoords, x);
                 Append(rep.setup.poslist, List(list, y -> -k));
@@ -507,6 +509,22 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
             Append(rep.setup.poslist, List(im, y -> pos));
         fi;
     od;
+    
+    end );
+    
+InstallGlobalFunction(MAJORANA_MappedWord,
+
+    function(rep, subrep, w, gens, imgs)
+    
+    local im;
+    
+    if IsRowVector(w) then 
+        im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
+    
+        return List(im, x -> Position(rep.setup.coords, x ));
+    else
+        return MappedWord(w, gens, imgs);
+    fi;
     
     end );
     

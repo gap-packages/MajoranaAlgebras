@@ -68,7 +68,7 @@ InstallGlobalFunction( MAJORANA_Dimension,
         Info( InfoMajorana, 10, "Warning: not all algebra products have been found!");
     fi;
     
-    return Ncols(rep.nullspace) - Nrows(rep.nullspace);  
+    return Size(rep.setup.coords) - Nrows(rep.setup.nullspace.vectors);  
     
     end );
     

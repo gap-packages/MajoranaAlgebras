@@ -220,8 +220,8 @@ InstallGlobalFunction(RemoveMatWithHeads,
             
             if x <> 0 then 
                 AddRow(v!.indices[k], x*v!.entries[k], mat!.indices, mat!.entries, i);
-            fi;
-        od;
+            fi;         
+        od;        
     od;
     
     return mat;

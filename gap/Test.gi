@@ -215,9 +215,9 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
 
     ErrorM1:=[];
     
-    for j in [1..Size(rep.algebraproducts)] do
+    for j in Filtered([1..Size(rep.algebraproducts)], i -> rep.algebraproducts[i] <> fail) do
         if not rep.algebraproducts[j] in [false, fail] then
-            for k in [1..dim] do 
+            for k in Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0) do 
                 for l in [rep.setup.pairreps[j], Reversed(rep.setup.pairreps[j])] do  
                     
                     u := SparseMatrix(1, dim, [[l[1]]], [[1]], Rationals);
@@ -226,7 +226,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
                     
                     p := MAJORANA_AlgebraProduct(v,w,rep.algebraproducts,rep.setup);
                     
-                    if p <> false then
+                    if not p in [fail, false] then
                         x := MAJORANA_InnerProduct(u,p,rep.innerproducts, rep.setup);
                         y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
                         

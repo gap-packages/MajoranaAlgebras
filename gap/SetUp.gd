@@ -11,3 +11,5 @@ DeclareGlobalFunction( "MAJORANA_FindPerm" );
 DeclareGlobalFunction( "SP_Inverse" );
 
 DeclareGlobalFunction( "MAJORANA_RecordCoords" );
+
+DeclareGlobalFunction( "MAJORANA_MappedWord" );
