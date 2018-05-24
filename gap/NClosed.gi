@@ -87,7 +87,7 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
     local i, j, v, x, pos;
     
     rep.vec!.ncols := Size(rep.setup.coords);
-    rep.nullspace!.ncols := Size(rep.setup.coords);
+    rep.setup.nullspace.vectors!.ncols := Size(rep.setup.coords);
     
     for i in [1..Nrows(rep.mat)] do 
         if ForAll(rep.mat!.indices[i], x -> rep.unknowns[x] in rep.setup.coords) then
@@ -99,12 +99,12 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
                 
                 SetEntry(v, 1, pos, -rep.mat!.entries[i][j]);
                 
-                rep.nullspace := UnionOfRows(rep.nullspace, v);
+                rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, v);
             od;
         fi;
     od;
     
-    rep.nullspace := MAJORANA_BasisOfEvecs(rep.nullspace);
+    rep.setup.nullspace := ReversedEchelonMatDestructive(rep.setup.nullspace.vectors);
     
     end );
     
