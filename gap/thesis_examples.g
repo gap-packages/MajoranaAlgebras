@@ -315,7 +315,12 @@ rep_25S5 := MajoranaRepresentation(ex, 1, "AxiomM8");
 MajoranaAlgebraTest(rep_25S5);
 Info(InfoThesis, 50, STRINGIFY("Group: 2^5:S5, dim ", MAJORANA_Dimension(rep_25S5) ) );
 
+##### 242 non-existence
 
+a := (1,2)(3,4); b := (5,6)(7,8); c := (1,3)(5,7);
+G := Group(a,b,c);
+
+T5 := [a, a^c, b, b^c, c, c^a, c^b, c^(a*b), a*b, (a*b)^c, a*c*b*c, c*a*c*b, a*b*c*b*c, c*a*b*c*b, a*b*c*a*c, c*a*b*c*a];;
 
 
 
