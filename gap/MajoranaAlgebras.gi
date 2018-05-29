@@ -783,9 +783,9 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
     new_mat := CopyMat(mat);
     new_vec := CopyMat(vec);
     
-    for i in [1 .. Nrows(mat)] do 
-        if mat!.indices[i] <> [] then 
-            for g in rep.setup.conjelts do
+    for g in rep.setup.conjelts do
+        for i in [1 .. Nrows(mat)] do 
+            if mat!.indices[i] <> [] then 
                 conj := [,];
                 
                 conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
@@ -793,11 +793,11 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
                                                     
                 new_mat := UnionOfRows(new_mat, conj[1]);
                 new_vec := UnionOfRows(new_vec, conj[2]);
-            od;
-        fi;
+            fi;
+        od;
         
         if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
-    
+            
             x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
             
             if not false in rep.algebraproducts then return true; fi;
