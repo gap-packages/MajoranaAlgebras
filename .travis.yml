@@ -5,22 +5,28 @@ env:
     - COVDIR=coverage
 
 addons:
-  apt_packages:
-    - libgmp-dev
-    - libreadline-dev
-    - libgmp-dev:i386
-    - libreadline-dev:i386
-    - gcc-multilib
-    - g++-multilib
+  apt:
+    update: true
+    sources:
+      - ubuntu-toolchain-r-test
+      - ubuntu-toolchain-precise-3.8
+    packages:
+      - gcc-5
+      - g++-5
+      - libgmp-dev
+      - libreadline-dev
+      - libgmp-dev:i386
+      - libreadline-dev:i386
+      - gcc-multilib
+      - g++-multilib
 
 matrix:
   include:
-    - env: CFLAGS="-O2" CC=clang CXX=clang++
+    - env: CFLAGS="-O2" CC="clang" CXX="clang++"
       compiler: clang
-    - env: CFLAGS="-O2"
+    - env: CFLAGS="-O2" CC="gcc-5" CXX="g++-5"
       compiler: gcc
     - env: CFLAGS=""  # test build w/o optimization
-    - env: ABI=32
 
 branches:
   only:
