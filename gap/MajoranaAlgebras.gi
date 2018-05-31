@@ -796,7 +796,7 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
             fi;
         od;
         
-        if Nrows(new_mat) > Ncols(new_mat)/2 or Nrows(new_mat) > 8000 then 
+        if Nrows(new_mat) > Ncols(new_mat) then 
             
             x := MAJORANA_SolutionAlgProducts(new_mat, new_vec, unknowns, rep.algebraproducts, rep.setup);
             
