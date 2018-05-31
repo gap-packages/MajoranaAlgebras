@@ -478,7 +478,7 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     # Add extra basis vectors
     
-    for i in [Size(subrep.involutions) + 1.. Size(subrep.setup.coords)] do 
+    for i in [1.. Size(subrep.setup.coords)] do 
         
         list := Positions(subrep.setup.poslist, i);
         im := List(subrep.setup.longcoords{list}, 
