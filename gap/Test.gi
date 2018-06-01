@@ -31,6 +31,8 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
             od;
         od;
     od;
+    
+    return true;
 
     end );
                     
@@ -98,24 +100,21 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                 fi;
             od;
         od;
-        
     od;
     
-    end
+    return true;
     
-    );
+    end );
         
 InstallGlobalFunction(MajoranaAlgebraTest,
     
     function(rep)
     
-    # Check that all triples obey Axiom M1
-    
     MAJORANA_TestAxiomM1(rep);
 
-    # Check that eigenvectors obey the fusion rules
-
     MAJORANA_TestFusion(rep);
+
+    MAJORANA_TestPrimitivity(rep);
 
     return true;
     
@@ -185,13 +184,10 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         od;
         
         if Size(errorortho) > 0 then Error("Orthog"); fi;
-        if Size(errorortho) > 0 then Error("Orthog"); fi;
         
-        return errorortho;
+        return true;
         
-        end
-        
-        );
+        end );
         
 # Checks if bilinear and algebra products obey Fusion, outputs a list which is empty if they do obey the axiom
 
@@ -243,13 +239,58 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
     
     if Size(ErrorM1) > 0 then Error("Axiom M1"); fi;
     
-    return ErrorM1;
+    return true;
 
-    end
+    end );
 
-);
+InstallGlobalFunction( MAJORANA_TestPrimitivity,
 
-InstallGlobalFunction(MAJORANA_AxiomM2,
+    function(rep)
+    
+    local i, dim, u, v, j, x, mat, espace;
+    
+    if false in rep.algebraproducts then return fail; fi;
+    
+    dim := Size(rep.setup.coords);
+    
+    for i in rep.setup.orbitreps do 
+        
+        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        
+        mat := SparseMatrix(0, dim, [], [], Rationals);
+        
+        for j in [1 .. dim] do 
+            v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
+        
+            x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+            
+            mat := UnionOfRows(mat, x);
+        od;
+        
+        espace := KernelMat(mat - SparseIdentityMatrix(dim, Rationals));
+        
+        if Nrows(espace.relations) <> 1 then 
+            Error("Primitivity");
+        fi;
+    od;
+    
+    return true;
+    
+    end );
+
+InstallGlobalFunction( MAJORANA_IsComplete, 
+
+    function(rep)
+    
+    if false in rep.algebraproducts then 
+        return false; 
+    else
+        return true;
+    fi;
+    
+    end );
+
+InstallGlobalFunction(MAJORANA_TestAxiomM2,
 
     function(rep) # Tests that the algebra obeys axiom M2
 

@@ -6,6 +6,11 @@ DeclareGlobalFunction( "MAJORANA_TestFusion" );
 
 DeclareGlobalFunction( "MAJORANA_TestAxiomM1" );
 
-DeclareGlobalFunction( "MAJORANA_AxiomM2" );
+DeclareGlobalFunction( "MAJORANA_TestAxiomM2" );
 
 DeclareGlobalFunction( "MAJORANA_TestEvecs" );
+
+DeclareGlobalFunction( "MAJORANA_TestPrimitivity" );
+
+DeclareGlobalFunction( "MAJORANA_IsComplete" );
+
