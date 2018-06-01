@@ -38,7 +38,11 @@ If the representation is not complete then the user may use the function `NClose
     
     NClosedMajoranaRepresentation(rep);;
 
- This function should be called `n-2` times in order to attempt construction of the `n`-closed algebra. 
+This function should be called `n-2` times in order to attempt construction of the `n`-closed algebra. 
+
+Once a completed algebra has been found, the function `MAJORANA_Dimension` returns the dimension of the algebra. If all inner products have been found, but there are some missing algebra products then this value will be a lower bound on the true value of the dimension. 
+
+    MAJORANA_Dimension(rep);
 
 ## Choice of axioms 
 
@@ -49,3 +53,14 @@ The string `"All axioms"` chooses a version of the algorithm which uses the Majo
 The string `"AxiomM8"` chooses a version of the algorithm which uses the Majorana axioms M1 - M7, as well as the additional axioms M8 but no others. 
 
 The string `"NoAxioms"` chooses a version of the algorithm which uses the Majorana axioms M1 - M7 but no others. 
+
+## Testing the output
+
+Once a representation (complete or otherwise) has been constructed, the user may use the following functions to test properties of the algebra. Each function takes as its input the record returned by `MajoranaRepresentation`. Each function enters a break loop if the property does not hold in the algebra, returns true if the property can be determined to be true on the complete or incomplete algebra and fail otherwise.
+    
+    MAJORANA_TestAxiomM1(rep);
+    MAJORANA_TestAxiomM2(rep);
+    MAJORANA_TestFusion(rep);
+    MAJORANA_TestPrimitivity(rep);
+    
+Alternatively, the function `MajoranaAlgebraTest` takes the same argument and runs all tests, with the exception of `MAJORANA_TestAxiomM2` which is a particularly expensive test.
