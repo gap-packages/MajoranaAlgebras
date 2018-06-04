@@ -152,6 +152,7 @@ function(rep)
                     od;
                 
                     if MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
+                        rep.evecs[i] := new;
                         break;
                     fi;
                 fi;
