@@ -18,6 +18,8 @@ ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/NClosed.gd");
 
+ReadPackage( "MajoranaAlgebras", "gap/NoForm.gd");
+
 ReadPackage( "MajoranaAlgebras", "gap/Orbits.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gd");

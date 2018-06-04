@@ -29,6 +29,8 @@ ReadPackage( "MajoranaAlgebras", "gap/ExamplesPaper.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/NClosed.gi");
 
+ReadPackage( "MajoranaAlgebras", "gap/NoForm.gi");
+
 ReadPackage( "MajoranaAlgebras", "gap/Orbits.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gi");

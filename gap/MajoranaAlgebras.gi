@@ -111,10 +111,17 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
 InstallGlobalFunction( MAJORANA_Fusion,
 
-function(rep)
+function(arg)
 
-    local   i, j, k, a, b, dim, new, evals;
+    local   i, j, k, a, b, dim, new, evals, rep, FUSE;
     
+    rep := arg[1];
+    FUSE := MAJORANA_FuseEigenvectors;
+    
+    if Size(arg) = 2 and arg[2] = false then 
+        FUSE := MAJORANA_FuseEigenvectorsNoForm;
+    fi;
+            
     dim := Size(rep.setup.coords);
     
     for i in rep.setup.orbitreps do 
@@ -141,8 +148,7 @@ function(rep)
                         
                         b := CertainRows(rep.evecs[i][evals[2]], [k]);
                         
-                        MAJORANA_FuseEigenvectors(a, b, i, evals, new, 
-                        rep.innerproducts, rep.algebraproducts, rep.setup);  
+                        FUSE(a, b, i, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
                 
@@ -657,9 +663,14 @@ InstallGlobalFunction(MAJORANA_BasisOfEvecs,
     
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(rep)
+    function(arg)
     
-    local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n; 
+    local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list; 
+
+    rep := arg[1];
+    evals_list := [[1,2],[2,1],[1,3],[2,3]];
+    
+    if Size(arg) = 2 and arg[2] = false then evals_list := [[1,2], [1,3]]; fi;
 
     dim := Size(rep.setup.coords);
     
@@ -679,7 +690,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     
     Info(   InfoMajorana, 50, "Building resurrection");
     
-    for evals in [[1,2],[2,1],[1,3],[2,3]] do     
+    for evals in evals_list do     
         for i in rep.setup.orbitreps do 
             
             evecs_a := rep.evecs[i][evals[1]];
