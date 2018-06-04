@@ -23,10 +23,7 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
                 
                 if not x in [ev*v, false] then
-                    y := MAJORANA_InnerProduct(x - ev*v, x - ev*v, rep.innerproducts, rep.setup);
-                    if not y in [0, false] then
-                        Error("evecs");
-                    fi;
+                    Error("evecs");
                 fi;
             od;
         od;
@@ -79,7 +76,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                 a := CertainRows(ev_a, [j]);
                 for k in [1..Nrows(ev_b)] do
                     b := CertainRows(ev_b, [k]);
-                    MAJORANA_FuseEigenvectors(  a, b, i, evals, new, 
+                    MAJORANA_FuseEigenvectorsNoForm(  a, b, i, evals, new, 
                                                 rep.innerproducts,
                                                 rep.algebraproducts,
                                                 rep.setup );
