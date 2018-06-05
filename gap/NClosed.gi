@@ -49,7 +49,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
     for i in [Size(rep.algebraproducts) + 1 .. Size(rep.setup.pairreps)] do 
         rep.algebraproducts[i] := false;
-        rep.innerproducts[i] := false;
+        if rep.innerproducts <> false then rep.innerproducts[i] := false; fi;
     od;
     
     for i in rep.setup.orbitreps do 

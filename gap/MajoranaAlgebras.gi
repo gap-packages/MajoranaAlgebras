@@ -127,7 +127,7 @@ function(arg)
     for i in rep.setup.orbitreps do 
     
         while true do 
-            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep.setup.nullspace) then
+            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
                 break;
             fi;
         
@@ -157,7 +157,7 @@ function(arg)
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
                     od;
                 
-                    if MAJORANA_CheckBasis(dim, new, rep.setup.nullspace) = true then
+                    if MAJORANA_CheckBasis(dim, new, rep) = true then
                         rep.evecs[i] := new;
                         break;
                     fi;
@@ -182,11 +182,13 @@ function(arg)
 
 InstallGlobalFunction( MAJORANA_CheckBasis,
 
-    function(dim, evecs, nullspace)
+    function(dim, evecs, rep)
     
     local i, basis;
     
-    if Sum(List(evecs, Nrows)) + Nrows(nullspace.vectors) < dim - 1 then 
+    if rep.innerproducts = false then return false; fi;
+    
+    if Sum(List(evecs, Nrows)) + Nrows(rep.setup.nullspace.vectors) < dim - 1 then 
         return false;
     fi;
     
