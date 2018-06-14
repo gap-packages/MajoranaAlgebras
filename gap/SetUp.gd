@@ -11,3 +11,5 @@ DeclareGlobalFunction( "SP_Inverse" );
 DeclareGlobalFunction( "MAJORANA_RecordCoords" );
 
 DeclareGlobalFunction( "MAJORANA_MappedWord" );
+
+DeclareGlobalFunction( "MAJORANA_RemoveDuplicateShapes" );
