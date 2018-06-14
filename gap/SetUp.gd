@@ -4,8 +4,6 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 
 DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 
-DeclareGlobalFunction( "MAJORANA_MakeVector" );
-
 DeclareGlobalFunction( "MAJORANA_FindPerm" );
 
 DeclareGlobalFunction( "SP_Inverse" );

@@ -408,23 +408,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     end );
     
-InstallGlobalFunction(MAJORANA_MakeVector,
-
-    function(pos,vals,dim)
-    
-    local   i,
-            vec;
-    
-    vec := [1..dim]*0;
-    
-    for i in [1..Size(pos)] do 
-        vec[pos[i]] := vals[i];
-    od; 
-    
-    return SparseMatrix([vec], Rationals);
-    
-    end);
-    
 InstallGlobalFunction( MAJORANA_FindPerm, 
     
     function(g, rep, subrep)

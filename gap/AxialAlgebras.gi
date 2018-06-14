@@ -145,7 +145,3 @@ InstallGlobalFunction( AdjointEigenspaces,
     
     end );
         
-    
-    
-        
-    
