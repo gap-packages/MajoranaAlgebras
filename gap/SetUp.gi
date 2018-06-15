@@ -449,10 +449,6 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
     
     local subrep, gens, emb, t, i, k, x, im, list, pos;
 
-    if not shape in ["6A","4B"] and Product(involutions) in rep.setup.longcoords then 
-        return;
-    fi;
-
     subrep := algebras.(shape);
     
     gens := GeneratorsOfGroup(subrep.group);
