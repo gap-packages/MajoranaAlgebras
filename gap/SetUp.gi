@@ -548,7 +548,7 @@ InstallGlobalFunction(MAJORANA_MappedWord,
     if IsRowVector(w) then 
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
     
-        return List(im, x -> Position(rep.setup.coords, x ));
+        return SortedList(List(im, x -> Position(rep.setup.coords, x )));
     else
         return MappedWord(w, gens, imgs);
     fi;
