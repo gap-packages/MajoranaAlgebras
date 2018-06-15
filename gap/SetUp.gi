@@ -201,7 +201,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     od;
     
     for i in ind[2] do 
-        if ForAny(orbs.orbitals[i], x -> x[1]*x[2] in RepsCubes6A) then 
+        if ForAny(orbs.orbitals[i], x -> x[1]*x[2] in RepsCubes6A) then
         
             shape[i]:="2A";;
             
@@ -213,10 +213,11 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
                     for j in Intersection(ind[4],x - Size(ind[2])) do 
                         shape[j] := "4B";
                     od;
+                    
+                    cc := Difference(cc, [x]);
+                    
                 fi;
             od; 
-             
-            cc := Difference(cc, [x]);
         fi;
     od;
     
