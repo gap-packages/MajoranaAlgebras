@@ -299,7 +299,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
-                        shape       := input.shapes[index] );
+                        shape       := input.shapes[index],
+                        field       := Rationals );
                         
     rep.setup   := rec( coords      := ShallowCopy(input.involutions),
                         longcoords  := ShallowCopy(input.involutions),
@@ -333,7 +334,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     dim := Size(rep.setup.coords);
     
-    rep.setup.nullspace := rec( heads := [1..dim]*0, vectors := SparseMatrix(0, 0, [], [], Rationals));
+    rep.setup.nullspace := rec( heads := [1..dim]*0, vectors := SparseMatrix(0, 0, [], [], rep.field));
     
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);
@@ -363,14 +364,14 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
     rep.evecs           := NullMat(t,3);
-    rep.nullspace := SparseMatrix(0, dim, [], [], Rationals);
+    rep.nullspace := SparseMatrix(0, dim, [], [], rep.field);
 
     # Set up eigenvector matrix
 
     for j in [1..t] do
         if j in rep.setup.orbitreps then
             for k in [1..3] do
-                rep.evecs[j][k] := SparseMatrix(0, dim, [], [], Rationals);
+                rep.evecs[j][k] := SparseMatrix(0, dim, [], [], rep.field);
             od;
         else
             for k in [1..3] do

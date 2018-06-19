@@ -260,7 +260,7 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
     nrows := Nrows(mat);
     ncols := Ncols(mat);
     
-    res := SparseZeroMatrix(nrows, ncols, Rationals);
+    res := SparseZeroMatrix(nrows, ncols, rep.field);
     
     indices := IndicesOfSparseMatrix(mat);
     entries := EntriesOfSparseMatrix(mat);

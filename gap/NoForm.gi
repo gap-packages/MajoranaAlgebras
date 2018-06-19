@@ -21,7 +21,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         od;
     od;
 
-    null := SparseMatrix(null, Rationals);
+    null := SparseMatrix(null, rep.field);
 
     null := ReversedEchelonMatDestructive(null);
     
@@ -68,7 +68,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
             z;
          
     dim := Size(setup.coords);
-    u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+    u := SparseMatrix(1, dim, [[i]], [[1]]);
     
     new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;

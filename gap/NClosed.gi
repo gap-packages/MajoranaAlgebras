@@ -39,7 +39,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     MAJORANA_Orbitals(gens, dim, rep.setup);
     
     pos := Position(rep.setup.coords, rep.setup.pairreps[index]);    
-    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], Rationals);
+    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], rep.field);
     
     for i in [1..Size(rep.algebraproducts)] do 
         if rep.algebraproducts[i] <> false then 
@@ -68,7 +68,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
             if x[j] < 0 then sign := -1; else sign := 1; fi;
             
             if sign*x[j] <> j then 
-                new := SparseMatrix(1, new_dim, [[j, sign*x[j]]], [[1, -sign]], Rationals);
+                new := SparseMatrix(1, new_dim, [[j, sign*x[j]]], [[1, -sign]], rep.field);
                 Sort(new!.indices[1]);
             
                 rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 

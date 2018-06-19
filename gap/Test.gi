@@ -13,7 +13,7 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
     local   u, v, i, j, k, ev, x, y;
     
     for i in rep.setup.orbitreps do 
-        u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], rep.field);
         
         for j in [1..3] do
             ev := MAJORANA_FusionTable[1][j + 1];
@@ -59,14 +59,14 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
     for i in rep.setup.orbitreps do        
         
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
     
         for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do 
         
             new := [0,0,0];
             
             for j in [1..3] do 
-                new[j] := SparseMatrix(0, dim, [], [], Rationals);
+                new[j] := SparseMatrix(0, dim, [], [], rep.field);
             od;
                     
             ev_a := rep.evecs[i][evals[1]];
@@ -119,7 +119,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
         
 InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
-    function(innerproducts,evecs, setup) 
+    function(rep) 
     
     # Tests that eigenspaces are orthogonal with respect to the inner product
 
@@ -138,19 +138,19 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
         
         errorortho := [];
 
-        for i in setup.orbitreps do
+        for i in rep.setup.orbitreps do
 
-            u := SparseMatrix(1, Size(setup.coords), [[i]], [[1]], Rationals);
+            u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], rep.field);
             
             for a in [1..3] do 
             
                 # orthogonality with 1-eigenvectors
                 
-                ev_a := evecs[i][a];
+                ev_a := rep.evecs[i][a];
                 
                 for j in [1..Nrows(ev_a)] do  
                     v := CertainRows(ev_a, [j]);
-                    x := MAJORANA_InnerProduct(u, v, innerproducts, setup);
+                    x := MAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);
                     
                     if (x <> false) and (x <> 0) then 
 
@@ -162,14 +162,14 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                 
                 for b in [a+1..3] do 
                 
-                    ev_b := evecs[i][b];
+                    ev_b := rep.evecs[i][b];
                     
                     for j in [1..Nrows(ev_a)] do  
                         v := CertainRows(ev_a, [j]);
                         for k in [1..Nrows(ev_b)] do
                             w := CertainRows(ev_b, [k]);
                             
-                            x := MAJORANA_InnerProduct(v, w, innerproducts, setup);
+                            x := MAJORANA_InnerProduct(v, w, rep.innerproducts, rep.setup);
                             
                             if (x <> false) and (x <> 0) then 
                                 Add(errorortho, [i,a,b,v,w]);
@@ -213,9 +213,9 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
             for k in Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0) do 
                 for l in [rep.setup.pairreps[j], Reversed(rep.setup.pairreps[j])] do  
                     
-                    u := SparseMatrix(1, dim, [[l[1]]], [[1]], Rationals);
-                    v := SparseMatrix(1, dim, [[l[2]]], [[1]], Rationals);
-                    w := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
+                    u := SparseMatrix(1, dim, [[l[1]]], [[1]], rep.field);
+                    v := SparseMatrix(1, dim, [[l[2]]], [[1]], rep.field);
+                    w := SparseMatrix(1, dim, [[k]], [[1]], rep.field);
                     
                     p := MAJORANA_AlgebraProduct(v,w,rep.algebraproducts,rep.setup);
                     
@@ -252,19 +252,19 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
     
     for i in rep.setup.orbitreps do 
         
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
         
-        mat := SparseMatrix(0, dim, [], [], Rationals);
+        mat := SparseMatrix(0, dim, [], [], rep.field);
         
         for j in [1 .. dim] do 
-            v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
+            v := SparseMatrix(1, dim, [[j]], [[1]], rep.field);
         
             x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
             
             mat := UnionOfRows(mat, x);
         od;
         
-        espace := KernelMat(mat - SparseIdentityMatrix(dim, Rationals));
+        espace := KernelMat(mat - SparseIdentityMatrix(dim, rep.field));
         
         if Nrows(espace.relations) <> 1 then 
             Error("Primitivity");
@@ -315,10 +315,10 @@ InstallGlobalFunction(MAJORANA_TestAxiomM2,
             for l in [1..dim] do
                 for m in [1..dim] do
                     
-                    a := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
-                    b := SparseMatrix(1, dim, [[k]], [[1]], Rationals);
-                    c := SparseMatrix(1, dim, [[l]], [[1]], Rationals);
-                    d := SparseMatrix(1, dim, [[m]], [[1]], Rationals);
+                    a := SparseMatrix(1, dim, [[j]], [[1]], rep.field);
+                    b := SparseMatrix(1, dim, [[k]], [[1]], rep.field);
+                    c := SparseMatrix(1, dim, [[l]], [[1]], rep.field);
+                    d := SparseMatrix(1, dim, [[m]], [[1]], rep.field);
 
                     x0 := MAJORANA_AlgebraProduct(a,c,rep.algebraproducts,rep.setup);
                     x1 := MAJORANA_AlgebraProduct(b,d,rep.algebraproducts,rep.setup);
