@@ -528,6 +528,46 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
     
     end );
+    
+InstallGlobalFunction( MAJORANA_Orthogonality,
+
+    function(rep)
+    
+    local unknowns, mat, vec, i, ev, evecs_a, evecs_b, u, v, j, k, eq;
+    
+    unknowns := Positions(rep.innerproducts, false);
+    
+    mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
+    vec := SparseMatrix(0, 1, [], [], Rationals);
+    
+    for i in rep.setup.orbitreps do 
+        for ev in [[1,2], [1,3], [2,3]] do 
+                
+            evecs_a := rep.evecs[i][ev[1]];
+            evecs_b := rep.evecs[i][ev[2]];
+        
+            for j in [1..Nrows(evecs_a)] do 
+                u := CertainRows(evecs_a, [j]);
+                for k in [1..Nrows(evecs_b)] do 
+                    v := CertainRows(evecs_b, [k]);
+                    
+                    eq := MAJORANA_SeparateInnerProduct(u, v, unknowns, rep.innerproducts, rep.setup);
+                    
+                    if eq[1]!.indices[1] <> [] then 
+                        eq := eq*(1/eq[1]!.entries[1][1]);
+                        if not _IsRowOfSparseMatrix(mat, eq[1]) then
+                            mat := UnionOfRows(mat, eq[1]);
+                            vec := UnionOfRows(vec, eq[2]);
+                        fi;
+                    fi;
+                od;
+            od;
+        od;
+    od;
+    
+    return rec(mat := mat, vec := vec, unknowns := unknowns);
+    
+    end );
 
 InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
 

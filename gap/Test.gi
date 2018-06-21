@@ -304,16 +304,19 @@ InstallGlobalFunction(MAJORANA_TestAxiomM2,
             x0,     # products
             x1,     #
             x2,     #
-            x3;     #
+            x3,     #
+            basis;
 
     dim:=Size(rep.setup.coords);
+    
+    basis := Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0);
 
     B:=NullMat(dim^2,dim^2);
 
-    for j in [1..dim] do
-        for k in [1..dim] do
-            for l in [1..dim] do
-                for m in [1..dim] do
+    for j in basis do
+        for k in basis do
+            for l in basis do
+                for m in basis do
                     
                     a := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
                     b := SparseMatrix(1, dim, [[k]], [[1]], Rationals);

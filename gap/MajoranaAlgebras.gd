@@ -36,6 +36,8 @@ DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_AxiomM1" );
 
+DeclareGlobalFunction( "MAJORANA_Orthogonality" );
+
 DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_RecordSolution" );
