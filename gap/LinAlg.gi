@@ -42,7 +42,7 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
     
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
-    function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
+    function(A, ring) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
 
     local   B,      # input matrix
             n,      # size of matrix
@@ -53,7 +53,7 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
             k,      # loop over diagonals
             sum;    # sum used in values of L and D
 
-    B := ShallowCopy(A); n := Size(B); L := NullMat(n,n); D := NullMat(n,n);
+    B := ShallowCopy(A); n := Size(B); L := NullMat(n,n)*One(ring); D := NullMat(n,n)*One(ring);
 
     for i in [1..n] do
         sum := [];
@@ -61,30 +61,30 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
             Add(sum, L[i][j]*L[i][j]*D[j][j]);
         od;
 
-        D[i][i] := B[i][i] - Sum(sum);
+        D[i][i] := B[i][i] - Sum(sum)*One(ring);
 
-        if D[i][i] = 0 then
+        if D[i][i] = Zero(ring) then
                 for j in [i+1..n] do
                     sum := [];
                     for k in [1..i-1] do
                         Add(sum, L[j][k]*L[i][k]*D[k][k]);
                     od;
-                    if B[j][i] - Sum(sum) = 0 then
-                        L[j][i]:=0;
+                    if B[j][i] - Sum(sum) = Zero(ring) then
+                        L[j][i]:= Zero(ring);
                     else
                         return false;
                     fi;
                 od;
-                L[i][i]:=1;
+                L[i][i] := One(ring);
         else
             for j in [i+1..n] do
                 sum := [];
                 for k in [1..i-1] do
                     Add(sum, L[j][k]*L[i][k]*D[k][k]);
                 od;
-                L[j][i] := (B[j][i] - Sum(sum))/D[i][i];
+                L[j][i] := (B[j][i] - Sum(sum)*One(ring))/D[i][i];
             od;
-            L[i][i] := 1;
+            L[i][i] := One(ring);
         fi;
     od;
 
@@ -94,13 +94,13 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
     
 InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
-    function(GramMatrix) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
+    function(GramMatrix, field) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
 
     local   L,          # decomposition of matrix 
             Diagonals,  # list of diagonals from decomposition
             i;          # loop over sze of matrix
 
-    L := MAJORANA_LDLTDecomposition(GramMatrix);
+    L := MAJORANA_LDLTDecomposition(GramMatrix, field);
     
     if L = false then
         return -1;
@@ -218,7 +218,7 @@ InstallGlobalFunction(RemoveMatWithHeads,
         for i in [1..Nrows(mat)] do     
             x := -GetEntry(mat, i, j);
             
-            if x <> 0 then 
+            if x <> Zero(mat!.ring) then 
                 AddRow(v!.indices[k], x*v!.entries[k], mat!.indices, mat!.entries, i);
             fi;         
         od;        

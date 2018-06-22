@@ -308,17 +308,17 @@ InstallGlobalFunction(MAJORANA_TestAxiomM2,
 
     dim:=Size(rep.setup.coords);
 
-    B:=NullMat(dim^2,dim^2);
+    B:=NullMat(dim^2,dim^2)*One(rep.field);
 
     for j in [1..dim] do
         for k in [1..dim] do
             for l in [1..dim] do
                 for m in [1..dim] do
                     
-                    a := SparseMatrix(1, dim, [[j]], [[1]], rep.field);
-                    b := SparseMatrix(1, dim, [[k]], [[1]], rep.field);
-                    c := SparseMatrix(1, dim, [[l]], [[1]], rep.field);
-                    d := SparseMatrix(1, dim, [[m]], [[1]], rep.field);
+                    a := SparseMatrix(1, dim, [[j]], [[One(rep.field)]], rep.field);
+                    b := SparseMatrix(1, dim, [[k]], [[One(rep.field)]], rep.field);
+                    c := SparseMatrix(1, dim, [[l]], [[One(rep.field)]], rep.field);
+                    d := SparseMatrix(1, dim, [[m]], [[One(rep.field)]], rep.field);
 
                     x0 := MAJORANA_AlgebraProduct(a,c,rep.algebraproducts,rep.setup);
                     x1 := MAJORANA_AlgebraProduct(b,d,rep.algebraproducts,rep.setup);
@@ -333,7 +333,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM2,
         od;
     od;
     
-    if MAJORANA_PositiveDefinite(B) < 0 then 
+    if MAJORANA_PositiveDefinite(B, rep.field) < 0 then 
         return false; 
     else 
         return true; 

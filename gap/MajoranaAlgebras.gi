@@ -303,7 +303,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 sign,           # correct for 5A axes
                 sum;            # output value
 
-        sum := 0;
+        sum := Zero(u!.ring);
 
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
@@ -958,11 +958,13 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     Info(   InfoMajorana, 40, 
             STRINGIFY("Solving a ", Nrows(mat), " x ", Ncols(mat), " matrix") );
             
-    for i in [1..Nrows(mat)] do 
-        x := _FoldList2(mat!.entries[i], DenominatorRat, LcmInt);
-        mat!.entries[i] := mat!.entries[i]*x;
-        vec!.entries[i] := vec!.entries[i]*x;
-    od;
+    if algebraproducts[1]!.ring = Rationals then  
+        for i in [1..Nrows(mat)] do 
+            x := _FoldList2(mat!.entries[i], DenominatorRat, LcmInt);
+            mat!.entries[i] := mat!.entries[i]*x;
+            vec!.entries[i] := vec!.entries[i]*x;
+        od;
+    fi;
 
     sol := MAJORANA_SolutionMatVecs_Whatever(mat,vec);
     
@@ -1015,7 +1017,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
     Info( InfoMajorana, 60, "Solved a single solution");
     
     elm := x[1]!.entries[1][1]; 
-    x := x/elm;
+    x := x*(1/elm);
 
     MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.indices[1][1]],
                                 algebraproducts, setup );
@@ -1109,7 +1111,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
             for j in [1..Nrows(vec)] do 
                 elm := GetEntry(mat, j, i);
                 
-                if elm <> 0 then 
+                if elm <> Zero(mat!.ring) then 
                     AddToEntry(vec, j, 1, -elm*prod);
                 fi;
             od;
@@ -1152,8 +1154,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     if Nrows(mat) = 0 then 
     
         unknowns := [];
-        mat := SparseMatrix(0, Size(unknowns), [], []);
-        vec := SparseMatrix(0, Size(setup.coords), [], []); 
+        mat := SparseMatrix(0, Size(unknowns), [], [], mat!.ring);
+        vec := SparseMatrix(0, Size(setup.coords), [], [], mat!.ring); 
         
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
@@ -1211,7 +1213,7 @@ InstallGlobalFunction( MAJORANA_SingleInnerSolution,
     x := unknowns[eq[1]!.indices[1][1]];
     
     if eq[2]!.entries[1] = [] then 
-        innerproducts[x] := 0;
+        innerproducts[x] := Zero(mat!.ring);
     else
         innerproducts[x] := eq[2]!.entries[1][1]/eq[1]!.entries[1][1];
     fi;
@@ -1236,7 +1238,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
         if sol.solutions[i] <> fail then
             x := unknowns[i]; 
             if sol.solutions[i]!.entries[1] = [] then 
-                innerproducts[x] := 0;
+                innerproducts[x] := Zero(mat!.ring);
             else
                 innerproducts[x] := sol.solutions[i]!.entries[1][1];
             fi;
@@ -1336,6 +1338,8 @@ function(arg)
         unknowns := Positions(rep.algebraproducts, false);
                                 
         main := MAJORANA_MainLoop(rep);
+        
+        # if ForAny(rep.evecs[1][1]!.entries, x -> Zero(rep.field) in x) then Error(); fi;
         
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );

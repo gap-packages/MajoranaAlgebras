@@ -68,7 +68,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
             if x[j] < 0 then sign := -1; else sign := 1; fi;
             
             if sign*x[j] <> j then 
-                new := SparseMatrix(1, new_dim, [[j, sign*x[j]]], [[1, -sign]], rep.field);
+                new := SparseMatrix(1, new_dim, [[j, sign*x[j]]], [[1, -sign]*One(rep.field)], rep.field);
                 Sort(new!.indices[1]);
             
                 rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 
