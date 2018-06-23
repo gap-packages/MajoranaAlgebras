@@ -56,10 +56,9 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
 
-    function(a, b, i, evals, new, innerproducts, algebraproducts, setup)
+    function(a, b, u, evals, new, innerproducts, algebraproducts, setup)
     
     local   dim,
-            u, 
             test,
             new_ev,
             pos,
@@ -68,7 +67,6 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
             z;
          
     dim := Size(setup.coords);
-    u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
     new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;

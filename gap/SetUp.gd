@@ -8,6 +8,8 @@ DeclareGlobalFunction( "MAJORANA_FindPerm" );
 
 DeclareGlobalFunction( "SP_Inverse" );
 
+DeclareGlobalFunction( "SP_Product" );
+
 DeclareGlobalFunction( "MAJORANA_RecordCoords" );
 
 DeclareGlobalFunction( "MAJORANA_MappedWord" );

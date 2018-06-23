@@ -62,10 +62,9 @@ InstallGlobalFunction(MAJORANA_AddEvec,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
-    function(a, b, i, evals, new, innerproducts, algebraproducts, setup)
+    function(a, b, u, evals, new, innerproducts, algebraproducts, setup)
     
     local   dim,
-            u, 
             test,
             new_ev,
             pos,
@@ -74,7 +73,6 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
             z;
          
     dim := Size(setup.coords);
-    u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
     new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
@@ -113,7 +111,7 @@ InstallGlobalFunction( MAJORANA_Fusion,
 
 function(arg)
 
-    local   i, j, k, a, b, dim, new, evals, rep, FUSE;
+    local   i, j, k, a, b, dim, new, evals, rep, FUSE, u;
     
     rep := arg[1];
     FUSE := MAJORANA_FuseEigenvectors;
@@ -125,6 +123,8 @@ function(arg)
     dim := Size(rep.setup.coords);
     
     for i in rep.setup.orbitreps do 
+    
+        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
         while true do 
             if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
@@ -148,7 +148,7 @@ function(arg)
                         
                         b := CertainRows(rep.evecs[i][evals[2]], [k]);
                         
-                        FUSE(a, b, i, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
+                        FUSE(a, b, u, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
                 
