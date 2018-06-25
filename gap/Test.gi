@@ -72,7 +72,7 @@ InstallGlobalFunction( MAJORANA_IsAxis,
     
     end );
     
-InstallGlobalFunction( MAJORANA_TestAxiomM8, 
+InstallGlobalFunction( MAJORANA_TestAxiomM8, # Not actually working, giving false negatives
 
     function(rep)
 
