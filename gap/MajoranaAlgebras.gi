@@ -176,6 +176,10 @@ function(arg)
         od;        
     od;
     
+    if false in rep.innerproducts or rep.innerproducts = false then 
+        MAJORANA_IntersectEigenspaces(rep);
+    fi;
+    
     end );     
 
 # Returns true if we have full eigenspace decomposition, returns false otherwise
