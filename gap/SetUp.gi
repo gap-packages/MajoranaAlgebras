@@ -333,7 +333,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     dim := Size(rep.setup.coords);
     
-    rep.setup.nullspace := rec( heads := [1..dim]*0, vectors := SparseMatrix(0, 0, [], [], Rationals));
+    rep.setup.nullspace := rec( heads := [1..dim]*0, vectors := SparseMatrix(0, dim, [], [], Rationals));
     
     rep.setup.pairorbit := NullMat(dim,dim);
     rep.setup.pairconj  := NullMat(dim,dim);

@@ -23,13 +23,13 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     null := SparseMatrix(null, Rationals);
 
-    null := ReversedEchelonMatDestructive(null);
+    null := ReversedEchelonMatDestructive(null).vectors;
     
-    if Nrows(null.vectors) = Nrows(rep.setup.nullspace.vectors) then return; fi;
+    if Nrows(null) = 0 then return; fi;
     
-    rep.setup.nullspace := null;
+    rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, null);
     
-    if null.heads = [] then return; fi;
+    rep.setup.nullspace := ReversedEchelonMatDestructive(rep.setup.nullspace.vectors);
     
     for i in [1..Size(rep.setup.pairreps)] do
         x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
@@ -41,13 +41,13 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
     for i in [1..Size(rep.algebraproducts)] do 
         if not rep.algebraproducts[i] in [false, fail] then 
-            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], null);
+            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], rep.setup.nullspace);
         fi;
     od;
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], null);
+            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], rep.setup.nullspace);
             rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
         od;
     od;
@@ -150,7 +150,11 @@ InstallGlobalFunction( MajoranaRepresentationNoForm,
         
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
 
-        if not false in rep.algebraproducts then
+        if not false in rep.algebraproducts then    
+            
+            MAJORANA_Fusion(rep, false);
+            MAJORANA_IntersectEigenspaces(rep);
+        
             Info( InfoMajorana, 10, "Success" );
             return rep;
         elif ForAll(rep.algebraproducts{unknowns}, x -> x = false) then 
