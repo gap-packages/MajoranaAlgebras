@@ -527,6 +527,8 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         od;
     od;
     
+    if false then 
+    
     for i in [1..Nrows(rep.setup.nullspace.vectors)] do 
         u := CertainRows(rep.setup.nullspace.vectors, [i]);
         for j in Filtered([1..dim], k -> rep.setup.nullspace.heads[k] = 0) do
@@ -555,6 +557,8 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
             fi;
         od;
     od;
+    
+    fi;
     
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
@@ -978,7 +982,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             v := CertainRows(setup.nullspace.vectors, [j]);
             
             if  ForAny(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] = false) and
-                ForAll(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] <> fail) then   
+                ForAll(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] <> fail) then   # TODO think I can improve this, only an issue if a fail is actually hit during separation
          
                 x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                 
