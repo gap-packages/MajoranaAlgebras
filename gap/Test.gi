@@ -306,9 +306,9 @@ InstallGlobalFunction(MAJORANA_TestAxiomM2,
             x2,     #
             x3;     #
 
-    dim:=Size(rep.setup.coords);
+    dim:=Size(rep.setup.coords);;
 
-    B:=NullMat(dim^2,dim^2)*One(rep.field);
+    B:=NullMat(dim^2,dim^2)*One(rep.field);;
 
     for j in [1..dim] do
         for k in [1..dim] do

@@ -4,7 +4,38 @@
 # Implementations
 #
 
-# Creates list of indexes [i,j] where product of i th and j th coordinate vectors is not known
+InstallGlobalFunction( MAJORANA_ChangeFieldOfRep, 
+
+    function(rep, field)
+    
+    local i, j;
+    
+    rep.field := field;
+    
+    for i in [1..Size(rep.algebraproducts)] do 
+        if not rep.algebraproducts[i] in [false, fail] then 
+            rep.algebraproducts[i] := rep.algebraproducts[i]*One(field);
+            rep.algebraproducts[i]!.ring := field;
+        fi;
+    od;
+    
+    for i in [1..Size(rep.innerproducts)] do 
+        if not rep.innerproducts[i] in [false, fail] then 
+            rep.innerproducts[i] := rep.innerproducts[i]*One(field);
+        fi;
+    od;
+    
+    for i in rep.setup.orbitreps do 
+        rep.evecs[i] := rep.evecs[i]*One(field);
+        for j in [1..3] do 
+            rep.evecs[i][j]!.ring := field;
+        od;
+    od;
+    
+    rep.setup.nullspace.vectors := rep.setup.nullspace.vectors*One(field);
+    rep.setup.nullspace.vectors!.ring := field;
+
+    end );
 
 # Finds the indices i such that v_i*v is not known
 

@@ -10,6 +10,8 @@
 #! @Arguments G, T
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
+DeclareGlobalFunction( "MAJORANA_ChangeFieldOfRep" );
+
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
