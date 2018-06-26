@@ -490,7 +490,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
             u := SparseMatrix(1, dim, [[ j[1] ]], [[ 1 ]], Rationals);
             v := SparseMatrix(1, dim, [[ j[2] ]], [[ 1 ]], Rationals);
                 
-            for k in [1..dim] do
+            for k in Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0) do
             
                 w := SparseMatrix(1, dim, [[ k ]], [[ 1 ]], Rationals);
                     
