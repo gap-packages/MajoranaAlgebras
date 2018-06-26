@@ -176,7 +176,7 @@ function(arg)
         od;        
     od;
     
-    if rep.innerproducts <> false and false in rep.innerproducts then 
+    if rep.innerproducts = false or false in rep.innerproducts then 
         MAJORANA_IntersectEigenspaces(rep);
     fi;
     
