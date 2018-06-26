@@ -531,7 +531,7 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
         fi;
     od;
     
-    return Compacted(input.shapes);
+    input.shapes := Compacted(input.shapes);
     
     end );
     
