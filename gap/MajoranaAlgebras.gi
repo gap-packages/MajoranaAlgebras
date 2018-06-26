@@ -176,6 +176,10 @@ function(arg)
         od;        
     od;
     
+    #if Size(arg) = 1 then 
+    #    MAJORANA_Fusion(rep, false);
+    #fi;
+    
     if rep.innerproducts = false or false in rep.innerproducts then 
         MAJORANA_IntersectEigenspaces(rep);
     fi;
@@ -520,6 +524,35 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     fi;     
                 fi;
             od;
+        od;
+    od;
+    
+    for i in [1..Nrows(rep.setup.nullspace.vectors)] do 
+        u := CertainRows(rep.setup.nullspace.vectors, [i]);
+        for j in Filtered([1..dim], k -> rep.setup.nullspace.heads[k] = 0) do
+            if false in rep.innerproducts{rep.setup.pairorbit[j]} then 
+                v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
+                
+                eq := MAJORANA_SeparateInnerProduct(u, v, unknowns, rep.innerproducts, rep.setup);
+                
+                if Size(eq[1]!.indices[1]) = 1 then 
+                    z := MAJORANA_SingleInnerSolution(  eq, mat, vec, 
+                                                        unknowns, 
+                                                        rep.innerproducts);
+                    
+                    mat := z.mat; vec := z.vec; unknowns := z.unknowns;
+                    
+                    if unknowns = [] then 
+                        MAJORANA_CheckNullSpace(rep); return;
+                    fi;
+                elif eq[1]!.indices[1] <> [] then 
+                    eq := eq*(1/eq[1]!.entries[1][1]);
+                    if not _IsRowOfSparseMatrix(mat, eq[1]) then
+                        mat := UnionOfRows(mat, eq[1]);
+                        vec := UnionOfRows(vec, eq[2]);
+                    fi;
+                fi;
+            fi;
         od;
     od;
     
