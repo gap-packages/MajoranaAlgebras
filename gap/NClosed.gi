@@ -42,7 +42,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], Rationals);
     
     for i in [1..Size(rep.algebraproducts)] do 
-        if rep.algebraproducts[i] <> false then 
+        if not rep.algebraproducts[i] in [false, fail] then 
             rep.algebraproducts[i]!.ncols := new_dim;
         fi;
     od;
