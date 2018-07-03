@@ -58,6 +58,29 @@ InstallGlobalFunction( MAJORANA_Decomposition,
     
     end );
     
+InstallGlobalFunction( MAJORANA_MiyamotoGroup,
+
+    function(rep)
+    
+    local null, gens, dim;
+    
+    dim  := Size(rep.setup.coords);;
+
+    if Nrows(rep.nullspace) > 0 then 
+        null := EchelonMat(ConvertSparseMatrixToMatrix(rep.nullspace));;
+    else 
+        null := [];
+    fi;
+
+    gens := GeneratorsOfGroup(rep.group);;
+    gens := List(gens, x -> Position(AsList(rep.group), x));; 
+    gens := rep.setup.pairconjelts{gens};;
+    gens := List(gens, x -> MAJORANA_FindMatrix(x, null, dim));;
+    
+    return Group(gens);
+    
+    end);
+    
 InstallGlobalFunction( MAJORANA_Dimension, 
 
     function(rep)
