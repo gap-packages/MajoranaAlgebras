@@ -574,7 +574,17 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                             MAJORANA_CheckNullSpace(rep); return;
                         fi;
                     elif eq[1]!.indices[1] <> [] then 
-                        eq := eq*(1/eq[1]!.entries[1][1]);
+                    
+                        if IsRationalFunction( eq[1]!.entries[1][1] ) then 
+                            if not IsConstantRationalFunction( DenominatorOfRationalFunction( eq[1]!.entries[1][1] )) then 
+                                # Error( "Non constant denominator KernelEchelonMatDestructive");
+                                Print("\n");
+                                Display(DenominatorOfRationalFunction( eq[1]!.entries[1][1] ));
+                                Print("\n");
+                            fi;
+                        fi;
+                    
+                        eq := eq*(One(rep.field)/eq[1]!.entries[1][1]);
                         if not _IsRowOfSparseMatrix(mat, eq[1]) then
                             mat := UnionOfRows(mat, eq[1]);
                             vec := UnionOfRows(vec, eq[2]);
