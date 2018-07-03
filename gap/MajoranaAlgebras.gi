@@ -36,6 +36,41 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
     rep.setup.nullspace.vectors!.ring := field;
 
     end );
+    
+InstallGlobalFunction( MAJORANA_SetValue, 
+
+    function(rep, function_field, indets, vals)
+    
+    local i, j;
+    
+    for i in [1..Size(rep.algebraproducts)] do 
+        if not rep.algebraproducts[i] in [false, fail] then 
+            rep.algebraproducts[i]!.entries[1] := List(rep.algebraproducts[i]!.entries[1], x -> Value(x, indets, vals));
+        fi;
+    od;
+    
+    for i in [1..Size(rep.innerproducts)] do 
+        if not rep.innerproducts[i] in [false, fail] then 
+            rep.innerproducts[i] := Value(rep.innerproducts[i], indets, vals);
+        fi;
+    od;
+    
+    for i in rep.setup.orbitreps do 
+        for j in [1..3] do 
+            rep.evecs[i][j]!.entries := List(rep.evecs[i][j]!.entries, x -> List(x, y -> Value(y, indets, vals)));
+        od;
+    od;
+    
+    rep.setup.nullspace.vectors!.entries := List(rep.setup.nullspace.vectors!.entries, x -> List(x, y -> Value(y, indets, vals)));
+    
+    MAJORANA_ChangeFieldOfRep(rep, CoefficientsRing(function_field));
+    
+    end );
+    
+    
+    
+    
+    
 
 # Finds the indices i such that v_i*v is not known
 

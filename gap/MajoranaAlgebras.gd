@@ -12,6 +12,8 @@ DeclareGlobalFunction( "MajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_ChangeFieldOfRep" );
 
+DeclareGlobalFunction( "MAJORANA_SetValue" );
+
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
