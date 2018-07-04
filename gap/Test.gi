@@ -58,13 +58,15 @@ InstallGlobalFunction(MAJORANA_TestFusion,
     dim := Size(rep.setup.coords);
 
     for i in rep.setup.orbitreps do        
+    
+        Display(i);
         
         u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
     
         for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do 
         
             new := [0,0,0];
-            
+                
             for j in [1..3] do 
                 new[j] := SparseMatrix(0, dim, [], [], rep.field);
             od;
@@ -82,20 +84,21 @@ InstallGlobalFunction(MAJORANA_TestFusion,
                                                 rep.setup );
                 od;
             od;
-        od;
         
-        for j in [1..3] do
-            ev := MAJORANA_FusionTable[1][j + 1];
-            
-            new[j] := EchelonMatDestructive(new[j]).vectors;
-            
-            for k in [1..Nrows(new[j])] do 
-                a := CertainRows(new[j], [k]);
-                x := MAJORANA_AlgebraProduct(u, a, rep.algebraproducts, rep.setup);
-                if x <> ev*a and x <> false then 
-                    Error("Algebra does not obey the fusion rules");
-                fi;
+            for j in [1..3] do
+                ev := MAJORANA_FusionTable[1][j + 1];
+                
+                # new[j] := EchelonMatDestructive(new[j]).vectors;
+                
+                for k in [1..Nrows(new[j])] do 
+                    a := CertainRows(new[j], [k]);
+                    x := MAJORANA_AlgebraProduct(u, a, rep.algebraproducts, rep.setup);
+                    if x <> ev*a and x <> false then 
+                        Error("Algebra does not obey the fusion rules");
+                    fi;
+                od;
             od;
+        
         od;
     od;
     
