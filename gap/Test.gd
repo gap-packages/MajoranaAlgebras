@@ -20,3 +20,5 @@ DeclareGlobalFunction( "MAJORANA_TestPrimitivity" );
 
 DeclareGlobalFunction( "MAJORANA_IsComplete" );
 
+DeclareGlobalFunction( "MAJORANA_TestPositiveDefiniteForm" );
+

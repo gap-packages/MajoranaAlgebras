@@ -371,19 +371,21 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
 
     function(rep)
     
-    local i, dim, u, v, j, x, mat, espace;
+    local i, dim, u, v, j, x, mat, espace, basis;
     
     if false in rep.algebraproducts then return fail; fi;
     
     dim := Size(rep.setup.coords);
     
+    basis := Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0);
+    
     for i in rep.setup.orbitreps do 
         
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
         
-        mat := SparseMatrix(0, dim, [], [], Rationals);
+        mat := SparseMatrix(0, Size(basis), [], [], Rationals);
         
-        for j in [1 .. dim] do 
+        for j in basis do 
             v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
         
             x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
@@ -413,7 +415,25 @@ InstallGlobalFunction( MAJORANA_IsComplete,
     fi;
     
     end );
+    
+InstallGlobalFunction( MAJORANA_TestPositiveDefiniteForm,
 
+    function(rep)
+    
+    local dim, gram;
+    
+    dim := Size(rep.setup.coords);
+    
+    gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep.innerproducts, rep.setup);
+
+    if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram)) < 0 then 
+        return false; 
+    else 
+        return true; 
+    fi;
+    
+    end );
+    
 InstallGlobalFunction(MAJORANA_TestAxiomM2,
 
     function(rep) # Tests that the algebra obeys axiom M2
