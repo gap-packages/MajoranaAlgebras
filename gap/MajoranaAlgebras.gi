@@ -242,6 +242,8 @@ function(arg)
         od;        
     od;
     
+    MAJORANA_IntersectEigenspaces(rep);
+    
     end );     
 
 # Returns true if we have full eigenspace decomposition, returns false otherwise
@@ -571,7 +573,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                         mat := z.mat; vec := z.vec; unknowns := z.unknowns;
                         
                         if unknowns = [] then 
-                            MAJORANA_CheckNullSpace(rep); return;
+                            #MAJORANA_CheckNullSpace(rep); return;
                         fi;
                     elif eq[1]!.indices[1] <> [] then 
                     
@@ -598,7 +600,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
     if x.unknowns = [] then 
-        MAJORANA_CheckNullSpace(rep);
+        #MAJORANA_CheckNullSpace(rep);
     fi;
 
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
