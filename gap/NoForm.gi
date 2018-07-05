@@ -2,11 +2,13 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     function(rep)
 
-    local dim, null, i, j, k, evecs_a, evecs_b, Z, x;
+    local dim, null, i, j, k, evecs_a, evecs_b, Z, x, u, v, g, ev, gens;
 
     dim := Size(rep.setup.coords);
 
     null := [];
+
+    # Add intersection of eigenspaces to nullspace
 
     for i in rep.setup.orbitreps do 
         for j in [1 .. 3] do 
@@ -21,15 +23,49 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         od;
     od;
 
-    null := SparseMatrix(null, rep.field);
+    null := SparseMatrix(null, Rationals);
+    
+    # Use eigenvectors to find potentially more nullspace vectors
+    
+    for i in rep.setup.orbitreps do 
+    
+        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+    
+        for j in [1 .. 3] do
+            
+            ev := MAJORANA_FusionTable[1][j + 1];
+            
+            for k in [1..Nrows(rep.evecs[i][j])] do 
+                v := CertainRows(rep.evecs[i][j], [k]);
+                x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+                
+                if x <> false then 
+                    null := UnionOfRows(null, x - ev*v);
+                fi;
+            od;
+        od;
+    od;
+    
+    # Find basis and remove null vecs from products and evecs
 
-    null := ReversedEchelonMatDestructive(null);
+    null := ReversedEchelonMatDestructive(null).vectors;
     
-    if Nrows(null.vectors) = Nrows(rep.setup.nullspace.vectors) then return; fi;
+    if Nrows(null) = 0 then return; fi;
     
-    rep.setup.nullspace := null;
+    gens := GeneratorsOfGroup(rep.group);;
+    gens := List(gens, x -> Position(AsList(rep.group), x));
+    gens := rep.setup.pairconjelts{gens};
     
-    if null.heads = [] then return; fi;
+    for g in gens do 
+        for i in [1..Nrows(null)] do
+            x := CertainRows(null, [i]);
+            null := UnionOfRows(null, MAJORANA_ConjugateVec(x, g));
+        od;
+    od;
+    
+    null := UnionOfRows(rep.setup.nullspace.vectors, null);
+    
+    rep.setup.nullspace := ReversedEchelonMatDestructive(null);
     
     for i in [1..Size(rep.setup.pairreps)] do
         x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
@@ -41,13 +77,13 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
     for i in [1..Size(rep.algebraproducts)] do 
         if not rep.algebraproducts[i] in [false, fail] then 
-            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], null);
+            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], rep.setup.nullspace);
         fi;
     od;
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], null);
+            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], rep.setup.nullspace);
             rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
         od;
     od;
