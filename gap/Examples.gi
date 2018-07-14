@@ -16,6 +16,14 @@ BindGlobal("A8",function()
     end
     );
     
+BindGlobal("J2",function() # shape 2
+    local G, T, t;
+    G := AtlasGroup("J2");
+    t := (1,7)(2,47)(3,79)(4,25)(5,97)(6,41)(8,86)(9,52)(10,28)(14,42)(15,70)(16,80)(17,72)(19,20)(21,65)(22,90)(24,96)(26,64)(27,36)(29,67)(31,92)(32,69)(33,49)(34,88)(35,83)(37,74)(40,99)(45,48)(50,93)(51,82)(53,84)(55,63)(58,60)(59,77)(61,87)(62,95)(68,100)(73,81)(76,85)(89,98);
+    T := ShallowCopy(AsList(ConjugacyClass(G, t)));
+    return ShapesOfMajoranaRepresentationAxiomM8(G,T);;
+    end );
+    
 BindGlobal("L34",function()
     local G, T, ex;
     G := PSL(3,4);;
