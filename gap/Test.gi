@@ -5,7 +5,47 @@ BindGlobal("MAJORANA_FusionTable",
             ,[    0,    0,   1/4, 1/32]
             ,[  1/4,  1/4,     0, 1/32]
             ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
-
+            
+InstallGlobalFunction( MAJORANA_TestFusionTable,
+    
+    function(adjoint, evals, table, rep)
+    
+    local n, field, eigenvectors, ev, eigenspaces, i, j, k, l, u, v, x, space;
+    
+    n := Nrows(adjoint);
+    
+    field := adjoint!.ring;
+    
+    eigenvectors := [];
+    
+    for ev in evals do 
+        Add(eigenvectors, KernelMat(adjoint - ev*SparseIdentityMatrix(15, field)).relations);
+    od;
+    
+    eigenspaces := List(eigenvectors, x -> ConvertSparseMatrixToMatrix(x));;
+    eigenspaces := List(eigenspaces, x -> Subspace(field^n, x));;
+    
+    for i in [1..Size(evals)] do 
+        for j in [1..Size(evals)] do 
+            space := Subspace(field^n, Union(List(eigenspaces, Basis){table[i][j]}));
+            
+            for k in [1..Nrows(eigenvectors[i])] do 
+                u := CertainRows(eigenvectors[i], [k]);
+                for l in [1..Nrows(eigenvectors[j])] do 
+                    v := CertainRows(eigenvectors[j], [l]);
+                    
+                    x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+                    
+                    if not ConvertSparseMatrixToMatrix(x)[1] in space then 
+                        Error("Fusion table is not obeyed");
+                    fi;
+                od;
+            od;
+        od;
+    od;
+    
+    end );
+    
 InstallGlobalFunction(MAJORANA_TestEvecs,
 
     function(rep)
@@ -286,6 +326,24 @@ InstallGlobalFunction( MAJORANA_IsComplete,
         return false; 
     else
         return true;
+    fi;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_TestPositiveDefiniteForm,
+
+    function(rep)
+    
+    local dim, gram;
+    
+    dim := Size(rep.setup.coords);
+    
+    gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep);
+
+    if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram), rep.field) < 0 then 
+        return false; 
+    else 
+        return true; 
     fi;
     
     end );
