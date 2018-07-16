@@ -34,6 +34,11 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
     
     rep.setup.nullspace.vectors := rep.setup.nullspace.vectors*One(field);
     rep.setup.nullspace.vectors!.ring := field;
+    
+    rep.mat!.ring := field;
+    rep.mat!.entries := List(rep.mat!.entries, x -> x*One(field));
+    rep.vec!.ring := field;
+    rep.vec!.entries := List(rep.vec!.entries, x -> x*One(field));
 
     end );
     
@@ -193,7 +198,7 @@ function(arg)
     for i in rep.setup.orbitreps do 
     
         while true do 
-            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
+            if false and MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
                 break;
             fi;
         
@@ -223,7 +228,7 @@ function(arg)
                         new[j] := MAJORANA_BasisOfEvecs(new[j]);
                     od;
                 
-                    if MAJORANA_CheckBasis(dim, new, rep) = true then
+                    if false and MAJORANA_CheckBasis(dim, new, rep) = true then
                         rep.evecs[i] := new;
                         break;
                     fi;
@@ -573,19 +578,9 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                         mat := z.mat; vec := z.vec; unknowns := z.unknowns;
                         
                         if unknowns = [] then 
-                            #MAJORANA_CheckNullSpace(rep); return;
+                            MAJORANA_CheckNullSpace(rep); return;
                         fi;
-                    elif eq[1]!.indices[1] <> [] then 
-                    
-                        if IsRationalFunction( eq[1]!.entries[1][1] ) then 
-                            if not IsConstantRationalFunction( DenominatorOfRationalFunction( eq[1]!.entries[1][1] )) then 
-                                # Error( "Non constant denominator KernelEchelonMatDestructive");
-                                Print("\n");
-                                Display(DenominatorOfRationalFunction( eq[1]!.entries[1][1] ));
-                                Print("\n");
-                            fi;
-                        fi;
-                    
+                    elif eq[1]!.indices[1] <> [] then
                         eq := eq*(One(rep.field)/eq[1]!.entries[1][1]);
                         if not _IsRowOfSparseMatrix(mat, eq[1]) then
                             mat := UnionOfRows(mat, eq[1]);
@@ -600,7 +595,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
     if x.unknowns = [] then 
-        #MAJORANA_CheckNullSpace(rep);
+        MAJORANA_CheckNullSpace(rep);
     fi;
 
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);

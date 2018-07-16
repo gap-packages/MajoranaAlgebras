@@ -150,6 +150,10 @@ InstallGlobalFunction( NClosedMajoranaRepresentation,
         unknowns := Positions(rep.algebraproducts, false);
                                 
         MAJORANA_MainLoop(rep);
+        
+        MAJORANA_Fusion(rep, false);
+        
+        MajoranaAlgebraTest(rep);
 
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
