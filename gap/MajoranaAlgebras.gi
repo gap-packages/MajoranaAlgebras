@@ -66,6 +66,9 @@ InstallGlobalFunction( MAJORANA_SetValue,
         od;
     od;
     
+    rep.mat!.entries := List(rep.mat!.entries, x -> List(x, y -> Value(y, indets, vals)) );
+    rep.vec!.entries := List(rep.vec!.entries, x -> List(x, y -> Value(y, indets, vals)));
+    
     rep.setup.nullspace.vectors!.entries := List(rep.setup.nullspace.vectors!.entries, x -> List(x, y -> Value(y, indets, vals)));
     
     MAJORANA_ChangeFieldOfRep(rep, CoefficientsRing(function_field));
@@ -559,7 +562,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
             u := SparseMatrix(1, dim, [[ j[1] ]], [[ 1 ]], rep.field);
             v := SparseMatrix(1, dim, [[ j[2] ]], [[ 1 ]], rep.field);
                 
-            for k in [1..dim] do
+            for k in Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0) do
             
                 w := SparseMatrix(1, dim, [[ k ]], [[ 1 ]], rep.field);
                     
@@ -930,6 +933,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
         if y <> false then 
             res[2] := res[2] + (1/4)*y*u;
         else
+            Error();
             return false;
         fi;
     fi;
