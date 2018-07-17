@@ -48,22 +48,26 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
     # Find basis and remove null vecs from products and evecs
 
-    null := ReversedEchelonMatDestructive(null).vectors;
+    rep.setup.nullspace := ReversedEchelonMatDestructive(null).vectors;
     
-    if Nrows(null) = 0 then return; fi;
+    MAJORANA_RemoveNullspaceNoForm(rep);
     
-    gens := GeneratorsOfGroup(rep.group);;
-    gens := List(gens, x -> Position(AsList(rep.group), x));
-    gens := rep.setup.pairconjelts{gens};
+    end );
     
-    for g in gens do 
-        for i in [1..Nrows(null)] do
-            x := CertainRows(null, [i]);
+InstallGlobalFunction( MAJORANA_RemoveNullspaceNoForm,
+
+    function(rep)
+    
+    local null, g, i, h, x;
+
+    if Nrows(rep.setup.nullspace) = 0 then return; fi;
+    
+    for g in rep.setup.conjelts do 
+        for i in [1..Nrows(rep.setup.nullspace.vectors)] do
+            x := CertainRows(rep.setup.nullspace.vectors, [i]);
             null := UnionOfRows(null, MAJORANA_ConjugateVec(x, g));
         od;
     od;
-    
-    null := UnionOfRows(rep.setup.nullspace.vectors, null);
     
     rep.setup.nullspace := ReversedEchelonMatDestructive(null);
     
@@ -87,8 +91,6 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
             rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
         od;
     od;
-    
-    end );
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
 

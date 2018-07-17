@@ -1,6 +1,8 @@
 DeclareGlobalFunction( "MAJORANA_FuseEigenvectorsNoForm" );
 
 DeclareGlobalFunction( "MAJORANA_IntersectEigenspaces" );
+
+DeclareGlobalFunction( "MAJORANA_RemoveNullspaceNoForm" );
     
 DeclareGlobalFunction( "MAJORANA_MainLoopNoForm" );
     
