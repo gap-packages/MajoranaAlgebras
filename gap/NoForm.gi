@@ -2,7 +2,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     function(rep)
 
-    local dim, null, i, j, k, evecs_a, evecs_b, Z, x, u, v, g, ev, gens;
+    local dim, null, i, j, k, evecs_a, evecs_b, z, x, u, v, g, ev, gens;
 
     dim := Size(rep.setup.coords);
 
@@ -16,14 +16,14 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
                 evecs_a := ConvertSparseMatrixToMatrix(rep.evecs[i][j]);
                 evecs_b := ConvertSparseMatrixToMatrix(rep.evecs[i][k]);
              
-                Z := SumIntersectionMat(evecs_a, evecs_b);
+                z := SumIntersectionMat(evecs_a, evecs_b);
                 
-                Append(null, Z[2]); 
+                Append(null, z[2]); 
             od;
         od;
     od;
 
-    null := SparseMatrix(null, Rationals);
+    null := SparseMatrix(null, rep.field);
     
     # Use eigenvectors to find potentially more nullspace vectors
     
@@ -49,8 +49,14 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     if Nrows(null) = 0 then return; fi;
     
     # Find basis and remove null vecs from products and evecs
+    
+    null!.ncols := dim;
+    
+    null := UnionOfRows(null, rep.setup.nullspace.vectors);
 
     rep.setup.nullspace := ReversedEchelonMatDestructive(null);
+    
+    if rep.setup.nullspace.heads = [] then Error(); fi;
     
     MAJORANA_RemoveNullspaceNoForm(rep);
     
