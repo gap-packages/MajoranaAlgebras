@@ -415,6 +415,8 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     
     local   dim, j, list, pos, im, sign;
     
+    if IsRowVector(g) then return g; fi;
+    
     dim := Size(subrep.setup.coords);
     list := [1..dim]*0;
         
@@ -459,7 +461,7 @@ InstallGlobalFunction( MAJORANA_RecordCoords,
         
         list := Positions(subrep.setup.poslist, i);
         im := List(subrep.setup.longcoords{list}, 
-                y -> MAJORANA_MappedWord(rep, subrep, y, gens, involutions));
+        y -> MAJORANA_MappedWord(rep, subrep, y, gens, involutions));
         
         x := First(im, y -> y in rep.setup.longcoords);
             
