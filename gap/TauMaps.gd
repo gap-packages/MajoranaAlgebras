@@ -1,0 +1,1 @@
+DeclareGlobalFunction( "MAJORANA_TauShapes" );
