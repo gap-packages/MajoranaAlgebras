@@ -2,7 +2,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     function(rep)
 
-    local dim, null, i, j, k, evecs_a, evecs_b, Z, x, u, v, g, ev, gens;
+    local dim, null, i, j, k, evecs_a, evecs_b, Z, x, u, v, g, ev, conj;
 
     dim := Size(rep.setup.coords);
 
@@ -52,18 +52,17 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
     if Nrows(null) = 0 then return; fi;
     
-    gens := GeneratorsOfGroup(rep.group);;
-    gens := List(gens, x -> Position(AsList(rep.group), x));
-    gens := rep.setup.pairconjelts{gens};
+    conj := SparseMatrix(0, dim, [], [], Rationals);
+    conj := UnionOfRows(conj, null);
     
-    for g in gens do 
+    for g in rep.setup.conjelts do 
         for i in [1..Nrows(null)] do
             x := CertainRows(null, [i]);
-            null := UnionOfRows(null, MAJORANA_ConjugateVec(x, g));
+            conj := UnionOfRows(conj, MAJORANA_ConjugateVec(x, g));
         od;
     od;
     
-    null := UnionOfRows(rep.setup.nullspace.vectors, null);
+    null := UnionOfRows(rep.setup.nullspace.vectors, conj);
     
     rep.setup.nullspace := ReversedEchelonMatDestructive(null);
     
