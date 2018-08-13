@@ -78,9 +78,11 @@ InstallGlobalFunction( MAJORANA_TauShapes,
         fi;
     od;
     
+    gph := List(gph, DuplicateFreeList);
+    
     comps := AutoConnectedComponents(gph);
     
-    comps := Filtered(comps, x -> shape[x[1]][2] = 'X' and shape[x[1]][1] in ['2','4']);
+    comps := Filtered(comps, x -> ForAny(shape{x}, y -> y in ["2X", "4X"] ) );
     
     # Put in any known (4B, 2A) pairs
     
@@ -138,9 +140,13 @@ InstallGlobalFunction( MAJORANA_TauShapes,
         
     od;
     
+    orbs.orbitals := List(orbs.orbitals, x -> List( x, y -> tau{y} ) ) ;
+    
     return rec( group       := Group(tau),
                 tau         := tau,
                 shapes      := shapeslist,
+                orbitals    := orbs.orbitals,
+                involutions := tau,
                 pairreps    := orbs.pairreps,
                 pairorbit   := orbs.pairorbit,
                 pairconj    := orbs.pairconj,
@@ -231,6 +237,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     
     rep         := rec( group       := input.group,
                         tau         := input.tau,
+                        involutions := input.tau,
                         shape       := input.shapes[index] );
                         
     rep.setup   := rec( coords          := [1..t],
@@ -361,3 +368,34 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     return rep;
     
     end );
+    
+InstallGlobalFunction( TauMapMajoranaRepresentation,
+
+    function(input, index)
+    
+    local rep, unknowns, main;
+    
+    rep := MAJORANA_TauSetUp(input, index);
+    
+    while true do
+        
+        unknowns := Positions(rep.algebraproducts, false);
+                                
+        main := MAJORANA_MainLoop(rep);
+        
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
+        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+
+        if not false in rep.algebraproducts then
+            Info( InfoMajorana, 10, "Success" );
+            return rep;
+        elif ForAll(rep.algebraproducts{unknowns}, x -> x = false) then 
+            Info( InfoMajorana, 10, "Fail" );
+            rep.mat := main.mat; rep.vec := main.vec; rep.unknowns := main.unknowns;
+            return rep;
+        fi;
+    od;
+    
+    end );
+    
+    
