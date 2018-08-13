@@ -1345,14 +1345,13 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     dim := Size(rep.setup.coords);
     
-    gram := MAJORANA_FillGramMatrix(Positions(rep.setup.nullspace.heads, 0), rep.innerproducts, rep.setup);
-    null := KernelEchelonMatDestructive(gram, [1..Ncols(gram)]).relations;; 
+    gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
+    null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
+    null := ReversedEchelonMatDestructive(null);
     
-    null := UnionOfRows(null, rep.setup.nullspace.vectors);
+    rep.setup.nullspace := null;
     
-    rep.setup.nullspace := ReversedEchelonMatDestructive(null);
-    
-    if rep.setup.nullspace.heads = [] then return; fi;
+    if null.heads = [] then return; fi;
     
     for i in [1..Size(rep.setup.pairreps)] do
         x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
@@ -1365,18 +1364,19 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     for i in [1..Size(rep.algebraproducts)] do 
         if not rep.algebraproducts[i] in [false, fail] then 
-            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], rep.setup.nullspace);
+            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], null);
         fi;
     od;
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], rep.setup.nullspace );
+            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], null);
             rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
         od;
     od;
     
     end );
+
 
 InstallGlobalFunction(MAJORANA_MainLoop,
     
