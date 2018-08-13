@@ -921,7 +921,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(u, a, b, c, evals, unknowns, innerproducts, algebraproducts, setup)
     
-    local   x, y, ev, res; 
+    local   x, y, ev, res,  n, i; 
     
     res := MAJORANA_SeparateAlgebraProduct(b, c, unknowns, algebraproducts, setup);
     
@@ -935,9 +935,13 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     
     res := res + MAJORANA_SeparateAlgebraProduct(u, x, unknowns, algebraproducts, setup);
     
-    if evals[1] = 2 then 
-        y := MAJORANA_InnerProduct(a, c, innerproducts, setup);
+    n := a - b;
+
+    if evals[1] = 2 then
+        i := u!.indices[1][1];
         
+        y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], rep.field), c, rep.innerproducts, rep.setup);
+
         if y <> false then 
             res[2] := res[2] + (1/4)*y*u;
         else
