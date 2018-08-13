@@ -200,7 +200,7 @@ InstallGlobalFunction( MAJORANA_TauRecordCoords,
             Append(list, Positions(subrep.setup.poslist, -k));
         fi;
         
-        im := List(subrep.setup.longcoords{list}, x -> emb{x});
+        im := List(subrep.setup.longcoords{list}, x -> SortedList(emb{x}));
         
         x := First(im, y -> y in rep.setup.longcoords);
         
@@ -258,12 +258,8 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     rep.setup.conjelts := x.conjelts;
     rep.setup.orbitreps := x.orbitreps;
     
-    rep.setup.pairconjelts := List(rep.setup.pairconjelts, ListPerm);
-    
-    for i in [1..Size(rep.setup.pairconjelts)] do 
-        Append(rep.setup.pairconjelts[i], [Size(rep.setup.pairconjelts[i]) + 1 .. t]);
-    od;
-    
+    # rep.setup.pairconjelts := List(rep.setup.pairconjelts, x -> ListPerm(x, t));
+
     rep.setup.embeddings := NullMat(t, t);;
     
     for i in [1..t] do
@@ -297,7 +293,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
             rep.setup.pairconj[i][j]  := input.pairconj[i][j];
         od;
     od;
-
+    
     rep.setup.pairreps  := ShallowCopy(input.pairreps);
     rep.setup.pairconjelts := List(input.pairconjelts, x -> MAJORANA_FindPerm(x, rep, rep));
 
