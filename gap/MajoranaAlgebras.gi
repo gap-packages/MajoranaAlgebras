@@ -1341,6 +1341,8 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     local   dim, gram, null, unknowns, i, j, x;
     
+    if fail in rep.innerproducts then return; fi;
+    
     dim := Size(rep.setup.coords);
     
     gram := MAJORANA_FillGramMatrix(Positions(rep.setup.nullspace.heads, 0), rep.innerproducts, rep.setup);
