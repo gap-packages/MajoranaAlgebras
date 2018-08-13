@@ -1343,13 +1343,14 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     dim := Size(rep.setup.coords);
     
-    gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
-    null := KernelEchelonMatDestructive(gram, [1..dim]).relations;; 
-    null := ReversedEchelonMatDestructive(null);
+    gram := MAJORANA_FillGramMatrix(Positions(rep.setup.heads, 0), rep.innerproducts, rep.setup);
+    null := KernelEchelonMatDestructive(gram, [1..Ncols(gram)]).relations;; 
     
-    rep.setup.nullspace := null;
+    null := UnionOfRows(null, rep.setup.nullspace.vectors);
     
-    if null.heads = [] then return; fi;
+    rep.setup.nullspace := ReversedEchelonMatDestructive(null);
+    
+    if rep.setup.nullspace.heads = [] then return; fi;
     
     for i in [1..Size(rep.setup.pairreps)] do
         x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
