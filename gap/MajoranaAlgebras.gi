@@ -940,7 +940,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     if evals[1] = 2 then
         i := u!.indices[1][1];
         
-        y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], rep.field), c, rep.innerproducts, rep.setup);
+        y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], Rationals), c, innerproducts, setup);
 
         if y <> false then 
             res[2] := res[2] + (1/4)*y*u;
