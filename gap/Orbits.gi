@@ -146,7 +146,8 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             
                             pos := Position(setup.pairconjelts, g);
                             
-                            if pos = fail then 
+                            if pos = fail then # maybe this should be an error
+                                Info(InfoMajorana, 10, "WARNING: Group of actions bigger than pure group" );
                                 Add(setup.pairconjelts, g);
                                 pos := Size(setup.pairconjelts);
                             fi;
