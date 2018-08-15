@@ -85,12 +85,6 @@ InstallGlobalFunction( MAJORANA_Dimension,
 
     function(rep)
     
-    if rep.innerproducts <> false and false in rep.innerproducts then return fail; fi;
-    
-    if false in rep.algebraproducts then 
-        Info( InfoMajorana, 10, "Warning: not all algebra products have been found!");
-    fi;
-    
     return Size(rep.setup.coords) - Nrows(rep.setup.nullspace.vectors);  
     
     end );
