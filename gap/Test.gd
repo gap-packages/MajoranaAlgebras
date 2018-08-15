@@ -22,3 +22,5 @@ DeclareGlobalFunction( "MAJORANA_IsComplete" );
 
 DeclareGlobalFunction( "MAJORANA_TestPositiveDefiniteForm" );
 
+DeclareGlobalFunction( "IsMinimal3GeneratedAlgebra" );
+
