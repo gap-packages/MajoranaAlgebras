@@ -27,7 +27,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
     # Use eigenvectors to find potentially more nullspace vectors
     
-    for i in rep.setup.orbitreps do 
+    for i in Filtered(rep.setup.orbitreps, x -> rep.setup.nullspace.heads[i] = 0) do 
     
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
