@@ -445,22 +445,25 @@ function(rep)
                 v := CertainRows(rep.evecs[i][ev], [j]);
                 
                 x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
+
+                if x <> fail then 
                 
-                x[2] := x[2] + MAJORANA_FusionTable[1][ev + 1]*v;
-                
-                if Size(x[1]!.indices[1]) = 1 then 
-                    y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
-                                                    rep.algebraproducts,
-                                                    rep.setup);
-                                                    
-                    if not false in rep.algebraproducts then return true; fi;
-                                                    
-                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                    x[2] := x[2] + MAJORANA_FusionTable[1][ev + 1]*v;
                     
-                elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(mat, x[1]) then
-                    mat := UnionOfRows(mat, x[1]);
-                    vec := UnionOfRows(vec, x[2]);
-                fi;                
+                    if Size(x[1]!.indices[1]) = 1 then 
+                        y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
+                                                        rep.algebraproducts,
+                                                        rep.setup);
+                                                        
+                        if not false in rep.algebraproducts then return true; fi;
+                                                        
+                        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                        
+                    elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(mat, x[1]) then
+                        mat := UnionOfRows(mat, x[1]);
+                        vec := UnionOfRows(vec, x[2]);
+                    fi;  
+                fi;
             od;
         od;
     od;
@@ -652,6 +655,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             fi;
             
             x := algebraproducts[k];
+            
+            if x = fail then return fail; fi;
             
             if x <> false then 
                                         
@@ -923,11 +928,11 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     function(u, a, b, c, evals, unknowns, innerproducts, algebraproducts, setup)
     
-    local   x, y, ev, res,  n, i; 
+    local   x, y, z, ev, res,  n, i; 
     
     res := MAJORANA_SeparateAlgebraProduct(b, c, unknowns, algebraproducts, setup);
     
-    if res[1]!.indices[1] = [] then return false; fi;
+    if res[1]!.indices[1] = [] or res = fail then return false; fi;
     
     ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
     
@@ -937,7 +942,11 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     
     if x = fail then return false; fi;
     
-    res := res + MAJORANA_SeparateAlgebraProduct(u, x, unknowns, algebraproducts, setup);
+    z := MAJORANA_SeparateAlgebraProduct(u, x, unknowns, algebraproducts, setup);
+    
+    if z = fail then return; fi;
+    
+    res := res + z;
     
     n := a - b;
 
@@ -994,7 +1003,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
          
                 x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
                 
-                if Size(x[1]!.indices[1]) = 1 then 
+                if x <> fail and Size(x[1]!.indices[1]) = 1 then 
                     
                     y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
                                                         algebraproducts,
@@ -1004,7 +1013,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                     
                     mat := y.mat; vec := y.vec; unknowns := y.unknowns;
                     
-                elif x[1]!.indices[1] <> [] then 
+                elif x <> fail and x[1]!.indices[1] <> [] then 
                     if not _IsRowOfSparseMatrix(mat, x[1]) then
                         mat := UnionOfRows(mat, x[1]);
                         vec := UnionOfRows(vec, x[2]);
