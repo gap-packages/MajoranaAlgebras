@@ -351,6 +351,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
                         y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
                         
                         if x <> false and y <> false and x <> y then 
+                            return false;
                             # Error("Axiom M1");
                             Add(ErrorM1,[l[1], l[2] ,k]);
                         fi;
