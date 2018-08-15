@@ -79,7 +79,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
     
-    if x = false then return; fi;
+    if x in [false, fail] then return; fi;
     
     if evals = [2,2] then 
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
@@ -94,7 +94,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
         
         z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
         
-        if z = false then return; fi;
+        if z in [false,  fail] then return; fi;
         
         new[2] := MAJORANA_AddEvec(new[2], z - (1/32)*u*y);
         new[1] := MAJORANA_AddEvec(new[1], x + (3/32)*u*y - 4*z); 
@@ -273,7 +273,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
                 x := algebraproducts[k];
                 
-                if x <> false then
+                if not x in [fail, false] then
                     
                     g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]];
                     
@@ -285,9 +285,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                         Add(elts, g);
                         Add(vecs, CopyMat(sign*u!.entries[1][i]*v!.entries[1][j]*x));
                     fi;
-                else
+                elif x = false then 
                     # cannot calculate product
                     return false;
+                else # product with a vector in the nullspace
+                    return fail;
                 fi;
             od;
         od;
@@ -500,7 +502,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                     
                 y := MAJORANA_AlgebraProduct(v, w, rep.algebraproducts, rep.setup);
             
-                if y <> false then 
+                if not y in [fail, false] then 
 
                     eq := MAJORANA_SeparateInnerProduct(w, x, unknowns, rep.innerproducts, rep.setup); 
                     eq := eq - MAJORANA_SeparateInnerProduct(y, u, unknowns, rep.innerproducts, rep.setup);
@@ -932,6 +934,8 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     res := ev*res;
     
     x := MAJORANA_AlgebraProduct(c, a - b, algebraproducts, setup);
+    
+    if x = fail then return false; fi;
     
     res := res + MAJORANA_SeparateAlgebraProduct(u, x, unknowns, algebraproducts, setup);
     

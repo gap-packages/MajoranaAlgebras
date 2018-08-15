@@ -22,7 +22,7 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
                 
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
                 
-                if not x in [ev*v, false] then
+                if not x in [ev*v, false, fail] then
                     Error("evecs");
                 fi;
             od;
@@ -201,7 +201,7 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
             for k in [1..Nrows(new[j])] do 
                 a := CertainRows(new[j], [k]);
                 x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
-                if x <> ev*a and x <> false then 
+                if not x in [ev*a, false, fail] then 
                     Error("The algebra does not obey the fusion rules");
                 fi;
             od;

@@ -39,7 +39,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
                 v := CertainRows(rep.evecs[i][j], [k]);
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
                 
-                if x <> false then 
+                if not x in [fail, false] then 
                     null := UnionOfRows(null, x - ev*v);
                 fi;
             od;
@@ -108,22 +108,22 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
     
-    if x = false then return; fi;
+    if x in [false, fail] then return; fi;
     
     if evals = [2,2] then 
         y := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
         
-        if y = false then return; fi;
+        if y in [fail, false] then return; fi;
             
         new[1] := MAJORANA_AddEvec(new[1], x - y);
     elif evals = [3,3] then 
         y := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
         
-        if y = false then return; fi;
+        if y in [fail, false] then return; fi;
         
         z := MAJORANA_AlgebraProduct(u,y,algebraproducts, setup);
         
-        if z = false then return; fi;
+        if z in [fail, false] then return; fi;
         
         new[2] := MAJORANA_AddEvec(new[2], y - z);
         new[1] := MAJORANA_AddEvec(new[1], x - 5*y + 4*z); 
