@@ -79,7 +79,9 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
     
-    if x in [false, fail] then return; fi;
+    if x = false then return; fi;
+    
+    if x = fail then return; fi;
     
     if evals = [2,2] then 
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
@@ -127,9 +129,9 @@ function(arg)
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
         while true do 
-            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
-                break;
-            fi;
+            #if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
+            #    break;
+            #fi;
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
