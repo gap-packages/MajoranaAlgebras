@@ -496,7 +496,7 @@ InstallGlobalFunction( IsMinimal3GeneratedAlgebra,
 
     function(rep)
 
-    local n, dim, k, triples, U, t, H, i, j, V, u, v, type, dih, axes, prod;
+    local n, dim, k, triples, U, t, H, i, j, V, u, v, type, dih, axes, prod, x, list;
 
     k := Size(rep.involutions);;
     dim := MAJORANA_Dimension(rep);
@@ -543,10 +543,16 @@ InstallGlobalFunction( IsMinimal3GeneratedAlgebra,
         
         if Size(U) <> dim then 
         
-            type := rep.shape[rep.setup.pairorbit[t[1]][t[2]]];  
-            dih := MAJORANA_DihedralAlgebrasNoAxioms.(type);
+            list := [];
         
-            if Size(U) <>  Size(dih.setup.coords) then return false; fi;
+            for x in Combinations(t, 2) do 
+                type := rep.shape[rep.setup.pairorbit[x[1]][x[2]]];  
+                dih := MAJORANA_DihedralAlgebrasNoAxioms.(type);
+            
+                Add(list, Size(dih.setup.coords));
+            od;
+        
+            if Size(U) <>  Maximum(list) then return false; fi;
         
         fi;
     od;
