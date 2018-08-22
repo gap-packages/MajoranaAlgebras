@@ -182,9 +182,9 @@ function(arg)
         MAJORANA_Fusion(rep, false);
     fi;
     
-    if rep.innerproducts = false or false in rep.innerproducts then 
+    # if rep.innerproducts = false or false in rep.innerproducts then 
         MAJORANA_IntersectEigenspaces(rep);
-    fi;
+    # fi;
     
     end );     
 
