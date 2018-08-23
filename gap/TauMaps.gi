@@ -328,6 +328,26 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
         fi;
     od;
 
+    # Check for any 2A algebras coming from the more axes func
+    
+    if IsBound(input.algebras2A) then 
+        for i in Filtered( [1 .. Size(rep.shape)], k -> rep.shape[k] = "2A" ) do 
+            x := First(input.algebras2A, y -> Size( Intersection(y, input.pairreps[i])) = 2 );
+            
+            j := PositionProperty(x, y -> not y in input.pairreps[i]);
+            
+            rep.algebraproducts[i] := SparseMatrix(1, dim, [ x ] , [[1/8, 1/8, 1/8]], Rationals);
+            rep.algebraproducts[i]!.entries[j] := -1/8;
+            
+            for k in Filtered( input.pairreps, x -> x in rep.setup.orbitreps) do
+                
+                
+                ### TODO Add evecs from these 2A algebras
+                
+            od;
+        od;
+    fi;
+
     # Embed dihedral algebras
     
     for i in [1..t] do 

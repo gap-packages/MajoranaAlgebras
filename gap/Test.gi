@@ -496,7 +496,13 @@ InstallGlobalFunction( MAJORANA_SubalgebraAxes,
 
     function(rep, t)
     
-    local n, H, tau, axes, U, V, i, j, u, v, prod;
+    local n, H, tau, axes, U, V, i, j, u, v, prod, field;
+    
+    if IsBound(rep.field) then 
+        field := rep.field; 
+    else
+        field := Rationals;
+    fi;
     
     n := Size(rep.setup.coords);
     
@@ -509,7 +515,7 @@ InstallGlobalFunction( MAJORANA_SubalgebraAxes,
     U := NullMat(Size(axes), n);
     
     for i in [1..Size(axes)] do 
-        U[i][axes[i]] := 1;
+        U[i][axes[i]] := One(field);
     od;
     
     while true do 
@@ -517,9 +523,9 @@ InstallGlobalFunction( MAJORANA_SubalgebraAxes,
         V := StructuralCopy(U);
         
         for i in [1..Size(V)] do
-            u := SparseMatrix( [V[i]], Rationals);
+            u := SparseMatrix( [V[i]], field);
             for j in [i + 1 .. Size(V)] do 
-                v := SparseMatrix( [V[j]], Rationals);
+                v := SparseMatrix( [V[j]], field);
                 prod := MAJORANA_AlgebraProduct( u, v, rep.algebraproducts, rep.setup);
                 
                 if prod in [false, fail] then return false; fi;
