@@ -533,3 +533,100 @@ InstallGlobalFunction( MAJORANA_TauRemoveDuplicateShapes,
     input.shapes := Compacted(input.shapes);
     
     end );
+    
+InstallGlobalFunction( MAJORANA_LatexRep, 
+
+    function( list ) # Of the form [ Structure description of group, length of orbits on axes, shape, dim ]
+    
+    local str, group, axes, shape, dim, i, x;
+    
+    str := [];;
+    
+    group := list[1];
+    axes := list[2];
+    
+    if IsBound(list[3]) then 
+        shape := Filtered( list[3], x -> not x in ["1A", "5A"] );
+    else 
+        shape := [];
+    fi; 
+    
+    dim := list[4];
+    
+    Append( str, STRINGIFY( group, " & " , axes[1] ) );
+    
+    for i in [2 .. Size(axes)] do 
+        Append( str, STRINGIFY(" + ", axes[i]) );
+    od;
+    
+    Append(str, " & ");
+    
+    if shape <> [] then 
+        Append( str, STRINGIFY(" ( ", shape[1]  ));
+                
+        for x in shape{[2.. Size(shape)]} do 
+            Append(str, STRINGIFY(", ", x));
+        od;
+        
+        Append( str, ")" );
+    fi;
+    
+    
+    Append( str, STRINGIFY( " & ", dim) );
+    
+    return str;
+    
+    end );
+
+    
+InstallGlobalFunction( MAJORANA_LatexNonMinimalOutput,
+
+    function(reps)
+    
+    local rep, bad, i, x, subs, row, str;
+    
+    str := [];
+    
+    for rep in reps do 
+    
+        bad := IsMinimal3GeneratedAlgebra(rep);
+        
+        if bad <> true then 
+        
+            subs := List(bad, x -> MAJORANA_SubalgebraAxes(rep, x));
+                
+            row := List(subs, x -> [    StructureDescription( Group(x[1]) ),                        # Iso type of group
+                                        List( Orbits( Group(x[1]), [1 .. Size(x[1])] ), Length ),   # Lengths of orbits on axes
+                                        ,                                                           # No shape, fill in manually
+                                        Size(x[2])      ] );                                        # Dim of alg
+            
+            row := DuplicateFreeList(row);
+            
+            #  Print the rep info on first line
+            
+            Append( str, MAJORANA_LatexRep( [ StructureDescription(rep.group), 
+                                            List( Orbits(rep.group, [1.. Size(rep.involutions)]), Length),
+                                            rep.shape,
+                                            MAJORANA_Dimension( rep )       ] ) );
+                                            
+            Append( str, " & " );
+            
+            # Also print first subalg on first line 
+            
+            Append( str, STRINGIFY( MAJORANA_LatexRep( row[1]), """ \\ """, "\n" ) );
+
+            for i in [2 .. Size(row)] do 
+               Append(str, " & & & & ");
+               Append(str, MAJORANA_LatexRep( row[i] ));
+               Append(str, """ \\ """, "\n" );
+            od;
+            
+        fi;
+        
+        Append(str, "&&&&&&& \\ \n");
+        
+    od;
+    
+    return str;
+    
+    end );

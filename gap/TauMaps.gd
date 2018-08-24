@@ -11,3 +11,7 @@ DeclareGlobalFunction( "MAJORANA_MoreAxes" );
 DeclareGlobalFunction( "MAJORANA_TauRemoveDuplicateShapes" );
 
 DeclareGlobalFunction( "OnLists" );
+
+DeclareGlobalFunction( "MAJORANA_LatexRep" );
+
+DeclareGlobalFunction( "MAJORANA_LatexNonMinimalOutput" );
