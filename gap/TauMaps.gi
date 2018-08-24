@@ -620,10 +620,10 @@ InstallGlobalFunction( MAJORANA_LatexNonMinimalOutput,
                Append(str, MAJORANA_LatexRep( row[i] ));
                Append(str, """ \\ """, "\n" );
             od;
+           
+            Append(str, "&&&&&&& \\ \n");
             
         fi;
-        
-        Append(str, "&&&&&&& \\ \n");
         
     od;
     
