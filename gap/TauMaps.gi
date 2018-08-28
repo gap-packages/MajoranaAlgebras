@@ -583,7 +583,7 @@ InstallGlobalFunction( MAJORANA_LatexNonMinimalOutput,
 
     function(reps)
     
-    local rep, bad, i, x, subs, row, str;
+    local rep, bad, i, x, subs, row, str, dim;
     
     str := [];
     
@@ -604,24 +604,30 @@ InstallGlobalFunction( MAJORANA_LatexNonMinimalOutput,
             
             #  Print the rep info on first line
             
+            if MAJORANA_IsComplete(rep) then
+                dim := MAJORANA_Dimension(rep);
+            else
+                dim := STRINGIFY( MAJORANA_Dimension(rep), " ? ");
+            fi;
+            
             Append( str, MAJORANA_LatexRep( [ StructureDescription(rep.group), 
                                             List( Orbits(rep.group, [1.. Size(rep.involutions)]), Length),
                                             rep.shape,
-                                            MAJORANA_Dimension( rep )       ] ) );
+                                            dim       ] ) );
                                             
             Append( str, " & " );
             
             # Also print first subalg on first line 
             
-            Append( str, STRINGIFY( MAJORANA_LatexRep( row[1]), """ \\ """, "\n" ) );
+            Append( str, STRINGIFY( MAJORANA_LatexRep( row[1]), """ \\ """, "\n " ) );
 
             for i in [2 .. Size(row)] do 
                Append(str, " & & & & ");
                Append(str, MAJORANA_LatexRep( row[i] ));
-               Append(str, """ \\ """, "\n" );
+               Append(str, STRINGIFY( """ \\""", " \n ") );
             od;
            
-            Append(str, "&&&&&&& \\ \n");
+            Append(str, STRINGIFY( """&&&&&&& \\ """, "\n "));
             
         fi;
         
