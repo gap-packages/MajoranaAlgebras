@@ -68,6 +68,14 @@ DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
 DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
 
+DeclareGlobalFunction( "MAJORANA_AdjointAction" );
+
+DeclareGlobalFunction( "MAJORANA_EigenvectorPolynomial" );
+
+DeclareGlobalFunction( "UnionOfRowsList" );
+
+DeclareGlobalFunction( "MAJORANA_FindFusionTable" );
+
 DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
 DeclareInfoClass( "InfoMajorana" );

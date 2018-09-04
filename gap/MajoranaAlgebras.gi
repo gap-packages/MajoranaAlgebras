@@ -1281,6 +1281,142 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         
     end );
     
+InstallGlobalFunction( MAJORANA_AdjointAction,
+
+    function(rep, axis) 
+    
+    local basis, adj, dim, field, u, v, prod, i;
+    
+    basis := Positions(rep.setup.nullspace.heads, 0);;
+    dim := Size(rep.setup.coords);
+    field := rep.field;
+    
+    adj := SparseMatrix(0, dim, [], [], field);
+    
+    u := SparseMatrix(1, dim, [ [ axis ] ], [ [ One(field) ] ], field);
+    
+    for i in basis do 
+        v := SparseMatrix(1, dim, [ [ i ] ], [ [ One(field) ] ], field);
+        prod := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+        adj := UnionOfRows(adj, prod);
+    od;
+    
+    return CertainColumns(adj, basis);
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_EigenvectorPolynomial,
+
+    function(evals, coeff_ring, dim)
+    
+    local pol, x, ev;
+    
+    x := Indeterminate(coeff_ring);
+    
+    pol := One(coeff_ring);
+    
+    for ev in evals do 
+        pol := pol*(x - ev);
+    od;
+    
+    return pol*SparseIdentityMatrix( dim, coeff_ring );
+    
+    end );
+    
+InstallGlobalFunction( UnionOfRowsList,
+
+    function( list )
+    
+    local l, mat, i;
+    
+    l := Length(list);
+    
+    if l = 1 then return list[1]; fi;
+    
+    mat := list[1];;
+    
+    for i in [2..l] do 
+        mat := UnionOfRows(mat, list[i]);
+    od;
+    
+    return mat;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_FindFusionTable,
+
+    function(rep, axis, evals)
+    
+    local dim, ring, decomp, adj, e, table, i, j, k, a, u, b, v, x, pol, vals, product, ev;
+    
+    adj := MAJORANA_AdjointAction(rep, axis);
+    
+    dim := adj!.ncols;
+    ring := adj!.ring;
+    
+    decomp := List(evals, ev -> KernelMat(adj - ev*SparseIdentityMatrix( dim, ring )));
+    decomp := List(decomp, x -> x.relations);
+    
+    e := Size(evals);
+    
+    table := NullMat( e, e);
+    
+    for i in [1 .. e] do 
+        for j in [i .. e] do 
+        
+            Display( [i,j] );
+        
+            product := SparseMatrix( 0, dim, [], [], ring);
+            
+            for a in [1 .. Nrows(decomp[i]) ] do 
+                u := CertainRows( decomp[i], [ a ] );
+                for b in [1 .. Nrows(decomp[j])] do
+                    v := CertainRows( decomp[j], [ b ] );
+                    
+                    product := UnionOfRows(product, MAJORANA_AlgebraProduct( u, v, rep.algebraproducts, rep.setup) );
+                    
+                od;
+            od;
+            
+            # product := EchelonMatDestructive(product).vectors;
+            
+            Error("pause");
+            
+            if ForAll(product!.entries, x -> x = []) then 
+                table[i][j] := [];
+                table[j][i] := [];
+            else
+                product := CertainColumns( product, Positions(rep.setup.nullspace.heads, 0));
+                #product := ConvertSparseMatrixToMatrix(product)*One(ring);
+                for k in [1 .. e] do 
+                    for x in Combinations([1 .. e], k) do 
+                        
+                        pol := One(ring);
+                        
+                        for ev in evals{x} do 
+                            pol := pol*(adj - ev*SparseIdentityMatrix(dim, ring));
+                        od;
+                        
+                        vals := product*pol;
+                        
+                        if ForAll(vals!.entries, x -> x = []) then 
+                            table[i][j] := x;
+                            table[j][i] := x;
+                            break;                            
+                        fi;
+                    od;
+                    
+                    if table[i][j] <> 0 then break; fi;
+                    
+                od;
+            fi;
+        od;
+    od;
+    
+    return table;
+    
+    end );
+    
 InstallGlobalFunction( MAJORANA_SingleInnerSolution, 
 
     function(eq, mat, vec, unknowns, innerproducts)

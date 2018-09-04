@@ -98,8 +98,6 @@ InstallGlobalFunction(MAJORANA_TestFusion,
     dim := Size(rep.setup.coords);
 
     for i in rep.setup.orbitreps do        
-    
-        Display(i);
         
         u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
     
