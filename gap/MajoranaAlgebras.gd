@@ -70,9 +70,7 @@ DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
 
 DeclareGlobalFunction( "MAJORANA_AdjointAction" );
 
-DeclareGlobalFunction( "MAJORANA_EigenvectorPolynomial" );
-
-DeclareGlobalFunction( "UnionOfRowsList" );
+DeclareGlobalFunction( "MAJORANA_NaiveProduct" );
 
 DeclareGlobalFunction( "MAJORANA_FindFusionTable" );
 

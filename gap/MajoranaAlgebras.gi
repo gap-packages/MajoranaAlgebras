@@ -1305,57 +1305,61 @@ InstallGlobalFunction( MAJORANA_AdjointAction,
     
     end );
     
-InstallGlobalFunction( MAJORANA_EigenvectorPolynomial,
+InstallGlobalFunction( MAJORANA_NaiveProduct,
 
-    function(evals, coeff_ring, dim)
+    function(u, v, products)
     
-    local pol, x, ev;
+    local vec, i, j;
     
-    x := Indeterminate(coeff_ring);
+    vec := SparseMatrix( 1, Ncols(u), [ [  ] ], [ [  ] ], u!.ring );
     
-    pol := One(coeff_ring);
-    
-    for ev in evals do 
-        pol := pol*(x - ev);
+    for i in [1 .. Size(u!.indices[1])] do
+        for j in [1 .. Size(v!.indices[1])] do
+            vec := vec + u!.entries[1][i]*v!.entries[1][j]*products[u!.indices[1][i]][v!.indices[1][j]];
+        od;
     od;
     
-    return pol*SparseIdentityMatrix( dim, coeff_ring );
+    return vec;
     
     end );
-    
-InstallGlobalFunction( UnionOfRowsList,
 
-    function( list )
-    
-    local l, mat, i;
-    
-    l := Length(list);
-    
-    if l = 1 then return list[1]; fi;
-    
-    mat := list[1];;
-    
-    for i in [2..l] do 
-        mat := UnionOfRows(mat, list[i]);
-    od;
-    
-    return mat;
-    
-    end );
-    
 InstallGlobalFunction( MAJORANA_FindFusionTable,
 
     function(rep, axis, evals)
     
-    local dim, ring, decomp, adj, e, table, i, j, k, a, u, b, v, x, pol, vals, product, ev;
+    local field, basis, products, dim, i, u, j, v, adj, decomp, e, table, a, b, pol, product, ev, vals, k, x;
     
-    adj := MAJORANA_AdjointAction(rep, axis);
+    field := rep.field;;
+
+    basis := Positions(rep.setup.nullspace.heads, 0);;
     
-    dim := adj!.ncols;
-    ring := adj!.ring;
+    products := NullMat(Size(basis), Size(basis));;
     
-    decomp := List(evals, ev -> KernelMat(adj - ev*SparseIdentityMatrix( dim, ring )));
-    decomp := List(decomp, x -> x.relations);
+    dim := Size(rep.setup.coords);;
+    
+    for i in [1..Size(basis)] do 
+        
+        u := SparseMatrix(1, dim, [[ basis[i] ]], [[ One(field) ]], field);;
+        
+        for j in [1..Size(basis)] do 
+            
+            v := SparseMatrix(1, dim, [[ basis[j] ]], [[ One(field) ]], field);;
+            
+            products[i][j] := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);;
+            products[i][j] := CertainColumns(products[i][j], basis);;
+        od;;
+    od;;
+            
+    dim := Size(basis);;
+    
+    adj := SparseMatrix(0, dim, [], [], field);;
+    
+    for i in [1 .. dim] do 
+        adj := UnionOfRows(adj, products[axis][i]);;
+    od;;
+    
+    decomp := List(evals, ev -> KernelMat(adj - ev*SparseIdentityMatrix( dim, field )));;
+    decomp := List(decomp, x -> x.relations);;
     
     e := Size(evals);
     
@@ -1366,38 +1370,37 @@ InstallGlobalFunction( MAJORANA_FindFusionTable,
         
             Display( [i,j] );
         
-            product := SparseMatrix( 0, dim, [], [], ring);
+            product := SparseMatrix( 0, dim, [], [], field);
             
             for a in [1 .. Nrows(decomp[i]) ] do 
                 u := CertainRows( decomp[i], [ a ] );
                 for b in [1 .. Nrows(decomp[j])] do
                     v := CertainRows( decomp[j], [ b ] );
                     
-                    product := UnionOfRows(product, MAJORANA_AlgebraProduct( u, v, rep.algebraproducts, rep.setup) );
+                    product := UnionOfRows(product, MAJORANA_NaiveProduct( u, v, products) );
+                    
+                    # if [i,j] = [1,4] then Error(); fi;
                     
                 od;
             od;
-            
-            # product := EchelonMatDestructive(product).vectors;
-            
-            Error("pause");
             
             if ForAll(product!.entries, x -> x = []) then 
                 table[i][j] := [];
                 table[j][i] := [];
             else
-                product := CertainColumns( product, Positions(rep.setup.nullspace.heads, 0));
-                #product := ConvertSparseMatrixToMatrix(product)*One(ring);
+                # product := CertainColumns( product, Positions(rep.setup.nullspace.heads, 0));
                 for k in [1 .. e] do 
                     for x in Combinations([1 .. e], k) do 
                         
-                        pol := One(ring);
+                        pol := One(field);
                         
                         for ev in evals{x} do 
-                            pol := pol*(adj - ev*SparseIdentityMatrix(dim, ring));
+                            pol := pol*(adj - ev*SparseIdentityMatrix(dim, field));
                         od;
                         
                         vals := product*pol;
+                        
+                        # if [i, j] = [1,4] and x = [4] then Error("pause"); fi;
                         
                         if ForAll(vals!.entries, x -> x = []) then 
                             table[i][j] := x;
