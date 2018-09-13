@@ -2,12 +2,12 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     
     function(G,T)
     
-    local   t,              # size of T
+    local   gens, g, perm,
+            t,              # size of T
             i,              # indices
             j,
             k,
             x,              # result of orbitals
-            orbs,           # orbitals on T
             shape,          # one shape
             RepsSquares6A,  # (ts)^2 where o(ts) = 6
             unknowns,       # indices of 3X axes
@@ -30,18 +30,37 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     
     # Construct orbitals of  on T x T
     
-    orbs := MAJORANA_OrbitalsT(G,T);
+    gens := [];
+    
+    for g in GeneratorsOfGroup(G) do 
+        perm := [];
+        for i in [1..t] do 
+            Add(perm, Position(T, T[i]^g));
+        od;
+        Add(gens, perm);
+    od;
+    
+    input := rec();
+    
+    input.pairorbit := NullMat(t,t);
+    input.pairconj  := NullMat(t,t);
+    input.pairreps  := [];
+    input.orbitals  := [];
+    input.pairconjelts := [];
+    input.coords := T;
+    
+    MAJORANA_Orbitals(gens, 0, input);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := NullMat(1,Size(orbs.pairreps))[1];
+    shape := NullMat(1,Size(input.pairreps))[1];
 
     RepsSquares6A := [];
     unknowns := [];;
 
-    for i in [1..Size(orbs.pairreps)] do
+    for i in [1..Size(input.pairreps)] do
     
-        x := T{orbs.pairreps[i]};
+        x := T{input.pairreps[i]};
         
         if Order(x[1]*x[2]) = 1 then 
             shape[i] := "1A";
@@ -69,7 +88,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     # Check for inclusions of 2A and 3A in 6A
 
     for i in unknowns do
-        if ForAny(orbs.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
+        if ForAny(input.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
             shape[i]:="3A";;
             unknowns := Difference(unknowns, [i]);            
         fi;
@@ -93,17 +112,11 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         od;
         
         Add(shapeslist,ShallowCopy(shape));
-        
     od;
     
-    input  := rec(  group       := G,
-                    involutions := T,
-                    orbitals    := orbs.orbitals,
-                    shapes      := shapeslist,
-                    pairreps    := orbs.pairreps,
-                    pairorbit   := orbs.pairorbit,
-                    pairconj    := orbs.pairconj,
-                    pairconjelts := orbs.pairconjelts     );
+    input.group       := G;
+    input.involutions := T;
+    input.shapes      := shapeslist;
     
     return input;
 
@@ -113,7 +126,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
     function(G,T)
     
-    local   t,              # size of T
+    local   gens, g, perm, 
+            t,              # size of T
             i,              # indices
             j,
             k,
@@ -135,11 +149,30 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
     # Construct orbitals of  on T x T
     
-    orbs := MAJORANA_OrbitalsT(G,T);
+    gens := [];
+    
+    for g in GeneratorsOfGroup(G) do 
+        perm := [];
+        for i in [1..t] do 
+            Add(perm, Position(T, T[i]^g));
+        od;
+        Add(gens, perm);
+    od;
+    
+    input := rec();
+    
+    input.pairorbit := NullMat(t,t);
+    input.pairconj  := NullMat(t,t);
+    input.pairreps  := [];
+    input.orbitals  := [];
+    input.pairconjelts := [];
+    input.coords := T;
+    
+    MAJORANA_Orbitals(gens, 0, input);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := NullMat(1,Size(orbs.pairreps))[1];
+    shape := NullMat(1,Size(input.pairreps))[1];
 
     RepsSquares4X := [];
     RepsSquares6A := [];
@@ -147,9 +180,9 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
     ind := NullMat(6,0);;
 
-    for i in [1..Size(orbs.pairreps)] do
+    for i in [1..Size(input.pairreps)] do
     
-        x := T{orbs.pairreps[i]};
+        x := T{input.pairreps[i]};
         
         if Order(x[1]*x[2]) = 1 then 
             shape[i] := "1A";
@@ -175,10 +208,10 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     
     # Check for inclusions of 2X in 4X
     
-    gph := NullMat(Size(orbs.orbitals), 0);
+    gph := NullMat(Size(input.orbitals), 0);
     
     for i in ind[2] do 
-        for x in orbs.orbitals[i] do
+        for x in input.orbitals[i] do
             pos := Positions(RepsSquares4X, x[1]*x[2]);
             
             if pos <> [] then
@@ -194,14 +227,14 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     # Check for inclusions of 2A and 3A in 6A
 
     for i in ind[3] do
-        if ForAny(orbs.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
+        if ForAny(input.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
             shape[i]:="3A";;
             ind[3] := Difference(ind[3], [i]);            
         fi;
     od;
     
     for i in ind[2] do 
-        if ForAny(orbs.orbitals[i], x -> x[1]*x[2] in RepsCubes6A) then
+        if ForAny(input.orbitals[i], x -> x[1]*x[2] in RepsCubes6A) then
         
             shape[i]:="2A";;
             
@@ -260,17 +293,11 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
         od;            
         
         Add(shapeslist,ShallowCopy(shape));
-        
     od;
     
-    input  := rec(  group       := G,
-                    involutions := T,
-                    orbitals    := orbs.orbitals,
-                    shapes      := shapeslist,
-                    pairreps    := orbs.pairreps,
-                    pairorbit   := orbs.pairorbit,
-                    pairconj    := orbs.pairconj,
-                    pairconjelts := orbs.pairconjelts     );
+    input.group       := G;
+    input.involutions := T;
+    input.shapes      := shapeslist;
     
     return input;
 

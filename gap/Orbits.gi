@@ -146,8 +146,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             
                             pos := Position(setup.pairconjelts, g);
                             
-                            if pos = fail then # maybe this should be an error
-                                Info(InfoMajorana, 10, "WARNING: Group of actions bigger than pure group" );
+                            if pos = fail then 
                                 Add(setup.pairconjelts, g);
                                 pos := Size(setup.pairconjelts);
                             fi;
@@ -157,108 +156,12 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                         fi;
                     od;
                 od; 
-                               
+                
+                if IsBound(setup.orbitals) then 
+                    Add(setup.orbitals, Immutable(orb));
+                fi;
             fi;
         od;
     od;
-    
-    end );
-    
-InstallGlobalFunction( MAJORANA_OrbitalsT,
-
-    function(G, T)
-    
-    local   gens,
-            t, 
-            i,
-            j,
-            k,
-            setup,
-            pnt,
-            d,
-            gen,
-            orb,
-            orbs,
-            elts,
-            count,
-            p,
-            q,
-            h,
-            g,
-            pos,
-            pos_1,
-            pos_2;
-            
-    gens := GeneratorsOfGroup(G);
-    t := Size(T);
-    
-    setup := rec();
-    
-    setup.pairorbit := NullMat(t,t);
-    setup.pairconj  := NullMat(t,t);
-    setup.pairreps  := [];
-    setup.orbitals  := [];
-    setup.pairconjelts := AsList(G);
-    
-    for i in [1..t] do 
-        for j in [i..t] do 
-            if setup.pairorbit[i][j] = 0 then 
-                
-                Add(setup.pairreps, [i,j]);
-                
-                k := Size(setup.pairreps);
-                
-                setup.pairorbit[i][j] := k;
-                setup.pairorbit[j][i] := k;
-                
-                setup.pairconj[i][j] := 1;
-                setup.pairconj[j][i] := 1;
-                
-                pnt := Immutable(T{[i,j]});
-                
-                orb := [pnt];
-                elts := [Identity(G)];
-                
-                count := 0;
-                
-                for p in orb do 
-                    
-                    count := count + 1;
-                    h := elts[count];
-                    
-                    for gen in gens do 
-                    
-                        q := OnPairs(p,gen);
-                        g := h*gen;
-                        
-                        MakeImmutable(q);
-
-                        pos_1 := Position(T,q[1]);
-                        pos_2 := Position(T,q[2]);
-                        
-                        if setup.pairorbit[pos_1][pos_2] = 0 then 
-                        
-                            Add( orb, q );
-                            Add( elts, g);
-                                
-                            setup.pairorbit[pos_1][pos_2] := k;
-                            setup.pairorbit[pos_2][pos_1] := k;
-                            
-                            pos := Position(setup.pairconjelts, g);
-                            
-                            setup.pairconj[pos_1][pos_2] := pos;
-                            setup.pairconj[pos_2][pos_1] := pos;
-                            
-                        fi;
-                    od;
-                od;
-                
-                Add(setup.orbitals, Immutable(orb));
-                
-            fi;
-        od;
-    od; 
-                
-    return setup;
     
     end );
