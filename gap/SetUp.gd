@@ -1,3 +1,5 @@
+DeclareGlobalFunction( "MAJORANA_NewSetUp" );
+
 DeclareGlobalFunction( "MAJORANA_SetUp" );
 
 #! @Chapter Majorana Representations
@@ -27,3 +29,9 @@ DeclareGlobalFunction( "MAJORANA_RecordCoords" );
 DeclareGlobalFunction( "MAJORANA_MappedWord" );
 
 DeclareGlobalFunction( "MAJORANA_RemoveDuplicateShapes" );
+
+DeclareGlobalFunction( "MAJORANA_EmbedDihedralAlgebra" );
+
+DeclareGlobalFunction( "MAJORANA_FindTauMap" );
+
+

@@ -169,7 +169,9 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
     local   i, im, j, k, g, v, sign, x, l;
     
-    emb := MAJORANA_FindPerm(emb, rep, subrep);
+    if not IsRowVector(emb) then 
+        emb := MAJORANA_FindPerm(emb, rep, subrep);
+    fi;
     
     for i in [1..Size(subrep.algebraproducts)] do 
     
