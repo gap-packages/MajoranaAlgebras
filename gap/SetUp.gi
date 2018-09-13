@@ -385,7 +385,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     gens := GeneratorsOfGroup(subalg.group);
     imgs := rep.involutions{ x };
     
-    emb := List(subalg.setup.coords, w -> MAJORANA_MappedWord(subalg, rep, w, gens, imgs) );
+    emb := List(subalg.setup.coords, w -> MAJORANA_MappedWord(rep, subalg, w, gens, imgs) );
     
     MAJORANA_Embed( rep, subalg, emb );
     
@@ -660,7 +660,7 @@ InstallGlobalFunction(MAJORANA_MappedWord,
     if IsRowVector(w) then 
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
     
-        return SortedList(List(im, x -> Position(rep.setup.coords, x )));
+        return SortedList(List(im, x -> Position(rep.involutions, x )));
     else
         return Position(rep.setup.longcoords, MappedWord(w, gens, imgs) );
     fi;
