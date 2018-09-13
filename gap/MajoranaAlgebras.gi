@@ -151,17 +151,6 @@ function(arg)
                         FUSE(a, b, u, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
                 od;
-                
-                if false and ForAny(new, x -> Nrows(x) > dim) then 
-                    for j in [1..3] do 
-                        new[j] := MAJORANA_BasisOfEvecs(new[j]);
-                    od;
-                
-                    if MAJORANA_CheckBasis(dim, new, rep) = true then
-                        rep.evecs[i] := new;
-                        break;
-                    fi;
-                fi;
             od;
         
             for j in [1..3] do
@@ -180,9 +169,7 @@ function(arg)
         MAJORANA_Fusion(rep, false);
     fi;
     
-    # if rep.innerproducts = false or false in rep.innerproducts then 
-        MAJORANA_IntersectEigenspaces(rep);
-    # fi;
+    MAJORANA_IntersectEigenspaces(rep);
     
     end );     
 
