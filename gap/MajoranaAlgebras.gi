@@ -4,8 +4,6 @@
 # Implementations
 #
 
-# Creates list of indexes [i,j] where product of i th and j th coordinate vectors is not known
-
 # Finds the indices i such that v_i*v is not known
 
 InstallGlobalFunction(MAJORANA_FindBadIndices,
@@ -129,9 +127,9 @@ function(arg)
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
         while true do 
-            #if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
-            #    break;
-            #fi;
+            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
+                break;
+            fi;
         
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
@@ -534,39 +532,6 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
         od;
     od;
     
-    if false then 
-    
-    for i in [1..Nrows(rep.setup.nullspace.vectors)] do 
-        u := CertainRows(rep.setup.nullspace.vectors, [i]);
-        for j in Filtered([1..dim], k -> rep.setup.nullspace.heads[k] = 0) do
-            if false in rep.innerproducts{rep.setup.pairorbit[j]} then 
-                v := SparseMatrix(1, dim, [[j]], [[1]], Rationals);
-                
-                eq := MAJORANA_SeparateInnerProduct(u, v, unknowns, rep.innerproducts, rep.setup);
-                
-                if Size(eq[1]!.indices[1]) = 1 then 
-                    z := MAJORANA_SingleInnerSolution(  eq, mat, vec, 
-                                                        unknowns, 
-                                                        rep.innerproducts);
-                    
-                    mat := z.mat; vec := z.vec; unknowns := z.unknowns;
-                    
-                    if unknowns = [] then 
-                        MAJORANA_CheckNullSpace(rep); return;
-                    fi;
-                elif eq[1]!.indices[1] <> [] then 
-                    eq := eq*(1/eq[1]!.entries[1][1]);
-                    if not _IsRowOfSparseMatrix(mat, eq[1]) then
-                        mat := UnionOfRows(mat, eq[1]);
-                        vec := UnionOfRows(vec, eq[2]);
-                    fi;
-                fi;
-            fi;
-        od;
-    od;
-    
-    fi;
-    
     x := MAJORANA_SolutionInnerProducts(mat,vec,unknowns,rep.innerproducts);
 
     if x.unknowns = [] then 
@@ -574,46 +539,6 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     fi;
 
     return rec( mat := x.mat, vec := x.vec, unknowns := x.unknowns);
-    
-    end );
-    
-InstallGlobalFunction( MAJORANA_Orthogonality,
-
-    function(rep)
-    
-    local unknowns, mat, vec, i, ev, evecs_a, evecs_b, u, v, j, k, eq;
-    
-    unknowns := Positions(rep.innerproducts, false);
-    
-    mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
-    vec := SparseMatrix(0, 1, [], [], Rationals);
-    
-    for i in rep.setup.orbitreps do 
-        for ev in [[1,2], [1,3], [2,3]] do 
-                
-            evecs_a := rep.evecs[i][ev[1]];
-            evecs_b := rep.evecs[i][ev[2]];
-        
-            for j in [1..Nrows(evecs_a)] do 
-                u := CertainRows(evecs_a, [j]);
-                for k in [1..Nrows(evecs_b)] do 
-                    v := CertainRows(evecs_b, [k]);
-                    
-                    eq := MAJORANA_SeparateInnerProduct(u, v, unknowns, rep.innerproducts, rep.setup);
-                    
-                    if eq[1]!.indices[1] <> [] then 
-                        eq := eq*(1/eq[1]!.entries[1][1]);
-                        if not _IsRowOfSparseMatrix(mat, eq[1]) then
-                            mat := UnionOfRows(mat, eq[1]);
-                            vec := UnionOfRows(vec, eq[2]);
-                        fi;
-                    fi;
-                od;
-            od;
-        od;
-    od;
-    
-    return rec(mat := mat, vec := vec, unknowns := unknowns);
     
     end );
 
