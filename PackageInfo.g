@@ -17,6 +17,17 @@ Persons := [
   rec(
     IsAuthor := true,
     IsMaintainer := true,
+    FirstNames := "Markus",
+    LastName := "Pfeiffer",
+    WWWHome := "https://markusp.morphism.de/",
+    Email := "markus.pfeiffer@st-andrews.ac.uk",
+    PostalAddress := "School of Computer Science, University of St Andrews, North Haugh, KY16 9SX",
+    Place := "St Andrews, UK",
+    Institution := "University of St Andrews",
+  ),
+  rec(
+    IsAuthor := true,
+    IsMaintainer := true,
     FirstNames := "Madeleine",
     LastName := "Whybrow",
     WWWHome := "www.madeleinewhybrow.wordpress.com",
