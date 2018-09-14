@@ -1,5 +1,3 @@
-DeclareGlobalFunction( "MAJORANA_NewSetUp" );
-
 DeclareGlobalFunction( "MAJORANA_SetUp" );
 
 #! @Chapter Majorana Representations

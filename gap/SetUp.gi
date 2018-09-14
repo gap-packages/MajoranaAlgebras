@@ -291,7 +291,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     end );
     
-InstallGlobalFunction( MAJORANA_NewSetUp,
+InstallGlobalFunction( MAJORANA_SetUp,
 
     function(input, index, algebras)
     
@@ -532,139 +532,6 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
             od;
         fi;
     od;
-    
-    end );
-                        
-InstallGlobalFunction( MAJORANA_SetUp,
-    
-    function(input, index, algebras)
-    
-    local   rep,
-            t,              # size of T
-            x,              # temporary variables
-            i,              # index variables
-            j,
-            k,
-            g,
-            y,
-            res,
-            subrep,
-            emb,
-            gens,
-            dim,            # size of coordinates
-            s;              # number of orbits of G on T x T
-            
-    t := Size(input.involutions);
-    
-    rep         := rec( group       := input.group,
-                        involutions := input.involutions,
-                        shape       := input.shapes[index] );
-                        
-    rep.setup   := rec( coords      := ShallowCopy(input.involutions),
-                        longcoords  := ShallowCopy(input.involutions),
-                        poslist     := [1..t]               ); 
-
-    gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    x := MAJORANA_Orbits(gens, t, rep.setup);
-
-    rep.setup.conjelts := x.conjelts;
-    rep.setup.orbitreps := x.orbitreps;    
-
-    for i in [1..t] do
-        for j in [i + 1 .. t] do 
-            k := input.pairorbit[i][j];
-            if rep.shape[k] in ["4B", "6A"] then 
-                MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep, algebras);
-            fi;
-         od;
-    od;
-    
-    for i in [1..t] do
-        for j in [i + 1 .. t] do 
-            k := input.pairorbit[i][j];
-            if not rep.shape[k] in ["4B", "6A"] then 
-                MAJORANA_RecordCoords(rep.involutions{[i,j]}, rep.shape[k], rep, algebras);
-            fi;
-         od;
-    od;
-    
-    dim := Size(rep.setup.coords);
-    
-    rep.setup.nullspace := rec( heads := [1..dim]*0, vectors := SparseMatrix(0, dim, [], [], Rationals));
-    
-    rep.setup.pairorbit := NullMat(dim,dim);
-    rep.setup.pairconj  := NullMat(dim,dim);
-    
-    for i in [1..t] do 
-        for j in [1..t] do 
-            rep.setup.pairorbit[i][j] := input.pairorbit[i][j];
-            rep.setup.pairconj[i][j]  := input.pairconj[i][j];
-        od;
-    od;
-
-    rep.setup.pairreps  := ShallowCopy(input.pairreps);
-    rep.setup.pairconjelts := List(input.pairconjelts, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    x := MAJORANA_Orbits(gens, t, rep.setup);
-
-    rep.setup.conjelts := x.conjelts;
-    rep.setup.orbitreps := x.orbitreps;
-
-    MAJORANA_Orbitals(gens, t, rep.setup);
-    
-    s := Size(rep.setup.pairreps);
-    
-    rep.algebraproducts := List([1..s], x -> false);
-    rep.innerproducts   := List([1..s], x -> false);
-    rep.evecs           := NullMat(t,3);
-    rep.nullspace := SparseMatrix(0, dim, [], [], Rationals);
-
-    # Set up eigenvector matrix
-
-    for j in [1..t] do
-        if j in rep.setup.orbitreps then
-            for k in [1..3] do
-                rep.evecs[j][k] := SparseMatrix(0, dim, [], [], Rationals);
-            od;
-        else
-            for k in [1..3] do
-                rep.evecs[j][k] := false;
-            od;
-        fi;
-    od;
-
-    # Embed dihedral algebras
-    
-    for i in [1..t] do 
-        for j in [i + 1..t] do 
-            
-            k := rep.setup.pairorbit[i][j];
-            
-            subrep := algebras.(rep.shape[k]);
-            gens := GeneratorsOfGroup(subrep.group);
-            
-            emb := GroupHomomorphismByImages(subrep.group, rep.group, gens, rep.setup.coords{[i,j]});
-            
-            MAJORANA_Embed(rep, subrep, emb);
-        od;
-    od;
-
-    for i in rep.setup.orbitreps do
-        for j in [1..3] do 
-            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
-        od; 
-    od;
-    
-    for x in rep.algebraproducts do 
-        if x <> false then x!.ncols := dim; fi;
-    od;
-    
-    return rep;
     
     end );
     
