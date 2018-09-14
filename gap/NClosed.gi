@@ -129,6 +129,10 @@ InstallGlobalFunction( MAJORANA_NClosedExtendPerm,
         fi;
         
         pos := Position(setup.coords, im);
+        
+        if pos = fail then  
+            pos := Size(setup.coords); 
+        fi;
 
         Add(perm, sign*pos);
     od;
