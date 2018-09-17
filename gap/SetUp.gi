@@ -454,19 +454,16 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     emb := List(emb, x -> Position(rep.setup.longcoords, x) );
     emb := rep.setup.poslist{emb};
     
-    ## Embed algebra and inner products
+    ## Add any new orbits
 
     for j in [1 .. Size(subrep.setup.pairreps)] do 
-        sign := 1;
         
         im := emb{subrep.setup.pairreps[j]};
         
-        if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;        
-        if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
+        if im[1] < 0 then im[1] := -im[1]; fi;        
+        if im[2] < 0 then im[2] := -im[2]; fi;
         
         orbit := rep.setup.pairorbit[im[1]][im[2]];
-        
-        # if orbit < 0 then sign := -sign; orbit := -orbit; fi;
         
         ## If need be, add a new orbit
         
@@ -492,12 +489,24 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
             od;
             
             g := [1 .. Size(rep.setup.coords)];
-            
-        else
-            g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
         fi;
-                
-        if orbit < 0 then orbit := -orbit; fi;
+    od;
+    
+    ## Embed algebra and inner products
+    
+    for j in [1 .. Size(subrep.setup.pairreps)] do 
+        sign := 1;
+        
+        im := emb{subrep.setup.pairreps[j]};
+        
+        if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;        
+        if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
+        
+        orbit := rep.setup.pairorbit[im[1]][im[2]];
+
+        g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
+        
+        if orbit < 0 then sign := -sign; orbit := -orbit; fi;
                 
         if not IsBound(rep.algebraproducts[orbit]) or rep.algebraproducts[orbit] = false then 
             v := MAJORANA_ImageVector(subrep.algebraproducts[j], emb, rep, subrep);
