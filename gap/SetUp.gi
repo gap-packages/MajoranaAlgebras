@@ -158,6 +158,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     input.coords := T;
     
     MAJORANA_Orbitals(gens, 0, input);
+    
+    input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
@@ -306,8 +308,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup   := rec( coords          := [1..t], 
                         longcoords      := [1..t], 
                         poslist         := [1..t],
-                        pairorbit       := input.pairorbit,
-                        pairconj        := input.pairconj,
+                        pairorbit       := ShallowCopy(input.pairorbit),
+                        pairconj        := ShallowCopy(input.pairconj),
                         pairconjelts    := input.pairconjelts,
                         pairreps        := input.pairreps );
     
@@ -464,17 +466,15 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         
         orbit := rep.setup.pairorbit[im[1]][im[2]];
         
-        if orbit < 0 then sign := -sign; orbit := -orbit; fi;
+        # if orbit < 0 then sign := -sign; orbit := -orbit; fi;
         
         ## If need be, add a new orbit
         
         if orbit = 0 then 
-        
-            # if sign < 0 then Error( "Negative sign in embed dihedral, check what happens here" ); fi;
             
             Add(rep.setup.pairreps, SortedList( im ) );
             
-            orbit := sign*Size(rep.setup.pairreps);
+            orbit := Size(rep.setup.pairreps );
             
             for k in elts do 
                 

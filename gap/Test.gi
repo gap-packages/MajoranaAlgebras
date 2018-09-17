@@ -351,8 +351,8 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
                         y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
                         
                         if x <> false and y <> false and x <> y then 
-                            return false;
-                            # Error("Axiom M1");
+                            # return false;
+                            Error("Axiom M1");
                             Add(ErrorM1,[l[1], l[2] ,k]);
                         fi;
                         
@@ -592,9 +592,39 @@ InstallGlobalFunction( IsMinimal3GeneratedAlgebra,
     return true;
         
     end );
-            
-            
+    
+InstallGlobalFunction( MAJORANA_TestSetup,
 
+    function(rep)
+    
+    local dim, i, j, k, g, sign, sign_k, im;
+    
+    dim := Size(rep.setup.coords);
+    
+    for i in [1 .. dim] do 
+        for j in [i .. dim] do 
+            k := rep.setup.pairorbit[i][j];
+            g := rep.setup.pairconj[i][j];
+            g := rep.setup.pairconjelts[g];
+            
+            sign_k := 1;
+            
+            if k < 0 then k := -k; sign_k := -1; fi;
+            
+            im := g{rep.setup.pairreps[k]};
+            
+            sign := 1;
+            
+            if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
+            if im[1] < 0 then im[2] := -im[2]; sign := -sign; fi;
+            
+            if SortedList(im) <> [i,j] then Error("Does not conjugate to correct pair"); fi;
+            
+            if sign <> sign_k then Error("Sign error"); fi;
+        od;
+    od;
+    
+    end );
         
         
         
