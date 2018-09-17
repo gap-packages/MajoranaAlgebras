@@ -389,7 +389,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     function( i, rep, subrep )
     
-    local   t, x, elts, j, list, y, orbit, k, l, g, dim, gens, imgs, emb, im, sign, v, evecs;
+    local   t, x, elts, j, list, list_5A, y, orbit, k, l, g, dim, gens, imgs, emb, im, sign, v, evecs;
     
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
@@ -405,8 +405,9 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     
     for j in [dim + 1 .. Size(rep.setup.coords)] do 
     
-        list := Concatenation( Positions(rep.setup.poslist, j), Positions(rep.setup.poslist, -j) );
-        
+        list := Positions(rep.setup.poslist, j);
+        list_5A := Positions(rep.setup.poslist, -j);
+
         for g in rep.setup.pairconjelts{elts} do 
             
             im := SortedList(g{ rep.setup.coords[j] });
@@ -417,6 +418,8 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
                 Append( rep.setup.longcoords, List( list, k -> SortedList(g{ rep.setup.longcoords[k] })));
                 Append( rep.setup.poslist, List( list, k ->  Size(rep.setup.coords) ) );
                 
+                Append( rep.setup.longcoords, List( list_5A, k -> SortedList(g{ rep.setup.longcoords[k] })));
+                Append( rep.setup.poslist, List( list_5A, k -> -Size(rep.setup.coords) ) );
             fi;
         od;
     od;
@@ -467,11 +470,11 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         
         if orbit = 0 then 
         
-            if sign < 0 then Error( "Negative sign in embed dihedral, check what happens here" ); fi;
+            # if sign < 0 then Error( "Negative sign in embed dihedral, check what happens here" ); fi;
             
             Add(rep.setup.pairreps, SortedList( im ) );
             
-            orbit := Size(rep.setup.pairreps);
+            orbit := sign*Size(rep.setup.pairreps);
             
             for k in elts do 
                 
@@ -493,6 +496,8 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         else
             g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
         fi;
+                
+        if orbit < 0 then orbit := -orbit; fi;
                 
         if not IsBound(rep.algebraproducts[orbit]) or rep.algebraproducts[orbit] = false then 
             v := MAJORANA_ImageVector(subrep.algebraproducts[j], emb, rep, subrep);
