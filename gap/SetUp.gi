@@ -393,7 +393,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     function( i, rep, subrep )
     
-    local   t, x, elts, j, list, list_5A, y, orbit, k, l, g, dim, gens, imgs, emb, im, sign, v, evecs, new, new_5A, vec, inv;
+    local   dim, t, gens, x, inv, elts, emb, j, im, orbit, y, k;
     
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
@@ -408,76 +408,11 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     ## Add new vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     
-    for j in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
-    
-        list := Positions(subrep.setup.poslist, j);
-        list_5A := Positions(subrep.setup.poslist, -j);
-        
-        new := [];
-        new_5A := [];
-        
-        for y in subrep.setup.longcoords{list} do 
-            Add( new, MAJORANA_MappedWord(rep, subrep, y, gens, inv));
-        od;
-        
-        for y in subrep.setup.longcoords{list_5A} do 
-            Add( new_5A, MAJORANA_MappedWord(rep, subrep, y, gens, inv));
-        od;
-
-        vec := First(new, y -> y in rep.setup.longcoords);
-        
-        if vec = fail then 
-
-            for g in rep.setup.pairconjelts{elts} do 
-                
-                im := SortedList(g{ new[1] });
-                
-                if not im in rep.setup.longcoords then
-                    Add( rep.setup.coords, im );
-                    
-                    k := Size(rep.setup.coords);
-                
-                    Append( rep.setup.longcoords, List( new, y -> SortedList(g{y}) ) );
-                    Append( rep.setup.poslist, List( new, y ->  k ) );
-                    
-                    Append( rep.setup.longcoords, List( new_5A, y -> SortedList(g{y}) ) );
-                    Append( rep.setup.poslist, List( new_5A, x -> -k ) );
-                fi;
-            od;
-        else
-            new := Filtered(new, y -> not y in rep.setup.longcoords);
-            k := rep.setup.poslist[Position(rep.setup.longcoords, vec )];
-            
-            Append(rep.setup.longcoords, new); 
-            Append(rep.setup.poslist, List(new, y -> k));
-        fi;
-    od;
-    
-    for y in rep.setup.pairorbit do 
-        Append(y, [dim + 1 .. Size(rep.setup.coords)]*0 );
-    od;
-    
-    for y in rep.setup.pairconj do 
-        Append(y, [dim + 1 .. Size(rep.setup.coords)]*0 );
-    od;
-    
-    Append(rep.setup.pairorbit, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
-    Append(rep.setup.pairconj, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
-    
-    for g in rep.setup.pairconjelts do 
-        MAJORANA_NClosedExtendPerm( g, rep.setup);
-    od;
-    
-    for g in rep.setup.conjelts do 
-        MAJORANA_NClosedExtendPerm( g, rep.setup);
-    od;
+    MAJORANA_AddNewVectors( rep, subrep, gens, inv, elts );
     
     ## Embed the dihedral algebra
     
-    gens := GeneratorsOfGroup(subrep.group);
-    imgs := rep.involutions{ x };
-    
-    emb := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, imgs) );
+    emb := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
     emb := List(emb, x -> Position(rep.setup.longcoords, x) );
     emb := rep.setup.poslist{emb};
     
@@ -516,61 +451,80 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
             od;
         fi;
     od;
-    
-    ## Embed algebra and inner products
-    
-    for j in [1 .. Size(subrep.setup.pairreps)] do 
-        sign := 1;
-        
-        im := emb{subrep.setup.pairreps[j]};
-        
-        if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;        
-        if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
-        
-        orbit := rep.setup.pairorbit[im[1]][im[2]];
 
-        g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
-        
-        if orbit < 0 then sign := -sign; orbit := -orbit; fi;
-                
-        if not IsBound(rep.algebraproducts[orbit]) or rep.algebraproducts[orbit] = false then 
-            v := MAJORANA_ImageVector(subrep.algebraproducts[j], emb, rep, subrep);
-            rep.algebraproducts[orbit] := sign*MAJORANA_ConjugateVec(v,g);
-        fi;
-        
-        if not IsBound(rep.innerproducts[orbit]) or rep.innerproducts[orbit] = false then 
-            rep.innerproducts[orbit] := sign*subrep.innerproducts[j];
-        fi;
-    od;
+    ## Embed products and evecs
     
-    ## Embed eigenvectors
+    MAJORANA_Embed( rep, subrep, emb );
+
+    end );
     
-    for j in subrep.setup.orbitreps do 
+InstallGlobalFunction( MAJORANA_AddNewVectors, 
+
+    function(rep, subrep, gens, inv, elts)
+    
+    local i, list, list_5A, new, new_5A, x, vec, g, im, k, dim;
+    
+    dim := Size(rep.setup.coords);
+    
+    for i in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
+    
+        list := Positions(subrep.setup.poslist, i);
+        list_5A := Positions(subrep.setup.poslist, -i);
         
-        im := emb[j];
+        new := [];
+        new_5A := [];
         
-        g := false;
-        
-        for x in List(rep.setup.conjelts, x -> SP_Inverse(x)) do
-            if x[im] in rep.setup.orbitreps then 
-                g := x;
-                break; 
-            fi;
+        for x in subrep.setup.longcoords{list} do 
+            Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
         od;
         
-        if g <> false then 
-            for k in [1..3] do 
-                if Nrows(subrep.evecs[j][k]) > 0 then 
-                    evecs := MAJORANA_ImageVector(subrep.evecs[j][k], emb, rep, subrep);
-                    for l in [1..Nrows(evecs)] do 
-                        v := CertainRows(evecs, [l]);
-                        v := MAJORANA_ConjugateVec(v, g);
-                        rep.evecs[g[im]][k] := UnionOfRows(rep.evecs[g[im]][k], v);
-                    od;
+        for x in subrep.setup.longcoords{list_5A} do 
+            Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+        od;
+
+        vec := First(new, x -> x in rep.setup.longcoords);
+        
+        if vec = fail then 
+
+            for g in rep.setup.pairconjelts{elts} do 
+                
+                im := SortedList(g{ new[1] });
+                
+                if not im in rep.setup.longcoords then
+                    Add( rep.setup.coords, im );
+                    
+                    k := Size(rep.setup.coords);
+                
+                    Append( rep.setup.longcoords, List( new, x -> SortedList(g{x}) ) );
+                    Append( rep.setup.poslist, List( new, x ->  k ) );
+                    
+                    Append( rep.setup.longcoords, List( new_5A, x -> SortedList(g{x}) ) );
+                    Append( rep.setup.poslist, List( new_5A, x -> -k ) );
                 fi;
             od;
+        else
+            new := Filtered(new, x -> not x in rep.setup.longcoords);
+            k := rep.setup.poslist[Position(rep.setup.longcoords, vec )];
+            
+            Append(rep.setup.longcoords, new); 
+            Append(rep.setup.poslist, List(new, x -> k));
         fi;
     od;
+    
+    for x in rep.setup.pairorbit do 
+        Append(x, [dim + 1 .. Size(rep.setup.coords)]*0 );
+    od;
+    
+    for x in rep.setup.pairconj do 
+        Append(x, [dim + 1 .. Size(rep.setup.coords)]*0 );
+    od;
+    
+    Append(rep.setup.pairorbit, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
+    Append(rep.setup.pairconj, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
+    
+    for g in rep.setup.pairconjelts do  MAJORANA_NClosedExtendPerm( g, rep.setup); od;
+    
+    for g in rep.setup.conjelts do MAJORANA_NClosedExtendPerm( g, rep.setup); od;
     
     end );
     

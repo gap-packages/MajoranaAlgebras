@@ -196,24 +196,20 @@ InstallGlobalFunction( "MAJORANA_Embed",
             
             g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
             
-            if rep.algebraproducts[k] = false then 
+            if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then 
                 if subrep.algebraproducts[i] <> false then 
                     v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
                     rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g);
                 fi;
             fi;
             
-            if rep.innerproducts[k] = false then 
+            if not IsBound(rep.innerproducts[k]) or rep.innerproducts[k] = false then 
                 if subrep.innerproducts[i] <> false then 
                     rep.innerproducts[k] := sign*subrep.innerproducts[i];
                 fi;
             fi;
         fi;
     od;
-    
-    im := MAJORANA_ImageVector( subrep.nullspace, emb, rep, subrep);
-
-    rep.nullspace := UnionOfRows(rep.nullspace, im);
     
     for i in subrep.setup.orbitreps do 
         
