@@ -20,7 +20,7 @@ DeclareGlobalFunction( "MAJORANA_FindPerm" );
 
 DeclareGlobalFunction( "SP_Inverse" );
 
-DeclareGlobalFunction( "SP_Product" );s
+DeclareGlobalFunction( "SP_Product" );
 
 DeclareGlobalFunction( "MAJORANA_MappedWord" );
 

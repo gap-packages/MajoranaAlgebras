@@ -616,7 +616,7 @@ InstallGlobalFunction( MAJORANA_TestSetup,
             sign := 1;
             
             if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
-            if im[1] < 0 then im[2] := -im[2]; sign := -sign; fi;
+            if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
             
             if SortedList(im) <> [i,j] then Error("Does not conjugate to correct pair"); fi;
             

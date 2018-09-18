@@ -45,7 +45,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     input.pairconj  := NullMat(t,t);
     input.pairreps  := [];
     input.orbitals  := [];
-    input.pairconjelts := [];
+    input.pairconjelts := [ [1..t] ];
     input.coords := T;
     
     MAJORANA_Orbitals(gens, 0, input);
@@ -496,8 +496,8 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
             
             Add(rep.setup.pairreps, SortedList( im ) );
             
-            orbit := Size(rep.setup.pairreps );
-            
+            orbit := Size(rep.setup.pairreps);
+                        
             for k in elts do 
                 
                 sign := 1;
@@ -512,8 +512,6 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
                 rep.setup.pairconj[y[1]][y[2]] := k;
                 rep.setup.pairconj[y[2]][y[1]] := k;
             od;
-            
-            g := [1 .. Size(rep.setup.coords)];
         fi;
     od;
     
