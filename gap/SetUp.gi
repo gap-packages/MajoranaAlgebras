@@ -409,7 +409,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     for j in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
     
         list := Positions(subrep.setup.poslist, j);
-        list_5A := Positions(rep.setup.poslist, -j);
+        list_5A := Positions(subrep.setup.poslist, -j);
         
         new := [];
         new_5A := [];
