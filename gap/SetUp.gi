@@ -391,39 +391,64 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     function( i, rep, subrep )
     
-    local   t, x, elts, j, list, list_5A, y, orbit, k, l, g, dim, gens, imgs, emb, im, sign, v, evecs;
+    local   t, x, elts, j, list, list_5A, y, orbit, k, l, g, dim, gens, imgs, emb, im, sign, v, evecs, new, new_5A, vec, inv;
     
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
+    gens := GeneratorsOfGroup(subrep.group);
     
     x := rep.setup.pairreps[i];
+    inv := rep.involutions{x};
         
-    elts := List(rep.setup.pairorbit{ [1 .. t] }, x -> Positions(x{ [1 .. t] }, i) );
+    elts := List( rep.setup.pairorbit, x -> Positions(x, i) );
+    elts := List( [1..t], x-> rep.setup.pairconj[x]{elts[x]} );   
     elts := DuplicateFreeList(Flat(elts));
 
     ## Add new vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     
-    MAJORANA_RecordCoords( rep.involutions{x}, subrep, rep );
+    for j in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
     
-    for j in [dim + 1 .. Size(rep.setup.coords)] do 
-    
-        list := Positions(rep.setup.poslist, j);
+        list := Positions(subrep.setup.poslist, j);
         list_5A := Positions(rep.setup.poslist, -j);
-
-        for g in rep.setup.pairconjelts{elts} do 
-            
-            im := SortedList(g{ rep.setup.coords[j] });
-            
-            if not im in rep.setup.longcoords then
-                Add( rep.setup.coords, im );
-            
-                Append( rep.setup.longcoords, List( list, k -> SortedList(g{ rep.setup.longcoords[k] })));
-                Append( rep.setup.poslist, List( list, k ->  Size(rep.setup.coords) ) );
-                
-                Append( rep.setup.longcoords, List( list_5A, k -> SortedList(g{ rep.setup.longcoords[k] })));
-                Append( rep.setup.poslist, List( list_5A, k -> -Size(rep.setup.coords) ) );
-            fi;
+        
+        new := [];
+        new_5A := [];
+        
+        for y in subrep.setup.longcoords{list} do 
+            Add( new, MAJORANA_MappedWord(rep, subrep, y, gens, inv));
         od;
+        
+        for y in subrep.setup.longcoords{list_5A} do 
+            Add( new_5A, MAJORANA_MappedWord(rep, subrep, y, gens, inv));
+        od;
+
+        vec := First(new, y -> y in rep.setup.longcoords);
+        
+        if vec = fail then 
+
+            for g in rep.setup.pairconjelts{elts} do 
+                
+                im := SortedList(g{ new[1] });
+                
+                if not im in rep.setup.longcoords then
+                    Add( rep.setup.coords, im );
+                    
+                    k := Size(rep.setup.coords);
+                
+                    Append( rep.setup.longcoords, List( new, y -> SortedList(g{y}) ) );
+                    Append( rep.setup.poslist, List( new, y ->  k ) );
+                    
+                    Append( rep.setup.longcoords, List( new_5A, y -> SortedList(g{y}) ) );
+                    Append( rep.setup.poslist, List( new_5A, x -> -k ) );
+                fi;
+            od;
+        else
+            new := Filtered(new, y -> not y in rep.setup.longcoords);
+            k := rep.setup.poslist[Position(rep.setup.longcoords, vec )];
+            
+            Append(rep.setup.longcoords, new); 
+            Append(rep.setup.poslist, List(new, y -> k));
+        fi;
     od;
     
     for y in rep.setup.pairorbit do 
