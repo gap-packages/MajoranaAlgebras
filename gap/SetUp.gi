@@ -49,6 +49,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     input.coords := T;
     
     MAJORANA_Orbitals(gens, 0, input);
+    
+    input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
