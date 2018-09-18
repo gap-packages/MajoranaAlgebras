@@ -610,51 +610,6 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     
     end);
     
-InstallGlobalFunction( MAJORANA_RecordCoords,
-
-    function(involutions, subrep, rep)
-    
-    local gens, emb, t, i, k, x, im, list, pos;
-    
-    gens := GeneratorsOfGroup(subrep.group);
-    
-    # Add extra basis vectors
-    
-    for i in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do 
-        
-        list := Positions(subrep.setup.poslist, i);
-        im := List(subrep.setup.longcoords{list}, 
-                    y -> MAJORANA_MappedWord(rep, subrep, y, gens, involutions));
-        
-        x := First(im, y -> y in rep.setup.longcoords);
-    
-        if x = fail then 
-        
-            Add(rep.setup.coords, im[1]);
-            k := Size(rep.setup.coords);
-            
-            Append(rep.setup.longcoords, im);
-            Append(rep.setup.poslist, List(im, y -> k));
-            
-            if "5A" in subrep.shape then 
-                list := Positions(subrep.setup.poslist, -i);
-                x := List(subrep.setup.longcoords{list}, 
-                        y -> MAJORANA_MappedWord(rep, subrep, y, gens, involutions));
-                
-                Append(rep.setup.longcoords, x);
-                Append(rep.setup.poslist, List(list, y -> -k));
-            fi;
-        else
-            im := Filtered(im, y -> not y in rep.setup.longcoords);
-            pos := rep.setup.poslist[Position(rep.setup.longcoords, x)];
-                        
-            Append(rep.setup.longcoords, im); 
-            Append(rep.setup.poslist, List(im, y -> pos));
-        fi;
-    od;
-
-    end );
-    
 InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes, 
 
     function(input)
