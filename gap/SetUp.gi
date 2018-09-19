@@ -393,7 +393,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     function( i, rep, subrep )
     
-    local   dim, t, gens, x, inv, elts, emb, j, im, orbit, y, k;
+    local   dim, t, gens, x, inv, elts, emb, j, im, orbit, y, k, sign;
     
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
