@@ -1327,27 +1327,11 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(arg)
 
-    local   rep, unknowns, input, index, algebras, main;  
+    local   rep, unknowns, main;  
 
-    if Size(arg) = 2 then  
-        arg[3] := "AllAxioms";
-        algebras := MAJORANA_DihedralAlgebras;    
-    elif arg[3] = "AllAxioms" then
-        algebras := MAJORANA_DihedralAlgebras;
-    elif arg[3] = "NoAxioms" then 
-        algebras := MAJORANA_DihedralAlgebrasNoAxioms;
-    elif arg[3] = "AxiomM8" then 
-        algebras := MAJORANA_DihedralAlgebrasAxiomM8;
-    fi;
-    
-    input := arg[1]; index := arg[2];
+    if Size(arg) = 2 then arg[3] := "AllAxioms"; fi;
 
-    rep :=  MAJORANA_SetUp(input,index,algebras);
-    
-    if Size(rep.group) > 120 then 
-        # MAJORANA_MaximalSubgps(rep, arg[3]);
-        # MAJORANA_AllEmbeddings(rep, arg[3]); 
-    fi;
+    rep :=  MAJORANA_SetUp(arg[1], arg[2],  arg[3]);
     
     while true do
         
