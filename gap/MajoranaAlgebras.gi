@@ -126,11 +126,7 @@ function(arg)
     
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
     
-        while true do 
-            if MAJORANA_CheckBasis(dim, rep.evecs[i], rep) then
-                break;
-            fi;
-        
+        while true do        
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
             new := [0,0,0];
@@ -162,14 +158,11 @@ function(arg)
             fi;
         
             rep.evecs[i] := new;
+            
+            MAJORANA_IntersectEigenspaces(rep);
+            MAJORANA_IntersectEigenspaces(rep);
         od;        
     od;
-    
-    if Size(arg) = 1 then 
-        MAJORANA_Fusion(rep, false);
-    fi;
-    
-    MAJORANA_IntersectEigenspaces(rep);
     
     end );     
 
