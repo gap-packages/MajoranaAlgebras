@@ -421,6 +421,10 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     emb := rep.setup.poslist{emb};
     
     ## Add any new orbits
+    
+    gens := GeneratorsOfGroup(rep.group);
+    gens := List( gens, g -> MAJORANA_FindTauMap(g, rep.involutions) );
+    for j in gens do MAJORANA_NClosedExtendPerm( j, rep.setup); od;
 
     for j in [1 .. Size(subrep.setup.pairreps)] do 
         
@@ -434,25 +438,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         ## If need be, add a new orbit
         
         if orbit = 0 then 
-            
-            Add(rep.setup.pairreps, SortedList( im ) );
-            
-            orbit := Size(rep.setup.pairreps);
-                        
-            for k in elts do 
-                
-                sign := 1;
-                
-                y := rep.setup.pairconjelts[k]{ im };
-                
-                if y[1] < 0 then sign := -sign; y[1] := -y[1]; fi;
-                if y[2] < 0 then sign := -sign; y[2] := -y[2]; fi;
-                
-                rep.setup.pairorbit[y[1]][y[2]] := sign*orbit;
-                rep.setup.pairorbit[y[2]][y[1]] := sign*orbit;
-                rep.setup.pairconj[y[1]][y[2]] := k;
-                rep.setup.pairconj[y[2]][y[1]] := k;
-            od;
+            MAJORANA_NewOrbital(im, gens, rep.setup);
         fi;
     od;
 

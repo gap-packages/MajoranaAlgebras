@@ -162,50 +162,6 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
                 
                 setup.pairconj[q[1]][q[2]] := pos;
                 setup.pairconj[q[2]][q[1]] := pos;
-                
-            elif z <> y then # This orbit has already been found
-                
-                Remove(setup.pairreps);
-                
-                g := setup.pairconj[q[1]][q[2]];
-                g := setup.pairconjelts[g];
-                
-                g := SP_Product( g, SP_Inverse(gen));
-                g := SP_Product( g, SP_Inverse(h));
-                
-                # Import orbit
-
-                for i in [1 .. dim] do 
-                    for j in [i .. dim] do
-                        
-                        k := setup.pairorbit[i][j];
-                     
-                        if k in [z, -z] then
-                            
-                            old := setup.pairconj[i][j];
-                            old := setup.pairconjelts[old];
-                            
-                            im := old{ pnt };
-                            
-                            new := SP_Product( g, old );
-                            
-                            pos := Position(setup.pairconjelts, new);
-                
-                            if pos = fail then 
-                                Add(setup.pairconjelts, new);
-                                pos := Size(setup.pairconjelts);
-                            fi;
-                            
-                            setup.pairorbit[im[1]][im[2]] := k;
-                            setup.pairorbit[im[2]][im[1]] := k;
-                
-                            setup.pairconj[im[1]][im[2]] := pos;
-                            setup.pairconj[im[2]][im[1]] := pos;
-                        fi;
-                    od;
-                od;
-                
-                return fail;
             fi;
         od;
     od;
