@@ -73,7 +73,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
     function(gens,t,setup)
     
     local   dim,
-            i,j,k,
+            i,j,k, l,
             orb,
             elts,
             count,
@@ -84,7 +84,8 @@ InstallGlobalFunction(MAJORANA_Orbitals,
             y,z,
             gen,
             pos,
-            sign;
+            sign,
+            new, old, im;
     
     dim := Size(setup.coords);
 
@@ -166,29 +167,38 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             g := SP_Product( g, SP_Inverse(gen));
                             g := SP_Product( g, SP_Inverse(h));
                             
-                            # Fix existing orbit info 
+                            # Import orbit
+
+                            for k in [1 .. dim] do 
+                                for l in [1 .. dim] do 
+                                    if setup.pairorbit[k][l] = z then 
+                                        old := setup.pairconj[k][l];
+                                        old := setup.pairconjelts[old];
+                                        
+                                        im := old{[i,j]};
+                                        
+                                        new := SP_Product( g, old );
+                                        
+                                        pos := Position(setup.pairconjelts, new);
                             
-                            elts := List( elts, x -> SP_Product( g, x) );
+                                        if pos = fail then 
+                                            Add(setup.pairconjelts, new);
+                                            pos := Size(setup.pairconjelts);
+                                        fi;
+                                        
+                                        setup.pairorbit[im[1]][im[2]] := z;
+                                        setup.pairorbit[im[2]][im[1]] := z;
                             
-                            for k in [1 .. Size(orb)] do 
-                                
-                                setup.pairorbit[orb[k][1]][orb[k][2]] := z;
-                                setup.pairorbit[orb[k][2]][orb[k][1]] := z;
-                                
-                                pos := Position(setup.pairconjelts, elts[k]);
-                            
-                                if pos = fail then 
-                                    Add(setup.pairconjelts, elts[k]);
-                                    pos := Size(setup.pairconjelts);
-                                fi;
-                                
-                                setup.pairconj[orb[k][1]][orb[k][2]] := pos;
-                                setup.pairconj[orb[k][2]][orb[k][1]] := pos;
+                                        setup.pairconj[im[1]][im[2]] := pos;
+                                        setup.pairconj[im[2]][im[1]] := pos;
+                                    fi;
+                                od;
                             od;
                             
                             y := z;
-                            h := elts[count];
                             
+                            orb := [];
+                            break;
                         fi;
                     od;
                 od; 
