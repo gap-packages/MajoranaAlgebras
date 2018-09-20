@@ -187,6 +187,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
                             od;
                             
                             y := z;
+                            h := elts[count];
                             
                         fi;
                     od;
