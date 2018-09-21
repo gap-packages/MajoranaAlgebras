@@ -266,7 +266,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
         for j in [i + 1 .. t] do 
             k := input.pairorbit[i][j];
             if rep.shape[k] in ["4B", "6A"] then 
-                MAJORANA_TauRecordCoords( i, j, rep, MAJORANA_DihedralAlgebrasNoAxioms);
+                MAJORANA_TauRecordCoords( i, j, rep, MAJORANA_DihedralAlgebras);
             fi;
          od;
     od;
@@ -275,7 +275,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
         for j in [i + 1 .. t] do 
             k := input.pairorbit[i][j];
             if not rep.shape[k] in ["4B", "6A"] then 
-                MAJORANA_TauRecordCoords( i, j, rep, MAJORANA_DihedralAlgebrasNoAxioms);
+                MAJORANA_TauRecordCoords( i, j, rep, MAJORANA_DihedralAlgebras);
             fi;
          od;
     od;
@@ -354,7 +354,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
         for j in [i + 1 .. t] do 
     
             shape := rep.shape[rep.setup.pairorbit[i][j]];
-            subrep := MAJORANA_DihedralAlgebrasNoAxioms.(shape);
+            subrep := MAJORANA_DihedralAlgebras.(shape);
             emb := rep.setup.embeddings[i][j];
             
             for k in [Size(emb) + 1 .. Size(subrep.setup.coords)] do 

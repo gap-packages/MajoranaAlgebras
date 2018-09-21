@@ -576,7 +576,7 @@ InstallGlobalFunction( IsMinimal3GeneratedAlgebra,
             
                 for x in Combinations(t, 2) do 
                     type := rep.shape[rep.setup.pairorbit[x[1]][x[2]]];  
-                    dih := MAJORANA_DihedralAlgebrasNoAxioms.(type);
+                    dih := MAJORANA_DihedralAlgebras.(type);
                 
                     Add(list, Size(dih.setup.coords));
                 od;

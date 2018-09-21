@@ -317,7 +317,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         pairconjelts    := StructuralCopy(input.pairconjelts),
                         pairreps        := ShallowCopy(input.pairreps)       );
     
-    algebras := MAJORANA_DihedralAlgebrasNoAxioms;
+    algebras := MAJORANA_DihedralAlgebras;
     
     ## Orbits on axes for eigenvectors
     
