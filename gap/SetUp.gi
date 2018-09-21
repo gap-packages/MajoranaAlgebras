@@ -416,9 +416,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     
     ## Embed the dihedral algebra
     
-    emb := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
-    emb := List(emb, x -> Position(rep.setup.longcoords, x) );
-    emb := rep.setup.poslist{emb};
+    emb := MAJORANA_FindEmbedding( rep, subrep, gens, inv );
     
     ## Add any new orbits
     
@@ -447,6 +445,31 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     MAJORANA_Embed( rep, subrep, emb );
 
     end );
+
+InstallGlobalFunction( MAJORANA_FindEmbedding, 
+
+    function( rep, subrep, gens, inv)
+    
+    local imgs, emb, pos, x;
+    
+    imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    
+    emb := [];
+    
+    for x in imgs do
+        pos := Position(rep.setup.longcoords, x);
+        if pos = fail then 
+            pos := Position(rep.setup.longelts, Product( rep.involutions{x} ));
+        fi;
+        
+        if pos = fail then Error(); fi;
+        
+        Add( emb, pos);
+    od;
+    
+    return rep.setup.poslist{emb};
+    
+    end );
     
 InstallGlobalFunction( MAJORANA_AddNewVectors, 
 
@@ -457,12 +480,10 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
     dim := Size(rep.setup.coords);
     
     for i in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
-    
         list := Positions(subrep.setup.poslist, i);
         list_5A := Positions(subrep.setup.poslist, -i);
         
-        new := [];
-        new_5A := [];
+        new := []; new_5A := [];
         
         for x in subrep.setup.longcoords{list} do 
             Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
@@ -472,66 +493,7 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
             Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
         od;
 
-        ## Check if any new vectors have already been added
-
-        vec := First(new, x -> x in rep.setup.longcoords); 
-        
-        if vec <> fail then 
-            k := rep.setup.poslist[Position(rep.setup.longcoords, vec )];
-            new := Filtered(new, x -> not x in rep.setup.longcoords);
-            
-            # TODO Do we not need to conjugate this one?
-            
-            Append(rep.setup.longcoords, new); 
-            Append(rep.setup.poslist, List(new, x -> k));
-            
-            if rep.axioms <> "NoAxioms" then 
-                Append(rep.setup.longelts, List( new, x -> Product( rep.involutions{x} ) ));
-            fi;
-        elif vec = fail and rep.axioms = "AllAxioms" then 
-            vec := First(new, x -> Product( rep.involutions{x} ) in rep.setup.longelts );
-            
-            if vec <> fail then 
-                new := Filtered(new, x -> not x in rep.setup.longelts);
-                k := rep.setup.poslist[Position(rep.setup.longelts, Product( rep.involutions{vec}) )];
-                
-                # TODO Do we not need to conjugate this one?
-                
-                Append(rep.setup.longcoords, new); 
-                Append(rep.setup.poslist, List(new, x -> k));
-                Append(rep.setup.longelts, List( new, x -> Product( rep.involutions{x} ) ));
-            fi;
-        fi;
-        
-        ## If vec = fail then all vectors are new and we add them
-        
-        if vec = fail then 
-
-            for g in rep.setup.pairconjelts{elts} do 
-                
-                im := SortedList(g{ new[1] });
-                
-                if not im in rep.setup.longcoords then
-                    Add( rep.setup.coords, im );
-                    
-                    k := Size(rep.setup.coords);
-                
-                    Append( rep.setup.longcoords, List( new, x -> SortedList(g{x}) ) );
-                    Append( rep.setup.poslist, List( new, x ->  k ) );
-                    
-                    if rep.axioms = "AllAxioms" then 
-                        Append(rep.setup.longelts, List( new, x -> Product( rep.involutions{ g{x} } ) ));
-                    fi;
-                    
-                    Append( rep.setup.longcoords, List( new_5A, x -> SortedList(g{x}) ) );
-                    Append( rep.setup.poslist, List( new_5A, x -> -k ) );
-                    
-                    if rep.axioms = "AllAxioms" then 
-                        Append(rep.setup.longelts, List( new_5A, x -> Product( rep.involutions{ g{x} } ) ));
-                    fi;
-                fi;
-            od;
-        fi;
+        MAJORANA_AddConjugateVectors( rep, new, new_5A, elts );
     od;
     
     for x in rep.setup.pairorbit do 
@@ -548,6 +510,67 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
     for g in rep.setup.pairconjelts do  MAJORANA_NClosedExtendPerm( g, rep.setup); od;
     
     for g in rep.setup.conjelts do MAJORANA_NClosedExtendPerm( g, rep.setup); od;
+    
+    end );
+    
+InstallGlobalFunction( MAJORANA_AddConjugateVectors,
+
+    function( rep, new, new_5A, elts )
+    
+    local   vec, g, im, k;
+
+    ## Check if any new vectors have already been added
+
+    if rep.axioms = "NoAxioms" then    
+        vec := First(new, x -> x in rep.setup.longcoords); 
+        if vec <> fail then 
+            new := Filtered(new, x -> not x in rep.setup.longcoords);
+            new_5A := Filtered(new_5A, x -> not x in rep.setup.longcoords);
+        fi;
+    else
+        vec := First(new, x -> Product( rep.involutions{x} ) in rep.setup.longelts );
+        if vec <> fail then 
+            new := Filtered(new, x -> not Product( rep.involutions{x} ) in rep.setup.longelts);
+            new_5A := Filtered(new_5A, x -> not Product( rep.involutions{x} ) in rep.setup.longelts);
+        fi;
+    fi;
+    
+    if new = [] then return; fi;
+        
+    for g in rep.setup.pairconjelts{elts} do
+    
+        im := SortedList( g{ new[1] } );
+        
+        if not im in rep.setup.longcoords then
+            if rep.axioms = "NoAxioms" or not Product( rep.involutions{ im } ) in rep.setup.longelts then
+                if vec = fail then 
+                    Add( rep.setup.coords, im );
+                    k := Size(rep.setup.coords);
+                else
+                    if rep.axioms = "NoAxioms" then 
+                        k := Position(rep.setup.longcoords, SortedList( g{ vec } ));
+                    else
+                        k := Position(rep.setup.longelts, Product(rep.involutions{ g{ vec } }));
+                    fi;
+                    k := rep.setup.poslist[k];
+                fi;
+            
+                Append( rep.setup.longcoords, List( new, x -> SortedList(g{x}) ) );
+                Append( rep.setup.poslist, List( new, x ->  k ) );
+                
+                if rep.axioms = "AllAxioms" then 
+                    Append(rep.setup.longelts, List( new, x -> Product( rep.involutions{ g{x} } ) ));
+                fi;
+                
+                Append( rep.setup.longcoords, List( new_5A, x -> SortedList(g{x}) ) );
+                Append( rep.setup.poslist, List( new_5A, x -> -k ) );
+                
+                if rep.axioms = "AllAxioms" then 
+                    Append(rep.setup.longelts, List( new_5A, x -> Product( rep.involutions{ g{x} } ) ));
+                fi;
+            fi;
+        fi;
+    od;
     
     end );
     

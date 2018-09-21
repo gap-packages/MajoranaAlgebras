@@ -32,4 +32,7 @@ DeclareGlobalFunction( "MAJORANA_FindTauMap" );
 
 DeclareGlobalFunction( "MAJORANA_AddNewVectors" );
 
+DeclareGlobalFunction( "MAJORANA_AddConjugateVectors" );
+
+DeclareGlobalFunction( "MAJORANA_FindEmbedding" );
 
