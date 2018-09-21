@@ -375,7 +375,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
         od; 
     od;
     
-    for i in gens do MAJORANA_NClosedExtendPerm( i, rep.setup); od;
+    for i in gens do MAJORANA_NClosedExtendPerm( i, rep); od;
     
     MAJORANA_Orbitals( gens, t, rep.setup);
     
@@ -405,11 +405,11 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     
     x := rep.setup.pairreps[i];
     inv := rep.involutions{x};
-        
+
     elts := List( rep.setup.pairorbit, x -> Positions(x, i) );
     elts := List( [1..t], x-> rep.setup.pairconj[x]{elts[x]} );   
     elts := DuplicateFreeList(Flat(elts));
-
+        
     ## Add new vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     
     MAJORANA_AddNewVectors( rep, subrep, gens, inv, elts );
@@ -422,7 +422,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     
     gens := GeneratorsOfGroup(rep.group);
     gens := List( gens, g -> MAJORANA_FindTauMap(g, rep.involutions) );
-    for j in gens do MAJORANA_NClosedExtendPerm( j, rep.setup); od;
+    for j in gens do MAJORANA_NClosedExtendPerm( j, rep); od;
 
     for j in [1 .. Size(subrep.setup.pairreps)] do 
         
@@ -507,9 +507,9 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
     Append(rep.setup.pairorbit, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
     Append(rep.setup.pairconj, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
     
-    for g in rep.setup.pairconjelts do  MAJORANA_NClosedExtendPerm( g, rep.setup); od;
+    for g in rep.setup.pairconjelts do  MAJORANA_NClosedExtendPerm( g, rep); od;
     
-    for g in rep.setup.conjelts do MAJORANA_NClosedExtendPerm( g, rep.setup); od;
+    for g in rep.setup.conjelts do MAJORANA_NClosedExtendPerm( g, rep); od;
     
     end );
     
