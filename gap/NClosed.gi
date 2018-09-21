@@ -15,11 +15,11 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     od;
     
     for x in rep.setup.pairconjelts do 
-        MAJORANA_NClosedExtendPerm(x, rep.setup);
+        MAJORANA_NClosedExtendPerm(x, rep);
     od;
     
     for x in rep.setup.conjelts do 
-        MAJORANA_NClosedExtendPerm(x, rep.setup);
+        MAJORANA_NClosedExtendPerm(x, rep);
     od;
     
     new_dim := Size(rep.setup.coords);
@@ -110,15 +110,15 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
     
 InstallGlobalFunction( MAJORANA_NClosedExtendPerm,
 
-    function(perm, setup)
+    function(perm, rep)
     
     local dim, new_dim, i, im, sign, pos;
     
-    new_dim := Size(setup.coords);
+    new_dim := Size(rep.setup.coords);
     dim := Size(perm);
     
     for i in [dim + 1 .. new_dim] do 
-        im := perm{setup.coords[i]};
+        im := perm{rep.setup.coords[i]};
         sign := 1;
             
         if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
@@ -128,7 +128,15 @@ InstallGlobalFunction( MAJORANA_NClosedExtendPerm,
             im := im{[2,1]};
         fi;
         
-        pos := Position(setup.coords, im);
+        pos := Position(rep.setup.coords, im);
+        
+        if pos = fail then  
+            pos := Position(rep.setup.longcoords, im);
+            if pos = fail then 
+                pos := Position(rep.setup.longelts, Product( rep.involutions{im} ) );
+            fi;
+            pos := rep.setup.poslist[pos];
+        fi;
 
         Add(perm, sign*pos);
     od;

@@ -22,8 +22,17 @@ DeclareGlobalFunction( "SP_Inverse" );
 
 DeclareGlobalFunction( "SP_Product" );
 
-DeclareGlobalFunction( "MAJORANA_RecordCoords" );
-
 DeclareGlobalFunction( "MAJORANA_MappedWord" );
 
 DeclareGlobalFunction( "MAJORANA_RemoveDuplicateShapes" );
+
+DeclareGlobalFunction( "MAJORANA_EmbedDihedralAlgebra" );
+
+DeclareGlobalFunction( "MAJORANA_FindTauMap" );
+
+DeclareGlobalFunction( "MAJORANA_AddNewVectors" );
+
+DeclareGlobalFunction( "MAJORANA_AddConjugateVectors" );
+
+DeclareGlobalFunction( "MAJORANA_FindEmbedding" );
+
