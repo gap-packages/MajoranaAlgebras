@@ -312,10 +312,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         longcoords      := [1..t], 
                         longelts        := ShallowCopy(input. involutions), 
                         poslist         := [1..t],
-                        pairorbit       := ShallowCopy(input.pairorbit),
-                        pairconj        := ShallowCopy(input.pairconj),
-                        pairconjelts    := input.pairconjelts,
-                        pairreps        := input.pairreps );
+                        pairorbit       := StructuralCopy(input.pairorbit),
+                        pairconj        := StructuralCopy(input.pairconj),
+                        pairconjelts    := StructuralCopy(input.pairconjelts),
+                        pairreps        := ShallowCopy(input.pairreps)       );
     
     algebras := MAJORANA_DihedralAlgebrasNoAxioms;
     
