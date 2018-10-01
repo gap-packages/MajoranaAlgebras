@@ -24,4 +24,6 @@ ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gd");
 
+ReadPackage( "MajoranaAlgebras", "gap/Miscellaneous.gd");
+
 
