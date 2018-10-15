@@ -2,18 +2,30 @@ InstallGlobalFunction( MAJORANA_TauShapes,
 
     function(tau)
     
-    local G, d, orbs, shape, i, x, D, o1, o2, n, gph, comps, binaries, unknowns3X, j, k, shapeslist;    
+    local input, g, gens, perm, G, d, shape, i, x, D, o1, o2, n, gph, comps, binaries, unknowns3X, j, k, shapeslist;    
         
     G := Group(tau);
     d := Size(tau);
     
-    orbs := MAJORANA_OrbitalsT(G, [1..d]);
+    gens := GeneratorsOfGroup(G);
+    gens := List(gens, x -> ListPerm(x, d));
+    
+    input := rec();
+    
+    input.pairorbit := NullMat(d,d);
+    input.pairconj  := NullMat(d,d);
+    input.pairreps  := [];
+    input.orbitals  := [];
+    input.pairconjelts := [ [1..d] ];
+    input.coords := [1..d];
+    
+    MAJORANA_Orbitals(gens, 0, input);
     
     shape := [];
         
-    for i in [1 .. Size(orbs.pairreps)] do 
+    for i in [1 .. Size(input.pairreps)] do 
     
-        x := orbs.pairreps[i];
+        x := input.pairreps[i];
     
         D := Group(tau{x});
         
@@ -49,16 +61,16 @@ InstallGlobalFunction( MAJORANA_TauShapes,
     
     # Inclusions of 2A and 3A in 6A algebras
     
-    for i in [1..Size(orbs.pairreps)] do
+    for i in [1..Size(input.pairreps)] do
         if shape[i][1] = '6' then 
         
-            for x in [orbs.pairreps[i], Reversed(orbs.pairreps[i])] do 
+            for x in [input.pairreps[i], Reversed(input.pairreps[i])] do 
         
-                k := orbs.pairorbit[x[1]][x[1]^tau[x[2]]];
+                k := input.pairorbit[x[1]][x[1]^tau[x[2]]];
                 
                 shape[k] := "3A";
             
-                k := orbs.pairorbit[x[1]][x[2]^(tau[x[1]]*tau[x[2]])];
+                k := input.pairorbit[x[1]][x[2]^(tau[x[1]]*tau[x[2]])];
                 
                 shape[k] := "2A";
             od;
@@ -67,13 +79,13 @@ InstallGlobalFunction( MAJORANA_TauShapes,
     
     # Inclusions of 2X into 4X
     
-    gph := NullMat(Size(orbs.pairreps), 0);
+    gph := NullMat(Size(input.pairreps), 0);
     
-    for i in [1..Size(orbs.pairreps)] do 
+    for i in [1..Size(input.pairreps)] do 
         if shape[i][1] = '4' then 
         
-            for x in [orbs.pairreps[i], Reversed(orbs.pairreps[i])] do
-                Add(gph[i], orbs.pairorbit[x[1]][x[1]^tau[x[2]]]);
+            for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
+                Add(gph[i], input.pairorbit[x[1]][x[1]^tau[x[2]]]);
             od;
         fi;
     od;
@@ -140,17 +152,17 @@ InstallGlobalFunction( MAJORANA_TauShapes,
         
     od;
     
-    orbs.orbitals := List(orbs.orbitals, x -> List( x, y -> tau{y} ) ) ;
+    input.orbitals := List(input.orbitals, x -> List( x, y -> tau{y} ) ) ;
     
     return rec( group       := Group(tau),
                 tau         := tau,
                 shapes      := shapeslist,
-                orbitals    := orbs.orbitals,
+                orbitals    := input.orbitals,
                 involutions := tau,
-                pairreps    := orbs.pairreps,
-                pairorbit   := orbs.pairorbit,
-                pairconj    := orbs.pairconj,
-                pairconjelts := orbs.pairconjelts     );
+                pairreps    := input.pairreps,
+                pairorbit   := input.pairorbit,
+                pairconj    := input.pairconj,
+                pairconjelts := input.pairconjelts     );
     
     end );
 
@@ -247,18 +259,12 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
                         pairconj        := input.pairconj,
                         pairconjelts    := input.pairconjelts   );
                         
-    gens := List(rep.tau, ListPerm);
-    
-    for i in [1..t] do 
-        Append(gens[i], [Size(gens[i]) + 1 .. t]);
-    od;
+    gens := List(rep.tau, x -> ListPerm(x, t));
 
     x := MAJORANA_Orbits(gens, t, rep.setup);
 
     rep.setup.conjelts := x.conjelts;
     rep.setup.orbitreps := x.orbitreps;
-    
-    # rep.setup.pairconjelts := List(rep.setup.pairconjelts, x -> ListPerm(x, t));
 
     rep.setup.embeddings := NullMat(t, t);;
     
@@ -327,26 +333,6 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
             od;
         fi;
     od;
-
-    # Check for any 2A algebras coming from the more axes func
-    
-    if IsBound(input.algebras2A) then 
-        for i in Filtered( [1 .. Size(rep.shape)], k -> rep.shape[k] = "2A" ) do 
-            x := First(input.algebras2A, y -> Size( Intersection(y, input.pairreps[i])) = 2 );
-            
-            j := PositionProperty(x, y -> not y in input.pairreps[i]);
-            
-            rep.algebraproducts[i] := SparseMatrix(1, dim, [ x ] , [[1/8, 1/8, 1/8]], Rationals);
-            rep.algebraproducts[i]!.entries[j] := -1/8;
-            
-            for k in Filtered( input.pairreps, x -> x in rep.setup.orbitreps) do
-                
-                
-                ### TODO Add evecs from these 2A algebras
-                
-            od;
-        od;
-    fi;
 
     # Embed dihedral algebras
     
@@ -635,4 +621,25 @@ InstallGlobalFunction( MAJORANA_LatexNonMinimalOutput,
     
     return str;
     
+    end );
+
+InstallGlobalFunction( MAJORANA_TauMappedWord,
+
+    function(rep, subrep, w, gens, imgs)
+    
+    local im;
+    
+    if IsRowVector(subrep.setup.coords[w]) then 
+        im := List(w, i -> MAJORANA_TauMappedWord( rep, subrep, subrep.setup.coords[w], gens, imgs) );
+        return Position( rep.setup.coords, SortedList( im ));
+    else
+        if IsBound( subrep.setup.orbits[1][w] ) then 
+            im := MappedWord( subrep.setup.orbits[1][w], rep.tau{gens}, imgs );
+            return Image( im, gens[1] );
+        else
+            im := MappedWord( subrep.setup.orbits[2][w], rep.tau{gens}, imgs );
+            return Image( im, gens[2] );
+        fi;
+    fi;
+
     end );

@@ -30,6 +30,8 @@ DeclareGlobalFunction( "MAJORANA_EmbedDihedralAlgebra" );
 
 DeclareGlobalFunction( "MAJORANA_FindTauMap" );
 
+DeclareGlobalFunction( "MAJORANA_FindConjugatingVectors" );
+
 DeclareGlobalFunction( "MAJORANA_AddNewVectors" );
 
 DeclareGlobalFunction( "MAJORANA_AddConjugateVectors" );

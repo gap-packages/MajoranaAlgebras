@@ -128,13 +128,10 @@ InstallGlobalFunction( MAJORANA_NClosedExtendPerm,
             im := im{[2,1]};
         fi;
         
-        pos := Position(rep.setup.coords, im);
+        pos := rep.setup.coordmap[im];
         
         if pos = fail then  
-            pos := Position(rep.setup.longcoords, im);
-            if pos = fail then 
-                pos := Position(rep.setup.longelts, Product( rep.involutions{im} ) );
-            fi;
+            pos := Position(rep.setup.longelts, Product( rep.involutions{im} ) );
             pos := rep.setup.poslist[pos];
         fi;
 

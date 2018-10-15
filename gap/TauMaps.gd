@@ -15,3 +15,5 @@ DeclareGlobalFunction( "OnLists" );
 DeclareGlobalFunction( "MAJORANA_LatexRep" );
 
 DeclareGlobalFunction( "MAJORANA_LatexNonMinimalOutput" );
+
+DeclareGlobalFunction( "MAJORANA_TauMappedWord" );
