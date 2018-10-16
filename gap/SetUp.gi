@@ -404,28 +404,25 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
     
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
-    gens := GeneratorsOfGroup(subrep.group);
     
     x := rep.setup.pairreps[i];
     inv := rep.involutions{x};
     
-    ## Embed the dihedral algebra
+    ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     
-    emb := MAJORANA_FindEmbedding( rep, subrep, gens, inv );
-        
-    ## Add new vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
+    MAJORANA_AddNewVectors( rep, subrep, inv);
     
-    MAJORANA_AddNewVectors( rep, subrep, gens, inv);
-    
-    ## Embed the dihedral algebra
-    
-    emb := MAJORANA_FindEmbedding( rep, subrep, gens, inv );
+    ## Find the embedding of the subrep into the main algebra
+
+    emb := MAJORANA_FindEmbedding( rep, subrep, inv );
     
     ## Add any new orbits
     
     gens := GeneratorsOfGroup(rep.group);
-    gens := List( gens, g -> MAJORANA_FindTauMap(g, rep.involutions) );
-    for j in gens do MAJORANA_NClosedExtendPerm( j, rep); od;
+    gens := List( gens, g -> MAJORANA_FindPerm(g, rep, rep) );
+
+    #gens := List( gens, g -> MAJORANA_FindTauMap(g, rep.involutions) );
+    #for j in gens do MAJORANA_NClosedExtendPerm( j, rep); od;
 
     for j in [1 .. Size(subrep.setup.pairreps)] do 
         
@@ -451,9 +448,13 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
 InstallGlobalFunction( MAJORANA_FindEmbedding, 
 
-    function( rep, subrep, gens, inv)
+    function( rep, subrep, inv)
     
-    local imgs, emb, pos, x;
+    local imgs, emb, pos, x, gens;
+    
+    ## Find the images of the embedding of the subrep into the main rep
+    
+    gens := GeneratorsOfGroup(subrep.group);
     
     imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
     
@@ -474,11 +475,12 @@ InstallGlobalFunction( MAJORANA_FindEmbedding,
     
 InstallGlobalFunction( MAJORANA_AddNewVectors, 
 
-    function(rep, subrep, gens, inv)
+    function(rep, subrep, inv)
     
-    local i, list, list_5A, new, new_5A, x, vec, g, im, k, dim;
+    local i, list, list_5A, new, new_5A, x, vec, g, im, k, dim, gens;
     
     dim := Size(rep.setup.coords);
+    gens := GeneratorsOfGroup(subrep.group);
     
     for i in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
     
@@ -587,16 +589,14 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     
     function(g, rep, subrep)
     
-    local   dim, j, list, im, sign, vec;
-    
-    if IsRowVector(g) then return g; fi;
+    local   dim, i, list, im, sign, vec;
     
     dim := Size(subrep.setup.coords);
     list := [1..dim]*0;
         
-    for j in [1..dim] do 
+    for i in [1..dim] do 
         
-        vec := subrep.setup.coords[j];
+        vec := subrep.setup.coords[i];
     
         if IsRowVector(vec) then 
         
@@ -609,10 +609,16 @@ InstallGlobalFunction( MAJORANA_FindPerm,
             
             if im[1] > im[2] then im := im{[2,1]}; fi;
             
-            list[j] := rep.setup.coords[ im ]; 
+            list[i] := rep.setup.coordmap[ im ]; 
+            
+            if list[i] = fail then  
+                list[i] := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
+            fi;
+            
+            if list[i] = fail then Error("pause"); fi;
 
         else 
-            list[j] := rep.setup.coordmap[ OnPoints( vec, g) ]; 
+            list[i] := rep.setup.coordmap[ rep.involutions[i]^g ]; 
         fi;
     od;
 
