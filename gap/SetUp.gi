@@ -469,22 +469,6 @@ InstallGlobalFunction( MAJORANA_FindEmbedding,
     
     end );
     
-InstallGlobalFunction( MAJORANA_FindConjugatingVectors, 
-
-    function(new, rep)
-    
-    local orbits, positions, elts, t;
-    
-    t := Size(rep.involutions);
-    
-    orbits := List( new, x -> rep.setup.pairorbit[x[1]][x[2]] );
-    positions := List( rep.setup.pairorbit, row -> PositionsProperty(row{[1..t]}, i -> i in orbits ) );
-    elts := List( [1..t], x-> rep.setup.pairconj[x]{positions[x]} );   
-    
-    return DuplicateFreeList(Flat(elts));
-    
-    end );
-    
 InstallGlobalFunction( MAJORANA_AddNewVectors, 
 
     function(rep, subrep, gens, inv)
@@ -556,10 +540,8 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
     fi;
     
     if new = [] then return; fi;
-
-    elts := MAJORANA_FindConjugatingVectors(new, rep);
     
-    for g in rep.setup.pairconjelts{elts} do
+    for g in rep.setup.pairconjelts do
     
         im := List(new, x -> SortedList( g{ x } ));
         im := Filtered( im, x -> not x in rep.setup.coordmap );
@@ -568,9 +550,9 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
             im := Filtered( im, x -> not Product( rep.involutions{x} ) in rep.setup.coordmap);
         fi;
         
-        im_5A := List(new_5A, x -> SortedList( g{ x } ));
-        
         if im <> [] then 
+        
+            im_5A := List(new_5A, x -> SortedList( g{ x } ));
     
             if vec = fail then 
                 Add( rep.setup.coords, im[1] );
