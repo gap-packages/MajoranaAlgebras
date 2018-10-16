@@ -8,7 +8,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
     for i in [1..dim] do 
         for j in [i..dim] do 
-            if rep.setup.pairorbit[i][j] in [index, -index] then 
+            if rep.setup.pairorbit[i, j] in [index, -index] then 
                 Add(rep.setup.coords, [i,j]);
             fi;
         od;
@@ -54,7 +54,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            rep.evecs[i][j]!.ncols := new_dim;
+            rep.evecs[i, j]!.ncols := new_dim;
         od;
     od;
     
@@ -71,7 +71,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
                 new := SparseMatrix(1, new_dim, [[j, sign*x[j]]], [[1, -sign]], Rationals);
                 Sort(new!.indices[1]);
             
-                rep.evecs[i][3] := UnionOfRows(rep.evecs[i][3], new); 
+                rep.evecs[i, 3] := UnionOfRows(rep.evecs[i, 3], new); 
             fi;
         od;
     od;
@@ -93,11 +93,11 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
         if ForAll(rep.mat!.indices[i], x -> rep.unknowns[x] in rep.setup.coords) then
             v := CertainRows(rep.vec, [i]);
             for j in [1..Size(rep.mat!.indices[i])] do 
-                x := rep.mat!.indices[i][j];
+                x := rep.mat!.indices[i, j];
             
                 pos := Position(rep.setup.coords, rep.unknowns[x]);
                 
-                SetEntry(v, 1, pos, -rep.mat!.entries[i][j]);
+                SetEntry(v, 1, pos, -rep.mat!.entries[i, j]);
                 
                 rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, v);
             od;

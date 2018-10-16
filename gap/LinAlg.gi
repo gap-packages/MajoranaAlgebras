@@ -58,33 +58,33 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
     for i in [1..n] do
         sum := [];
         for j in [1..i-1] do
-            Add(sum, L[i][j]*L[i][j]*D[j][j]);
+            Add(sum, L[i, j]*L[i, j]*D[j, j]);
         od;
 
-        D[i][i] := B[i][i] - Sum(sum);
+        D[i, i] := B[i, i] - Sum(sum);
 
-        if D[i][i] = 0 then
+        if D[i, i] = 0 then
                 for j in [i+1..n] do
                     sum := [];
                     for k in [1..i-1] do
-                        Add(sum, L[j][k]*L[i][k]*D[k][k]);
+                        Add(sum, L[j, k]*L[i, k]*D[k, k]);
                     od;
-                    if B[j][i] - Sum(sum) = 0 then
-                        L[j][i]:=0;
+                    if B[j, i] - Sum(sum) = 0 then
+                        L[j, i]:=0;
                     else
                         return false;
                     fi;
                 od;
-                L[i][i]:=1;
+                L[i, i]:=1;
         else
             for j in [i+1..n] do
                 sum := [];
                 for k in [1..i-1] do
-                    Add(sum, L[j][k]*L[i][k]*D[k][k]);
+                    Add(sum, L[j, k]*L[i, k]*D[k, k]);
                 od;
-                L[j][i] := (B[j][i] - Sum(sum))/D[i][i];
+                L[j, i] := (B[j, i] - Sum(sum))/D[i, i];
             od;
-            L[i][i] := 1;
+            L[i, i] := 1;
         fi;
     od;
 
@@ -109,7 +109,7 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
     Diagonals := [];
 
     for i in [1..Size(GramMatrix)] do
-        Append(Diagonals,[L[2][i][i]]);
+        Append(Diagonals,[L[2][i, i]]);
     od;
 
     if ForAny(Diagonals, x->x<0) then

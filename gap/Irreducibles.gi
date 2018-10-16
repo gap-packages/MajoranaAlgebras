@@ -8,7 +8,7 @@ InstallGlobalFunction( MAJORANA_FindMatrix,
     
     for i in [1..dim] do
         if p[i] > 0 then sign := 1; else sign := -1; fi;
-       mat[i][sign*p[i]] := sign; 
+       mat[i, sign*p[i]] := sign; 
     od;
     
     if null <> [] then 

@@ -16,9 +16,9 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
         u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
         
         for j in [1..3] do
-            ev := MAJORANA_FusionTable[1][j + 1];
-            for k in [1..Nrows(rep.evecs[i][j])] do 
-                v := CertainRows(rep.evecs[i][j], [k]);
+            ev := MAJORANA_FusionTable[1, j + 1];
+            for k in [1..Nrows(rep.evecs[i, j])] do 
+                v := CertainRows(rep.evecs[i, j], [k]);
                 
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
                 
@@ -95,7 +95,7 @@ InstallGlobalFunction( MAJORANA_TestAxiomM8, # Not actually working, giving fals
         
         for j in [1..t] do
         
-            k := rep.setup.pairorbit[i][j];
+            k := rep.setup.pairorbit[i, j];
         
             if rep.shape[k] = ['2','A'] then
             
@@ -194,7 +194,7 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
         od;
     
         for j in [1..3] do
-            ev := MAJORANA_FusionTable[1][j + 1];
+            ev := MAJORANA_FusionTable[1, j + 1];
             
             new[j] := EchelonMatDestructive(new[j]).vectors;
             
@@ -273,7 +273,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
             
                 # orthogonality with 1-eigenvectors
                 
-                ev_a := evecs[i][a];
+                ev_a := evecs[i, a];
                 
                 for j in [1..Nrows(ev_a)] do  
                     v := CertainRows(ev_a, [j]);
@@ -289,7 +289,7 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
                 
                 for b in [a+1..3] do 
                 
-                    ev_b := evecs[i][b];
+                    ev_b := evecs[i, b];
                     
                     for j in [1..Nrows(ev_a)] do  
                         v := CertainRows(ev_a, [j]);
@@ -476,7 +476,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM2,
                     x2 := MAJORANA_AlgebraProduct(b,c,rep.algebraproducts,rep.setup);
                     x3 := MAJORANA_AlgebraProduct(a,d,rep.algebraproducts,rep.setup);
                 
-                    B[dim*(j-1) + k][dim*(l-1) +m]:=
+                    B[dim*(j-1) + k, dim*(l-1) +m]:=
                           MAJORANA_InnerProduct(x0,x1,rep.innerproducts, rep.setup)
                         - MAJORANA_InnerProduct(x2,x3,rep.innerproducts, rep.setup);
                 od;
@@ -515,7 +515,7 @@ InstallGlobalFunction( MAJORANA_SubalgebraAxes,
     U := NullMat(Size(axes), n);
     
     for i in [1..Size(axes)] do 
-        U[i][axes[i]] := One(field);
+        U[i, axes[i]] := One(field);
     od;
     
     while true do 
@@ -575,7 +575,7 @@ InstallGlobalFunction( IsMinimal3GeneratedAlgebra,
                 list := [];
             
                 for x in Combinations(t, 2) do 
-                    type := rep.shape[rep.setup.pairorbit[x[1]][x[2]]];  
+                    type := rep.shape[rep.setup.pairorbit[x[1], x[2]]];  
                     dih := MAJORANA_DihedralAlgebras.(type);
                 
                     Add(list, Size(dih.setup.coords));
@@ -603,8 +603,8 @@ InstallGlobalFunction( MAJORANA_TestSetup,
     
     for i in [1 .. dim] do 
         for j in [i .. dim] do 
-            k := rep.setup.pairorbit[i][j];
-            g := rep.setup.pairconj[i][j];
+            k := rep.setup.pairorbit[i, j];
+            g := rep.setup.pairconj[i, j];
             g := rep.setup.pairconjelts[g];
             
             sign_k := 1;

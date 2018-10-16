@@ -13,8 +13,8 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     for i in rep.setup.orbitreps do 
         for j in [1 .. 3] do 
             for k in [j + 1 .. 3] do
-                evecs_a := ConvertSparseMatrixToMatrix(rep.evecs[i][j]);
-                evecs_b := ConvertSparseMatrixToMatrix(rep.evecs[i][k]);
+                evecs_a := ConvertSparseMatrixToMatrix(rep.evecs[i, j]);
+                evecs_b := ConvertSparseMatrixToMatrix(rep.evecs[i, k]);
              
                 Z := SumIntersectionMat(evecs_a, evecs_b);
                 
@@ -35,10 +35,10 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
         for j in [1 .. 3] do
             
-            ev := MAJORANA_FusionTable[1][j + 1];
+            ev := MAJORANA_FusionTable[1, j + 1];
             
-            for k in [1..Nrows(rep.evecs[i][j])] do 
-                v := CertainRows(rep.evecs[i][j], [k]);
+            for k in [1..Nrows(rep.evecs[i, j])] do 
+                v := CertainRows(rep.evecs[i, j], [k]);
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
                 
                 if not x in [fail, false] then 
@@ -84,8 +84,8 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], rep.setup.nullspace);
-            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            rep.evecs[i, j] := RemoveMatWithHeads(rep.evecs[i, j], rep.setup.nullspace);
+            rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
         od;
     od;
     
@@ -105,7 +105,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
          
     dim := Size(setup.coords);
     
-    new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+    new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);

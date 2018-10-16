@@ -105,7 +105,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         
         for j in [1..Size(unknowns)] do
             k := unknowns[j];
-            if Binaries[i][j] = 1*Z(2) then
+            if Binaries[i, j] = 1*Z(2) then
                 shape[k]:="3A";
             else
                 shape[k]:="3C";
@@ -258,8 +258,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     for i in [1..Size(Binaries)] do
         
         for j in [1..Size(ind[3])] do
-            k:=ind[3][j];
-            if Binaries[i][j] = 1*Z(2) then
+            k:=ind[3, j];
+            if Binaries[i, j] = 1*Z(2) then
                 shape[k]:="3A";
             else
                 shape[k]:="3C";
@@ -268,7 +268,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
         
         for j in [1 .. Size(cc)] do 
             
-            if Binaries[i][j + Size(ind[3])] = 1*Z(2) then 
+            if Binaries[i, j + Size(ind[3])] = 1*Z(2) then 
                 for k in Intersection(ind[2],cc[j]) do 
                     shape[k] := "2A";
                 od;
@@ -340,11 +340,11 @@ InstallGlobalFunction( MAJORANA_SetUp,
     for j in [1..t] do
         if j in rep.setup.orbitreps then
             for k in [1..3] do
-                rep.evecs[j][k] := SparseMatrix(0, t, [], [], Rationals);
+                rep.evecs[j, k] := SparseMatrix(0, t, [], [], Rationals);
             od;
         else
             for k in [1..3] do
-                rep.evecs[j][k] := false;
+                rep.evecs[j, k] := false;
             od;
         fi;
     od;
@@ -370,8 +370,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
     
     for i in rep.setup.orbitreps do
         for j in [1..3] do 
-            rep.evecs[i][j]!.ncols := dim;
-            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            rep.evecs[i, j]!.ncols := dim;
+            rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
         od; 
     od;
     
@@ -431,7 +431,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         if im[1] < 0 then im[1] := -im[1]; fi;        
         if im[2] < 0 then im[2] := -im[2]; fi;
         
-        orbit := rep.setup.pairorbit[im[1]][im[2]];
+        orbit := rep.setup.pairorbit[im[1], im[2]];
         
         ## If need be, add a new orbit
         

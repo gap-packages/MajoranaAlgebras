@@ -62,15 +62,15 @@ InstallGlobalFunction( MAJORANA_TauShapes,
     # Inclusions of 2A and 3A in 6A algebras
     
     for i in [1..Size(input.pairreps)] do
-        if shape[i][1] = '6' then 
+        if shape[i, 1] = '6' then 
         
             for x in [input.pairreps[i], Reversed(input.pairreps[i])] do 
         
-                k := input.pairorbit[x[1]][x[1]^tau[x[2]]];
+                k := input.pairorbit[x[1], x[1]^tau[x[2]]];
                 
                 shape[k] := "3A";
             
-                k := input.pairorbit[x[1]][x[2]^(tau[x[1]]*tau[x[2]])];
+                k := input.pairorbit[x[1], x[2]^(tau[x[1]]*tau[x[2]])];
                 
                 shape[k] := "2A";
             od;
@@ -82,10 +82,10 @@ InstallGlobalFunction( MAJORANA_TauShapes,
     gph := NullMat(Size(input.pairreps), 0);
     
     for i in [1..Size(input.pairreps)] do 
-        if shape[i][1] = '4' then 
+        if shape[i, 1] = '4' then 
         
             for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
-                Add(gph[i], input.pairorbit[x[1]][x[1]^tau[x[2]]]);
+                Add(gph[i], input.pairorbit[x[1], x[1]^tau[x[2]]]);
             od;
         fi;
     od;
@@ -101,7 +101,7 @@ InstallGlobalFunction( MAJORANA_TauShapes,
     for x in comps do 
         if ForAny(shape{x}, y -> y[2] = 'A') then 
             for i in x do 
-                if shape[i][1] = '2' then 
+                if shape[i, 1] = '2' then 
                     shape[i] := "2A";
                 else
                     shape[i] := "4B";
@@ -120,9 +120,9 @@ InstallGlobalFunction( MAJORANA_TauShapes,
     
         for j in [1 .. Size(comps)] do 
             
-            if binaries[i][j] = 1*Z(2) then
+            if binaries[i, j] = 1*Z(2) then
                 for k in comps[j] do 
-                    if shape[k][1] = '2' then 
+                    if shape[k, 1] = '2' then 
                         shape[k] := "2A";
                     else
                         shape[k] := "4B";
@@ -130,7 +130,7 @@ InstallGlobalFunction( MAJORANA_TauShapes,
                 od;
             else
                 for k in comps[j] do 
-                    if shape[k][1] = '2' then 
+                    if shape[k, 1] = '2' then 
                         shape[k] := "2B";
                     else
                         shape[k] := "4A";
@@ -141,7 +141,7 @@ InstallGlobalFunction( MAJORANA_TauShapes,
         
         for j in [1 .. Size(unknowns3X)] do
             
-            if binaries[i][Size(comps) + j] = 1*Z(2) then
+            if binaries[i, Size(comps) + j] = 1*Z(2) then
                 shape[unknowns3X[j]] := "3A";
             else
                 shape[unknowns3X[j]] := "3C";
@@ -172,7 +172,7 @@ InstallGlobalFunction( MAJORANA_TauRecordCoords,
     
     local k, subrep, g, n, dim, emb, pos, shape, list, im, x;
     
-    k := rep.setup.pairorbit[i][j];
+    k := rep.setup.pairorbit[i, j];
     
     shape := rep.shape[k];
     
@@ -198,7 +198,7 @@ InstallGlobalFunction( MAJORANA_TauRecordCoords,
         od;
     fi;
     
-    rep.setup.embeddings[i][j] := emb;
+    rep.setup.embeddings[i, j] := emb;
 
     # Add new basis vectors
     
@@ -270,7 +270,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     
     for i in [1..t] do
         for j in [i + 1 .. t] do 
-            k := input.pairorbit[i][j];
+            k := input.pairorbit[i, j];
             if rep.shape[k] in ["4B", "6A"] then 
                 MAJORANA_TauRecordCoords( i, j, rep, MAJORANA_DihedralAlgebras);
             fi;
@@ -279,7 +279,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     
     for i in [1..t] do
         for j in [i + 1 .. t] do 
-            k := input.pairorbit[i][j];
+            k := input.pairorbit[i, j];
             if not rep.shape[k] in ["4B", "6A"] then 
                 MAJORANA_TauRecordCoords( i, j, rep, MAJORANA_DihedralAlgebras);
             fi;
@@ -295,8 +295,8 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     
     for i in [1..t] do 
         for j in [1..t] do 
-            rep.setup.pairorbit[i][j] := input.pairorbit[i][j];
-            rep.setup.pairconj[i][j]  := input.pairconj[i][j];
+            rep.setup.pairorbit[i, j] := input.pairorbit[i, j];
+            rep.setup.pairconj[i, j]  := input.pairconj[i, j];
         od;
     od;
     
@@ -325,11 +325,11 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     for j in [1..t] do
         if j in rep.setup.orbitreps then
             for k in [1..3] do
-                rep.evecs[j][k] := SparseMatrix(0, dim, [], [], Rationals);
+                rep.evecs[j, k] := SparseMatrix(0, dim, [], [], Rationals);
             od;
         else
             for k in [1..3] do
-                rep.evecs[j][k] := false;
+                rep.evecs[j, k] := false;
             od;
         fi;
     od;
@@ -339,9 +339,9 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     for i in [1..t] do 
         for j in [i + 1 .. t] do 
     
-            shape := rep.shape[rep.setup.pairorbit[i][j]];
+            shape := rep.shape[rep.setup.pairorbit[i, j]];
             subrep := MAJORANA_DihedralAlgebras.(shape);
-            emb := rep.setup.embeddings[i][j];
+            emb := rep.setup.embeddings[i, j];
             
             for k in [Size(emb) + 1 .. Size(subrep.setup.coords)] do 
                 x := SortedList(emb{subrep.setup.coords[k]});
@@ -359,7 +359,7 @@ InstallGlobalFunction( MAJORANA_TauSetUp,
     
     for i in rep.setup.orbitreps do
         for j in [1..3] do 
-            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
         od; 
     od;
     
@@ -422,7 +422,7 @@ InstallGlobalFunction( MAJORANA_MoreAxes,
     for i in list do 
         for j in [i + 1 .. t] do 
         
-            k := input.pairorbit[i][j];
+            k := input.pairorbit[i, j];
         
             if shape[k] = "2A" then 
                 
@@ -445,7 +445,7 @@ InstallGlobalFunction( MAJORANA_MoreAxes,
     
         for y in Combinations( x, 2) do  
         
-            k := new.pairorbit[y[1]][y[2]];
+            k := new.pairorbit[y[1], y[2]];
             
             new.shapes := Filtered(new.shapes, x -> x[k] = "2A" );
         od;
@@ -494,7 +494,7 @@ InstallGlobalFunction( MAJORANA_TauRemoveDuplicateShapes,
             
             im := g{x};
             
-            k := input.pairorbit[im[1]][im[2]];
+            k := input.pairorbit[im[1], im[2]];
             
             if k < 0 then Error("Maps to negative pair, not sure what to do in this case"); fi;
             
@@ -633,11 +633,11 @@ InstallGlobalFunction( MAJORANA_TauMappedWord,
         im := List(w, i -> MAJORANA_TauMappedWord( rep, subrep, subrep.setup.coords[w], gens, imgs) );
         return Position( rep.setup.coords, SortedList( im ));
     else
-        if IsBound( subrep.setup.orbits[1][w] ) then 
-            im := MappedWord( subrep.setup.orbits[1][w], rep.tau{gens}, imgs );
+        if IsBound( subrep.setup.orbits[1, w] ) then 
+            im := MappedWord( subrep.setup.orbits[1, w], rep.tau{gens}, imgs );
             return Image( im, gens[1] );
         else
-            im := MappedWord( subrep.setup.orbits[2][w], rep.tau{gens}, imgs );
+            im := MappedWord( subrep.setup.orbits[2, w], rep.tau{gens}, imgs );
             return Image( im, gens[2] );
         fi;
     fi;

@@ -79,7 +79,7 @@ InstallGlobalFunction(MAJORANA_Orbitals,
     for i in [1..dim] do 
         for j in [Maximum(i,t + 1)..dim] do 
 
-            if setup.pairorbit[i][j] = 0 then 
+            if setup.pairorbit[i, j] = 0 then 
                 
                 orb := MAJORANA_NewOrbital([i,j], gens, setup);
                 
@@ -109,11 +109,11 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
     
     y := Size(setup.pairreps);
     
-    setup.pairorbit[pnt[1]][pnt[2]] := y;
-    setup.pairorbit[pnt[2]][pnt[1]] := y;
+    setup.pairorbit[pnt[1], pnt[2]] := y;
+    setup.pairorbit[pnt[2], pnt[1]] := y;
     
-    setup.pairconj[pnt[1]][pnt[2]] := 1;
-    setup.pairconj[pnt[2]][pnt[1]] := 1;
+    setup.pairconj[pnt[1], pnt[2]] := 1;
+    setup.pairconj[pnt[2], pnt[1]] := 1;
     
     for p in orb do 
         
@@ -127,7 +127,7 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
             if q[1] < 0 then q[1] := -q[1]; fi;
             if q[2] < 0 then q[2] := -q[2]; fi;
             
-            z := setup.pairorbit[q[1]][q[2]];
+            z := setup.pairorbit[q[1], q[2]];
             
             if z = 0 then 
 
@@ -150,8 +150,8 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
                     sign := 1;
                 fi;
                 
-                setup.pairorbit[q[1]][q[2]] := sign*y;
-                setup.pairorbit[q[2]][q[1]] := sign*y;
+                setup.pairorbit[q[1], q[2]] := sign*y;
+                setup.pairorbit[q[2], q[1]] := sign*y;
                 
                 pos := Position(setup.pairconjelts, g);
                 
@@ -160,8 +160,8 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
                     pos := Size(setup.pairconjelts);
                 fi;
                 
-                setup.pairconj[q[1]][q[2]] := pos;
-                setup.pairconj[q[2]][q[1]] := pos;
+                setup.pairconj[q[1], q[2]] := pos;
+                setup.pairconj[q[2], q[1]] := pos;
             fi;
         od;
     od;
