@@ -139,6 +139,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
             i,              # indices
             j,
             k,
+            perm,
             x,              # result of orbitals
             ind,            # list of indices
             orbs,           # orbitals on T
@@ -167,7 +168,15 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     input.involutions := T;
     input.group       := G;
 
-    gens := List( GeneratorsOfGroup(G), g -> MAJORANA_FindPerm(g, input, input) );
+    gens := [];
+
+    for g in GeneratorsOfGroup(G) do
+        perm := [];
+        for i in [1..t] do
+            Add(perm, Position(T, T[i]^g));
+        od;
+        Add(gens, perm);
+    od;
 
     MAJORANA_Orbitals(gens, 0, input);
 
@@ -625,10 +634,6 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
 
         im := List(new, x -> SortedList( g{ x } ));
         im := Filtered( im, x -> not x in rep.setup.coordmap );
-
-        if rep.axioms = "AllAxioms" then
-            im := Filtered( im, x -> not Product( rep.involutions{x} ) in rep.setup.coordmap);
-        fi;
 
         if im <> [] then
 
