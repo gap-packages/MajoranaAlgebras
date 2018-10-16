@@ -23,7 +23,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
                     
     for i in v!.indices[1] do
         for j in list do 
-            k :=  setup.pairorbit[i][j];
+            k :=  setup.pairorbit[i, j];
             
             if k < 0 then k := -k; fi;
 
@@ -46,7 +46,7 @@ InstallGlobalFunction(MAJORANA_AddEvec,
     
     if x!.indices[1] = [] then return mat; fi;
     
-    x!.entries[1] := x!.entries[1]/x!.entries[1][Size(x!.entries[1])];
+    x!.entries[1] := x!.entries[1]/x!.entries[1, Size(x!.entries[1])];
     
     if _IsRowOfSparseMatrix(mat, x) then 
         return mat;
@@ -72,7 +72,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
          
     dim := Size(setup.coords);
     
-    new_ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+    new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
     
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
@@ -132,17 +132,17 @@ function(arg)
             new := [0,0,0];
             
             for j in [1..3] do 
-                new[j] := CopyMat(rep.evecs[i][j]);
+                new[j] := CopyMat(rep.evecs[i, j]);
             od;
         
             for evals in [[1,1], [1,2], [1,3], [2,3], [2,2], [3,3]] do
-                for j in [1..Nrows(rep.evecs[i][evals[1]])] do
+                for j in [1..Nrows(rep.evecs[i, evals[1]])] do
                     
-                    a := CertainRows(rep.evecs[i][evals[1]], [j]);
+                    a := CertainRows(rep.evecs[i, evals[1]], [j]);
                     
-                    for k in [1..Nrows(rep.evecs[i][evals[2]])] do 
+                    for k in [1..Nrows(rep.evecs[i, evals[2]])] do 
                         
-                        b := CertainRows(rep.evecs[i][evals[2]], [k]);
+                        b := CertainRows(rep.evecs[i, evals[2]], [k]);
                         
                         FUSE(a, b, u, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);  
                     od;                        
@@ -153,7 +153,7 @@ function(arg)
                 new[j] := MAJORANA_BasisOfEvecs(new[j]);
             od;
         
-            if ForAll([1..3], j -> Nrows(new[j]) = Nrows(rep.evecs[i][j])) then 
+            if ForAll([1..3], j -> Nrows(new[j]) = Nrows(rep.evecs[i, j])) then 
                 break;
             fi;
         
@@ -200,7 +200,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
     
     for i in [1..Size(mat!.indices[1])] do 
         
-        k := g[mat!.indices[1][i]];
+        k := g[mat!.indices[1, i]];
             
         sign := 1;
     
@@ -209,7 +209,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
         pos := PositionSorted(res!.indices[1], k);
         
         Add(res!.indices[1], k, pos);
-        Add(res!.entries[1], sign*mat!.entries[1][i], pos);
+        Add(res!.entries[1], sign*mat!.entries[1, i], pos);
     od;
     
     return res;
@@ -242,7 +242,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
                 
-                k := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+                k := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
                 
                 if k > 0 then 
                     sign := 1;
@@ -255,15 +255,15 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 
                 if not x in [fail, false] then
                     
-                    g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]];
+                    g := setup.pairconj[u!.indices[1, i], v!.indices[1, j]];
                     
                     pos := Position(elts,g);
                     
                     if pos <> fail then
-                        AddRow(x!.indices[1],  sign*u!.entries[1][i]*v!.entries[1][j]*x!.entries[1],  vecs[pos]!.indices, vecs[pos]!.entries, 1);
+                        AddRow(x!.indices[1],  sign*u!.entries[1, i]*v!.entries[1, j]*x!.entries[1],  vecs[pos]!.indices, vecs[pos]!.entries, 1);
                     else
                         Add(elts, g);
-                        Add(vecs, CopyMat(sign*u!.entries[1][i]*v!.entries[1][j]*x));
+                        Add(vecs, CopyMat(sign*u!.entries[1, i]*v!.entries[1, j]*x));
                     fi;
                 elif x = false then 
                     # cannot calculate product
@@ -297,7 +297,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
-                k := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+                k := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
                 
                 if k > 0 then 
                     sign := 1;
@@ -307,7 +307,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                 fi;
                 
                 if innerproducts[k] <> false then
-                    sum := sum + sign*u!.entries[1][i]*v!.entries[1][j]*innerproducts[k];
+                    sum := sum + sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[k];
                 else
                     return false;
                 fi;
@@ -331,7 +331,7 @@ function(range, innerproducts, setup)
     for i in [1..l] do 
         for j in [i..l] do
             
-            k := setup.pairorbit[range[i]][range[j]];
+            k := setup.pairorbit[range[i], range[j]];
             
             if k > 0 then 
                 SetEntry(mat, i, j, innerproducts[k]);
@@ -368,7 +368,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
             
-            m := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+            m := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
             
             if m > 0 then 
                 sign := 1;
@@ -378,10 +378,10 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             fi;
 
             if innerproducts[m] <> false then
-                AddToEntry(sum, 1, 1, - sign*u!.entries[1][i]*v!.entries[1][j]*innerproducts[m]);
+                AddToEntry(sum, 1, 1, - sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[m]);
             else
                 pos := Position(unknowns,m);
-                AddToEntry(row, 1, pos, sign*u!.entries[1][i]*v!.entries[1][j]);
+                AddToEntry(row, 1, pos, sign*u!.entries[1, i]*v!.entries[1, j]);
             fi;
         od;
     od;
@@ -420,15 +420,15 @@ function(rep)
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
      
         for ev in [1..3] do 
-            for j in [1..Nrows(rep.evecs[i][ev])] do
+            for j in [1..Nrows(rep.evecs[i, ev])] do
                 
-                v := CertainRows(rep.evecs[i][ev], [j]);
+                v := CertainRows(rep.evecs[i, ev], [j]);
                 
                 x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
 
                 if x <> fail then 
                 
-                    x[2] := x[2] + MAJORANA_FusionTable[1][ev + 1]*v;
+                    x[2] := x[2] + MAJORANA_FusionTable[1, ev + 1]*v;
                     
                     if Size(x[1]!.indices[1]) = 1 then 
                         y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, 
@@ -501,7 +501,7 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
                             MAJORANA_CheckNullSpace(rep); return;
                         fi;
                     elif eq[1]!.indices[1] <> [] then 
-                        eq := eq*(1/eq[1]!.entries[1][1]);
+                        eq := eq*(1/eq[1]!.entries[1, 1]);
                         if not _IsRowOfSparseMatrix(mat, eq[1]) then
                             mat := UnionOfRows(mat, eq[1]);
                             vec := UnionOfRows(vec, eq[2]);
@@ -552,7 +552,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
             
-            k := setup.pairorbit[u!.indices[1][i]][v!.indices[1][j]];
+            k := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
             
             if k > 0 then 
                 sign := 1;
@@ -567,19 +567,19 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             
             if x <> false then 
                                         
-                g := setup.pairconj[u!.indices[1][i]][v!.indices[1][j]];
+                g := setup.pairconj[u!.indices[1, i], v!.indices[1, j]];
                 
                 pos := Position(elts,g);
                 
                 if pos <> fail then 
-                    vecs[pos] := vecs[pos] - sign*u!.entries[1][i]*v!.entries[1][j]*x;
+                    vecs[pos] := vecs[pos] - sign*u!.entries[1, i]*v!.entries[1, j]*x;
                 else
                     Add(elts,g);
-                    Add(vecs,- sign*u!.entries[1][i]*v!.entries[1][j]*x);
+                    Add(vecs,- sign*u!.entries[1, i]*v!.entries[1, j]*x);
                 fi;
             else
 
-                l := [u!.indices[1][i], v!.indices[1][j]]; 
+                l := [u!.indices[1, i], v!.indices[1, j]]; 
                 Sort(l);
                 
                 pos := Position(unknowns,l);
@@ -588,7 +588,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                     Add(unknowns, l); pos := Size(unknowns);
                 fi;
                 
-                AddToEntry(row, 1, pos, u!.entries[1][i]*v!.entries[1][j]); 
+                AddToEntry(row, 1, pos, u!.entries[1, i]*v!.entries[1, j]); 
             fi;
         od;
     od;
@@ -620,7 +620,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     
     for i in [1..Size(row!.indices[1])] do
     
-        x := unknowns[row!.indices[1][i]];
+        x := unknowns[row!.indices[1, i]];
         y := g{x};
         
         sign := 1;
@@ -637,7 +637,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
         pos := PositionSorted(output!.indices[1], k);
         
         Add(output!.indices[1], k, pos);
-        Add(output!.entries[1], sign*row!.entries[1][i], pos);
+        Add(output!.entries[1], sign*row!.entries[1, i], pos);
     od;
 
     return output;
@@ -690,8 +690,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     for evals in evals_list do     
         for i in rep.setup.orbitreps do 
             
-            evecs_a := rep.evecs[i][evals[1]];
-            evecs_b := rep.evecs[i][evals[2]];
+            evecs_a := rep.evecs[i, evals[1]];
+            evecs_b := rep.evecs[i, evals[2]];
         
             u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
             
@@ -705,9 +705,9 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 for k in [1..Nrows(evecs_b)] do 
                     x := Size(Intersection(bad, evecs_b!.indices[k]));
                     if x = 1 then 
-                        Add(list[1][j], k);
+                        Add(list[1, j], k);
                     elif x > 1 then 
-                        Add(list[2][j], k);
+                        Add(list[2, j], k);
                     fi;
                 od;
             od;
@@ -715,7 +715,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
             for index in [1,2] do 
                 for j in [1..Nrows(evecs_a)] do 
                     c := CertainRows(evecs_a, [j]);
-                    for k in list[index][j] do 
+                    for k in list[index, j] do 
                         b := CertainRows(evecs_b, [k]);
                         
                         bad := MAJORANA_FindBadIndices(c, rep.algebraproducts, rep.setup);
@@ -841,7 +841,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     
     if res[1]!.indices[1] = [] or res = fail then return false; fi;
     
-    ev := MAJORANA_FusionTable[evals[1] + 1][evals[2] + 1];
+    ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
     
     res := ev*res;
     
@@ -858,7 +858,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     n := a - b;
 
     if evals[1] = 2 then
-        i := u!.indices[1][1];
+        i := u!.indices[1, 1];
         
         y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], Rationals), c, innerproducts, setup);
 
@@ -1022,10 +1022,10 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
             
     Info( InfoMajorana, 60, "Solved a single solution");
     
-    elm := x[1]!.entries[1][1]; 
+    elm := x[1]!.entries[1, 1]; 
     x := x/elm;
 
-    MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.indices[1][1]],
+    MAJORANA_RecordSolution(    x[2], unknowns[x[1]!.indices[1, 1]],
                                 algebraproducts, setup );
     
     y := MAJORANA_RemoveKnownAlgProducts(   mat, vec, unknowns, 
@@ -1051,9 +1051,9 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
             for i in [1..Nrows(mat)] do 
                 if Size(mat!.indices[i]) = 1 then 
                     switch := true;
-                    elm := mat!.entries[i][1];
+                    elm := mat!.entries[i, 1];
                     MAJORANA_RecordSolution(    CertainRows(vec, [i])*(1/elm), 
-                                                unknowns[mat!.indices[i][1]], 
+                                                unknowns[mat!.indices[i, 1]], 
                                                 algebraproducts, setup);
                 fi;;
             od;
@@ -1088,8 +1088,8 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
             g,
             sign;
     
-    y := setup.pairorbit[x[1]][x[2]];
-    g := SP_Inverse(setup.pairconjelts[setup.pairconj[x[1]][x[2]]]);
+    y := setup.pairorbit[x[1], x[2]];
+    g := SP_Inverse(setup.pairconjelts[setup.pairconj[x[1], x[2]]]);
     
     sign := 1;
     
@@ -1174,7 +1174,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     
         x := unknowns[i]; 
                     
-        y := setup.pairorbit[x[1]][x[2]];
+        y := setup.pairorbit[x[1], x[2]];
         
         sign := 1;
         
@@ -1186,14 +1186,14 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             
             switch := true;
             
-            g := setup.pairconjelts[setup.pairconj[x[1]][x[2]]];
+            g := setup.pairconjelts[setup.pairconj[x[1], x[2]]];
             
             prod := MAJORANA_ConjugateVec(prod,g);
             
             for j in [1..Nrows(vec)] do  
                 pos := Position(mat!.indices[j], i);
                 if pos <> fail then
-                    elm := mat!.entries[j][pos];
+                    elm := mat!.entries[j, pos];
                     AddRow( prod!.indices[1],-sign*elm*prod!.entries[1], 
                             vec!.indices, vec!.entries, j);
                 fi;
@@ -1216,12 +1216,12 @@ InstallGlobalFunction( MAJORANA_SingleInnerSolution,
     
     local x;
     
-    x := unknowns[eq[1]!.indices[1][1]];
+    x := unknowns[eq[1]!.indices[1, 1]];
     
     if eq[2]!.entries[1] = [] then 
         innerproducts[x] := 0;
     else
-        innerproducts[x] := eq[2]!.entries[1][1]/eq[1]!.entries[1][1];
+        innerproducts[x] := eq[2]!.entries[1, 1]/eq[1]!.entries[1, 1];
     fi;
     
     return MAJORANA_RemoveKnownInnProducts(mat, vec, unknowns, innerproducts);
@@ -1246,7 +1246,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
             if sol.solutions[i]!.entries[1] = [] then 
                 innerproducts[x] := 0;
             else
-                innerproducts[x] := sol.solutions[i]!.entries[1][1];
+                innerproducts[x] := sol.solutions[i]!.entries[1, 1];
             fi;
         fi;
     od;
@@ -1290,8 +1290,8 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            rep.evecs[i][j] := RemoveMatWithHeads(rep.evecs[i][j], null);
-            rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            rep.evecs[i, j] := RemoveMatWithHeads(rep.evecs[i, j], null);
+            rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
         od;
     od;
     
