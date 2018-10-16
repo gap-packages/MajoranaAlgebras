@@ -36,3 +36,4 @@ DeclareGlobalFunction( "MAJORANA_AddConjugateVectors" );
 
 DeclareGlobalFunction( "MAJORANA_FindEmbedding" );
 
+DeclareGlobalFunction( "MAJORANA_ExtendPerm" );

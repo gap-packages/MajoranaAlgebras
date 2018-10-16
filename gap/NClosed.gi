@@ -15,11 +15,11 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     od;
     
     for x in rep.setup.pairconjelts do 
-        MAJORANA_NClosedExtendPerm(x, rep);
+        MAJORANA_ExtendPerm(x, rep);
     od;
     
     for x in rep.setup.conjelts do 
-        MAJORANA_NClosedExtendPerm(x, rep);
+        MAJORANA_ExtendPerm(x, rep);
     od;
     
     new_dim := Size(rep.setup.coords);
@@ -107,37 +107,6 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
     rep.setup.nullspace := ReversedEchelonMatDestructive(rep.setup.nullspace.vectors);
     
     end );
-    
-InstallGlobalFunction( MAJORANA_NClosedExtendPerm,
-
-    function(perm, rep)
-    
-    local dim, new_dim, i, im, sign, pos;
-    
-    new_dim := Size(rep.setup.coords);
-    dim := Size(perm);
-    
-    for i in [dim + 1 .. new_dim] do 
-        im := perm{rep.setup.coords[i]};
-        sign := 1;
-            
-        if im[1] < 0 then im[1] := -im[1]; sign := -sign; fi;
-        if im[2] < 0 then im[2] := -im[2]; sign := -sign; fi;
-        
-        if im[1] > im[2] then 
-            im := im{[2,1]};
-        fi;
-        
-        pos := rep.setup.coordmap[im];
-        
-        if pos = fail then  
-            pos := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
-        fi;
-
-        Add(perm, sign*pos);
-    od;
-   
-    end);
     
 InstallGlobalFunction( NClosedMajoranaRepresentation, 
 
