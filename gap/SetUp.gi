@@ -315,7 +315,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         pairconjelts    := StructuralCopy(input.pairconjelts),
                         pairreps        := ShallowCopy(input.pairreps)       );
                         
-    for i in [1..t] do rep.setup.coordmap[i] := i; od;
+    for i in [1..t] do 
+        rep.setup.coordmap[i] := i; 
+        rep.setup.coordmap[rep.involutions[i]] := i; 
+    od;
     
     algebras := MAJORANA_DihedralAlgebras;
     
