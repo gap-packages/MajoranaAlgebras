@@ -1,8 +1,8 @@
+gap> SetInfoLevel(InfoMajorana, 0);
 
 ##
 ## Test each part of main loop on A5 shape 4
 ##
-
 gap> ex := A5();;
 gap> rep := MAJORANA_SetUp(ex, 4, "AllAxioms");;
 gap> MAJORANA_AxiomM1(rep);;
@@ -96,10 +96,13 @@ gap> Determinant( ConvertSparseMatrixToMatrix(gram) );
 ##
 ## Test the unknown inner product functions
 ##
+gap> mat := SparseMatrix( 1, 5, [ [ 1, 4 ] ], [ [ 1, -1 ] ], Rationals );;
+gap> vec := SparseMatrix( 1, 1, [ [ 1 ] ], [ [ 7123/518400 ] ], Rationals );;
 gap> unknowns := [1..5];;
 gap> innerproducts := [false, 289/57600, 1321/518400, false, 23/5184 ];;
-gap> MAJORANA_RemoveKnownInnProducts(mat, vec, unknowns, innerproducts);
-Error, List Elements: <list>[4] must have an assigned value
+gap> r := MAJORANA_RemoveKnownInnProducts(mat, vec, unknowns, innerproducts);;
+gap> r.unknowns;
+[ 1, 4 ]
 gap> eq := [ SparseMatrix( 1, 3, [ [ 1 ] ], [ [ -1 ] ], Rationals ), SparseMatrix( 1, 1, [ [ 1 ] ], [ [ -1/8192 ] ], Rationals ) ];;
 gap> mat := SparseMatrix( 0, 3, [  ], [  ], Rationals );;
 gap> vec := SparseMatrix( 0, 1, [  ], [  ], Rationals );;
