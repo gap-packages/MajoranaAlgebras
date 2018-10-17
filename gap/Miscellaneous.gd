@@ -10,3 +10,4 @@ DeclareGlobalFunction( "MAJORANA_FindFusionTable" );
 
 DeclareGlobalFunction( "MAJORANA_ConvertToBasis" );
 
+DeclareGlobalFunction( "MAJORANA_FindTauMapEigenspace");
