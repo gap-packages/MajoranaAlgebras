@@ -128,7 +128,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
 InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
-    function(innerproducts,evecs, setup)
+    function(rep)
 
     # Tests that eigenspaces are orthogonal with respect to the inner product
 
@@ -147,19 +147,19 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
         errorortho := [];
 
-        for i in setup.orbitreps do
+        for i in rep.setup.orbitreps do
 
-            u := SparseMatrix(1, Size(setup.coords), [[i]], [[1]], Rationals);
+            u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
 
             for a in [1..3] do
 
                 # orthogonality with 1-eigenvectors
 
-                ev_a := evecs[i, a];
+                ev_a := rep.evecs[i, a];
 
                 for j in [1..Nrows(ev_a)] do
                     v := CertainRows(ev_a, [j]);
-                    x := MAJORANA_InnerProduct(u, v, innerproducts, setup);
+                    x := MAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);
 
                     if (x <> false) and (x <> 0) then
 
@@ -171,14 +171,14 @@ InstallGlobalFunction(MAJORANA_TestOrthogonality,
 
                 for b in [a+1..3] do
 
-                    ev_b := evecs[i, b];
+                    ev_b := rep.evecs[i, b];
 
                     for j in [1..Nrows(ev_a)] do
                         v := CertainRows(ev_a, [j]);
                         for k in [1..Nrows(ev_b)] do
                             w := CertainRows(ev_b, [k]);
 
-                            x := MAJORANA_InnerProduct(v, w, innerproducts, setup);
+                            x := MAJORANA_InnerProduct(v, w, rep.innerproducts, rep.setup);
 
                             if (x <> false) and (x <> 0) then
                                 Add(errorortho, [i,a,b,v,w]);
