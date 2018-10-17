@@ -13,7 +13,7 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 #! @Arguments G,T
 #! @Returns a record with a component <A>shapes</A>
 #! @Description Performs exactly the same function as <Ref Func="ShapesOfMajoranaRepresentation"/>
-#! but gives only those shapes that obey axiom M8. 
+#! but gives only those shapes that obey axiom M8.
 DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 
 DeclareGlobalFunction( "MAJORANA_FindPerm" );
@@ -27,8 +27,6 @@ DeclareGlobalFunction( "MAJORANA_MappedWord" );
 DeclareGlobalFunction( "MAJORANA_RemoveDuplicateShapes" );
 
 DeclareGlobalFunction( "MAJORANA_EmbedDihedralAlgebra" );
-
-DeclareGlobalFunction( "MAJORANA_FindTauMap" );
 
 DeclareGlobalFunction( "MAJORANA_AddNewVectors" );
 
