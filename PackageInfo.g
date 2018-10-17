@@ -79,6 +79,7 @@ Dependencies := rec(
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
                          , [ "automata", ">= 1.13"]
                          , [ "Gauss", ">=0" ]
+                         , [ "AtlasRep", ">=0" ]
                          , [ "Char0Gauss", ">=0" ] ],
   SuggestedOtherPackages := [ ],
   ExternalConditions := [ ],
@@ -93,5 +94,3 @@ TestFile := "tst/testall.g",
 #Keywords := [ "TODO" ],
 
 ));
-
-
