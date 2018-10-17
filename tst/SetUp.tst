@@ -46,5 +46,11 @@ gap> ex := min3gen9();;
 gap> shapes := ShapesOfMajoranaRepresentationAxiomM8(ex.group, ex.involutions);;
 ##
 ## Test main funcs for A7
+##
 gap> a7 := A7();;
+gap> setup := MAJORANA_SetUp(a7, 2, "AllAxioms");;
+gap> Size(rep.setup.coords);
+406
+gap> MajoranaAlgebraTest(setup);
+true
 ##
