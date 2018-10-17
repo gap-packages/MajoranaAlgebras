@@ -18,9 +18,10 @@ gap> Set([ "1A", "3A", "2A", "2A", "4B", "6A", "1A", "2A", "3A", "5A" ]) = Set(s
 true
 gap> T := [ (1,2), (3,4), (5,6) ];; G := Group(T);;
 gap> shapes := ShapesOfMajoranaRepresentation(G, T);;
-gap> origshapes := ShallowCopy(shapes);;
+gap> Length(shapes.shapes) = 8;
+true
 gap> MAJORANA_RemoveDuplicateShapes(shapes);
-gap> IsSubset(Set(shapes.shapes), Set(origshapes.shapes));
+gap> Length(shapes.shapes) = 4;             
 true
 gap> s4 := S4T1();;
 gap> setup := ShapesOfMajoranaRepresentationAxiomM8(s4.group, s4.involutions);;
