@@ -13,7 +13,6 @@ gap> setup := MAJORANA_SetUp(a5, 2, "NoAxioms");;
 gap> MajoranaAlgebraTest(setup);
 true
 gap> MAJORANA_TestSetup(setup);
-true
 
 ##
 ##  Test main funcs for S5
