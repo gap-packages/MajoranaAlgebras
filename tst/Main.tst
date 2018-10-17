@@ -29,7 +29,18 @@ gap> MAJORANA_TestOrthogonality(rep);
 true
 gap> MAJORANA_TestEvecs(rep);
 true
-gap> rep := MajoranaRepresentation(ex, 3);;
+gap> rep := MajoranaRepresentationNoForm(ex, 1);;
+gap> MAJORANA_Dimension(rep);
+21
+gap> MajoranaAlgebraTestNoForm(rep);
+
+##
+## Test an A6 example that gives no algebra
+##
+gap> ex := A6();;
+gap> rep := MajoranaRepresentation(ex, 2);;
+gap> MAJORANA_Dimension(rep);
+0
 
 ##
 ## Test Axiom M2 and positive definiteness on S4
