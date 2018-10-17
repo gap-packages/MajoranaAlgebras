@@ -635,6 +635,10 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
         im := List(new, x -> SortedList( g{ x } ));
         im := Filtered( im, x -> not x in rep.setup.coordmap );
 
+        if rep.axioms = "AllAxioms" then
+            im := Filtered( im, x -> not Product( rep.involutions{x} ) in rep.setup.coordmap);
+        fi;
+
         if im <> [] then
 
             im_5A := List(new_5A, x -> SortedList( g{ x } ));
