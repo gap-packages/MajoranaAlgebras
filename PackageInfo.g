@@ -81,7 +81,7 @@ Dependencies := rec(
                          , [ "Gauss", ">=0" ]
                          , [ "AtlasRep", ">=0" ]
                          , [ "Char0Gauss", ">=0" ]
-                         , [ "datastructures", ">=0.2.2" ],
+                         , [ "datastructures", ">=0.2.2" ] ],
   SuggestedOtherPackages := [ ],
   ExternalConditions := [ ],
 ),
