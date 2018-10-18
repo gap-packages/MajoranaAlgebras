@@ -9,7 +9,6 @@ addons:
     update: true
     sources:
       - ubuntu-toolchain-r-test
-      - ubuntu-toolchain-precise-3.8
     packages:
       - gcc-5
       - g++-5
