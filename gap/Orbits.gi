@@ -183,6 +183,30 @@ function(os, pair)
     return p1 * p2;
 end;
 
+# getting [i,j], we union the orbits [i,j] and [j,i]
+# -> compute orbreps of both, take the smaller one
+MAJORANA_OrbitalRepUnion := function(os, p)
+    local r1, r2;
+
+    r1 := MAJORANA_OrbitalRep(os, p);
+    r2 := MAJORANA_OrbitalRep(os, p{[2,1]});
+
+    if r1 < r2 then
+        return r1;
+    else
+        return r2;
+    fi;
+end;
+
+MAJORANA_OrbitalRepUnions := function(os)
+    local reps, reps2, p, q;
+
+    reps := Set(Union( List( [1..Length(os.orbreps)]
+                       , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
+                                    , {x,y} -> MAJORANA_OrbitalRepUnion(os, [x,y]) ) ) ) );
+    return reps;
+end;
+
 # Might still have to try both [i,j] and [j,i]
 MAJORANA_OrbitalRepActSigned :=
 function(os, pair)
