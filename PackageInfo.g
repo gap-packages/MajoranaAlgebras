@@ -80,7 +80,8 @@ Dependencies := rec(
                          , [ "automata", ">= 1.13"]
                          , [ "Gauss", ">=0" ]
                          , [ "AtlasRep", ">=0" ]
-                         , [ "Char0Gauss", ">=0" ] ],
+                         , [ "Char0Gauss", ">=0" ]
+                         , [ "datastructures", ">=0.2.2" ],
   SuggestedOtherPackages := [ ],
   ExternalConditions := [ ],
 ),
