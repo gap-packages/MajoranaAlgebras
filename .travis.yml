@@ -3,13 +3,13 @@ env:
   global:
     - GAPROOT=gaproot
     - COVDIR=coverage
+    - GAP_PKGS_TO_BUILD="io profiling datastructures Gauss"
 
 addons:
   apt:
     update: true
     sources:
       - ubuntu-toolchain-r-test
-      - ubuntu-toolchain-precise-3.8
     packages:
       - gcc-5
       - g++-5
