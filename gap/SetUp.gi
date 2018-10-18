@@ -281,7 +281,7 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
         od;
 
         return output;
-        
+
     end );
 
 ##
@@ -290,9 +290,20 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
 
 InstallGlobalFunction( MAJORANA_SetUp,
 
-    function(input, index, axioms)
+    function( arg )
 
-    local rep, s, t, i, j, k, gens, orbs, dim, algebras;
+    local input, index, axioms, rep, s, t, i, j, k, gens, orbs, dim, algebras, mapped_word;
+
+    input := arg[1];
+    index := arg[2];
+    axioms := arg[3];
+    if Length(arg) = 4 and arg[4] = true then
+        mapped_word := MAJORANA_TauMappedWord;
+        algebras := MAJORANA_DihedralAlgebrasTauMaps;
+    else
+        mapped_word := MAJORANA_MappedWord;
+        algebras := MAJORANA_DihedralAlgebras;
+    fi;
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
@@ -312,8 +323,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
         rep.setup.coordmap[i] := i;
         rep.setup.coordmap[rep.involutions[i]] := i;
     od;
-
-    algebras := MAJORANA_DihedralAlgebras;
 
     ## Orbits on axes for eigenvectors
 
@@ -458,7 +467,7 @@ InstallGlobalFunction( MAJORANA_FindEmbedding,
 
     gens := GeneratorsOfGroup(subrep.group);
 
-    imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    imgs := List(subrep.setup.coords, w -> mapped_word(rep, subrep, w, gens, inv) );
 
     emb := [];
 
@@ -541,11 +550,11 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
         new := []; new_5A := [];
 
         for x in subrep.setup.longcoords{list} do
-            Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            Add( new, mapped_word(rep, subrep, x, gens, inv));
         od;
 
         for x in subrep.setup.longcoords{list_5A} do
-            Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            Add( new_5A, mapped_word(rep, subrep, x, gens, inv));
         od;
 
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
