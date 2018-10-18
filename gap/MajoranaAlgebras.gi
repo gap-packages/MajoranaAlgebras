@@ -535,7 +535,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
 
     if ForAll(mat!.indices[1], i -> g[i] = i) then return mat; fi;
 
-    res := SparseMatrix(1, Ncols(mat), [[]], [[]], rep.field);
+    res := SparseMatrix(1, Ncols(mat), [[]], [[]], mat!.ring);
 
     for i in [1..Size(mat!.indices[1])] do
 
@@ -682,11 +682,11 @@ function(range, rep)
     for i in [1..l] do
         for j in [i..l] do
 
-            k := setup.pairorbit[range[i], range[j]];
+            k := rep.setup.pairorbit[range[i], range[j]];
 
             if k > 0 then
-                SetEntry(mat, i, j, innerproducts[k]);
-                SetEntry(mat, j, i, innerproducts[k]);
+                SetEntry(mat, i, j, rep.innerproducts[k]);
+                SetEntry(mat, j, i, rep.innerproducts[k]);
             else
                 SetEntry(mat, i, j, -rep.innerproducts[-k]);
                 SetEntry(mat, j, i, -rep.innerproducts[-k]);
@@ -768,7 +768,7 @@ function(rep)
 
     for i in rep.setup.orbitreps do
 
-        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field));
+        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
 
         for ev in [1..3] do
             for j in [1..Nrows(rep.evecs[i, ev])] do
