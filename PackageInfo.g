@@ -78,15 +78,10 @@ Dependencies := rec(
   GAP := ">= 4.8",
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
                          , [ "automata", ">= 1.13"]
-<<<<<<< HEAD
-                         , [ "Gauss", ">=0" ] ],
-  SuggestedOtherPackages := [ ],
-=======
                          , [ "Gauss", ">=0" ]
                          , [ "AtlasRep", ">=0" ]
                          , [ "datastructures", ">=0.2.2" ] ],
   SuggestedOtherPackages := [ [ "Char0Gauss", ">=0" ] ],
->>>>>>> master
   ExternalConditions := [ ],
 ),
 
