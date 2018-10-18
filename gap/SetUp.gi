@@ -270,8 +270,21 @@ end);
 #        which axioms to assume
 #
 InstallGlobalFunction( MAJORANA_SetUp,
-function(input, index, axioms)
-    local rep, s, t, i, j, k, gens, orbs, dim, algebras, x;
+
+    function( arg )
+
+    local input, index, axioms, rep, s, t, i, j, k, gens, orbs, dim, algebras, mapped_word;
+
+    input := arg[1];
+    index := arg[2];
+    axioms := arg[3];
+    if Length(arg) = 4 and arg[4] = true then
+        mapped_word := MAJORANA_TauMappedWord;
+        algebras := MAJORANA_DihedralAlgebrasTauMaps;
+    else
+        mapped_word := MAJORANA_MappedWord;
+        algebras := MAJORANA_DihedralAlgebras;
+    fi;
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
@@ -282,8 +295,23 @@ function(input, index, axioms)
 
     t := Size(rep.involutions);
 
-    # The permutation induced by G acting on T by conjugation
-    gens := List(GeneratorsOfGroup(input.group), x -> MAJORANA_FindPerm(x, rep, rep));
+    rep.setup   := rec( coords          := [1..t],
+                        coordmap        := HashMap( t*t ),
+                        pairorbit       := StructuralCopy(input.pairorbit),
+                        pairconj        := StructuralCopy(input.pairconj),
+                        pairconjelts    := StructuralCopy(input.pairconjelts),
+                        pairreps        := ShallowCopy(input.pairreps)       );
+
+    for i in [1..t] do
+        rep.setup.coordmap[i] := i;
+        rep.setup.coordmap[rep.involutions[i]] := i;
+    od;
+
+    ## Orbits on axes for eigenvectors
+
+    gens := GeneratorsOfGroup(input.group);
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
+
     orbs := MAJORANA_Orbits(gens, t, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
@@ -478,11 +506,11 @@ function(rep, subrep, inv)
         new := []; new_5A := [];
 
         for x in subrep.setup.longcoords{list} do
-            Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            Add( new, mapped_word(rep, subrep, x, gens, inv));
         od;
 
         for x in subrep.setup.longcoords{list_5A} do
-            Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            Add( new_5A, mapped_word(rep, subrep, x, gens, inv));
         od;
 
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
