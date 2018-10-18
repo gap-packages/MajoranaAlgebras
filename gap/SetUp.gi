@@ -7,7 +7,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     function(G,T)
 
-    local   gens, g, perm, pos_1, pos_2,
+    local   g, perm, pos_1, pos_2,
             t,              # size of T
             i,              # indices
             j,
@@ -31,18 +31,6 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         od;
     od;
 
-    # Construct orbitals of  on T x T
-
-    gens := [];
-
-    for g in GeneratorsOfGroup(G) do
-        perm := [];
-        for i in [1..t] do
-            Add(perm, Position(T, T[i]^g));
-        od;
-        Add(gens, perm);
-    od;
-
     input := rec();
 
     input.pairorbit := NullMat(t,t);
@@ -53,7 +41,19 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     input.involutions := T;
     input.group       := G;
 
-    MAJORANA_Orbitals(gens, 0, input);
+    input.generators := [];
+
+    for g in GeneratorsOfGroup(G) do
+        perm := [];
+        for i in [1..t] do
+            Add(perm, Position(T, T[i]^g));
+        od;
+        Add(input.generators, perm);
+    od;
+
+    # Construct orbitals of  on T x T
+
+    MAJORANA_Orbitals(input.generators, 0, input);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
@@ -122,8 +122,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     function(G,T)
 
-    local   gens,
-            t,              # size of T
+    local   t,              # size of T
             i,              # indices
             j,
             k,
@@ -149,18 +148,17 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     input.coords := [1..t];
     input.involutions := T;
     input.group       := G;
-
-    gens := [];
+    input.generators := [];
 
     for g in GeneratorsOfGroup(G) do
         perm := [];
         for i in [1..t] do
             Add(perm, Position(T, T[i]^g));
         od;
-        Add(gens, perm);
+        Add(input.generators, perm);
     od;
 
-    MAJORANA_Orbitals(gens, 0, input);
+    MAJORANA_Orbitals(input.generators, 0, input);
 
     input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
 
@@ -281,7 +279,7 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
         od;
 
         return output;
-        
+
     end );
 
 ##
@@ -292,10 +290,11 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     function(input, index, axioms)
 
-    local rep, s, t, i, j, k, gens, orbs, dim, algebras;
+    local rep, s, t, i, j, k, orbs, dim, algebras;
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
+                        generators  := input.generators,
                         shape       := input.shapes[index],
                         axioms      := axioms   );
 
@@ -317,10 +316,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     ## Orbits on axes for eigenvectors
 
-    gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    orbs := MAJORANA_Orbits(gens, t, rep.setup);
+    orbs := MAJORANA_Orbits(input.generators, t, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
     rep.setup.orbitreps := orbs.orbitreps;
@@ -373,9 +369,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
         od;
     od;
 
-    for i in gens do MAJORANA_ExtendPerm( i, rep); od;
+    for i in rep.generators do MAJORANA_ExtendPerm( i, rep); od;
 
-    MAJORANA_Orbitals( gens, t, rep.setup);
+    MAJORANA_Orbitals( rep.generators, t, rep.setup);
 
     for i in [1..Size(rep.setup.pairreps)] do
 
@@ -401,7 +397,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     function( i, rep, subrep )
 
-    local   dim, t, gens, x, inv, elts, emb, j, im, orbit, y, k, sign;
+    local   dim, t, x, inv, elts, emb, j, im, orbit, y, k, sign;
 
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
@@ -419,9 +415,6 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     ## Add any new orbits
 
-    gens := GeneratorsOfGroup(rep.group);
-    gens := List( gens, g -> MAJORANA_FindPerm(g, rep, rep) );
-
     for j in [1 .. Size(subrep.setup.pairreps)] do
 
         im := emb{subrep.setup.pairreps[j]};
@@ -434,7 +427,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         ## If need be, add a new orbit
 
         if orbit = 0 then
-            MAJORANA_NewOrbital(im, gens, rep.setup);
+            MAJORANA_NewOrbital(im, rep.generators, rep.setup);
         fi;
     od;
 
@@ -563,7 +556,7 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
     Append(rep.setup.pairconj, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
 
     for g in rep.setup.pairconjelts do  MAJORANA_ExtendPerm( g, rep); od;
-
+    for g in rep.generators do MAJORANA_ExtendPerm( g, rep); od;
     for g in rep.setup.conjelts do MAJORANA_ExtendPerm( g, rep); od;
 
     end );
