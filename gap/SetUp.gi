@@ -287,7 +287,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
-                        generators  := input.generators,
+                        generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
                         axioms      := axioms,
                         setup       := input.setup
