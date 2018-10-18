@@ -92,164 +92,6 @@ InstallGlobalFunction(MAJORANA_Orbitals,
     
     end );
 
-# Compute an orbital structure which has the
-# following properties
-#
-# Input: G acting on Omega via Act
-#        (though, for the time being,
-#         G <= S_n acting on [1..n] OnPoints)
-#
-# Output: Orbital Structure
-#         - A set of representatives of orbitals
-#         - For any pair (i,j) efficiently
-#           determine which orbital it belongs to
-#         - For any pair (i,j) efficiently
-#           compute an element g in G that takes (i,j)
-#           to a representative in the set of
-#           representatives
-
-MAJORANA_OrbitalStructure :=
-# gens  - generators of the permrep on C
-#         as lists
-# t     - starting point for second component
-# setup - the setup structure
-function(gens, Omega, Act)
-    local o, so, i, res;
-
-    # Result will be an orbital structure that allows
-    # some stuff to be done with orbitals
-    res := rec( group := Group(gens) );
-
-    # Orbits. Currently we'll just choose the
-    # first element in each orbit as orbit rep
-    res.orbits := Orbits( res.group, Omega, Act );
-
-    # This is so we're able to determine which orbit the
-    # first point of a pair is in, and then get an element
-    # of G that maps said point to the orbit rep
-    # Really what we want is a schreier trees/vectors here
-    res.orbreps := [];
-    res.orbnums := [];
-    res.orbstabs := [];
-    for o in [1..Length(res.orbits)] do
-        Add(res.orbreps, res.orbits[o][1]);
-        res.orbstabs[o] := rec( );
-        res.orbstabs[o].stab := Stabilizer(res.group, res.orbits[o][1], Act);
-        res.orbstabs[o].orbs := Orbits(res.orbstabs[o].stab, Omega, Act);
-        res.orbstabs[o].orbnums := [];
-        res.orbstabs[o].orbreps := [];
-        for so in [1..Length(res.orbstabs[o].orbs)] do
-            Add(res.orbstabs[o].orbreps, res.orbstabs[o].orbs[so][1]);
-            for i in res.orbstabs[o].orbs[so] do
-                res.orbstabs[o].orbnums[i] := so;
-            od;
-        od;
-
-        for i in res.orbits[o] do
-            res.orbnums[i] := o;
-        od;
-    od;
-
-    return res;
-end;
-
-MAJORANA_OrbitalStructureSigned :=
-function(gens, Omega, Act)
-    local res;
-
-    res := MAJORANA_OrbitalStructure(List(gens, x->x![1]), Omega, Act);
-    res.signedgens := gens;
-    return res;
-end;
-
-MAJORANA_OrbitalRep :=
-function(os, pair)
-    local fo, so, p;
-    fo := os.orbnums[pair[1]];
-    p := RepresentativeAction(os.group, pair[1], os.orbreps[fo] );
-    so := os.orbstabs[fo].orbnums[pair[2]^p];
-    return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
-end;
-
-MAJORANA_OrbitalRepAct :=
-function(os, pair)
-    local fo, so, p1, p2;
-
-    fo := os.orbnums[pair[1]];
-    p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo]);
-    so := os.orbstabs[fo].orbnums[pair[2]^p1];
-    p2 := RepresentativeAction(os.orbstabs[fo].stab, pair[2]^p1, os.orbstabs[fo].orbreps[so]);
-
-    return p1 * p2;
-end;
-
-# getting [i,j], we union the orbits [i,j] and [j,i]
-# -> compute orbreps of both, take the smaller one
-MAJORANA_OrbitalRepUnion := function(os, p)
-    local r1, r2;
-
-    r1 := MAJORANA_OrbitalRep(os, p);
-    r2 := MAJORANA_OrbitalRep(os, p{[2,1]});
-
-    if r1 < r2 then
-        return r1;
-    else
-        return r2;
-    fi;
-end;
-
-MAJORANA_OrbitalRepUnions := function(os)
-    local reps, reps2, p, q;
-
-    reps := Set(Union( List( [1..Length(os.orbreps)]
-                       , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
-                                    , {x,y} -> MAJORANA_OrbitalRepUnion(os, [x,y]) ) ) ) );
-    return reps;
-end;
-
-# Might still have to try both [i,j] and [j,i]
-MAJORANA_OrbitalRepActSigned :=
-function(os, pair)
-    local ra, fact;
-
-    ra := MAJORANA_OrbitalRepAct(os, pair);
-    fact := Factorization(os.group, ra);
-
-    return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
-end;
-
-MAJORANA_SomeOrbTest :=
-function()
-    local ex, rep, gens, orbs, t, ra, fact, maresult;
-
-    t := NanosecondsSinceEpoch();
-    ex := A7();;
-    t := NanosecondsSinceEpoch() - t;
-    Print("ex  setup: ", t/1000000., "\n");
-
-    t := NanosecondsSinceEpoch();
-    rep := MAJORANA_SetUp(ex, 1, "AllAxioms");
-    t := NanosecondsSinceEpoch() - t;
-    Print("rep setup: ", t/1000000., "\n");
-
-    t := NanosecondsSinceEpoch();
-    gens := GeneratorsOfGroup(rep.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-    gens := List(gens, SignedPermList);
-
-    orbs := MAJORANA_OrbitalStructureSigned( gens
-                                           , [1..Length(rep.setup.coords)]
-                                           , OnPoints );
-    t := NanosecondsSinceEpoch() - t;
-    Print("orb setup: ", t/1000000., "\n");
-
-    t := NanosecondsSinceEpoch();
-    ra := MAJORANA_OrbitalRepActSigned(orbs, [216, 106]);
-    t := NanosecondsSinceEpoch() - t;
-    Print("repr calc: ", t/1000000., "\n");
-
-    return [ra, rep, orbs];
-end;
 
 InstallGlobalFunction( MAJORANA_NewOrbital,
 
@@ -343,3 +185,165 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
     return orb;
 
     end );
+
+# Compute an orbital structure which has the
+# following properties
+#
+# Input: G acting on Omega via Act
+#        (though, for the time being,
+#         G <= S_n acting on [1..n] OnPoints)
+#
+# Output: Orbital Structure
+#         - A set of representatives of orbitals
+#         - For any pair (i,j) efficiently
+#           determine which orbital it belongs to
+#         - For any pair (i,j) efficiently
+#           compute an element g in G that takes (i,j)
+#           to a representative in the set of
+#           representatives
+
+InstallGlobalFunction(MAJORANA_OrbitalStructure,
+# gens  - generators of the permrep on C
+#         as lists
+# t     - starting point for second component
+# setup - the setup structure
+function(gens, Omega, Act)
+    local o, so, i, res;
+
+    # Result will be an orbital structure that allows
+    # some stuff to be done with orbitals
+    res := rec( group := Group(gens) );
+
+    # Orbits. Currently we'll just choose the
+    # first element in each orbit as orbit rep
+    res.orbits := Orbits( res.group, Omega, Act );
+
+    # This is so we're able to determine which orbit the
+    # first point of a pair is in, and then get an element
+    # of G that maps said point to the orbit rep
+    # Really what we want is a schreier trees/vectors here
+    res.orbreps := [];
+    res.orbnums := [];
+    res.orbstabs := [];
+    for o in [1..Length(res.orbits)] do
+        Add(res.orbreps, res.orbits[o][1]);
+        res.orbstabs[o] := rec( );
+        res.orbstabs[o].stab := Stabilizer(res.group, res.orbits[o][1], Act);
+        res.orbstabs[o].orbs := Orbits(res.orbstabs[o].stab, Omega, Act);
+        res.orbstabs[o].orbnums := [];
+        res.orbstabs[o].orbreps := [];
+        for so in [1..Length(res.orbstabs[o].orbs)] do
+            Add(res.orbstabs[o].orbreps, res.orbstabs[o].orbs[so][1]);
+            for i in res.orbstabs[o].orbs[so] do
+                res.orbstabs[o].orbnums[i] := so;
+            od;
+        od;
+
+        for i in res.orbits[o] do
+            res.orbnums[i] := o;
+        od;
+    od;
+
+    return res;
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalStructureSigned,
+function(gens, Omega, Act)
+    local res;
+
+    res := MAJORANA_OrbitalStructure(List(gens, x->x![1]), Omega, Act);
+    res.signedgens := gens;
+    return res;
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalRep,
+function(os, pair)
+    local fo, so, p;
+    fo := os.orbnums[pair[1]];
+    p := RepresentativeAction(os.group, pair[1], os.orbreps[fo] );
+    so := os.orbstabs[fo].orbnums[pair[2]^p];
+    return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalRepAct,
+function(os, pair)
+    local fo, so, p1, p2;
+
+    fo := os.orbnums[pair[1]];
+    p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo]);
+    so := os.orbstabs[fo].orbnums[pair[2]^p1];
+    p2 := RepresentativeAction(os.orbstabs[fo].stab, pair[2]^p1, os.orbstabs[fo].orbreps[so]);
+
+    return p1 * p2;
+end);
+
+# getting [i,j], we union the orbits [i,j] and [j,i]
+# -> compute orbreps of both, take the smaller one
+InstallGlobalFunction(MAJORANA_OrbitalRepUnion,
+function(os, p)
+    local r1, r2;
+
+    r1 := MAJORANA_OrbitalRep(os, p);
+    r2 := MAJORANA_OrbitalRep(os, p{[2,1]});
+
+    if r1 < r2 then
+        return r1;
+    else
+        return r2;
+    fi;
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalRepUnions,
+function(os)
+    local reps, reps2, p, q;
+
+    reps := Set(Union( List( [1..Length(os.orbreps)]
+                       , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
+                                    , {x,y} -> MAJORANA_OrbitalRepUnion(os, [x,y]) ) ) ) );
+    return reps;
+end);
+
+# Still have to try both [i,j] and [j,i]
+# And we might want to think about caching.
+InstallGlobalFunction(MAJORANA_OrbitalRepActSigned,
+function(os, pair)
+    local ra, fact;
+
+    ra := MAJORANA_OrbitalRepAct(os, pair);
+    fact := Factorization(os.group, ra);
+
+    return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
+end);
+
+MAJORANA_SomeOrbTest :=
+function()
+    local ex, rep, gens, orbs, t, ra, fact, maresult;
+
+    t := NanosecondsSinceEpoch();
+    ex := A7();;
+    t := NanosecondsSinceEpoch() - t;
+    Print("ex  setup: ", t/1000000., "\n");
+
+    t := NanosecondsSinceEpoch();
+    rep := MAJORANA_SetUp(ex, 1, "AllAxioms");
+    t := NanosecondsSinceEpoch() - t;
+    Print("rep setup: ", t/1000000., "\n");
+
+    t := NanosecondsSinceEpoch();
+    gens := GeneratorsOfGroup(rep.group);
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
+    gens := List(gens, SignedPermList);
+
+    orbs := MAJORANA_OrbitalStructureSigned( gens
+                                           , [1..Length(rep.setup.coords)]
+                                           , OnPoints );
+    t := NanosecondsSinceEpoch() - t;
+    Print("orb setup: ", t/1000000., "\n");
+
+    t := NanosecondsSinceEpoch();
+    ra := MAJORANA_OrbitalRepActSigned(orbs, [216, 106]);
+    t := NanosecondsSinceEpoch() - t;
+    Print("repr calc: ", t/1000000., "\n");
+
+    return [ra, rep, orbs];
+end;
