@@ -44,7 +44,7 @@ end);
 InstallMethod(OneImmutable, "for signed permutations",
               [ IsSignedPermRep ],
 function(sp)
-    return Objectify(SignedPermType, [ (), [] ]);
+    return Objectify(SignedPermType, [ (), [0 * Z(2)] ]);
 end);
 
 InstallMethod(IsOne, "for signed permutations",
@@ -66,7 +66,7 @@ function(pt, sp)
         sign := 1;
     fi;
 
-    if IsOne(sp![2][spt]) then
+    if IsBound(sp![2][spt]) and IsOne(sp![2][spt]) then
         sign := -sign;
     fi;
     return sign * (spt^sp![1]);
