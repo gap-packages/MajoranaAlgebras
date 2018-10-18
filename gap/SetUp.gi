@@ -353,15 +353,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
     ## Embed dihedral algebras
 
     for i in Positions(rep.shape, "4B") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B, mapped_word);
     od;
 
     for i in Positions(rep.shape, "6A") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A, mapped_word );
     od;
 
     for i in PositionsProperty(rep.shape, x -> not x in [ "1A", "4B", "6A" ]) do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]) );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]), mapped_word );
     od;
 
     ## Finish off setup
@@ -404,23 +404,22 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
 InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
-    function( i, rep, subrep )
+    function( i, rep, subrep, mapped_word)
 
-    local   dim, t, x, inv, elts, emb, j, im, orbit, y, k, sign;
+    local   dim, t, x, elts, emb, j, im, orbit, y, k, sign;
 
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
 
     x := rep.setup.pairreps[i];
-    inv := rep.involutions{x};
 
     ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
 
-    MAJORANA_AddNewVectors( rep, subrep, inv);
+    MAJORANA_AddNewVectors( rep, subrep, x, mapped_word);
 
     ## Find the embedding of the subrep into the main algebra
 
-    emb := MAJORANA_FindEmbedding( rep, subrep, inv );
+    emb := MAJORANA_FindEmbedding( rep, subrep, x, mapped_word);
 
     ## Add any new orbits
 
@@ -452,7 +451,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
 InstallGlobalFunction( MAJORANA_FindEmbedding,
 
-    function( rep, subrep, inv)
+    function( rep, subrep, inv, mapped_word)
 
     local imgs, emb, pos, x, gens;
 
@@ -525,7 +524,7 @@ InstallGlobalFunction( MAJORANA_ExtendPerm,
 
 InstallGlobalFunction( MAJORANA_AddNewVectors,
 
-    function(rep, subrep, inv)
+    function(rep, subrep, inv, mapped_word)
 
     local i, list, list_5A, new, new_5A, x, vec, g, im, k, dim, gens;
 
@@ -749,9 +748,11 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
 
 InstallGlobalFunction(MAJORANA_MappedWord,
 
-    function(rep, subrep, w, gens, imgs)
+    function(rep, subrep, w, gens, inv)
 
-    local im;
+    local im, imgs;
+
+    imgs := rep.involutions{inv};
 
     if IsRowVector(w) then
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
