@@ -165,11 +165,3 @@ BindGlobal( "min3gen9", function()
     T := [a, a^b, b, b^a, c, c^a];;
     return ShapesOfMajoranaRepresentation(G,T);;
     end );
-
-BindGlobal( "min3gen9", function()
-    local a, b, c, G, T;
-    a := (1,3)(2,4);; b := (1,5)(2,6)(3,7)(4,8);; c := (1,8)(2,5)(3,6)(4,7);;
-    G := Group(a, b, c);;
-    T := [a, a^b, b, b^a, c, c^a];;
-    return ShapesOfMajoranaRepresentation(G,T);;
-    end );
