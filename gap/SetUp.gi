@@ -45,20 +45,23 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     input := rec();
 
-    input.pairorbit := NullMat(t,t);
-    input.pairconj  := NullMat(t,t);
-    input.pairreps  := [];
-    input.pairconjelts := [ [1..t] ];
+#    input.pairorbit := NullMat(t,t);
+#    input.pairconj  := NullMat(t,t);
+#    input.pairreps  := [];
+#    input.pairconjelts := [ [1..t] ];
     input.coords := [1..t];
     input.involutions := T;
     input.group       := G;
 
-    MAJORANA_Orbitals(gens, 0, input);
+#     MAJORANA_Orbitals(gens, 0, input);
+    input.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList), [1..t], OnPoints);
+    input.pairreps := MAJORANA_OrbitalRepUnions(input.orbitalstruct);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
     shape := [1 .. Size(input.pairreps)]*0;
     unknowns := [];;
+
 
     for i in [1..Size(input.pairreps)] do
 
@@ -250,39 +253,30 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     end );
 
 InstallGlobalFunction( MAJORANA_RecordSubalgebras,
+function( i, shape, input )
+    local output, x, inv, pos, k;
 
-    function( i, shape, input )
+    output := [];
 
-        local output, x, inv, pos, k;
+    for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
+        inv := input.involutions{x};
 
-        output := [];
+        if shape[i] = "6A" then
+            pos := Position( input.involutions, inv[1]^inv[2] );
+            k := Position( input.pairreps, MAJORANA_OrbitalRepUnion(input.orbitalstruct, [x[1], pos]) );
+            shape[k] := "3A";
 
-        for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
-
-            inv := input.involutions{x};
-
-            if shape[i] = "6A" then
-
-                pos := Position( input.involutions, inv[1]^inv[2] );
-                k := input.pairorbit[x[1]][pos];
-                shape[k] := "3A";
-
-                pos := Position( input.involutions, inv[2]^Product(inv) );
-                k := input.pairorbit[x[1]][pos];
-                shape[k] := "2A";
-
-            elif shape[i][1] = '4' then
-
-                pos := Position( input.involutions, inv[1]^inv[2] );
-                k := input.pairorbit[x[1]][pos];
-                Add( output, k );
-
-            fi;
-        od;
-
-        return output;
-        
-    end );
+            pos := Position( input.involutions, inv[2]^Product(inv) );
+            k := Position( input.pairreps, MAJORANA_OrbitalRepUnion(input.orbitalstruct, [x[1], pos]) );
+            shape[k] := "2A";
+        elif shape[i][1] = '4' then
+            pos := Position( input.involutions, inv[1]^inv[2] );
+            k := Position( input.pairreps, MAJORANA_OrbitalRepUnion(input.orbitalstruct, [x[1], pos]) );
+            Add( output, k );
+        fi;
+    od;
+    return output;
+end);
 
 ##
 ## The main setup function for the algorithm <MajoranaRepresentation>
