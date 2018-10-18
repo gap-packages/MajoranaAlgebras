@@ -290,16 +290,14 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     function( arg )
 
-    local input, index, axioms, rep, s, t, i, j, k, gens, orbs, dim, algebras, mapped_word;
+    local input, index, axioms, rep, s, t, i, j, k, gens, orbs, dim, algebras;
 
     input := arg[1];
     index := arg[2];
     axioms := arg[3];
     if Length(arg) = 4 and arg[4] = true then
-        mapped_word := MAJORANA_TauMappedWord;
         algebras := MAJORANA_DihedralAlgebrasTauMaps;
     else
-        mapped_word := MAJORANA_MappedWord;
         algebras := MAJORANA_DihedralAlgebras;
     fi;
 
@@ -353,15 +351,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
     ## Embed dihedral algebras
 
     for i in Positions(rep.shape, "4B") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B, mapped_word);
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B );
     od;
 
     for i in Positions(rep.shape, "6A") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A, mapped_word );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A );
     od;
 
     for i in PositionsProperty(rep.shape, x -> not x in [ "1A", "4B", "6A" ]) do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]), mapped_word );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]) );
     od;
 
     ## Finish off setup
@@ -404,7 +402,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
 InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
-    function( i, rep, subrep, mapped_word)
+    function( i, rep, subrep )
 
     local   dim, t, x, elts, emb, j, im, orbit, y, k, sign;
 
@@ -415,11 +413,11 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
 
-    MAJORANA_AddNewVectors( rep, subrep, x, mapped_word);
+    MAJORANA_AddNewVectors( rep, subrep, x);
 
     ## Find the embedding of the subrep into the main algebra
 
-    emb := MAJORANA_FindEmbedding( rep, subrep, x, mapped_word);
+    emb := MAJORANA_FindEmbedding( rep, subrep, x);
 
     ## Add any new orbits
 
@@ -451,7 +449,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
 InstallGlobalFunction( MAJORANA_FindEmbedding,
 
-    function( rep, subrep, inv, mapped_word)
+    function( rep, subrep, inv)
 
     local imgs, emb, pos, x, gens;
 
@@ -459,7 +457,11 @@ InstallGlobalFunction( MAJORANA_FindEmbedding,
 
     gens := GeneratorsOfGroup(subrep.group);
 
-    imgs := List(subrep.setup.coords, w -> mapped_word(rep, subrep, w, gens, inv) );
+    if IsBound(subrep.setup.orbits) then
+        imgs := List(subrep.setup.coords, w -> MAJORANA_TauMappedWord(rep, subrep, w, gens, inv) );
+    else
+        imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    fi;
 
     emb := [];
 
@@ -524,7 +526,7 @@ InstallGlobalFunction( MAJORANA_ExtendPerm,
 
 InstallGlobalFunction( MAJORANA_AddNewVectors,
 
-    function(rep, subrep, inv, mapped_word)
+    function(rep, subrep, inv)
 
     local i, list, list_5A, new, new_5A, x, vec, g, im, k, dim, gens;
 
@@ -542,11 +544,19 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
         new := []; new_5A := [];
 
         for x in subrep.setup.longcoords{list} do
-            Add( new, mapped_word(rep, subrep, x, gens, inv));
+            if IsBound(subrep.setup.orbits) then
+                Add( new, MAJORANA_TauMappedWord(rep, subrep, x, gens, inv));
+            else
+                Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            fi;
         od;
 
         for x in subrep.setup.longcoords{list_5A} do
-            Add( new_5A, mapped_word(rep, subrep, x, gens, inv));
+            if IsBound(subrep.setup.orbits) then
+                Add( new_5A, MAJORANA_TauMappedWord(rep, subrep, x, gens, inv));
+            else
+                Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            fi;
         od;
 
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
