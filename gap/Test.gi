@@ -78,6 +78,7 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
     function(u, evecs, innerproducts, algebraproducts, setup)
 
     local   dim,            # size of setup.coords
+            field,
             evals,
             new,
             a,              # first eigenvalue
@@ -91,29 +92,31 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
             x,              # product of eigenvectors
             y;              # product of x with u
 
-    for i in rep.setup.orbitreps do
+    field := algebraproducts[1]!.ring;
 
-        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
+    for i in setup.orbitreps do
+
+        u := SparseMatrix(1, dim, [[i]], [[1]], field);
 
         for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
 
             new := [0,0,0];
 
             for j in [1..3] do
-                new[j] := SparseMatrix(0, dim, [], [], rep.field);
+                new[j] := SparseMatrix(0, dim, [], [], field);
             od;
 
-            ev_a := rep.evecs[i][evals[1]];
-            ev_b := rep.evecs[i][evals[2]];
+            ev_a := evecs[i][evals[1]];
+            ev_b := evecs[i][evals[2]];
 
             for j in [1..Nrows(ev_a)] do
                 a := CertainRows(ev_a, [j]);
                 for k in [1..Nrows(ev_b)] do
                     b := CertainRows(ev_b, [k]);
                     MAJORANA_FuseEigenvectorsNoForm(  a, b, i, evals, new,
-                                                rep.innerproducts,
-                                                rep.algebraproducts,
-                                                rep.setup );
+                                                innerproducts,
+                                                algebraproducts,
+                                                setup );
                 od;
             od;
 
@@ -124,7 +127,7 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
 
                 for k in [1..Nrows(new[j])] do
                     a := CertainRows(new[j], [k]);
-                    x := MAJORANA_AlgebraProduct(u, a, rep.algebraproducts, rep.setup);
+                    x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
                     if x <> ev*a and x <> false then
                         Error("Algebra does not obey the fusion rules");
                     fi;
@@ -334,24 +337,6 @@ InstallGlobalFunction( MAJORANA_IsComplete,
     function(rep)
 
     if false in rep.algebraproducts then
-        return false;
-    else
-        return true;
-    fi;
-
-    end );
-
-InstallGlobalFunction( MAJORANA_TestPositiveDefiniteForm,
-
-    function(rep)
-
-    local dim, gram;
-
-    dim := Size(rep.setup.coords);
-
-    gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep.innerproducts, rep.setup);
-
-    if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram)) < 0 then
         return false;
     else
         return true;
