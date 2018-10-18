@@ -17,8 +17,8 @@ true
 gap> MAJORANA_AxiomM1(rep);;
 gap> MAJORANA_Fusion(rep);;
 gap> MAJORANA_UnknownAlgebraProducts(rep);;
-gap> MajoranaAlgebraTest(rep);
-Error, The algebra does not obey the fusion rules
+gap> MAJORANA_Fusion(rep);;
+gap> MajoranaAlgebraTest(rep);;
 
 ##
 ## Now test all of the smaller components on A5 shape 4
@@ -85,7 +85,7 @@ gap> MAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);
 ##
 ## Test fill Gram matrix function
 ##
-gap> gram := MAJORANA_FillGramMatrix( [1..15], rep.innerproducts, rep.setup);;
+gap> gram := MAJORANA_FillGramMatrix( [1..15], rep);;
 gap> Determinant( ConvertSparseMatrixToMatrix(gram) );
 242191370790963017483378115234375/324518553658426726783156020576256
 

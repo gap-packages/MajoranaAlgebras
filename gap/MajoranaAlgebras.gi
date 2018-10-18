@@ -123,11 +123,15 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     MAJORANA_Fusion(rep);
 
+    if MAJORANA_Dimension(rep) in [0,1] then return true; fi;
+
     MAJORANA_EigenvectorsAlgebraUnknowns(rep);
 
     MAJORANA_AxiomM1(rep);
 
     MAJORANA_Fusion(rep);
+
+    if MAJORANA_Dimension(rep) in [0,1] then return true; fi;
 
     return MAJORANA_UnknownAlgebraProducts(rep);
 
