@@ -225,8 +225,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
     if not false in rep.algebraproducts then return true; fi;
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
 
-    # Use the known nullspace vectors to calculate more algebra products
-    x := MAJORANA_NullspaceUnknowns(mat, vec, unknowns, rep.algebraproducts, rep.setup, rep.group);
+    x := MAJORANA_NullspaceUnknowns(mat, vec, unknowns, rep);
+
     if not false in rep.algebraproducts then return true; fi;
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
 

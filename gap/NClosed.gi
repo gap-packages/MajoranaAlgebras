@@ -34,7 +34,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
         rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
         rep.setup.pairrepsmap[ Reversed(rep.setup.pairreps[i]) ] := i;
     od;
-    
+
     pos := rep.setup.coordmap[rep.setup.pairreps[index]];
     rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], Rationals);
 
