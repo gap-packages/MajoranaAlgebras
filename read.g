@@ -9,9 +9,7 @@ ReadPackage( "MajoranaAlgebras", "gap/SignedPerm.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebras.gi");
 
-ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasNoAxioms.gi");
-
-ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasAxiomM8.gi");
+ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasTauMaps.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gi");
 

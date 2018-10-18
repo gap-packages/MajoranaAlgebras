@@ -340,15 +340,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
     algebras := MAJORANA_DihedralAlgebras;
 
     for i in Positions(rep.shape, "4B") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B, mapped_word);
     od;
 
     for i in Positions(rep.shape, "6A") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A, mapped_word );
     od;
 
     for i in PositionsProperty(rep.shape, x -> not x in [ "1A", "4B", "6A" ]) do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]) );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]), mapped_word );
     od;
 
     ## Finish off setup
@@ -394,7 +394,6 @@ function( i, rep, subrep )
     local gens, x, inv, elts, emb;
 
     x := rep.setup.pairreps[i];
-    inv := rep.involutions{x};
 
     ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     MAJORANA_AddNewVectors(rep, subrep, inv);
