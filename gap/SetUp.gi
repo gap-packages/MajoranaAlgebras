@@ -109,8 +109,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     function(G,T)
 
-    local   gens,
-            t,              # size of T
+    local   t,              # size of T
             i,              # indices
             j,
             k,
@@ -288,6 +287,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
+                        generators  := input.generators,
                         shape       := input.shapes[index],
                         axioms      := axioms,
                         setup       := input.setup
@@ -309,10 +309,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     ## Orbits on axes for eigenvectors
 
-    gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    orbs := MAJORANA_Orbits(gens, t, rep.setup);
+    orbs := MAJORANA_Orbits(input.generators, t, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
     rep.setup.orbitreps := orbs.orbitreps;
