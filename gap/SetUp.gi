@@ -7,17 +7,16 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     function(G,T)
 
-    local   gens, g, perm,
+    local   gens, g, perm, pos_1, pos_2,
             t,              # size of T
             i,              # indices
             j,
             k,
             x,              # result of orbitals
             shape,          # one shape
-            RepsSquares6A,  # (ts)^2 where o(ts) = 6
             unknowns,       # indices of 3X axes
             pos,            # positions
-            Binaries,       # used to loop through options for shapes
+            binaries,       # used to loop through options for shapes
             input;          #
 
     t := Size(T);
@@ -49,7 +48,6 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     input.pairorbit := NullMat(t,t);
     input.pairconj  := NullMat(t,t);
     input.pairreps  := [];
-    input.orbitals  := [];
     input.pairconjelts := [ [1..t] ];
     input.coords := [1..t];
     input.involutions := T;
@@ -57,13 +55,9 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     MAJORANA_Orbitals(gens, 0, input);
 
-    input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
-
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := NullMat(1,Size(input.pairreps))[1];
-
-    RepsSquares6A := [];
+    shape := [1 .. Size(input.pairreps)]*0;
     unknowns := [];;
 
     for i in [1..Size(input.pairreps)] do
@@ -76,43 +70,37 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
             shape[i]:="2A";
         elif Order(x[1]*x[2]) = 2 and not x[1]*x[2] in T then
             shape[i]:="2B";
-        elif Order(x[1]*x[2]) = 3 then
+        elif Order(x[1]*x[2]) = 3 and shape[i] = 0 then
             shape[i]:="3X";
-            Add(unknowns,i);
         elif Order(x[1]*x[2]) = 4 and not (x[1]*x[2])^2 in T then
             shape[i]:="4A";
         elif Order(x[1]*x[2]) = 4 and (x[1]*x[2])^2 in T then
             shape[i]:="4B";
         elif Order(x[1]*x[2]) = 5 then
             shape[i]:="5A";
-        elif Order(x[1]*x[2])=6 then
+        elif Order(x[1]*x[2]) = 6 then
             shape[i]:="6A";
-            Add(RepsSquares6A,(x[1]*x[2])^2);
-        else
+
+            MAJORANA_RecordSubalgebras( i, shape, input);
+
+        elif Order(x[1]*x[2]) > 6 then
             Error("This is not a 6-transposition group");
         fi;
     od;
 
-    # Check for inclusions of 2A and 3A in 6A
+    unknowns := Positions(shape, "3X");
 
-    for i in unknowns do
-        if ForAny(input.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
-            shape[i]:="3A";;
-            unknowns := Difference(unknowns, [i]);
-        fi;
-    od;
-
-    Binaries := AsList(FullRowSpace(GF(2),Size(unknowns)));
+    binaries := AsList(FullRowSpace(GF(2),Size(unknowns)));
 
     input.shapes := [];
 
     # Add new values in the shape
 
-    for i in [1..Size(Binaries)] do
+    for i in [1..Size(binaries)] do
 
         for j in [1..Size(unknowns)] do
             k := unknowns[j];
-            if Binaries[i, j] = 1*Z(2) then
+            if binaries[i, j] = 1*Z(2) then
                 shape[k]:="3A";
             else
                 shape[k]:="3C";
@@ -141,16 +129,10 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
             k,
             perm,
             x,              # result of orbitals
-            ind,            # list of indices
-            orbs,           # orbitals on T
             shape,          # one shape
-            RepsSquares4X,  # (ts)^2 where o(ts) = 4
-            RepsSquares6A,  # (ts)^2 where o(ts) = 6
-            RepsCubes6A,    # (ts)^3 where o(ts) = 6
             gph,            # digraph of 2X, 4X inclusions
             cc,             # connected components of gph
-            pos,            # positions
-            Binaries,       # used to loop through options for shapes
+            binaries,       # used to loop through options for shapes
             input;          #
 
     t := Size(T);
@@ -186,129 +168,120 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     shape := NullMat(1,Size(input.pairreps))[1];
 
-    RepsSquares4X := [];
-    RepsSquares6A := [];
-    RepsCubes6A := [];
-
-    ind := NullMat(6,0);;
-
     for i in [1..Size(input.pairreps)] do
 
         x := T{input.pairreps[i]};
 
         if Order(x[1]*x[2]) = 1 then
             shape[i] := "1A";
-        elif Order(x[1]*x[2]) = 2 then
+        elif Order(x[1]*x[2]) = 2 and shape[i] = 0 then
             shape[i]:="2X";
-            Add(ind[2],i);
-        elif Order(x[1]*x[2]) = 3 then
+        elif Order(x[1]*x[2]) = 3 and shape[i] = 0 then
             shape[i]:="3X";
-            Add(ind[3],i);
         elif Order(x[1]*x[2]) = 4 then
             shape[i]:="4X";
-            Add(ind[4],i);
-            Add(RepsSquares4X, (x[1]*x[2])^2);
         elif Order(x[1]*x[2]) = 5 then
             shape[i]:="5A";
-        elif Order(x[1]*x[2])=6 then
+        elif Order(x[1]*x[2]) = 6 then
             shape[i]:="6A";
-            Add(ind[6],i);
-            Add(RepsSquares6A,(x[1]*x[2])^2);
-            Add(RepsCubes6A,(x[1]*x[2])^3);
+            MAJORANA_RecordSubalgebras( i, shape, input);
         fi;
     od;
 
     # Check for inclusions of 2X in 4X
 
-    gph := NullMat(Size(input.orbitals), 0);
+    gph := List( [1 .. Size(input.orbitals)], x -> [] );
 
-    for i in ind[2] do
-        for x in input.orbitals[i] do
-            pos := Positions(RepsSquares4X, x[1]*x[2]);
-
-            if pos <> [] then
-                Append(gph[i], ind[4]{pos} + Size(ind[2]));
-            fi;
-        od;
+    for i in Positions(shape, "4X") do
+        gph[i] := MAJORANA_RecordSubalgebras(i, shape, input);
     od;
-
-    gph := List(gph, DuplicateFreeList);
 
     cc := AutoConnectedComponents(gph);
+    cc := Filtered( cc, comp -> ForAny(comp, i -> shape[i][2] = 'X' )  );
 
-    # Check for inclusions of 2A and 3A in 6A
-
-    for i in ind[3] do
-        if ForAny(input.orbitals[i], x -> x[1]*x[2] in RepsSquares6A) then
-            shape[i]:="3A";;
-            ind[3] := Difference(ind[3], [i]);
-        fi;
-    od;
-
-    for i in ind[2] do
-        if ForAny(input.orbitals[i], x -> x[1]*x[2] in RepsCubes6A) then
-
-            shape[i]:="2A";;
-
-            for x in cc do
-                if i in x then
-                    for j in Intersection(ind[2],x) do
-                        shape[j] := "2A";
-                    od;
-                    for j in Intersection(ind[4],x - Size(ind[2])) do
-                        shape[j] := "4B";
-                    od;
-
-                    cc := Difference(cc, [x]);
-
+    for i in [1 .. Size(cc)] do
+        if ForAny( cc[i], j -> shape[j] = "2A") then
+            for j in cc[i] do
+                if shape[j] = "4X" then
+                    shape[j] := "4B";
+                elif shape[j] = "2X" then
+                    shape[j] := "2A";
                 fi;
             od;
         fi;
     od;
 
-    cc := Filtered(cc, x -> Size(Intersection(x,ind[2])) > 0);
+    cc := Filtered( cc, comp -> ForAny(comp, i -> shape[i][2] = 'X' )  );
 
-    Binaries := AsList(FullRowSpace(GF(2),Size(ind[3]) + Size(cc)));
+    binaries := AsList( FullRowSpace(GF(2), Size(cc)) );
 
     input.shapes := [];
 
     # Add new values in the shape
 
-    for i in [1..Size(Binaries)] do
-
-        for j in [1..Size(ind[3])] do
-            k:=ind[3, j];
-            if Binaries[i, j] = 1*Z(2) then
-                shape[k]:="3A";
-            else
-                shape[k]:="3C";
-            fi;
-        od;
-
+    for i in [1 .. Size(binaries)] do
         for j in [1 .. Size(cc)] do
-
-            if Binaries[i, j + Size(ind[3])] = 1*Z(2) then
-                for k in Intersection(ind[2],cc[j]) do
-                    shape[k] := "2A";
-                od;
-                for k in Intersection(ind[4],cc[j] - Size(ind[2])) do
-                    shape[k] := "4B";
+            if binaries[i, j] = 1*Z(2) then
+                for k in cc[j] do
+                    if shape[k][1] in [ '2', '3' ] then
+                        shape[k][2] := 'A';
+                    elif shape[k][1] = '4' then
+                        shape[k][2] := 'B';
+                    fi;
                 od;
             else
-                for k in Intersection(ind[2],cc[j]) do
-                    shape[k] := "2B";
-                od;
-                for k in Intersection(ind[4],cc[j] - Size(ind[2])) do
-                    shape[k] := "4A";
+                for k in cc[j] do
+                    if shape[k][1] = '2' then
+                        shape[k][2] := 'B';
+                    elif shape[k][1] = '3' then
+                        shape[k][2] := 'C';
+                    elif shape[k][1] = '4' then
+                        shape[k][2] := 'A';
+                    fi;
                 od;
             fi;
         od;
 
-        Add(input.shapes,ShallowCopy(shape));
+        Add(input.shapes,StructuralCopy(shape));
     od;
 
     return input;
 
+    end );
+
+InstallGlobalFunction( MAJORANA_RecordSubalgebras,
+
+    function( i, shape, input )
+
+        local output, x, inv, pos, k;
+
+        output := [];
+
+        for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
+
+            inv := input.involutions{x};
+
+            if shape[i] = "6A" then
+
+                pos := Position( input.involutions, inv[1]^inv[2] );
+                k := input.pairorbit[x[1]][pos];
+                shape[k] := "3A";
+
+                pos := Position( input.involutions, inv[2]^Product(inv) );
+                k := input.pairorbit[x[1]][pos];
+                shape[k] := "2A";
+
+            elif shape[i][1] = '4' then
+
+                pos := Position( input.involutions, inv[1]^inv[2] );
+                k := input.pairorbit[x[1]][pos];
+                Add( output, k );
+
+            fi;
+        od;
+
+        return output;
+        
     end );
 
 ##

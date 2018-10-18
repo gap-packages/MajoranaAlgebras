@@ -16,6 +16,8 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 #! but gives only those shapes that obey axiom M8.
 DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 
+DeclareGlobalFunction( "MAJORANA_RecordSubalgebras" );
+
 DeclareGlobalFunction( "MAJORANA_FindPerm" );
 
 DeclareGlobalFunction( "SP_Inverse" );
