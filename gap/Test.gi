@@ -93,6 +93,7 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
             y;              # product of x with u
 
     field := algebraproducts[1]!.ring;
+    dim := Size(setup.coords);
 
     for i in setup.orbitreps do
 
