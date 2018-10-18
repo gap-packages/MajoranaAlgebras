@@ -17,6 +17,17 @@ Persons := [
   rec(
     IsAuthor := true,
     IsMaintainer := true,
+    FirstNames := "Markus",
+    LastName := "Pfeiffer",
+    WWWHome := "https://markusp.morphism.de/",
+    Email := "markus.pfeiffer@st-andrews.ac.uk",
+    PostalAddress := "School of Computer Science, University of St Andrews, North Haugh, KY16 9SX",
+    Place := "St Andrews, UK",
+    Institution := "University of St Andrews",
+  ),
+  rec(
+    IsAuthor := true,
+    IsMaintainer := true,
     FirstNames := "Madeleine",
     LastName := "Whybrow",
     WWWHome := "www.madeleinewhybrow.wordpress.com",
@@ -67,8 +78,15 @@ Dependencies := rec(
   GAP := ">= 4.8",
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
                          , [ "automata", ">= 1.13"]
+<<<<<<< HEAD
                          , [ "Gauss", ">=0" ] ],
   SuggestedOtherPackages := [ ],
+=======
+                         , [ "Gauss", ">=0" ]
+                         , [ "AtlasRep", ">=0" ]
+                         , [ "datastructures", ">=0.2.2" ] ],
+  SuggestedOtherPackages := [ [ "Char0Gauss", ">=0" ] ],
+>>>>>>> master
   ExternalConditions := [ ],
 ),
 
@@ -81,5 +99,3 @@ TestFile := "tst/testall.g",
 #Keywords := [ "TODO" ],
 
 ));
-
-

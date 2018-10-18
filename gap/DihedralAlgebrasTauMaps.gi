@@ -1,9 +1,10 @@
-BindGlobal( "MAJORANA_DihedralAlgebrasNoAxioms", rec());
+BindGlobal( "MAJORANA_DihedralAlgebras", rec());
 
 f := FreeGroup(2);
 g := f/[f.1^2, f.2^2, (f.1*f.2)^2];
+e := Identity(g);
 
-MAJORANA_DihedralAlgebrasNoAxioms.2A := 
+MAJORANA_DihedralAlgebras.2A := 
 
 rec(    algebraproducts := [    SparseMatrix( 1, 3, [ [ 1 ] ], [ [ 1 ] ] ), 
                                 SparseMatrix( 1, 3, [ [ 1, 2, 3 ] ], [ [ 1/8, 1/8, -1/8 ] ] ), 
@@ -23,6 +24,7 @@ rec(    algebraproducts := [    SparseMatrix( 1, 3, [ [ 1 ] ], [ [ 1 ] ] ),
         nullspace := SparseMatrix( 0, 3, [  ], [  ] ),
         setup := rec(   conjelts := [ [ 1 .. 3 ] ],
                         coords := [ g.1, g.2, [1,2] ],
+                        orbits := [ [ e, e ] ];
                         longcoords := [ g.1, g.2, [1,2] ],
                         orbitreps := [ 1, 2 ],
                         pairconj := [ [ 1, 1, 1 ], [ 1, 1, 1 ], [ 1, 1, 1 ] ],
@@ -30,13 +32,40 @@ rec(    algebraproducts := [    SparseMatrix( 1, 3, [ [ 1 ] ], [ [ 1 ] ] ),
                         pairorbit := [ [ 1, 2, 3 ], [ 2, 4, 5 ], [ 3, 5, 6 ] ],
                         pairreps := [ [ 1, 1 ], [ 1, 2 ], [ 1, 3 ], [ 2, 2 ], [ 2, 3 ], [ 3, 3 ] ],
                         poslist := [ 1 .. 3 ] ),
-        shape := [ "1A", "2A", "1A" ] ); 
+        shape := [ "1A", "2A", "1A" ] );  
 
-MAJORANA_DihedralAlgebrasNoAxioms.2B := MAJORANA_DihedralAlgebras.2B;
+MAJORANA_DihedralAlgebras.2B := 
 
+rec(     algebraproducts := [   SparseMatrix( 1, 2, [ [ 1 ] ], [ [ 1 ] ], Rationals ), 
+                                SparseMatrix( 1, 2, [ [  ] ], [ [  ] ], Rationals ), 
+                                SparseMatrix( 1, 2, [ [ 2 ] ], [ [ 1 ] ], Rationals ) ],
+        evecs := [  [   SparseMatrix( 1, 2, [ [ 2 ] ], [ [ 1 ] ], Rationals ), 
+                        SparseMatrix( 0, 2, [  ], [  ], Rationals ), 
+                        SparseMatrix( 0, 2, [  ], [  ], Rationals ) ], 
+                    [   SparseMatrix( 1, 2, [ [ 1 ] ], [ [ 1 ] ], Rationals ), 
+                        SparseMatrix( 0, 2, [  ], [  ], Rationals ), 
+                        SparseMatrix( 0, 2, [  ], [  ], Rationals ) ] ],
+        group := g,
+        innerproducts := [ 1, 0, 1 ],
+        involutions := [ g.1, g.2 ],
+        nullspace := SparseMatrix( 0, 2, [  ], [  ], Rationals ),
+        setup := rec(   conjelts := [ [ 1 .. 2 ] ],
+                        coords := [ g.1, g.2 ],
+                        orbits := [ [ e, e ] ];
+                        longcoords := [ g.1, g.2 ],
+                        orbitreps := [ 1, 2 ],
+                        nullspace := rec(   vectors := SparseMatrix( 0, 2, [  ], [  ], Rationals ),
+                                            heads := [] ),
+                        pairconj := [ [ 1, 1 ], [ 1, 1 ] ],
+                        pairconjelts := [ [ 1, 2 ], [ 1, 2 ], [ 1, 2 ], [ 1, 2 ] ],
+                        pairorbit := [ [ 1, 2 ], [ 2, 3 ] ],
+                        pairreps := [ [ 1, 1 ], [ 1, 2 ], [ 2, 2 ] ],
+                        poslist := [ 1 .. 2 ] ),
+        shape := [ "1A", "2B", "1A" ] );
+        
 g := f/[f.1^2, f.2^2, (f.1*f.2)^3];
 
-MAJORANA_DihedralAlgebrasNoAxioms.3A := 
+MAJORANA_DihedralAlgebras.3A := 
                 
 rec(    algebraproducts := [    SparseMatrix( 1, 4, [ [ 1 ] ], [ [ 1 ] ] ), 
                                 SparseMatrix( 1, 4, [ [ 1, 2, 3, 4 ] ], [ [ 1/16, 1/16, 1/32, -135/2048 ] ] ), 
@@ -53,6 +82,7 @@ rec(    algebraproducts := [    SparseMatrix( 1, 4, [ [ 1 ] ], [ [ 1 ] ] ),
         nullspace := SparseMatrix( 0, 4, [  ], [  ] ),
         setup := rec(   conjelts := [ [ 1 .. 4 ], [ 2, 3, 1, 4 ], [ 3, 2, 1, 4 ] ],
                         coords := [ g.1, g.2, g.1*g.2*g.1, [1,2] ],
+                        orbits := [ [ e, g.2*g.1, g.1 ] ];
                         longcoords := [ g.1, g.2, g.1*g.2*g.1, [1,2], [1,3], [2,3] ],
                         orbitreps := [ 1 ],
                         pairconj := [ [ 1, 1, 3, 1 ], [ 1, 5, 6, 5 ], [ 3, 6, 6, 6 ], [ 1, 5, 6, 1 ] ],
@@ -62,11 +92,34 @@ rec(    algebraproducts := [    SparseMatrix( 1, 4, [ [ 1 ] ], [ [ 1 ] ] ),
                         poslist := [ 1, 2, 3, 4, 4, 4 ] ),
         shape := [ "1A", "3A" ] );
                 
-MAJORANA_DihedralAlgebrasNoAxioms.3C := MAJORANA_DihedralAlgebras.3C;
+MAJORANA_DihedralAlgebras.3C := 
+
+rec (   algebraproducts := [    SparseMatrix( 1, 3, [ [ 1 ] ], [ [ 1 ] ], Rationals ), 
+                                SparseMatrix( 1, 3, [ [ 1, 2, 3 ] ], [ [ 1/64, 1/64, -1/64 ] ], Rationals ) ],
+        evecs := [  [   SparseMatrix( 1, 3, [ [ 1, 2, 3 ] ], [ [ -1/32, 1, 1 ] ], Rationals ), 
+                        SparseMatrix( 0, 3, [  ], [  ], Rationals ), 
+                        SparseMatrix( 1, 3, [ [ 2, 3 ] ], [ [ -1, 1 ] ], Rationals ) ], 
+                    [ false, false, false ], [ false, false, false ] ],
+        group := g,
+        innerproducts := [ 1, 1/64 ],
+        involutions := [ g.1, g.2, g.1*g.2*g.1 ],
+        nullspace := SparseMatrix( 0, 3, [  ], [  ], Rationals ),
+        setup := rec(   conjelts := [ [ 1 .. 3 ], [ 2, 3, 1 ], [ 3, 2, 1 ] ],
+                          coords := [ g.1, g.2, g.1*g.2*g.1 ],
+                          longcoords := [ g.1, g.2, g.1*g.2*g.1 ],
+                          nullspace := rec(   vectors := SparseMatrix( 0, 3, [  ], [  ], Rationals ),
+                                            heads := [] ),
+                          orbitreps := [ 1 ],
+                          pairconj := [ [ 1, 1, 3 ], [ 1, 5, 6 ], [ 3, 6, 6 ] ],
+                          pairconjelts := [ [ 1, 2, 3 ], [ 2, 1, 3 ], [ 1, 3, 2 ], [ 3, 1, 2 ], [ 2, 3, 1 ], [ 3, 2, 1 ] ],
+                          pairorbit := [ [ 1, 2, 2 ], [ 2, 1, 2 ], [ 2, 2, 1 ] ],
+                          pairreps := [ [ 1, 1 ], [ 1, 2 ] ],
+                          poslist := [ 1 .. 3 ] ),
+        shape := [ "1A", "3C" ] ) ;
 
 g := f/[f.1^2, f.2^2, (f.1*f.2)^4];
 
-MAJORANA_DihedralAlgebrasNoAxioms.4A := 
+MAJORANA_DihedralAlgebras.4A := 
 
 rec (   algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ] ), 
                                 SparseMatrix( 1, 5, [ [ 1, 2, 3, 4, 5 ] ], [ [ 3/64, 3/64, 1/64, 1/64, -3/64 ] ] ), 
@@ -97,8 +150,8 @@ rec (   algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ] ),
                         pairreps := [ [ 1, 1 ], [ 1, 2 ], [ 1, 3 ], [ 2, 2 ], [ 2, 4 ], [ 1, 5 ], [ 2, 5 ], [ 5, 5 ] ],
                         poslist := [ 1, 2, 3, 4, 5, 5, 5, 5 ] ),
         shape := [ "1A", "4A", "2B", "1A", "2B" ] ) ;
-
-MAJORANA_DihedralAlgebrasNoAxioms.4B := 
+        
+MAJORANA_DihedralAlgebras.4B := 
 
 rec (   algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ] ), 
                                 SparseMatrix( 1, 5, [ [ 1, 2, 3, 4, 5 ] ], [ [ 1/64, 1/64, -1/64, -1/64, 1/64 ] ] ), 
@@ -132,7 +185,7 @@ rec (   algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ] ),
 
 g := f/[f.1^2, f.2^2, (f.1*f.2)^5];
 
-MAJORANA_DihedralAlgebrasNoAxioms.5A := 
+MAJORANA_DihedralAlgebras.5A := 
 
 rec(    algebraproducts := [    SparseMatrix( 1, 6, [ [ 1 ] ], [ [ 1 ] ] ), 
                                 SparseMatrix( 1, 6, [ [ 1, 2, 3, 4, 5, 6 ] ], [ [ 3/128, 3/128, -1/128, -1/128, -1/128, 1 ] ] ), 
@@ -160,7 +213,7 @@ rec(    algebraproducts := [    SparseMatrix( 1, 6, [ [ 1 ] ], [ [ 1 ] ] ),
  
 g := f/[f.1^2, f.2^2, (f.1*f.2)^6];
         
-MAJORANA_DihedralAlgebrasNoAxioms.6A := 
+MAJORANA_DihedralAlgebras.6A := 
 
 rec(    algebraproducts := [    SparseMatrix( 1, 8, [ [ 1 ] ], [ [ 1 ] ] ), 
                                 SparseMatrix( 1, 8, [ [ 1, 2, 3, 4, 5, 6, 7, 8 ] ], [ [ 1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048 ] ] ), 
@@ -196,4 +249,4 @@ rec(    algebraproducts := [    SparseMatrix( 1, 8, [ [ 1 ] ], [ [ 1 ] ] ),
                         pairorbit := [ [ 1, 2, 2, 3, 4, 4, 5, 10 ], [ 2, 6, 7, 7, 2, 3, 8, 11 ], [ 2, 7, 6, 7, 3, 2, 8, 11 ], [ 3, 7, 7, 6, 2, 2, 8, 11 ], [ 4, 2, 3, 2, 1, 4, 5, 10 ], [ 4, 3, 2, 2, 4, 1, 5, 10 ], [ 5, 8, 8, 8, 5, 5, 9, 12 ], [ 10, 11, 11, 11, 10, 10, 12, 13 ] ],
                         pairreps := [ [ 1, 1 ], [ 1, 2 ], [ 1, 4 ], [ 1, 5 ], [ 1, 7 ], [ 2, 2 ], [ 2, 3 ], [ 2, 7 ], [ 7, 7 ], [ 1, 8 ], [ 2, 8 ], [ 7, 8 ], [ 8, 8 ] ],
                         poslist := [ 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 7, 8, 7, 8] ),
-        shape := [ "1A", "6A", "2A", "3A", "2A", "1A", "3A", "2A", "1A" ] );
+        shape := [ "1A", "6A", "2A", "3A", "2A", "1A", "3A", "2A", "1A" ] );;

@@ -41,8 +41,8 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            if Nrows(rep.evecs[i][j]) > 0 then 
-                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            if Nrows(rep.evecs[i, j]) > 0 then 
+                rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
             fi;
         od;
     od;
@@ -84,8 +84,8 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
     
     for i in rep.setup.orbitreps do 
         for j in [1..3] do 
-            if Nrows(rep.evecs[i][j]) > 0 then 
-                rep.evecs[i][j] := MAJORANA_BasisOfEvecs(rep.evecs[i][j]);
+            if Nrows(rep.evecs[i, j]) > 0 then 
+                rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
             fi;
         od;
     od;
@@ -115,7 +115,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
         fi;
         
         for i in [1..Size(subrep.shape)] do 
-            if subrep.shape[i][1] in ['2','3','4'] then 
+            if subrep.shape[i, 1] in ['2','3','4'] then 
                 
                 x := subrep.setup.pairreps[i];
         
@@ -124,7 +124,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
                 pos1 := Position(rep.setup.coords, im[1]);
                 pos2 := Position(rep.setup.coords, im[2]);
                 
-                k := rep.setup.pairorbit[pos1][pos2];
+                k := rep.setup.pairorbit[pos1, pos2];
                 
                 if subrep.shape[i] <> rep.shape[k] then 
                     return false;
@@ -169,7 +169,9 @@ InstallGlobalFunction( "MAJORANA_Embed",
     
     local   i, im, j, k, g, v, sign, x, l;
     
-    emb := MAJORANA_FindPerm(emb, rep, subrep);
+    if not IsRowVector(emb) then 
+        emb := MAJORANA_FindPerm(emb, rep, subrep);
+    fi;
     
     for i in [1..Size(subrep.algebraproducts)] do 
     
@@ -186,32 +188,28 @@ InstallGlobalFunction( "MAJORANA_Embed",
                 sign := -sign; im[2] := -im[2];
             fi;
             
-            k := rep.setup.pairorbit[im[1]][im[2]];
+            k := rep.setup.pairorbit[im[1], im[2]];
             
             if k < 0 then 
                 sign := -sign; k := -k;
             fi;
             
-            g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1]][im[2]]]);
+            g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1], im[2]]]);
             
-            if rep.algebraproducts[k] = false then 
+            if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then 
                 if subrep.algebraproducts[i] <> false then 
                     v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
                     rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g);
                 fi;
             fi;
             
-            if rep.innerproducts[k] = false then 
+            if not IsBound(rep.innerproducts[k]) or rep.innerproducts[k] = false then 
                 if subrep.innerproducts[i] <> false then 
                     rep.innerproducts[k] := sign*subrep.innerproducts[i];
                 fi;
             fi;
         fi;
     od;
-    
-    im := MAJORANA_ImageVector( subrep.nullspace, emb, rep, subrep);
-
-    rep.nullspace := UnionOfRows(rep.nullspace, im);
     
     for i in subrep.setup.orbitreps do 
         
@@ -228,12 +226,12 @@ InstallGlobalFunction( "MAJORANA_Embed",
         
         if g <> false then 
             for j in [1..3] do 
-                if Nrows(subrep.evecs[i][j]) > 0 then 
-                    im := MAJORANA_ImageVector(subrep.evecs[i][j], emb, rep, subrep);
+                if Nrows(subrep.evecs[i, j]) > 0 then 
+                    im := MAJORANA_ImageVector(subrep.evecs[i, j], emb, rep, subrep);
                     for l in [1..Nrows(im)] do 
                         v := CertainRows(im, [l]);
                         v := MAJORANA_ConjugateVec(v, g);
-                        rep.evecs[g[k]][j] := UnionOfRows(rep.evecs[g[k]][j], v);
+                        rep.evecs[g[k], j] := UnionOfRows(rep.evecs[g[k], j], v);
                     od;
                 fi;
             od;
@@ -270,14 +268,14 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
     
             sign := 1;;
             
-            im := emb[indices[i][j]];
+            im := emb[indices[i, j]];
             
             if im < 0 then 
                 sign := -sign;
                 im := -im;
             fi;
             
-            SetEntry(res, i, im, sign*entries[i][j]);
+            SetEntry(res, i, im, sign*entries[i, j]);
         od;
     od;
     

@@ -10,22 +10,22 @@ InstallGlobalFunction( AXIAL_FindAll3DAlgebras,
 
     T := EmptySCTable(3, Z(p)*0, "symmetric");;
 
-    T[1][1] := [ [1], [Z(p)^0] ];;   
-    T[2][2] := [ [2], [Z(p)^0] ];;
+    T[1, 1] := [ [1], [Z(p)^0] ];;   
+    T[2, 2] := [ [2], [Z(p)^0] ];;
 
     C := Cartesian(GF(p), GF(p), GF(p));;
 
     for a12 in C do 
-        T[1][2] := [    Filtered( [1 .. 3],   i -> a12[i] <> Z(p)*0 ),
+        T[1, 2] := [    Filtered( [1 .. 3],   i -> a12[i] <> Z(p)*0 ),
                         Filtered( a12,        i -> i <> Z(p)*0 )        ];
         for a13 in C do 
-            T[1][3] := [    Filtered( [1 .. 3],   i -> a13[i] <> Z(p)*0 ),
+            T[1, 3] := [    Filtered( [1 .. 3],   i -> a13[i] <> Z(p)*0 ),
                             Filtered( a13,        i -> i <> Z(p)*0 )        ];    
             for a23 in C do 
-                T[2][3] := [    Filtered( [1 .. 3],   i -> a23[i] <> Z(p)*0 ),
+                T[2, 3] := [    Filtered( [1 .. 3],   i -> a23[i] <> Z(p)*0 ),
                                 Filtered( a23,        i -> i <> Z(p)*0 )        ]; 
                 for a33 in C do 
-                    T[3][3] := [    Filtered( [1 .. 3],   i -> a33[i] <> Z(p)*0 ),
+                    T[3, 3] := [    Filtered( [1 .. 3],   i -> a33[i] <> Z(p)*0 ),
                                     Filtered( a33,        i -> i <> Z(p)*0 )        ];
                     
                     A := AlgebraByStructureConstants( GF(p), T);

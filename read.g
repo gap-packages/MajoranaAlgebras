@@ -36,3 +36,5 @@ ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gi");
 ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Miscellaneous.gi");
+
+ReadPackage( "MajoranaAlgebras", "gap/TauMaps.gi");
