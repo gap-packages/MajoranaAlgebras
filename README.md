@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/MWhybrow92/MajoranaAlgebras.svg?branch=master)](https://travis-ci.org/MWhybrow92/MajoranaAlgebras)
+[![Code Coverage](https://codecov.io/github/gap-system/gap/coverage.svg?branch=master&token=)](https://codecov.io/gh/MWhybrow92/MajoranaAlgebras)
 
 # MajoranaAlgebras
 
