@@ -7,7 +7,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     function(G,T)
 
-    local   gens, g, perm, pos_1, pos_2,
+    local   g, perm, pos_1, pos_2,
             t,              # size of T
             i,              # indices
             j,
@@ -31,18 +31,6 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
         od;
     od;
 
-    # Construct orbitals of  on T x T
-
-    gens := [];
-
-    for g in GeneratorsOfGroup(G) do
-        perm := [];
-        for i in [1..t] do
-            Add(perm, Position(T, T[i]^g));
-        od;
-        Add(gens, perm);
-    od;
-
     input := rec();
 
     input.pairorbit := NullMat(t,t);
@@ -53,7 +41,19 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
     input.involutions := T;
     input.group       := G;
 
-    MAJORANA_Orbitals(gens, 0, input);
+    input.generators := [];
+
+    for g in GeneratorsOfGroup(G) do
+        perm := [];
+        for i in [1..t] do
+            Add(perm, Position(T, T[i]^g));
+        od;
+        Add(input.generators, perm);
+    od;
+
+    # Construct orbitals of  on T x T
+
+    MAJORANA_Orbitals(input.generators, 0, input);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
@@ -122,8 +122,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     function(G,T)
 
-    local   gens,
-            t,              # size of T
+    local   t,              # size of T
             i,              # indices
             j,
             k,
@@ -149,18 +148,17 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     input.coords := [1..t];
     input.involutions := T;
     input.group       := G;
-
-    gens := [];
+    input.generators := [];
 
     for g in GeneratorsOfGroup(G) do
         perm := [];
         for i in [1..t] do
             Add(perm, Position(T, T[i]^g));
         od;
-        Add(gens, perm);
+        Add(input.generators, perm);
     od;
 
-    MAJORANA_Orbitals(gens, 0, input);
+    MAJORANA_Orbitals(input.generators, 0, input);
 
     input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
 
@@ -290,12 +288,22 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
 
 InstallGlobalFunction( MAJORANA_SetUp,
 
-    function(input, index, axioms)
+    function( arg )
 
-    local rep, s, t, i, j, k, gens, orbs, dim, algebras;
+    local input, index, axioms, rep, s, t, i, j, k, gens, orbs, dim, algebras;
+
+    input := arg[1];
+    index := arg[2];
+    axioms := arg[3];
+    if Length(arg) = 4 and arg[4] = true then
+        algebras := MAJORANA_DihedralAlgebrasTauMaps;
+    else
+        algebras := MAJORANA_DihedralAlgebras;
+    fi;
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
+                        generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
                         field       := Rationals,
                         axioms      := axioms   );
@@ -314,14 +322,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
         rep.setup.coordmap[rep.involutions[i]] := i;
     od;
 
-    algebras := MAJORANA_DihedralAlgebras;
-
     ## Orbits on axes for eigenvectors
 
-    gens := GeneratorsOfGroup(input.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    orbs := MAJORANA_Orbits(gens, t, rep.setup);
+    orbs := MAJORANA_Orbits(input.generators, t, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
     rep.setup.orbitreps := orbs.orbitreps;
@@ -376,9 +379,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
         od;
     od;
 
-    for i in gens do MAJORANA_ExtendPerm( i, rep); od;
+    for i in rep.generators do MAJORANA_ExtendPerm( i, rep); od;
 
-    MAJORANA_Orbitals( gens, t, rep.setup);
+    MAJORANA_Orbitals( rep.generators, t, rep.setup);
 
     for i in [1..Size(rep.setup.pairreps)] do
 
@@ -404,26 +407,22 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 
     function( i, rep, subrep )
 
-    local   dim, t, gens, x, inv, elts, emb, j, im, orbit, y, k, sign;
+    local   dim, t, x, elts, emb, j, im, orbit, y, k, sign;
 
     dim := Size(rep.setup.coords);
     t := Size(rep.involutions);
 
     x := rep.setup.pairreps[i];
-    inv := rep.involutions{x};
 
     ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
 
-    MAJORANA_AddNewVectors( rep, subrep, inv);
+    MAJORANA_AddNewVectors( rep, subrep, x);
 
     ## Find the embedding of the subrep into the main algebra
 
-    emb := MAJORANA_FindEmbedding( rep, subrep, inv );
+    emb := MAJORANA_FindEmbedding( rep, subrep, x);
 
     ## Add any new orbits
-
-    gens := GeneratorsOfGroup(rep.group);
-    gens := List( gens, g -> MAJORANA_FindPerm(g, rep, rep) );
 
     for j in [1 .. Size(subrep.setup.pairreps)] do
 
@@ -437,7 +436,7 @@ InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
         ## If need be, add a new orbit
 
         if orbit = 0 then
-            MAJORANA_NewOrbital(im, gens, rep.setup);
+            MAJORANA_NewOrbital(im, rep.generators, rep.setup);
         fi;
     od;
 
@@ -461,7 +460,11 @@ InstallGlobalFunction( MAJORANA_FindEmbedding,
 
     gens := GeneratorsOfGroup(subrep.group);
 
-    imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    if IsBound(subrep.setup.orbits) then
+        imgs := List(subrep.setup.coords, w -> MAJORANA_TauMappedWord(rep, subrep, w, gens, inv) );
+    else
+        imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    fi;
 
     emb := [];
 
@@ -544,11 +547,19 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
         new := []; new_5A := [];
 
         for x in subrep.setup.longcoords{list} do
-            Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            if IsBound(subrep.setup.orbits) then
+                Add( new, MAJORANA_TauMappedWord(rep, subrep, x, gens, inv));
+            else
+                Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            fi;
         od;
 
         for x in subrep.setup.longcoords{list_5A} do
-            Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            if IsBound(subrep.setup.orbits) then
+                Add( new_5A, MAJORANA_TauMappedWord(rep, subrep, x, gens, inv));
+            else
+                Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            fi;
         od;
 
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
@@ -566,7 +577,7 @@ InstallGlobalFunction( MAJORANA_AddNewVectors,
     Append(rep.setup.pairconj, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
 
     for g in rep.setup.pairconjelts do  MAJORANA_ExtendPerm( g, rep); od;
-
+    for g in rep.generators do MAJORANA_ExtendPerm( g, rep); od;
     for g in rep.setup.conjelts do MAJORANA_ExtendPerm( g, rep); od;
 
     end );
@@ -750,9 +761,11 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
 
 InstallGlobalFunction(MAJORANA_MappedWord,
 
-    function(rep, subrep, w, gens, imgs)
+    function(rep, subrep, w, gens, inv)
 
-    local im;
+    local im, imgs;
+
+    imgs := rep.involutions{inv};
 
     if IsRowVector(w) then
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));

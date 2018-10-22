@@ -1044,7 +1044,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     function(mat, vec, unknowns, rep)
 
-    local   i, j, gens,
+    local   i, j,
             u,
             v,
             x,
@@ -1059,11 +1059,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     dim := Size(rep.setup.coords);
 
-    gens := GeneratorsOfGroup(rep.group);
-    gens := List(gens, x -> Position(AsList(rep.group), x));
-    gens := rep.setup.pairconjelts{gens};
-
-    x := MAJORANA_Orbits(gens, dim, rep.setup);
+    x := MAJORANA_Orbits(rep.generators, dim, rep.setup);
 
     for i in x.orbitreps do
         u := SparseMatrix(1, dim, [[i]], [[1]], mat!.ring);

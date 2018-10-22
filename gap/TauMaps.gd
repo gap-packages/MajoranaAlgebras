@@ -1,15 +1,5 @@
-DeclareGlobalFunction( "MAJORANA_TauShapes" );
-
-DeclareGlobalFunction( "MAJORANA_TauRecordCoords" );
-
-DeclareGlobalFunction( "MAJORANA_TauSetUp" );
+DeclareGlobalFunction( "TauShapesOfMajoranaRepresentation" );
 
 DeclareGlobalFunction( "TauMapMajoranaRepresentation" );
-
-DeclareGlobalFunction( "MAJORANA_MoreAxes" );
-
-DeclareGlobalFunction( "MAJORANA_TauRemoveDuplicateShapes" );
-
-DeclareGlobalFunction( "OnLists" );
 
 DeclareGlobalFunction( "MAJORANA_TauMappedWord" );

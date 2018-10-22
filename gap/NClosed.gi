@@ -15,13 +15,9 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
         od;
     od;
 
-    for x in rep.setup.pairconjelts do
-        MAJORANA_ExtendPerm(x, rep);
-    od;
-
-    for x in rep.setup.conjelts do
-        MAJORANA_ExtendPerm(x, rep);
-    od;
+    for x in rep.setup.pairconjelts do MAJORANA_ExtendPerm(x, rep); od;
+    for x in rep.setup.conjelts do MAJORANA_ExtendPerm(x, rep); od;
+    for x in rep.generators do MAJORANA_ExtendPerm(x, rep); od;
 
     new_dim := Size(rep.setup.coords);
 
