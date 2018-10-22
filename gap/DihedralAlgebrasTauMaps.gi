@@ -154,7 +154,7 @@ rec (   algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ] ),
                         poslist := [ 1, 2, 3, 4, 5, 5, 5, 5 ] ),
         shape := [ "1A", "4A", "2B", "1A", "2B" ] ) ;
 
-MAJORANA_DihedralAlgebras.4B :=
+MAJORANA_DihedralAlgebrasTauMaps.4B :=
 
 rec (   algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ] ),
                                 SparseMatrix( 1, 5, [ [ 1, 2, 3, 4, 5 ] ], [ [ 1/64, 1/64, -1/64, -1/64, 1/64 ] ] ),
@@ -219,7 +219,7 @@ rec(    algebraproducts := [    SparseMatrix( 1, 6, [ [ 1 ] ], [ [ 1 ] ] ),
 
 g := f/[f.1^2, f.2^2, (f.1*f.2)^6];
 
-MAJORANA_DihedralAlgebras.6A :=
+MAJORANA_DihedralAlgebrasTauMaps.6A :=
 
 rec(    algebraproducts := [    SparseMatrix( 1, 8, [ [ 1 ] ], [ [ 1 ] ] ),
                                 SparseMatrix( 1, 8, [ [ 1, 2, 3, 4, 5, 6, 7, 8 ] ], [ [ 1/64, 1/64, -1/64, -1/64, -1/64, -1/64, 1/64, 45/2048 ] ] ),
