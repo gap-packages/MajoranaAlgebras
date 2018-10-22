@@ -19,11 +19,13 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
         fi;
     od;
 
-    for i in [1..Size(rep.innerproducts)] do
-        if not rep.innerproducts[i] in [false, fail] then
-            rep.innerproducts[i] := rep.innerproducts[i]*One(field);
-        fi;
-    od;
+    if rep.innerproducts <> false then
+        for i in [1..Size(rep.innerproducts)] do
+            if not rep.innerproducts[i] in [false, fail] then
+                rep.innerproducts[i] := rep.innerproducts[i]*One(field);
+            fi;
+        od;
+    fi;
 
     for i in rep.setup.orbitreps do
         rep.evecs[i] := rep.evecs[i]*One(field);
@@ -35,11 +37,13 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
     rep.setup.nullspace.vectors := rep.setup.nullspace.vectors*One(field);
     rep.setup.nullspace.vectors!.ring := field;
 
-    rep.mat!.ring := field;
-    rep.mat!.entries := List(rep.mat!.entries, x -> x*One(field));
-    rep.vec!.ring := field;
-    rep.vec!.entries := List(rep.vec!.entries, x -> x*One(field));
-
+    if IsBound(rep.mat) then
+        rep.mat!.ring := field;
+        rep.mat!.entries := List(rep.mat!.entries, x -> x*One(field));
+        rep.vec!.ring := field;
+        rep.vec!.entries := List(rep.vec!.entries, x -> x*One(field));
+    fi;
+    
     end );
 
 InstallGlobalFunction( MAJORANA_SetValue,
