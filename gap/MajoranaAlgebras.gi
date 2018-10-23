@@ -166,14 +166,8 @@ function(arg)
             od;
 
             for evals in [[1,1], [1,2], [1,3], [2,3], [2,2], [3,3]] do
-                for j in [1..Nrows(rep.evecs[i, evals[1]])] do
-
-                    a := CertainRows(rep.evecs[i, evals[1]], [j]);
-
-                    for k in [1..Nrows(rep.evecs[i, evals[2]])] do
-
-                        b := CertainRows(rep.evecs[i, evals[2]], [k]);
-
+                for a in Iterator(rep.evecs[i, evals[1]]) do
+                    for b in Iterator(rep.evecs[i, evals[2]]) do
                         FUSE(a, b, u, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);
                     od;
                 od;
@@ -205,7 +199,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     function(arg)
 
-    local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
+    local   dim, x, y, i, j, k, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
 
     rep := arg[1];
     evals_list := [[1,2],[2,1],[1,3],[2,3]];
@@ -263,9 +257,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
                         bad := MAJORANA_FindBadIndices(c, rep.algebraproducts, rep.setup);
 
-                        for l in [1..Nrows(evecs_a)] do
-
-                            a := CertainRows(evecs_a, [l]);
+                        for a in Iterator( evecs_a ) do
 
                             if CertainColumns(a, bad) = CertainColumns(b, bad) then
 
@@ -631,7 +623,6 @@ InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 function(rep)
 
     local   i,          # loop over representatives
-            j,
             unknowns,
             ev,         # loop over eigenvalues
             mat,        # matrix of unknowns
@@ -656,9 +647,7 @@ function(rep)
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
         for ev in [1..3] do
-            for j in [1..Nrows(rep.evecs[i, ev])] do
-
-                v := CertainRows(rep.evecs[i, ev], [j]);
+            for v in Iterator(rep.evecs[i, ev]) do
 
                 x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
 
@@ -977,7 +966,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             y,
             dim;
 
-    if Nrows(rep.setup.nullspace.vectors) = 0 then
+    if (rep.setup.nullspace.vectors) = 0 then
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
@@ -990,9 +979,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     for i in x.orbitreps do
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
-        for j in [1..Nrows(rep.setup.nullspace.vectors)] do
-
-            v := CertainRows(rep.setup.nullspace.vectors, [j]);
+        for v in Iterator(rep.setup.nullspace.vectors) do
 
             if  ForAny(rep.setup.pairorbit[i], k -> rep.algebraproducts[AbsInt(k)] = false) and
                 ForAll(rep.setup.pairorbit[i], k -> rep.algebraproducts[AbsInt(k)] <> fail) then   # TODO think I can improve this, only an issue if a fail is actually hit during separation
