@@ -1037,7 +1037,6 @@ InstallGlobalFunction(MAJORANA_Resurrection,
         if y <> false then
             res[2] := res[2] + (1/4)*y*u;
         else
-            Error();
             return false;
         fi;
     fi;
