@@ -9,6 +9,8 @@ ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasTauMaps.gi");
 
+ReadPackage( "MajoranaAlgebras", "gap/AlgebrasOfJordanType.gi");
+
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Test.gi");
