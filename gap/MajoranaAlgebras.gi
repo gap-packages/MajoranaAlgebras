@@ -43,7 +43,7 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
         rep.vec!.ring := field;
         rep.vec!.entries := List(rep.vec!.entries, x -> x*One(field));
     fi;
-    
+
     end );
 
 InstallGlobalFunction( MAJORANA_SetValue,
@@ -271,6 +271,8 @@ function(arg)
 
             MAJORANA_IntersectEigenspaces(rep);
             MAJORANA_IntersectEigenspaces(rep);
+
+            Info( InfoMajorana, 50, STRINGIFY( "Eigenspace dimensions: ", List(rep.evecs[i], Nrows), ". Nullspace dimension: ", Nrows(rep.setup.nullspace.vectors)));
         od;
     od;
 
