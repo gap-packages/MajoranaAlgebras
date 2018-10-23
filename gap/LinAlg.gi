@@ -229,8 +229,10 @@ InstallGlobalFunction(RemoveMatWithHeads,
     end );
 
 BindGlobal( "NextIterator_SparseMatrix", function( iter )
+
     iter!.pos := iter!.pos + 1;
     return CertainRows( iter!.matrix, [iter!.pos] );
+
     end );
 
 InstallOtherMethod( Iterator, "for a sparse matrix",
@@ -239,9 +241,12 @@ InstallOtherMethod( Iterator, "for a sparse matrix",
         local iter;
         iter := rec(    matrix := M,
                         pos := 0 );
+
         iter.NextIterator   := NextIterator_SparseMatrix;
         iter.IsDoneIterator := iter -> ( iter!.pos = Nrows(iter!.matrix) );
         iter.ShallowCopy    := iter -> rec( pos := iter!.pos,
                                             matrix := iter!.matrix ) ;
+
         return IteratorByFunctions(iter);
+
     end );

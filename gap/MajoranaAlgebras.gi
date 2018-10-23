@@ -209,7 +209,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     function(arg)
 
-    local   dim, x, y, i, j, k, l, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
+    local   dim, x, y, i, j, k, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
 
     rep := arg[1];
     evals_list := [[1,2],[2,1],[1,3],[2,3]];
@@ -271,9 +271,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
                         bad := MAJORANA_FindBadIndices(c, rep);
 
-                        for l in [1..Nrows(evecs_a)] do
-
-                            a := CertainRows(evecs_a, [l]);
+                        for a in Iterator( evecs_a ) do
 
                             # If this is satisfied then the product (a - b)*c is known
                             if CertainColumns(a, bad) = CertainColumns(b, bad) then
@@ -651,7 +649,6 @@ InstallGlobalFunction(MAJORANA_EigenvectorsAlgebraUnknowns,
 function(rep)
 
     local   i,          # loop over representatives
-            j,
             unknowns,
             ev,         # loop over eigenvalues
             mat,        # matrix of unknowns
@@ -675,9 +672,7 @@ function(rep)
 
         # Loop over the three eigenvalues 0, 1/4 and 1/32
         for ev in [1..3] do
-            for j in [1..Nrows(rep.evecs[i, ev])] do
-
-                v := CertainRows(rep.evecs[i, ev], [j]);
+            for v in Iterator(rep.evecs[i, ev]) do
 
                 # Create the equation u*evec = 0
                 x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
@@ -1030,7 +1025,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     local   i, j, gens, u, v, x, y, dim;
 
-    if Nrows(rep.setup.nullspace.vectors) = 0 then
+    if (rep.setup.nullspace.vectors) = 0 then
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
@@ -1047,9 +1042,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     for i in x.orbitreps do
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
-        # Loop over the rows of the nullspace
-        for j in [1..Nrows(rep.setup.nullspace.vectors)] do
-            v := CertainRows(rep.setup.nullspace.vectors, [j]);
+        for v in Iterator(rep.setup.nullspace.vectors) do
 
             # Calculate the equation u*v = 0
             x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,rep.algebraproducts,rep.setup);
