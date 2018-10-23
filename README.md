@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/MWhybrow92/MajoranaAlgebras.svg?branch=master)](https://travis-ci.org/MWhybrow92/MajoranaAlgebras)
+[![Code Coverage](https://codecov.io/github/gap-system/gap/coverage.svg?branch=master&token=)](https://codecov.io/gh/MWhybrow92/MajoranaAlgebras)
+
 # MajoranaAlgebras
 
 This is a GAP package for constructing Majorana algebras of finite groups. The package implements the algorithm described in the paper "Constructing Majorana representations" (https://arxiv.org/abs/1803.10723) by M. Pfeiffer and M. Whybrow.
