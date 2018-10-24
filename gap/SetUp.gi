@@ -308,6 +308,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         field       := Rationals,
                         axioms      := axioms   );
 
+    if IsBound(input.tau) then
+        rep.tau := input.tau;
+    fi;
+
     t := Size(rep.involutions);
 
     rep.setup   := rec( coords          := [1..t],

@@ -8,7 +8,8 @@ InstallGlobalFunction( TauShapesOfMajoranaRepresentation,
 
     input := rec();
 
-    input.involutions := tau;
+    input.involutions := [ 1 .. d ];
+    input.tau       := tau;
     input.pairorbit := NullMat(d,d);
     input.pairconj  := NullMat(d,d);
     input.pairreps  := [];
@@ -190,7 +191,7 @@ InstallGlobalFunction( MAJORANA_TauMappedWord,
 
     local im, i, imgs;
 
-    imgs := rep.involutions{inv};
+    imgs := rep.tau{inv};
 
     if IsRowVector(w) then
         im := List(w, i -> MAJORANA_TauMappedWord( rep, subrep, subrep.setup.coords[i], gens, inv) );
