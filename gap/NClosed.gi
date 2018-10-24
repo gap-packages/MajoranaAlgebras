@@ -35,7 +35,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     MAJORANA_Orbitals(gens, dim, rep.setup);
 
     pos := rep.setup.coordmap[rep.setup.pairreps[index]];
-    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], rep.field);
+    rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[One(rep.field)]], rep.field);
 
     for i in [1..Size(rep.algebraproducts)] do
         if not rep.algebraproducts[i] in [false, fail] then
@@ -104,7 +104,7 @@ InstallGlobalFunction( NClosedMajoranaRepresentation,
 
         MAJORANA_Fusion(rep, false);
 
-        MajoranaAlgebraTest(rep);
+        # MajoranaAlgebraTest(rep);
 
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
