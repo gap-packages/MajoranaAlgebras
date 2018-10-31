@@ -335,11 +335,21 @@ end);
 
 # Still have to try both [i,j] and [j,i]
 # And we might want to think about caching.
-InstallGlobalFunction(MAJORANA_OrbitalRepActSigned,
+InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementSigned,
 function(os, pair)
     local ra, fact;
 
-    ra := MAJORANA_OrbitalRepAct(os, pair);
+    ra := MAJORANA_OrbitalCanonizingElement(os, pair);
+    fact := Factorization(os.group, ra);
+
+    return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementInverseSigned,
+function(os, pair)
+    local ra, fact;
+
+    ra := MAJORANA_OrbitalCanonizingElementInverse(os, pair);
     fact := Factorization(os.group, ra);
 
     return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
