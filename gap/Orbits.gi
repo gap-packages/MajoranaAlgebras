@@ -1,7 +1,7 @@
 InstallGlobalFunction(MAJORANA_Orbits,
 
     function(gens, t, setup)
-    
+
     local   conjelts,
             orbitreps,
             i, j,
@@ -17,41 +17,41 @@ InstallGlobalFunction(MAJORANA_Orbits,
 
     conjelts := [1..t]*0;
     orbitreps := [];
-    
+
     dim := Size(setup.coords);
-    
-    for i in [1..t] do 
-        if conjelts[i] = 0 then 
-            
+
+    for i in [1..t] do
+        if conjelts[i] = 0 then
+
             Add(orbitreps, i);
             conjelts[i] := [1..dim];
-            
+
             orb := [i];
             elts := [[1..dim]];
-            
+
             count := 0;
-            
-            for p in orb do 
-            
+
+            for p in orb do
+
                 count := count + 1;
                 h := elts[count];
-                
-                for gen in gens do 
+
+                for gen in gens do
                     q := gen[p];
-                    
+
                     g := [];
-    
-                    for j in h do 
-                        if j > 0 then 
+
+                    for j in h do
+                        if j > 0 then
                             Add(g, gen[j]);
                         else
                             Add(g, -gen[-j]);
                         fi;
                     od;
-                    
+
                     if q < 0 then q := -q; fi;
-                    
-                    if conjelts[q] = 0 then 
+
+                    if conjelts[q] = 0 then
                         Add(orb, q);
                         Add(elts, g);
                         conjelts[q] := g;
@@ -60,36 +60,36 @@ InstallGlobalFunction(MAJORANA_Orbits,
             od;
         fi;
     od;
-    
+
     conjelts := DuplicateFreeList(conjelts);
-    
+
     return rec( conjelts := conjelts,
                 orbitreps := orbitreps  );
-                        
-    end ); 
-   
+
+    end );
+
 InstallGlobalFunction(MAJORANA_Orbitals,
 
     function(gens,t,setup)
-    
+
     local   dim, i, j, orb;
-    
+
     dim := Size(setup.coords);
 
-    for i in [1..dim] do 
-        for j in [Maximum(i,t + 1)..dim] do 
+    for i in [1..dim] do
+        for j in [Maximum(i,t + 1)..dim] do
 
-            if setup.pairorbit[i][j] = 0 then 
-                
+            if setup.pairorbit[i][j] = 0 then
+
                 orb := MAJORANA_NewOrbital([i,j], gens, setup);
-                
-                if IsBound(setup.orbitals) then 
+
+                if IsBound(setup.orbitals) then
                     Add(setup.orbitals, Immutable(orb));
                 fi;
             fi;
         od;
     od;
-    
+
     end );
 
 
@@ -252,6 +252,10 @@ InstallGlobalFunction(MAJORANA_OrbitalStructureSigned,
 function(gens, Omega, Act)
     local res;
 
+    # Takes as input a signed permutation and just converts this to
+    # a permutation (using the syntax "x -> x![1]") before passing it
+    # to MAJORANA_OrbitalStructure.
+
     res := MAJORANA_OrbitalStructure(List(gens, x->x![1]), Omega, Act);
     res.signedgens := gens;
     return res;
@@ -259,6 +263,10 @@ end);
 
 InstallGlobalFunction(MAJORANA_OrbitalRep,
 function(os, pair)
+
+    # Returns a representative (as a pair of elements of the G set) for the
+    # orbital that contains <pair>.
+
     local fo, so, p;
     fo := os.orbnums[pair[1]];
     p := RepresentativeAction(os.group, pair[1], os.orbreps[fo] );
@@ -266,14 +274,35 @@ function(os, pair)
     return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalRepAct,
+InstallGlobalFunction(MAJORANA_OrbitalCanonizingElement,
 function(os, pair)
+
+    # Returns a group elements that maps <pair> to its orbital representative
+    # (as given by MAJORANA_OrbitalRep).
+
     local fo, so, p1, p2;
 
     fo := os.orbnums[pair[1]];
     p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo]);
     so := os.orbstabs[fo].orbnums[pair[2]^p1];
     p2 := RepresentativeAction(os.orbstabs[fo].stab, pair[2]^p1, os.orbstabs[fo].orbreps[so]);
+
+    return p1 * p2;
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementInverse,
+function(os, pair)
+
+    # Returns a group elements that maps the orbital representative of <pair>
+    # to <pair> itself. This will be the inverse of the output of
+    # MAJORANA_OrbitalCanonizingElement( os, pair )
+
+    local fo, so, p1, p2;
+
+    fo := os.orbnums[pair[1]];
+    p1 := RepresentativeAction(os.group, os.orbreps[fo], pair[1]);
+    so := os.orbstabs[fo].orbnums[pair[2]^p1];
+    p2 := RepresentativeAction(os.orbstabs[fo].stab, os.orbstabs[fo].orbreps[so], pair[2]^p1);
 
     return p1 * p2;
 end);
