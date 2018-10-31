@@ -413,8 +413,14 @@ function( i, rep, subrep )
     gens := GeneratorsOfGroup(rep.group);
     gens := List( gens, g -> MAJORANA_FindPerm(g, rep, rep) );
 
-    rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList), [1..dim], OnPoints);
+    rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList),
+                                                                [1..Size(rep.setup.coords)], OnPoints);
     rep.setup.pairreps := MAJORANA_OrbitalRepUnions(rep.setup.orbitalstruct);
+
+    for i in [1 .. Size(rep.setup.pairreps) ] do
+        rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
+        rep.setup.pairrepsmap[ Reversed(rep.setup.pairreps[i]) ] := i;
+    od;
 
 #    for j in [1 .. Size(subrep.setup.pairreps)] do
 #
@@ -553,7 +559,7 @@ function(rep, subrep, inv)
 
 #    for g in rep.setup.pairconjelts do  MAJORANA_ExtendPerm( g, rep); od;
 
-#    for g in rep.setup.conjelts do MAJORANA_ExtendPerm( g, rep); od;
+    for g in rep.setup.conjelts do MAJORANA_ExtendPerm( g, rep); od;
 
     end );
 
@@ -563,11 +569,11 @@ function(rep, subrep, inv)
 ##
 InstallGlobalFunction( MAJORANA_AddConjugateVectors,
 function( rep, new, new_5A )
-    local vec, g, im, im_5A, k, elts, x;
+    local vec, g, im, im_5A, k, elts, x, transversal;
 
     # new and new_5A are pairs of indices
-    Print("bla: ", new, "\n");
-    Print("bla: ", new_5A, "\n");
+    # Print("bla: ", new, "\n");
+    # Print("bla: ", new_5A, "\n");
 
     ## Find which (if any) new vectors are not yet in <setup.coordmap>
 
@@ -593,8 +599,12 @@ function( rep, new, new_5A )
     ## to <setup.coords>. Otherwise, there are some new vectors but these
     ## are equal to an existing element of <setup.coords>
 
+    transversal := MAJORANA_OrbitalUnionTransversalIterator( rep.setup.orbitalstruct, new[1]);
+
     # g is a permutation represented as a list
-    for g in rep.setup.pairconjelts do
+    for g in transversal do
+
+        g := ListPerm(g, Size(rep.setup.coords));
 
         # new/new_5A is a list of pairs
         # this computes all conjugates of these pairs
@@ -748,7 +758,7 @@ InstallGlobalFunction(MAJORANA_MappedWord,
 function(rep, subrep, w, gens, imgs)
     local im;
 
-    Print("mw: w: ", w, " gens: " , gens, " imgs: ", imgs, "\n");
+    # Print("mw: w: ", w, " gens: " , gens, " imgs: ", imgs, "\n");
     if IsRowVector(w) then
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
         return SortedList(List(im, x -> Position(rep.involutions, x )));

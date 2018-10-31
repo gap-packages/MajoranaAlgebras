@@ -177,7 +177,7 @@ function(rep, subrep, emb)
     #
     # Seems like this is a return value from MAJORANA_FindEmbedding
 
-    Print("an emb: ", emb, "\n");
+    # Print("an emb: ", emb, "\n");
     # Error("an emb!");
 
     if not IsRowVector(emb) then
