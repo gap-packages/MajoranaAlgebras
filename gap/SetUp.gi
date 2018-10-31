@@ -277,7 +277,8 @@ function(input, index, axioms)
     # contains ... (what does it contain?)
     rep.setup   := rec( coords          := [1..t],
                         coordmap        := HashMap( t*t ),
-                        # Why a copy
+                        # Record a copy of the pairreps so that input.pairreps
+                        # doesn't get touched.
                         pairreps        := ShallowCopy(input.pairreps)
                       );
 
@@ -501,7 +502,7 @@ function(rep, subrep, inv)
     dim := Size(rep.setup.coords);
     gens := GeneratorsOfGroup(subrep.group);
 
-    # pairs?
+    # Take the additional basis vectors (if they exists) from the dihedral alg <subrep>
     for i in [Size(subrep.involutions) + 1 .. Size(subrep.setup.coords)] do
 
         ## Find the new vectors to be added to <setup.coordmap>
