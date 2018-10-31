@@ -340,7 +340,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
 
     for i in v!.indices[1] do
         for j in list do
-            k := MAJORANA_OrbitalRep(setup.orbitalstruct, [i, j]);
+            k := MAJORANA_OrbitalRepUnion(setup.orbitalstruct, [i, j]);
             k :=  setup.pairrepsmap[ k ];
 
             if k < 0 then k := -k; fi;
@@ -514,7 +514,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
 
-                k := MAJORANA_OrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+                k := MAJORANA_OrbitalRepUnion(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
                 k := setup.pairrepsmap[ k ];
 
                 if k > 0 then
@@ -575,7 +575,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
-                k := MAJORANA_OrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+                k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
                 k := setup.pairrepsmap[ k ];
 
                 if k > 0 then
@@ -614,7 +614,7 @@ function(range, innerproducts, setup)
     for i in [1..l] do
         for j in [i..l] do
 
-            k := MAJORANA_OrbitalRep( setup.orbitalstruct, range{[i,j]} );
+            k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, range{[i,j]} );
             k := setup.pairrepsmap[k];
 
             if k > 0 then
@@ -725,7 +725,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            k := MAJORANA_OrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+            k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
             k := setup.pairrepsmap[k];
 
             if k > 0 then
@@ -797,7 +797,10 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            k := MAJORANA_OrbitalRep( [u!.indices[1, i], v!.indices[1, j]] );
+            k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+
+            if setup.pairrepsmap[k] = fail then Error(); fi;
+
             k := setup.pairrepsmap[k];
 
             if k > 0 then
