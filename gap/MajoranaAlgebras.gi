@@ -340,7 +340,8 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
 
     for i in v!.indices[1] do
         for j in list do
-            k :=  setup.pairorbit[i, j];
+            k := MAJORANA_OrbitalRep(setup.orbitalstruct, [i, j]);
+            k :=  setup.pairrepsmap[ k ];
 
             if k < 0 then k := -k; fi;
 
@@ -513,7 +514,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
 
-                k := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
+                k := MAJORANA_OrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+                k := setup.pairrepsmap[ k ];
 
                 if k > 0 then
                     sign := 1;
@@ -526,7 +528,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
                 if not x in [fail, false] then
 
-                    g := setup.pairconj[u!.indices[1, i], v!.indices[1, j]];
+                    g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
+                    g := ListSignedPerm(g, dim);
 
                     pos := Position(elts,g);
 
@@ -545,8 +548,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             od;
         od;
 
-        for i in [1..Size(elts)] do
-            x := MAJORANA_ConjugateVec(vecs[i], setup.pairconjelts[elts[i]]);
+        for g in elts do
+            x := MAJORANA_ConjugateVec(vecs[i], g);
             AddRow(x!.indices[1], x!.entries[1], vec!.indices, vec!.entries, 1);
         od;
 
@@ -572,7 +575,8 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
-                k := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
+                k := MAJORANA_OrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+                k := setup.pairrepsmap[ k ];
 
                 if k > 0 then
                     sign := 1;
@@ -610,7 +614,8 @@ function(range, innerproducts, setup)
     for i in [1..l] do
         for j in [i..l] do
 
-            k := setup.pairorbit[range[i], range[j]];
+            k := MAJORANA_OrbitalRep( setup.orbitalstruct, range{[i,j]} );
+            k := setup.pairrepsmap[k];
 
             if k > 0 then
                 SetEntry(mat, i, j, innerproducts[k]);
@@ -720,7 +725,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            k := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
+            k := MAJORANA_OrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+            k := setup.pairrepsmap[k];
 
             if k > 0 then
                 sign := 1;
@@ -735,7 +741,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
 
             if x <> false then
 
-                g := setup.pairconj[u!.indices[1, i], v!.indices[1, j]];
+                g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
+                g := ListSignedPerm(g, dim);
 
                 pos := Position(elts,g);
 
@@ -761,8 +768,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
         od;
     od;
 
-    for i in [1..Size(elts)] do
-        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
+    for g in elts do
+        sum := sum + MAJORANA_ConjugateVec(vecs[i], g);
     od;
 
     return [row, RemoveMatWithHeads(sum, setup.nullspace)];
@@ -778,8 +785,8 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             dim,            # size of coordinates
             i,              # index for dim of u
             j,              # index for dim of v
-            m,              # orbit of i,j
-            pos,            # position of m in unknowns
+            k,              # orbit of i,j
+            pos,            # position of k in unknowns
             sign;           # correct sign of 5A axes
 
     dim := Size(setup.coords);
@@ -790,19 +797,20 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            m := setup.pairorbit[u!.indices[1, i], v!.indices[1, j]];
+            k := MAJORANA_OrbitalRep( [u!.indices[1, i], v!.indices[1, j]] );
+            k := setup.pairrepsmap[k];
 
-            if m > 0 then
+            if k > 0 then
                 sign := 1;
             else
                 sign := -1;
-                m := -m;
+                k := -k;
             fi;
 
-            if innerproducts[m] <> false then
-                AddToEntry(sum, 1, 1, - sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[m]);
+            if innerproducts[k] <> false then
+                AddToEntry(sum, 1, 1, - sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[k]);
             else
-                pos := Position(unknowns,m);
+                pos := Position(unknowns,k);
                 AddToEntry(row, 1, pos, sign*u!.entries[1, i]*v!.entries[1, j]);
             fi;
         od;
@@ -968,7 +976,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
 InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
-    function(mat, vec, unknowns, algebraproducts, setup, group)
+    function(mat, vec, unknowns, rep)
 
     local   i, j, gens,
             u,
@@ -977,61 +985,55 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
             y,
             dim;
 
-    if Nrows(setup.nullspace.vectors) = 0 then
+    if Nrows(rep.setup.nullspace.vectors) = 0 then
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
     Info( InfoMajorana, 50, "Building nullspace unknowns" );
 
-    dim := Size(setup.coords);
+    dim := Size(rep.setup.coords);
 
-    gens := GeneratorsOfGroup(group);
-    gens := List(gens, x -> Position(AsList(group), x));
-    gens := setup.pairconjelts{gens};
+    gens := GeneratorsOfGroup(rep.group);
+    gens := List( gens, g -> MAJORANA_FindPerm(g, rep, rep) );
 
-    x := MAJORANA_Orbits(gens, dim, setup);
+    x := MAJORANA_Orbits(gens, dim, rep.setup);
 
     for i in x.orbitreps do
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
-        for j in [1..Nrows(setup.nullspace.vectors)] do
+        for j in [1..Nrows(rep.setup.nullspace.vectors)] do
 
-            v := CertainRows(setup.nullspace.vectors, [j]);
+            v := CertainRows(rep.setup.nullspace.vectors, [j]);
+            x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,rep.algebraproducts,rep.setup);
 
-            if  ForAny(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] = false) and
-                ForAll(setup.pairorbit[i], k -> algebraproducts[AbsInt(k)] <> fail) then   # TODO think I can improve this, only an issue if a fail is actually hit during separation
+            if x <> fail and Size(x[1]!.indices[1]) = 1 then
 
-                x := MAJORANA_SeparateAlgebraProduct(u,v,unknowns,algebraproducts,setup);
+                y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns,
+                                                    rep.algebraproducts,
+                                                    rep.setup);
 
-                if x <> fail and Size(x[1]!.indices[1]) = 1 then
+                if not false in rep.algebraproducts then return true; fi;
 
-                    y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns,
-                                                        algebraproducts,
-                                                        setup);
+                mat := y.mat; vec := y.vec; unknowns := y.unknowns;
 
-                    if not false in algebraproducts then return true; fi;
-
-                    mat := y.mat; vec := y.vec; unknowns := y.unknowns;
-
-                elif x <> fail and x[1]!.indices[1] <> [] then
-                    if not _IsRowOfSparseMatrix(mat, x[1]) then
-                        mat := UnionOfRows(mat, x[1]);
-                        vec := UnionOfRows(vec, x[2]);
-                    fi;
+            elif x <> fail and x[1]!.indices[1] <> [] then
+                if not _IsRowOfSparseMatrix(mat, x[1]) then
+                    mat := UnionOfRows(mat, x[1]);
+                    vec := UnionOfRows(vec, x[2]);
                 fi;
             fi;
         od;
 
         if Nrows(mat) > 8000 then
-            y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+            y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
-            if not false in algebraproducts then return; fi;
+            if not false in rep.algebraproducts then return; fi;
 
             mat := y.mat; vec := y.vec; unknowns := y.unknowns;
         fi;
     od;
 
-    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, algebraproducts, setup);
+    y := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
 
     return rec( mat := y.mat, vec := y.vec, unknowns := y.unknowns);
 
@@ -1182,7 +1184,8 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
             sign;
 
     y := setup.pairorbit[x[1], x[2]];
-    g := SP_Inverse(setup.pairconjelts[setup.pairconj[x[1], x[2]]]);
+    g := MAJORANA_OrbitalCanonizingElementSigned( setup.orbitalstruct, x);
+    g := ListSignedPerm(g, Size(setup.coords));
 
     sign := 1;
 
@@ -1245,7 +1248,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
 
             switch := true;
 
-            g := setup.pairconjelts[setup.pairconj[x[1], x[2]]];
+            g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct, x);
+            g := ListSignedPerm(g, Size(setup.coords));
 
             prod := MAJORANA_ConjugateVec(prod,g);
 
