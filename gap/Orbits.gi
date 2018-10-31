@@ -303,6 +303,7 @@ function(os, pair)
     return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
 end);
 
+# TODO: fix this.
 InstallGlobalFunction(MAJORANA_OrbitalCanonizingElement,
 function(os, pair)
 
@@ -384,9 +385,8 @@ function(os, pair)
     return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
 end);
 
+# Signedness
 InstallGlobalFunction(MAJORANA_OrbitalTransversalIterator,
-# Input: orbital structure, the rep of the orbital
-# Returns: an iterator
 function( os, rep )
     local r, fo, so;
 
@@ -396,7 +396,7 @@ function( os, rep )
     r := rec( lorb := ShallowCopy(os.orbits[fo])
             , rorb := ShallowCopy(os.orbstabs[fo].orbs[so])
             , NextIterator := function(iter)
-                local lrep, rrep;
+                local lrep, rrep, fact;
 
                 lrep := RepresentativeAction(os.group, rep[1], iter!.lorb[1]);
                 rrep := RepresentativeAction(os.orbstabs[fo].stab, rep[2], iter!.rorb[1]);
@@ -405,12 +405,14 @@ function( os, rep )
                     iter!.rorb := ShallowCopy(os.orbstabs[fo].orbs[so]);
                     Remove(iter!.lorb, 1);
                 fi;
-                return rrep * lrep;
+
+                fact := Factorization(os.group, rrep * lrep);
+                return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
             end
             , IsDoneIterator := iter -> iter!.lorb = []
             , ShallowCopy := iter -> rec( lorb := ShallowCopy(iter!.lorb)
                                         , rorb := ShallowCopy(iter!.rorb) )
-             );
+            );
     return IteratorByFunctions(r);
 end);
 
