@@ -293,21 +293,25 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     t := Size(rep.involutions);
 
+    # contains ... (what does it contain?)
     rep.setup   := rec( coords          := [1..t],
                         coordmap        := HashMap( t*t ),
-                        pairorbit       := StructuralCopy(input.pairorbit),
-                        pairconj        := StructuralCopy(input.pairconj),
-                        pairconjelts    := StructuralCopy(input.pairconjelts),
-                        pairreps        := ShallowCopy(input.pairreps)       );
+                        # Why a copy
+                        pairreps        := ShallowCopy(input.pairreps)
+                      );
 
+    # coordmap gives the position in coords of the coord
     for i in [1..t] do
         rep.setup.coordmap[i] := i;
         rep.setup.coordmap[rep.involutions[i]] := i;
     od;
 
     ## Orbits on axes for eigenvectors
+    gens := GeneratorsOfGroup(input.group);
+    # The permutation induced by G acting on T by conjugation
+    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
 
-    orbs := MAJORANA_Orbits(input.generators, t, rep.setup);
+    orbs := MAJORANA_Orbits(gens, t, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
     rep.setup.orbitreps := orbs.orbitreps;
@@ -719,6 +723,7 @@ function(rep, subrep, w, gens, imgs)
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
         return SortedList(List(im, x -> Position(rep.involutions, x )));
     else
+
         return Position(rep.involutions, MappedWord(w, gens, imgs) );
     fi;
 end);
