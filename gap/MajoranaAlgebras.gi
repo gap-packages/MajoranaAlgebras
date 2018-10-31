@@ -1024,7 +1024,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     local   i, j, gens, u, v, x, y, dim;
 
-    if (rep.setup.nullspace.vectors) = 0 then
+    if Nrows(rep.setup.nullspace.vectors) = 0 then
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
