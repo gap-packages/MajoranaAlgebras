@@ -120,19 +120,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     # Construct orbitals of  on T x T
 
-    input := rec();
-
-    input.pairorbit := NullMat(t,t);
-    input.pairconj  := NullMat(t,t);
-    input.pairreps  := [];
-    input.orbitals  := [];
-    input.pairconjelts := [ [1..t] ];
-    input.coords := [1..t];
-    input.involutions := T;
-    input.group       := G;
-
+    # Construct orbitals of  on T x T
     gens := [];
-
     for g in GeneratorsOfGroup(G) do
         perm := [];
         for i in [1..t] do
@@ -141,13 +130,17 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
         Add(gens, perm);
     od;
 
-    MAJORANA_Orbitals(gens, 0, input);
+    input := rec();
 
-    input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
+    input.coords := [1..t];
+    input.involutions := T;
+    input.group       := G;
+    input.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList), [1..t], OnPoints);
+    input.pairreps := MAJORANA_OrbitalRepUnions(input.orbitalstruct);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := NullMat(1,Size(input.pairreps))[1];
+    shape := [1 .. Size(input.pairreps)]*0;
 
     for i in [1..Size(input.pairreps)] do
 
@@ -171,7 +164,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     # Check for inclusions of 2X in 4X
 
-    gph := List( [1 .. Size(input.orbitals)], x -> [] );
+    gph := List( [1 .. Size(input.pairreps)], x -> [] );
 
     for i in Positions(shape, "4X") do
         gph[i] := MAJORANA_RecordSubalgebras(i, shape, input);
@@ -732,7 +725,7 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
 ## <MappedWord> for indices or pairs of indices referring to elements of coords
 ##
 
-# 
+#
 InstallGlobalFunction(MAJORANA_MappedWord,
 function(rep, subrep, w, gens, imgs)
     local im;
