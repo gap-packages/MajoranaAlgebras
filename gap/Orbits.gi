@@ -201,6 +201,7 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
 #           compute an element g in G that takes (i,j)
 #           to a representative in the set of
 #           representatives
+#         - iterate over orbit given a rep
 
 InstallGlobalFunction(MAJORANA_OrbitalStructure,
 # gens  - generators of the permrep on C
@@ -314,6 +315,69 @@ function(os, pair)
 
     return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
 end);
+
+InstallGlobalFunction(MAJORANA_OrbitalTransversalIterator,
+# Input: orbital structure, the rep of the orbital
+# Returns: an iterator
+function( os, rep )
+    local r, fo, so;
+
+    fo := os.orbnums[rep[1]];
+    so := os.orbstabs[fo].orbnums[rep[2]];
+
+    r := rec( lorb := ShallowCopy(os.orbits[fo])
+            , rorb := ShallowCopy(os.orbstabs[fo].orbs[so])
+            , NextIterator := function(iter)
+                local lrep, rrep;
+
+                lrep := RepresentativeAction(os.group, rep[1], iter!.lorb[1]);
+                rrep := RepresentativeAction(os.orbstabs[fo].stab, rep[2], iter!.rorb[1]);
+                Remove(iter!.rorb, 1);
+                if IsEmpty(iter!.rorb) then
+                    iter!.rorb := ShallowCopy(os.orbstabs[fo].orbs[so]);
+                    Remove(iter!.lorb, 1);
+                fi;
+                return rrep * lrep;
+            end
+            , IsDoneIterator := iter -> iter!.lorb = []
+            , ShallowCopy := iter -> rec( lorb := ShallowCopy(iter!.lorb)
+                                        , rorb := ShallowCopy(iter!.rorb) )
+             );
+    return IteratorByFunctions(r);
+end);
+
+InstallGlobalFunction(MAJORANA_OrbitalUnionTransversalIterator,
+function(os, rep)
+    local r, r1, r2, iters;
+
+    iters := [];
+    # We're actually looking at unions of orbitals
+    # if r1 <> r2, we have to iterate both orbits
+    r1 := MAJORANA_OrbitalRep(os, rep);
+    r2 := MAJORANA_OrbitalRep(os, rep{[2,1]});
+
+    # if r1 = r2 then [i,j] and [j,i] are in the same
+    # orbital and we only iterate that, otherwise we iterate
+    # over both.
+    Add(iters, MAJORANA_OrbitalTransversalIterator(os, r1));
+    if r2 <> r1 then
+        Add(iters, MAJORANA_OrbitalTransversalIterator(os, r2));
+    fi;
+
+    return IteratorByFunctions(rec( iters := iters
+                                  , NextIterator := function(iter)
+                                      local r;
+                                      r := NextIterator(iter!.iters[1]);
+                                      if IsDoneIterator(iter!.iters[1]) then
+                                          Remove(iter!.iters, 1);
+                                      fi;
+                                      return r;
+                                  end
+                                  , IsDoneIterator := iter -> iter!.iters = []
+                                  , ShallowCopy := iter -> rec( iters := ShallowCopy(iter!.iters) ) ) );
+end);
+
+
 
 MAJORANA_SomeOrbTest :=
 function()
