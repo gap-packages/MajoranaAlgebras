@@ -166,9 +166,9 @@ InstallGlobalFunction( "MAJORANA_EmbedKnownRep",
 
 # Embed subrep into rep
 #
-# For such an embedding we map 
+# For such an embedding we map
 #  - involutions to involutions
-#  - 
+#  -
 InstallGlobalFunction( "MAJORANA_Embed",
 function(rep, subrep, emb)
     local   i, im, j, k, g, v, sign, x, l;
@@ -176,10 +176,10 @@ function(rep, subrep, emb)
     # what is emb?
     #
     # Seems like this is a return value from MAJORANA_FindEmbedding
-    
+
     Print("an emb: ", emb, "\n");
-    Error("an emb!");
-    
+    # Error("an emb!");
+
     if not IsRowVector(emb) then
         emb := MAJORANA_FindPerm(emb, rep, subrep);
     fi;
@@ -199,13 +199,11 @@ function(rep, subrep, emb)
                 sign := -sign; im[2] := -im[2];
             fi;
 
-            k := rep.setup.pairorbit[im[1], im[2]];
+            k := rep.setup.pairrepsmap[ MAJORANA_OrbitalRep( rep.setup.orbitalstruct, im ) ];
+            if k < 0 then sign := -sign; k := -k; fi;
 
-            if k < 0 then
-                sign := -sign; k := -k;
-            fi;
-
-            g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1], im[2]]]);
+            g := MAJORANA_OrbitalCanonizingElementInverseSigned( rep.setup.orbitalstruct, im );
+            g := ListSignedPerm(g, Size(rep.setup.coords));
 
             if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then
                 if subrep.algebraproducts[i] <> false then
