@@ -47,6 +47,12 @@ function(sp)
     return Objectify(SignedPermType, [ (), [0 * Z(2)] ]);
 end);
 
+InstallMethod(OneMutable, "for signed permutations",
+              [ IsSignedPermRep ],
+function(sp)
+    return Objectify(SignedPermType, [ (), [0 * Z(2)] ]);
+end);
+
 InstallMethod(IsOne, "for signed permutations",
   [ IsSignedPermRep ],
 function(sp)
@@ -71,5 +77,3 @@ function(pt, sp)
     fi;
     return sign * (spt^sp![1]);
 end);
-
-
