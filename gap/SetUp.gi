@@ -277,10 +277,15 @@ function(input, index, axioms)
     # contains ... (what does it contain?)
     rep.setup   := rec( coords          := [1..t],
                         coordmap        := HashMap( t*t ),
-                        # Record a copy of the pairreps so that input.pairreps
-                        # doesn't get touched.
-                        pairreps        := ShallowCopy(input.pairreps)
+                        pairreps        := ShallowCopy( input.pairreps ),
+                        pairrepsmap     := HashMap( t*t )
                       );
+
+    # Put the current pairreps into the hashmap pairrepsmap
+
+    for i in [1 .. Size(rep.setup.pairreps) ] do
+        rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
+    od;
 
     # coordmap gives the position in coords of the coord
     for i in [1..t] do
@@ -305,7 +310,7 @@ function(input, index, axioms)
     # One algebra product for every pair
     # One inner product for every pair
     # eigenvector decomposition for ...?
-    s := Size(rep.setup.pairreps);
+    s := Size(input.pairreps);
 
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
@@ -353,9 +358,19 @@ function(input, index, axioms)
 
     for i in gens do MAJORANA_ExtendPerm(i, rep); od;
 
-#     MAJORANA_Orbitals( gens, t, rep.setup);
+    # Calculate the orbitals of G on the spanning set rep.setup.coords
+
     rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList), [1..dim], OnPoints);
+
+    # Store representatives of the orbitals and add them to a corresponding hashmap
+
     rep.setup.pairreps := MAJORANA_OrbitalRepUnions(rep.setup.orbitalstruct);
+
+    for i in [1 .. Size(rep.setup.pairreps) ] do
+        rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
+    od;
+
+    ## Fill in the unknown algebra and inner products with the value false
 
     for i in [1..Size(rep.setup.pairreps)] do
         if not IsBound(rep.algebraproducts[i]) then
