@@ -1,4 +1,4 @@
- 
+
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
 function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns record where solutions[i] gives the value of unknown variable i if found, and fail otherwise
@@ -225,5 +225,28 @@ InstallGlobalFunction(RemoveMatWithHeads,
     od;
 
     return mat;
+
+    end );
+
+BindGlobal( "NextIterator_SparseMatrix", function( iter )
+
+    iter!.pos := iter!.pos + 1;
+    return CertainRows( iter!.matrix, [iter!.pos] );
+
+    end );
+
+InstallOtherMethod( Iterator, "for a sparse matrix",
+    [ IsSparseMatrix ],
+    function( M )
+        local iter;
+        iter := rec(    matrix := M,
+                        pos := 0 );
+
+        iter.NextIterator   := NextIterator_SparseMatrix;
+        iter.IsDoneIterator := iter -> ( iter!.pos = Nrows(iter!.matrix) );
+        iter.ShallowCopy    := iter -> rec( pos := iter!.pos,
+                                            matrix := iter!.matrix ) ;
+
+        return IteratorByFunctions(iter);
 
     end );
