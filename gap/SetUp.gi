@@ -285,6 +285,7 @@ function(input, index, axioms)
 
     for i in [1 .. Size(rep.setup.pairreps) ] do
         rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
+        rep.setup.pairrepsmap[ Reversed(rep.setup.pairreps[i]) ] := i;
     od;
 
     # coordmap gives the position in coords of the coord
@@ -368,6 +369,7 @@ function(input, index, axioms)
 
     for i in [1 .. Size(rep.setup.pairreps) ] do
         rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
+        rep.setup.pairrepsmap[ Reversed(rep.setup.pairreps[i]) ] := i;
     od;
 
     ## Fill in the unknown algebra and inner products with the value false
