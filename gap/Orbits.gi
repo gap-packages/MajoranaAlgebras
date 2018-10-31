@@ -444,7 +444,7 @@ function()
     Print("orb setup: ", t/1000000., "\n");
 
     t := NanosecondsSinceEpoch();
-    ra := MAJORANA_OrbitalRepActSigned(orbs, [216, 106]);
+    ra := MAJORANA_OrbitalCanonizingElementSigned(orbs, [216, 106]);
     t := NanosecondsSinceEpoch() - t;
     Print("repr calc: ", t/1000000., "\n");
 
