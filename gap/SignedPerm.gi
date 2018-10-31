@@ -16,6 +16,30 @@ function(l)
     return Objectify( SignedPermType, [ p, ts ] );
 end);
 
+BindGlobal( "ListSignedPerm",
+function( arg )
+    local sp, len, p, s, l, i;
+
+    sp := arg[1]; p := sp![1]; s := sp![2];
+
+    if Length(arg) = 2 then
+        len := arg[2];
+    else
+        len := Length(s);
+    fi;
+
+    l := ListPerm(p, len);
+
+    for i in [ 1 .. len ] do
+        if IsBound(s[i]) and IsOne(s[i]) then
+            l[i] := -l[i];
+        fi;
+    od;
+
+    return l;
+
+end );
+
 BindGlobal( "SignedPerm",
 function(p, s)
     return Objectify( SignedPermType, [ p, s ]);
