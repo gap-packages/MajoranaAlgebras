@@ -231,6 +231,8 @@ end );
 #           to a representative in the set of
 #           representatives
 #         - iterate over orbit given a rep
+#         - iterate over a transversal for
+#           a stabilizer of a pair
 
 InstallGlobalFunction(MAJORANA_OrbitalStructure,
 # gens  - generators of a group acting on Omega
@@ -241,7 +243,7 @@ function(gens, Omega, Act)
 
     # Result will be an orbital structure that allows
     # some stuff to be done with orbitals
-    res := rec( group := Group(gens) );
+    res := rec( group := Group(gens), act := Act );
 
     # Orbits. Currently we'll just choose the
     # first element in each orbit as orbit rep
@@ -276,19 +278,6 @@ function(gens, Omega, Act)
     return res;
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalStructureSigned,
-function(gens, Omega, Act)
-    local res;
-
-    # Takes as input a signed permutation and just converts this to
-    # a permutation (using the syntax "x -> x![1]") before passing it
-    # to MAJORANA_OrbitalStructure.
-
-    res := MAJORANA_OrbitalStructure(List(gens, x->x![1]), Omega, Act);
-    res.signedgens := gens;
-    return res;
-end);
-
 InstallGlobalFunction(MAJORANA_OrbitalRep,
 function(os, pair)
 
@@ -298,7 +287,7 @@ function(os, pair)
     local fo, so, p;
     fo := os.orbnums[pair[1]];
     p := RepresentativeAction(os.group, pair[1], os.orbreps[fo] );
-    so := os.orbstabs[fo].orbnums[pair[2]^p];
+    so := os.orbstabs[fo].orbnums[os.act(pair[2], p)];
     return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
 end);
 
@@ -313,8 +302,9 @@ function(os, pair)
 
     fo := os.orbnums[pair[1]];
     p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo]);
-    so := os.orbstabs[fo].orbnums[pair[2]^p1];
-    p2 := RepresentativeAction(os.orbstabs[fo].stab, pair[2]^p1, os.orbstabs[fo].orbreps[so]);
+    so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
+    p2 := RepresentativeAction( os.orbstabs[fo].stab, os.act(pair[2], p1)
+                               , os.orbstabs[fo].orbreps[so]);
 
     return p1 * p2;
 end);
@@ -330,8 +320,8 @@ function(os, pair)
 
     fo := os.orbnums[pair[1]];
     p1 := RepresentativeAction(os.group, os.orbreps[fo], pair[1]);
-    so := os.orbstabs[fo].orbnums[pair[2]^p1];
-    p2 := RepresentativeAction(os.orbstabs[fo].stab, os.orbstabs[fo].orbreps[so], pair[2]^p1);
+    so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
+    p2 := RepresentativeAction(os.orbstabs[fo].stab, os.orbstabs[fo].orbreps[so], os.act(pair[2], p1));
 
     return p1 * p2;
 end);
@@ -360,28 +350,6 @@ function(os)
                        , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
                                     , {x,y} -> MAJORANA_OrbitalRepUnion(os, [x,y]) ) ) ) );
     return reps;
-end);
-
-# Still have to try both [i,j] and [j,i]
-# And we might want to think about caching.
-InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementSigned,
-function(os, pair)
-    local ra, fact;
-
-    ra := MAJORANA_OrbitalCanonizingElement(os, pair);
-    fact := Factorization(os.group, ra);
-
-    return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
-end);
-
-InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementInverseSigned,
-function(os, pair)
-    local ra, fact;
-
-    ra := MAJORANA_OrbitalCanonizingElementInverse(os, pair);
-    fact := Factorization(os.group, ra);
-
-    return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
 end);
 
 # Signedness
