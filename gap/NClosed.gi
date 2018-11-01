@@ -24,7 +24,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     gens := GeneratorsOfGroup(rep.group);
     gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
 
-    rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList), [1..dim], OnPoints);
+    rep.setup.orbitalstruct := MAJORANA_OrbitalStructure(List(gens, SignedPermList), [1..dim], OnPosPoints);
 
     # Store representatives of the orbitals and add them to a corresponding hashmap
 

@@ -196,7 +196,7 @@ InstallGlobalFunction( MAJORANA_FindOrbitals,
 
     # Construct the orbital structure
 
-    rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(gens, Omega, OnPoints);
+    rep.setup.orbitalstruct := MAJORANA_OrbitalStructure(gens, Omega, OnPosPoints);
 
     # Store representatives of the orbitals and add them to a corresponding hashmap
 
