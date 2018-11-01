@@ -1,3 +1,5 @@
+DeclareGlobalFunction( "MAJORANA_FindOrbitals" );
+
 DeclareGlobalFunction( "MAJORANA_Orbitals" );
 
 DeclareGlobalFunction( "MAJORANA_NewOrbital" );
@@ -22,4 +24,3 @@ DeclareGlobalFunction( "MAJORANA_OrbitalCanonizingElementInverseSigned" );
 # produces an elements g \in G so that
 DeclareGlobalFunction( "MAJORANA_OrbitalTransversalIterator" );
 DeclareGlobalFunction( "MAJORANA_OrbitalUnionTransversalIterator" );
-

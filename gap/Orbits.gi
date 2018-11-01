@@ -186,6 +186,33 @@ InstallGlobalFunction( MAJORANA_NewOrbital,
 
     end );
 
+InstallGlobalFunction( MAJORANA_FindOrbitals,
+
+    function(rep, gens, Omega)
+
+    local new_pairreps, k, x;
+
+    gens := List(gens, SignedPermList);
+
+    # Construct the orbital structure
+
+    rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(gens, Omega, OnPoints);
+
+    # Store representatives of the orbitals and add them to a corresponding hashmap
+
+    new_pairreps := MAJORANA_OrbitalRepUnions(rep.setup.orbitalstruct);
+
+    for x in new_pairreps do
+        if not x in rep.setup.pairreps then
+            Add(rep.setup.pairreps, x);
+            k := Size(rep.setup.pairreps);
+            rep.setup.pairrepsmap[ x ] := k;
+            rep.setup.pairrepsmap[ Reversed(x) ] := k;
+        fi;
+    od;
+
+end );
+
 # Compute an orbital structure which has the
 # following properties
 #
