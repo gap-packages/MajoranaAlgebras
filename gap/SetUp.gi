@@ -488,19 +488,6 @@ function(rep, subrep, inv)
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
     od;
 
-#    for x in rep.setup.pairorbit do
-#        Append(x, [dim + 1 .. Size(rep.setup.coords)]*0 );
-#    od;
-
-#    for x in rep.setup.pairconj do
-#        Append(x, [dim + 1 .. Size(rep.setup.coords)]*0 );
-#    od;
-
-#    Append(rep.setup.pairorbit, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
-#    Append(rep.setup.pairconj, NullMat( Size(rep.setup.coords) - dim , Size(rep.setup.coords) ));
-
-#    for g in rep.setup.pairconjelts do  MAJORANA_ExtendPerm( g, rep); od;
-
     for g in rep.setup.conjelts do MAJORANA_ExtendPerm( g, rep); od;
 
     end );
@@ -514,8 +501,6 @@ function( rep, new, new_5A )
     local vec, g, im, im_5A, k, elts, x, transversal;
 
     # new and new_5A are pairs of indices
-    # Print("bla: ", new, "\n");
-    # Print("bla: ", new_5A, "\n");
 
     ## Find which (if any) new vectors are not yet in <setup.coordmap>
 
@@ -700,12 +685,10 @@ InstallGlobalFunction(MAJORANA_MappedWord,
 function(rep, subrep, w, gens, imgs)
     local im;
 
-    # Print("mw: w: ", w, " gens: " , gens, " imgs: ", imgs, "\n");
     if IsRowVector(w) then
         im := List(w, i -> MappedWord(subrep.setup.coords[i], gens, imgs));
         return SortedList(List(im, x -> Position(rep.involutions, x )));
     else
-
         return Position(rep.involutions, MappedWord(w, gens, imgs) );
     fi;
 end);
