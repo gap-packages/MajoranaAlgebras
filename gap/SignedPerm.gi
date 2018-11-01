@@ -128,4 +128,6 @@ function(l,r)
     return false;
 end);
 
-
+# for an int and a signed perm
+InstallGlobalFunction(OnPosPoints,
+    { pnt, elm } -> pnt ^ elm![1]);
