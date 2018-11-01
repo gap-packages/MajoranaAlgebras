@@ -233,10 +233,9 @@ end );
 #         - iterate over orbit given a rep
 
 InstallGlobalFunction(MAJORANA_OrbitalStructure,
-# gens  - generators of the permrep on C
-#         as lists
-# t     - starting point for second component
-# setup - the setup structure
+# gens  - generators of a group acting on Omega
+# Omega - the domain
+# Act   - action of Group(gens) on Omega 
 function(gens, Omega, Act)
     local o, so, i, res;
 
@@ -253,14 +252,14 @@ function(gens, Omega, Act)
     # of G that maps said point to the orbit rep
     # Really what we want is a schreier trees/vectors here
     res.orbreps := [];
-    res.orbnums := [];
+    res.orbnums := HashMap(Size(Omega));
     res.orbstabs := [];
     for o in [1..Length(res.orbits)] do
         Add(res.orbreps, res.orbits[o][1]);
         res.orbstabs[o] := rec( );
         res.orbstabs[o].stab := Stabilizer(res.group, res.orbits[o][1], Act);
         res.orbstabs[o].orbs := Orbits(res.orbstabs[o].stab, Omega, Act);
-        res.orbstabs[o].orbnums := [];
+        res.orbstabs[o].orbnums := HashMap(Size(Omega));
         res.orbstabs[o].orbreps := [];
         for so in [1..Length(res.orbstabs[o].orbs)] do
             Add(res.orbstabs[o].orbreps, res.orbstabs[o].orbs[so][1]);
@@ -447,8 +446,6 @@ function(os, rep)
                                   , ShallowCopy := iter -> rec( iters := ShallowCopy(iter!.iters) ) ) );
 end);
 
-
-
 MAJORANA_SomeOrbTest :=
 function()
     local ex, rep, gens, orbs, t, ra, fact, maresult;
@@ -481,3 +478,4 @@ function()
 
     return [ra, rep, orbs];
 end;
+
