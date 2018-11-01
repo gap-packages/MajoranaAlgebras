@@ -533,9 +533,8 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
                 if not x in [fail, false] then
 
-                    # Find the element that maps the orbital representative to the pair (i,j)
-                    g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
-                    g := ListSignedPerm(g, Ncols(u));
+                    g := MAJORANA_OrbitalCanonizingElementInverse(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
+                    g := ListSignedPerm(g, dim);
 
                     pos := Position(elts,g);
 
@@ -757,9 +756,9 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             if x = fail then return fail; fi;
 
             if x <> false then
-                # If the product (i,j) is known then compute the algebra product as usual
-                g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
-                g := ListSignedPerm(g, Size(setup.coords));
+
+                g := MAJORANA_OrbitalCanonizingElementInverse(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
+                g := ListSignedPerm(g, dim);
 
                 pos := Position(elts,g);
 
@@ -1232,8 +1231,8 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
 
     local   y, g, sign;
 
-    # Find the representative of the orbital containing the pair x and the corresponding group elt
-    g := MAJORANA_OrbitalCanonizingElementSigned( rep.setup.orbitalstruct, x);
+    y := rep.setup.pairorbit[x[1], x[2]];
+    g := MAJORANA_OrbitalCanonizingElement( rep.setup.orbitalstruct, x);
     g := ListSignedPerm(g, Size(rep.setup.coords));
     y := rep.setup.pairrepsmap[g{x}];
 
