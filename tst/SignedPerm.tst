@@ -12,16 +12,16 @@ gap> t * s;
 <signed permutation ( 1, 3)( 4, 6,10, 5), [ Z(2)^0, 0*Z(2), Z(2)^0, 0*Z(2), 
 0*Z(2), 0*Z(2), 0*Z(2), 0*Z(2), Z(2)^0, Z(2)^0 ]>
 gap> One(s); One(t);
-<signed permutation (), [  ]>
-<signed permutation (), [  ]>
+<signed permutation (), [ 0*Z(2) ]>
+<signed permutation (), [ 0*Z(2) ]>
 gap> Inverse(s);
 <signed permutation (1,3)(5,6), [ 0*Z(2), Z(2)^0, 0*Z(2), 0*Z(2), Z(2)^0, 
 0*Z(2) ]>
 gap> Inverse(t);
 <signed permutation ( 4, 5)( 6,10), [ Z(2)^0, Z(2)^0, Z(2)^0, 0*Z(2), 0*Z(2), 
 0*Z(2), 0*Z(2), 0*Z(2), Z(2)^0, 0*Z(2) ]>
-gap> Invese(s) * s;
-Error, Variable: 'Invese' must have a value
+gap> Inverse(s) * s = One(s);
+true
 gap> Inverse(t) * s;
 <signed permutation ( 1, 3)( 4, 6,10, 5), [ Z(2)^0, 0*Z(2), Z(2)^0, 0*Z(2), 
 0*Z(2), 0*Z(2), 0*Z(2), 0*Z(2), Z(2)^0, Z(2)^0 ]>
@@ -38,3 +38,11 @@ gap> 1 ^ s;
 -3
 gap> (-1)^s;
 3
+gap> s = t;
+false
+gap> s < t;
+false
+gap> t < s;
+true
+gap> t > s;
+false
