@@ -202,7 +202,7 @@ function(rep, subrep, emb)
             k := rep.setup.pairrepsmap[ MAJORANA_OrbitalRep( rep.setup.orbitalstruct, im ) ];
             if k < 0 then sign := -sign; k := -k; fi;
 
-            g := MAJORANA_OrbitalCanonizingElementInverseSigned( rep.setup.orbitalstruct, im );
+            g := MAJORANA_OrbitalCanonizingElementInverse( rep.setup.orbitalstruct, im );
             g := ListSignedPerm(g, Size(rep.setup.coords));
 
             if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then

@@ -219,9 +219,7 @@ end );
 # following properties
 #
 # Input: G acting on Omega via Act
-#        (though, for the time being,
-#         G <= S_n acting on [1..n] OnPoints)
-#
+
 # Output: Orbital Structure
 #         - A set of representatives of orbitals
 #         - For any pair (i,j) efficiently
@@ -243,7 +241,7 @@ function(gens, Omega, Act)
 
     # Result will be an orbital structure that allows
     # some stuff to be done with orbitals
-    res := rec( group := Group(gens), act := Act );
+    res := rec( gens := gens, group := Group(gens), act := Act );
 
     # Orbits. Currently we'll just choose the
     # first element in each orbit as orbit rep
@@ -374,7 +372,7 @@ function( os, rep )
                 fi;
 
                 fact := Factorization(os.group, rrep * lrep);
-                return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.signedgens);
+                return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.gens);
             end
             , IsDoneIterator := iter -> iter!.lorb = []
             , ShallowCopy := iter -> rec( lorb := ShallowCopy(iter!.lorb)
@@ -433,14 +431,14 @@ function()
     gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
     gens := List(gens, SignedPermList);
 
-    orbs := MAJORANA_OrbitalStructureSigned( gens
-                                           , [1..Length(rep.setup.coords)]
-                                           , OnPoints );
+    orbs := MAJORANA_OrbitalStructure( gens
+                                     , [1..Length(rep.setup.coords)]
+                                     , OnPosPoints );
     t := NanosecondsSinceEpoch() - t;
     Print("orb setup: ", t/1000000., "\n");
 
     t := NanosecondsSinceEpoch();
-    ra := MAJORANA_OrbitalCanonizingElementSigned(orbs, [216, 106]);
+    ra := MAJORANA_OrbitalCanonizingElement(orbs, [216, 106]);
     t := NanosecondsSinceEpoch() - t;
     Print("repr calc: ", t/1000000., "\n");
 
