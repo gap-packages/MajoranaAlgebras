@@ -1200,11 +1200,6 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             prod;
 
     if Nrows(mat) = 0 then
-
-        unknowns := [];
-        mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
-        vec := SparseMatrix(0, Size(setup.coords), [], [], Rationals);
-
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
