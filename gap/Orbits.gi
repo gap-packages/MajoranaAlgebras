@@ -399,17 +399,7 @@ function(os, rep)
         Add(iters, MAJORANA_OrbitalTransversalIterator(os, r2));
     fi;
 
-    return IteratorByFunctions(rec( iters := iters
-                                  , NextIterator := function(iter)
-                                      local r;
-                                      r := NextIterator(iter!.iters[1]);
-                                      if IsDoneIterator(iter!.iters[1]) then
-                                          Remove(iter!.iters, 1);
-                                      fi;
-                                      return r;
-                                  end
-                                  , IsDoneIterator := iter -> iter!.iters = []
-                                  , ShallowCopy := iter -> rec( iters := ShallowCopy(iter!.iters) ) ) );
+    return ConcatenationIterators(iters);
 end);
 
 MAJORANA_SomeOrbTest :=
