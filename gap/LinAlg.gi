@@ -1,4 +1,4 @@
- 
+
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
 function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns record where solutions[i] gives the value of unknown variable i if found, and fail otherwise
@@ -10,43 +10,43 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
             pos,
             elm,
             rowlist;
-    
+
     n := Ncols(mat);
 
     res := EchelonMatTransformationDestructive(mat);
     mat := res.vectors;
     vec := res.coeffs*vec;
-    
+
     sol := [1..n]*0;
     rowlist := [];
-    
-    for i in Reversed([1 .. n]) do 
-    
+
+    for i in Reversed([1 .. n]) do
+
         pos := res.heads[i];
-        
-        if pos = 0 then   
-            sol[i] := fail;             
-        elif Size(mat!.indices[pos]) > 1 then 
+
+        if pos = 0 then
+            sol[i] := fail;
+        elif Size(mat!.indices[pos]) > 1 then
             Add(rowlist, pos);
             sol[i] := fail;
         else
             sol[i] := CertainRows(vec, [pos]);
         fi;
     od;
-    
+
     return rec( solutions := sol,
                 mat := CertainRows(mat, rowlist),
                 vec := CertainRows(vec, rowlist)  );
-                
+
     end );
-    
+
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
     function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
 
     local   B,      # input matrix
             n,      # size of matrix
-            L,      # output lower triangular matrix    
+            L,      # output lower triangular matrix
             D,      # output diagonal matrix
             i,      # loop over rows of matrix
             j,      # loop over columns of matrix
@@ -89,23 +89,23 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
     od;
 
     return Concatenation([L],[D]);
-    
+
     end );
-    
+
 InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
     function(GramMatrix) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
 
-    local   L,          # decomposition of matrix 
+    local   L,          # decomposition of matrix
             Diagonals,  # list of diagonals from decomposition
             i;          # loop over sze of matrix
 
     L := MAJORANA_LDLTDecomposition(GramMatrix);
-    
+
     if L = false then
         return -1;
     fi;
-    
+
     Diagonals := [];
 
     for i in [1..Size(GramMatrix)] do
@@ -119,9 +119,9 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
     else
         return 1;
     fi;
-    
+
     end );
-    
+
 InstallGlobalFunction(_FoldList2,
     function(list, func, op)
     local k, s, old_s, r, i, len, n, nh, res, r1, r2;
@@ -172,58 +172,76 @@ InstallGlobalFunction(_IsRowOfSparseMatrix,
     function(mat, row)
 
     local pos;
-    
+
     pos := Position(mat!.indices, row!.indices[1]);
-    
-    if pos = fail then 
-        return false; 
+
+    if pos = fail then
+        return false;
     fi;
-    
-    if mat!.entries[pos] = row!.entries[1] then 
+
+    if mat!.entries[pos] = row!.entries[1] then
         return true;
     else
         return false;
     fi;
-    
+
     end);
-    
-InstallGlobalFunction(ReversedEchelonMatDestructive, 
+
+InstallGlobalFunction(ReversedEchelonMatDestructive,
 
     function(mat)
-    
+
     local ncols, ech;
-    
+
     ncols := Ncols(mat);;
-    
+
     ech := EchelonMatDestructive(CertainColumns(mat, [ncols, ncols - 1 .. 1]));
-    
+
     ech.vectors := CertainColumns(ech.vectors, [ncols, ncols - 1 .. 1]);
     ech.heads   := Reversed(ech.heads);
-    
+
     return ech;
-    
+
     end );
-    
+
 InstallGlobalFunction(RemoveMatWithHeads,
 
     function(mat, null)
-    
+
     local v, i, j, k, x;
-    
+
     v := null.vectors;
-    
-    for j in PositionsProperty(null.heads, x -> x <> 0) do 
+
+    for j in PositionsProperty(null.heads, x -> x <> 0) do
         k := null.heads[j];
-        
-        for i in [1..Nrows(mat)] do     
+
+        for i in [1..Nrows(mat)] do
             x := -GetEntry(mat, i, j);
-            
-            if x <> 0 then 
+
+            if x <> 0 then
                 AddRow(v!.indices[k], x*v!.entries[k], mat!.indices, mat!.entries, i);
-            fi;         
-        od;        
+            fi;
+        od;
     od;
-    
+
     return mat;
-    
+
+    end );
+
+BindGlobal( "NextIterator_SparseMatrix", function( iter )
+    iter!.pos := iter!.pos + 1;
+    return CertainRows( iter!.matrix, [iter!.pos] );
+    end );
+
+InstallOtherMethod( Iterator, "for a sparse matrix",
+    [ IsSparseMatrix ],
+    function( M )
+        local iter;
+        iter := rec(    matrix := M,
+                        pos := 0 );
+        iter.NextIterator   := NextIterator_SparseMatrix;
+        iter.IsDoneIterator := iter -> ( iter!.pos = Nrows(iter!.matrix) );
+        iter.ShallowCopy    := iter -> rec( pos := iter!.pos,
+                                            matrix := iter!.matrix ) ;
+        return IteratorByFunctions(iter);
     end );
