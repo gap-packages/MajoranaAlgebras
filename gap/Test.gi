@@ -6,15 +6,21 @@ BindGlobal("MAJORANA_FusionTable",
             ,[  1/4,  1/4,     0, 1/32]
             ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
 
+##
+## Tests that the vectors stored in rep.evecs are indeed eigenvectors
+##
+
 InstallGlobalFunction(MAJORANA_TestEvecs,
 
     function(rep)
 
     local   u, v, i, j, k, ev, x, y;
 
+    # Loop over the representatives of the orbits of G on T
     for i in rep.setup.orbitreps do
         u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
 
+        # For each of the three eigenvalues 0, 1/4, 1/32, check that the eqn u*v = ev*v holds
         for j in [1..3] do
             ev := MAJORANA_FusionTable[1, j + 1];
             for k in [1..Nrows(rep.evecs[i, j])] do
@@ -33,11 +39,15 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
 
     end );
 
-InstallGlobalFunction( MAJORANA_TestFusionAxis,
+##
+## Tests whether the eigevectors of each of the axes of rep obey the fusion rules
+##
 
-    function(u, evecs, innerproducts, algebraproducts, setup)
+InstallGlobalFunction( MAJORANA_TestFusion,
 
-    local   dim,            # size of setup.coords
+    function(rep)
+
+    local   axis,
             evals,
             new,
             a,              # first eigenvalue
@@ -49,63 +59,43 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
             j,
             k,
             x,              # product of eigenvectors
-            y;              # product of x with u
-
-    dim := Size(setup.coords);
-
-    for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
-
-        new := [0,0,0];
-
-        for j in [1..3] do
-            new[j] := SparseMatrix(0, dim, [], [], Rationals);
-        od;
-
-        ev_a := evecs[evals[1]];
-        ev_b := evecs[evals[2]];
-
-        for j in [1..Nrows(ev_a)] do
-            a := CertainRows(ev_a, [j]);
-            for k in [1..Nrows(ev_b)] do
-                b := CertainRows(ev_b, [k]);
-                MAJORANA_FuseEigenvectorsNoForm(  a, b, u, evals, new,
-                                            innerproducts,
-                                            algebraproducts,
-                                            setup );
-            od;
-        od;
-
-        for j in [1..3] do
-            ev := MAJORANA_FusionTable[1, j + 1];
-
-            new[j] := EchelonMatDestructive(new[j]).vectors;
-
-            for k in [1..Nrows(new[j])] do
-                a := CertainRows(new[j], [k]);
-                x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
-                if not x in [ev*a, false, fail] then
-                    Error("The algebra does not obey the fusion rules");
-                fi;
-            od;
-        od;
-    od;
-
-    end );
-
-# Checks if algebra obeys the fusion rules, outputs list which is empty if it does obey fusion rules
-
-InstallGlobalFunction(MAJORANA_TestFusion,
-
-    function(rep)
-
-    local   dim, u, i;
-
-    dim := Size(rep.setup.coords);
+            y;              # product of x with axis
 
     for i in rep.setup.orbitreps do
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        axis := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
+        for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
 
-        MAJORANA_TestFusionAxis(u, rep.evecs[i], rep.innerproducts, rep.algebraproducts, rep.setup);
+            new := [0,0,0];
+
+            for j in [1..3] do
+                new[j] := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals);
+            od;
+
+            ev_a := rep.evecs[i][evals[1]];
+            ev_b := rep.evecs[i][evals[2]];
+
+            for j in [1..Nrows(ev_a)] do
+                a := CertainRows(ev_a, [j]);
+                for k in [1..Nrows(ev_b)] do
+                    b := CertainRows(ev_b, [k]);
+                    MAJORANA_FuseEigenvectorsNoForm(  a, b, axis, evals, new, rep);
+                od;
+            od;
+
+            for j in [1..3] do
+                ev := MAJORANA_FusionTable[1, j + 1];
+
+                new[j] := EchelonMatDestructive(new[j]).vectors;
+
+                for k in [1..Nrows(new[j])] do
+                    a := CertainRows(new[j], [k]);
+                    x := MAJORANA_AlgebraProduct(axis, a, rep.algebraproducts, rep.setup);
+                    if not x in [ev*a, false, fail] then
+                        Error("The algebra does not obey the fusion rules");
+                    fi;
+                od;
+            od;
+        od;
     od;
 
     return true;
