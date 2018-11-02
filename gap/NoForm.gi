@@ -71,7 +71,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     for i in [1..Size(rep.setup.pairreps)] do
 
         x := Filtered([1..dim], j -> ForAny( [1.. dim],
-                                k -> MAJORANA_OrbitalRepUnion(rep.setup.orbitalstruct, [j,k]) = i));
+                                k -> MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, [j,k]) = i));
         if ForAll(x, j -> rep.setup.nullspace.heads[j] <> 0) then
             rep.setup.pairreps[i] := fail;
             rep.algebraproducts[i] := fail;

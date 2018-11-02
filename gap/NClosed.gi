@@ -8,7 +8,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
 
     for i in [1..dim] do
         for j in [i..dim] do
-            if MAJORANA_OrbitalRepUnion( rep.setup.orbitalstruct, [i,j]) in [index, -index] then
+            if MAJORANA_UnorderedOrbitalRep( rep.setup.orbitalstruct, [i,j]) in [index, -index] then
                 Add(rep.setup.coords, [i,j]);
                 rep.setup.coordmap[[i,j]] := Size(rep.setup.coords);
             fi;
@@ -24,11 +24,11 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     gens := GeneratorsOfGroup(rep.group);
     gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
 
-    rep.setup.orbitalstruct := MAJORANA_OrbitalStructureSigned(List(gens, SignedPermList), [1..dim], OnPoints);
+    rep.setup.orbitalstruct := MAJORANA_OrbitalStructure(List(gens, SignedPermList), [1..dim], OnPosPoints);
 
     # Store representatives of the orbitals and add them to a corresponding hashmap
 
-    rep.setup.pairreps := MAJORANA_OrbitalRepUnions(rep.setup.orbitalstruct);
+    rep.setup.pairreps := MAJORANA_UnorderedOrbitalReps(rep.setup.orbitalstruct);
 
     for i in [1 .. Size(rep.setup.pairreps) ] do
         rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;

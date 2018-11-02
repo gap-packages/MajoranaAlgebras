@@ -101,3 +101,33 @@ function(pt, sp)
     fi;
     return sign * (spt^sp![1]);
 end);
+
+InstallMethod( \=, "for a signed permutation and a signed permutation",
+               [ IsSignedPermRep, IsSignedPermRep ],
+function(l,r)
+    local lmp;
+
+    if l![1] = r![1] then
+        lmp := LargestMovedPoint(l![1]);
+        return l![2]{ [1..lmp ]} = r![2]{ [1..lmp] };
+    fi;
+    return false;
+end);
+
+InstallMethod( \<, "for a signed permutation and a signed permutation",
+               [ IsSignedPermRep, IsSignedPermRep ],
+function(l,r)
+    local lmp;
+
+    if l![1] < r![1] then
+        return true;
+    elif l![1] = r![1] then
+        lmp := LargestMovedPoint(l![1]);
+        return l![2]{ [1..lmp ]} < r![2]{ [1..lmp] };
+    fi;
+    return false;
+end);
+
+# for an int and a signed perm
+InstallGlobalFunction(OnPosPoints,
+    { pnt, elm } -> pnt ^ elm![1]);

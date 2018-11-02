@@ -244,15 +244,15 @@ function( i, shape, input )
         # Record the 3A and 2A contained in 6A
         if shape[i] = "6A" then
             pos := Position( input.involutions, inv[1]^inv[2] );
-            k := input.setup.pairrepsmap[ MAJORANA_OrbitalRepUnion(input.setup.orbitalstruct, [x[1], pos]) ];
+            k := input.setup.pairrepsmap[ MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]) ];
             shape[k] := "3A";
 
             pos := Position( input.involutions, inv[2]^Product(inv) );
-            k := input.setup.pairrepsmap[ MAJORANA_OrbitalRepUnion(input.setup.orbitalstruct, [x[1], pos]) ];
+            k := input.setup.pairrepsmap[ MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]) ];
             shape[k] := "2A";
         elif shape[i][1] = '4' then
             pos := Position( input.involutions, inv[1]^inv[2] );
-            k := input.setup.pairrepsmap[ MAJORANA_OrbitalRepUnion(input.setup.orbitalstruct, [x[1], pos]) ];
+            k := input.setup.pairrepsmap[ MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]) ];
             Add( output, k );
         fi;
     od;
@@ -554,7 +554,7 @@ function( rep, new, new_5A )
     ## to <setup.coords>. Otherwise, there are some new vectors but these
     ## are equal to an existing element of <setup.coords>
 
-    transversal := MAJORANA_OrbitalUnionTransversalIterator( rep.setup.orbitalstruct, new[1]);
+    transversal := MAJORANA_UnorderedOrbitalTransversalIterator( rep.setup.orbitalstruct, new[1]);
 
     # g is a permutation represented as a list
     for g in transversal do
