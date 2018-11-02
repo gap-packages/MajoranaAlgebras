@@ -327,7 +327,7 @@ end);
 # Acting on sets of size 2
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalRep,
 function(os, p)
-    local a, b, r1, r2, p1;
+    local a, b, oa, ob, r1, r2, p1;
 
     a := p[1];
     b := p[2];
@@ -355,7 +355,7 @@ function(os, pair)
     # Returns a group elements that maps <pair> to its orbital representative
     # (as given by MAJORANA_OrbitalRep).
 
-    local a, b, fo, so, p1, p2;
+    local a, b, oa, ob, r1, r2, p1, p2;
 
     a := pair[1];
     b := pair[2];
@@ -433,8 +433,10 @@ function( os, rep )
     # Make sure we have *the* rep, not *a* rep
     rep := MAJORANA_UnorderedOrbitalRep(os, rep);
 
+
+
     r := rec( orb := HashMap()
-            , new := [ rep ]
+            , new := [ [ rep, [] ] ]
             , NextIterator := function(iter)
                 local i, pntp, pnt, npntp, npnt;
 
@@ -442,19 +444,24 @@ function( os, rep )
                 pnt := pntp[1];
 
                 for i in [1..Length(os.gens)] do
-                    npnt := os.act(pnt, g);
+                    npnt := Set(pnt, x -> os.act(x, os.gens[i]));
                     if not npnt in iter!.orb then
                         npntp := [ npnt, Concatenation(pntp[2], [i]) ];
                         iter!.orb[npnt] := npntp[2];
-                        Add(new, npntp);
+                        Add(iter!.new, npntp);
                     fi;
                 od;
-                return Product(List(pntp[2], i -> os.gens[i]));
+                if Length(pntp[2]) = 0 then
+                    return One(os.group);
+                else
+                    return Product(List(pntp[2], i -> os.gens[i]));
+                fi;
             end
             , IsDoneIterator := iter -> iter!.new = []
-            , ShallowCopy := iter -> rec( orb := ShallowCopy(iter!.orb)
+            , ShallowCopy := iter -> rec( orb := StructuralCopy(iter!.orb)
                                         , new := ShallowCopy(iter!.new) )
             );
+    r.orb[rep] := [];
     return IteratorByFunctions(r);
 end);
 

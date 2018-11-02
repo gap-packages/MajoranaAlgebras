@@ -344,7 +344,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     for i in v!.indices[1] do
         # Loop over all vectors in coords
         for j in list do
-            k := MAJORANA_OrbitalRepUnion(rep.setup.orbitalstruct, [i, j]);
+            k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, [i, j]);
             k := rep.setup.pairrepsmap[ k ];
 
             if k < 0 then k := -k; fi;
@@ -518,7 +518,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             for j in Reversed([1..Size(v!.indices[1])]) do
 
                 # Find the representative of the orbital containing (i,j)
-                k := MAJORANA_OrbitalRepUnion(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+                k := MAJORANA_UnorderedOrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
                 k := setup.pairrepsmap[ k ];
 
                 # Adjust the sign
@@ -586,7 +586,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
                 # Find the representative of the orbital containing the pair (i,j)
-                k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+                k := MAJORANA_UnorderedOrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
                 k := setup.pairrepsmap[ k ];
 
                 # Adjust the sign
@@ -627,7 +627,7 @@ function(range, innerproducts, setup)
         for j in [i..l] do
 
             # Find the representative of the orbital containing the pair <range{[i,j]}>
-            k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, range{[i,j]} );
+            k := MAJORANA_UnorderedOrbitalRep( setup.orbitalstruct, range{[i,j]} );
             k := setup.pairrepsmap[k];
 
             # Adjust for the sign
@@ -740,7 +740,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
         for j in [1..Size(v!.indices[1])] do
 
             # Find the representative of the orbital containing the pair (i,j)
-            k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+            k := MAJORANA_UnorderedOrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
             k := setup.pairrepsmap[k];
 
             # Adjust the sign
@@ -815,8 +815,10 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            # Find the representative of the orbital containing the pair (i,j)
-            k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+            k := MAJORANA_UnorderedOrbitalRep( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
+
+            if setup.pairrepsmap[k] = fail then Error(); fi;
+
             k := setup.pairrepsmap[k];
 
             # Adjust the sign

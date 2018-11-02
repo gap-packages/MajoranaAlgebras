@@ -526,7 +526,7 @@ function( rep, new, new_5A )
     ## to <setup.coords>. Otherwise, there are some new vectors but these
     ## are equal to an existing element of <setup.coords>
 
-    transversal := MAJORANA_OrbitalUnionTransversalIterator( rep.setup.orbitalstruct, new[1]);
+    transversal := MAJORANA_UnorderedOrbitalTransversalIterator( rep.setup.orbitalstruct, new[1]);
 
     # g is a permutation represented as a list
     for g in transversal do
