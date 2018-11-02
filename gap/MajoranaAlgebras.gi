@@ -871,8 +871,8 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
     mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
     vec := x.coeffs*vec;
 
-    new_mat := CopyMat(mat);
-    new_vec := CopyMat(vec);
+    new_mat := SparseMatrix( 0, Ncols(mat), [], [], Rationals );
+    new_vec := SparseMatrix( 0, Ncols(vec), [], [], Rationals );
 
     for g in rep.setup.conjelts do
         for i in [1 .. Nrows(mat)] do
