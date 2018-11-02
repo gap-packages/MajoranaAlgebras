@@ -1292,7 +1292,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         # If the product is now known the remove its value from the rhs
         if prod <> false then
 
-            g := MAJORANA_OrbitalCanonizingElementInverseSigned(rep.setup.orbitalstruct, x);
+            g := MAJORANA_OrbitalCanonizingElementInverse(rep.setup.orbitalstruct, x);
             g := ListSignedPerm(g, Size(rep.setup.coords));
 
             prod := MAJORANA_ConjugateVec(prod,g);
