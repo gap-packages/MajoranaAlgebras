@@ -922,7 +922,6 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
     mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
     vec := x.coeffs*vec;
 
-    # These matrices will be what we add the conjugated rows to
     new_mat := SparseMatrix( 0, Ncols(mat), [], [], Rationals );
     new_vec := SparseMatrix( 0, Ncols(vec), [], [], Rationals );
 
