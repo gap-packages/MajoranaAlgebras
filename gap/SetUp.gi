@@ -112,6 +112,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     local   t,              # size of T
             i,              # indices
             j,
+            gens,
             k,
             perm,
             x,              # result of orbitals
