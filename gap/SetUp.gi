@@ -286,20 +286,12 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
-                        generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
                         axioms      := axioms,
                         setup       := input.setup
                       );
 
     t := Size(rep.involutions);
-
-    # contains ... (what does it contain?)
-    rep.setup   := rec( coords          := [1..t],
-                        coordmap        := HashMap( t*t ),
-                        # Why a copy
-                        pairreps        := ShallowCopy(input.pairreps)
-                      );
 
     # coordmap gives the position in coords of the coord
     for i in [1..t] do
@@ -397,6 +389,7 @@ function( i, rep, subrep )
     local gens, x, inv, elts, emb;
 
     x := rep.setup.pairreps[i];
+    inv := rep.involutions{x};
 
     ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     MAJORANA_AddNewVectors(rep, subrep, inv);
