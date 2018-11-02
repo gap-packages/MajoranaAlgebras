@@ -176,7 +176,7 @@ function(arg)
                     for k in [1..Nrows(rep.evecs[i, evals[2]])] do
                         b := CertainRows(rep.evecs[i, evals[2]], [k]);
 
-                        FUSE(a, b, u, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);
+                        FUSE(a, b, u, evals, new, rep);
                     od;
                 od;
             od;
@@ -390,41 +390,33 @@ InstallGlobalFunction(MAJORANA_AddEvec,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
-    function(a, b, u, evals, new, innerproducts, algebraproducts, setup)
+    function(a, b, u, evals, new, rep)
 
-    local   dim,
-            test,
-            new_ev,
-            pos,
-            x,
-            y,
-            z;
-
-    dim := Size(setup.coords);
+    local   new_ev, pos, x, y, z;
 
     # Find the eigenvalue of the new vector
     new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
 
     # Find the product of the eigenvectors a and b
-    x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
+    x := MAJORANA_AlgebraProduct(a,b,rep.algebraproducts,rep.setup);
 
     if x in [false, fail] then return; fi;
 
     # If the eigenvalues are both equal to 1/4 or to 1/32 then we need to
     # do more work to recover the eigenvectors
     if evals = [2,2] then
-        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+        y := MAJORANA_InnerProduct(a,b,rep.innerproducts,rep.setup);
 
         if y = false then return; fi;
 
         new[1] := MAJORANA_AddEvec(new[1], x - (1/4)*u*y);
     elif evals = [3,3] then
-        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+        y := MAJORANA_InnerProduct(a,b,rep.innerproducts,rep.setup);
 
         if y = false then return; fi;
 
-        z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
+        z := MAJORANA_AlgebraProduct(u,x,rep.algebraproducts, rep.setup);
 
         if z in [false,  fail] then return; fi;
 
@@ -1270,6 +1262,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             i,
             j,
             elm,
+            x,
             y,
             sign,
             g,
@@ -1286,7 +1279,8 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     for i in [1..Size(unknowns)] do
 
         # Find the representative of the orbital containing the unknown value
-        y := MAJORANA_OrbitalRepUnion(rep.setup.orbitalstruct, unknowns[i]);
+        x := unknowns[i];
+        y := MAJORANA_OrbitalRepUnion(rep.setup.orbitalstruct, x);
 
         # Adjust the sign
         sign := 1;

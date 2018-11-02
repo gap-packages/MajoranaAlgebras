@@ -95,37 +95,29 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
 
-    function(a, b, u, evals, new, innerproducts, algebraproducts, setup)
+    function(a, b, u, evals, new, rep)
 
-    local   dim,
-            test,
-            new_ev,
-            pos,
-            x,
-            y,
-            z;
-
-    dim := Size(setup.coords);
+    local   new_ev, pos, x, y, z;
 
     new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
 
-    x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
+    x := MAJORANA_AlgebraProduct(a,b,rep.algebraproducts,rep.setup);
 
     if x in [false, fail] then return; fi;
 
     if evals = [2,2] then
-        y := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
+        y := MAJORANA_AlgebraProduct(u, x, rep.algebraproducts, rep.setup);
 
         if y in [fail, false] then return; fi;
 
         new[1] := MAJORANA_AddEvec(new[1], x - y);
     elif evals = [3,3] then
-        y := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
+        y := MAJORANA_AlgebraProduct(u, x, rep.algebraproducts, rep.setup);
 
         if y in [fail, false] then return; fi;
 
-        z := MAJORANA_AlgebraProduct(u,y,algebraproducts, setup);
+        z := MAJORANA_AlgebraProduct(u,y,rep.algebraproducts, rep.setup);
 
         if z in [fail, false] then return; fi;
 
