@@ -16,8 +16,13 @@ DeclareGlobalFunction( "MAJORANA_OrbitalCanonizingElementInverse" );
 DeclareGlobalFunction( "MAJORANA_OrbitalRepUnion" );
 DeclareGlobalFunction( "MAJORANA_OrbitalRepUnions" );
 # DeclareGlobalFunction( "MAJORANA_OrbitalRepActSigned" );
+DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalRep" );
+DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalReps" );
+# DeclareGlobalFunction( "MAJORANA_OrbitalRepUnions" );
+
+#
 
 # For the lack of a better name, returns an iterator that
 # produces an elements g \in G so that
 DeclareGlobalFunction( "MAJORANA_OrbitalTransversalIterator" );
-DeclareGlobalFunction( "MAJORANA_OrbitalUnionTransversalIterator" );
+DeclareGlobalFunction( "MAJORANA_OrbitalUnorderedTransversalIterator" );

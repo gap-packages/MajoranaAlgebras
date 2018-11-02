@@ -200,7 +200,7 @@ InstallGlobalFunction( MAJORANA_FindOrbitals,
 
     # Store representatives of the orbitals and add them to a corresponding hashmap
 
-    new_pairreps := MAJORANA_OrbitalRepUnions(rep.setup.orbitalstruct);
+    new_pairreps := MAJORANA_UnorderedOrbitalReps(rep.setup.orbitalstruct);
 
     for x in new_pairreps do
         if not x in rep.setup.pairreps then
@@ -235,7 +235,7 @@ end );
 InstallGlobalFunction(MAJORANA_OrbitalStructure,
 # gens  - generators of a group acting on Omega
 # Omega - the domain
-# Act   - action of Group(gens) on Omega 
+# Act   - action of Group(gens) on Omega
 function(gens, Omega, Act)
     local o, so, i, res;
 
@@ -324,33 +324,76 @@ function(os, pair)
     return p1 * p2;
 end);
 
-# getting [i,j], we union the orbits [i,j] and [j,i]
-# -> compute orbreps of both, take the smaller one
-InstallGlobalFunction(MAJORANA_OrbitalRepUnion,
+# Acting on sets of size 2
+InstallGlobalFunction(MAJORANA_UnorderedOrbitalRep,
 function(os, p)
-    local r1, r2;
+    local a, b, r1, r2, p1;
 
-    r1 := MAJORANA_OrbitalRep(os, p);
-    r2 := MAJORANA_OrbitalRep(os, p{[2,1]});
+    a := p[1];
+    b := p[2];
+
+    oa := os.orbnums[a];
+    ob := os.orbnums[b];
+
+    r1 := os.orbreps[oa];
+    r2 := os.orbreps[ob];
 
     if r1 < r2 then
-        return r1;
+        p1 := RepresentativeAction(os.group, a, r1);
+        ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
+        return [ r1, os.orbstabs[oa].orbreps[ob]];
     else
-        return r2;
+        p1 := RepresentativeAction(os.group, b, r2);
+        oa := os.orbstabs[ob].orbnums[os.act(a, p1)];
+        return [ r2, os.orbstabs[ob].orbreps[oa] ];
     fi;
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalRepUnions,
+InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElement,
+function(os, pair)
+
+    # Returns a group elements that maps <pair> to its orbital representative
+    # (as given by MAJORANA_OrbitalRep).
+
+    local a, b, fo, so, p1, p2;
+
+    a := pair[1];
+    b := pair[2];
+
+    oa := os.orbnums[a];
+    ob := os.orbnums[b];
+
+    r1 := os.orbreps[oa];
+    r2 := os.orbreps[ob];
+
+    if r1 < r2 then
+        p1 := RepresentativeAction(os.group, a, r1);
+        ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
+        p2 := RepresentativeAction(os.orbstabs[oa].stab, os.act(b, p1)
+                                   , os.orbstabs[oa].orbreps[ob]);
+    else
+        p1 := RepresentativeAction(os.group, b, r2);
+        oa := os.orbstabs[ob].orbnums[os.act(a, p1)];
+        p2 := RepresentativeAction(os.orbstabs[ob].stab, os.act(a, p1)
+                                   , os.orbstabs[oa].orbreps[ob]);
+    fi;
+
+    return p1 * p2;
+end);
+
+InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElementInverse,
+     {os, pair} -> MAJORANA_UnorderedOrbitalCanonizingElement(os, pair) ^ -1);
+
+InstallGlobalFunction(MAJORANA_UnorderedOrbitalReps,
 function(os)
     local reps, reps2, p, q;
 
     reps := Set(Union( List( [1..Length(os.orbreps)]
                        , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
-                                    , {x,y} -> MAJORANA_OrbitalRepUnion(os, [x,y]) ) ) ) );
+                                    , {x,y} -> MAJORANA_UnorderedOrbitalRep(os, [x,y]) ) ) ) );
     return reps;
 end);
 
-# Signedness
 InstallGlobalFunction(MAJORANA_OrbitalTransversalIterator,
 function( os, rep )
     local r, fo, so;
@@ -381,25 +424,38 @@ function( os, rep )
     return IteratorByFunctions(r);
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalUnionTransversalIterator,
-function(os, rep)
-    local r, r1, r2, iters;
+# For now, a disguised orbit algorithm which is probably better
+# than computing RepresentativeAction all the time!
+InstallGlobalFunction(MAJORANA_UnorderedOrbitalTransversalIterator,
+function( os, rep )
+    local r, fo, so;
 
-    iters := [];
-    # We're actually looking at unions of orbitals
-    # if r1 <> r2, we have to iterate both orbits
-    r1 := MAJORANA_OrbitalRep(os, rep);
-    r2 := MAJORANA_OrbitalRep(os, rep{[2,1]});
+    # Make sure we have *the* rep, not *a* rep
+    rep := MAJORANA_UnorderedOrbitalRep(os, rep);
 
-    # if r1 = r2 then [i,j] and [j,i] are in the same
-    # orbital and we only iterate that, otherwise we iterate
-    # over both.
-    Add(iters, MAJORANA_OrbitalTransversalIterator(os, r1));
-    if r2 <> r1 then
-        Add(iters, MAJORANA_OrbitalTransversalIterator(os, r2));
-    fi;
+    r := rec( orb := HashMap()
+            , new := [ rep ]
+            , NextIterator := function(iter)
+                local i, pntp, pnt, npntp, npnt;
 
-    return ConcatenationIterators(iters);
+                pntp := Remove(iter!.new, 1);
+                pnt := pntp[1];
+
+                for i in [1..Length(os.gens)] do
+                    npnt := os.act(pnt, g);
+                    if not npnt in iter!.orb then
+                        npntp := [ npnt, Concatenation(pntp[2], [i]) ];
+                        iter!.orb[npnt] := npntp[2];
+                        Add(new, npntp);
+                    fi;
+                od;
+                return Product(List(pntp[2], i -> os.gens[i]));
+            end
+            , IsDoneIterator := iter -> iter!.new = []
+            , ShallowCopy := iter -> rec( orb := ShallowCopy(iter!.orb)
+                                        , new := ShallowCopy(iter!.new) )
+            );
+    return IteratorByFunctions(r);
 end);
 
 MAJORANA_SomeOrbTest :=
