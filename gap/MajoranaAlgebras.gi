@@ -261,7 +261,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                 od;
             od;
 
-
+            # Loop over eigevectors a, b and c where a and c are <evals[1]>-eigenvectors
+            # and b is an <evals[2]>-eigenvectors.
             for index in [1,2] do
                 for j in [1..Nrows(evecs_a)] do
                     c := CertainRows(evecs_a, [j]);
@@ -274,11 +275,14 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
                             a := CertainRows(evecs_a, [l]);
 
+                            # If this is satisfied then the product (a - b)*c is known
                             if CertainColumns(a, bad) = CertainColumns(b, bad) then
 
+                                # Perform resurrection on these eigenvectors
                                 x := MAJORANA_Resurrection(  u, a, b, c, evals, unknowns,rep);
 
                                 if x <> false and x[1]!.indices[1] <> [] then
+                                    # If this equation has only one unknown then record this value immediately
                                     if Size(x[1]!.indices[1]) = 1 then
                                         y := MAJORANA_SolveSingleSolution( x, mat, vec, unknowns, rep);
 
@@ -286,6 +290,8 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
                                         if not false in rep.algebraproducts then return true; fi;
                                     elif not _IsRowOfSparseMatrix(mat, x[1]) then
+                                    # Otherwise, add the equation to the system of linear equations
+
                                         mat := UnionOfRows(mat, x[1]);
                                         vec := UnionOfRows(vec, x[2]);
                                     fi;
@@ -293,6 +299,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
                             fi;
                         od;
 
+                        # If the matrix is over a certain size then for performance reasons, solve it already
                         if Nrows(mat) > Ncols(mat) or Nrows(mat) > 8000 then
                             x := MAJORANA_SolutionAlgProducts(mat, vec, unknowns, rep);
 
@@ -311,6 +318,7 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     mat := x.mat; vec := x.vec; unknowns := x.unknowns;
 
+    # If no new algebra products have been found then also add the images of the currect equations under the group action
     if n = Size(Positions(rep.algebraproducts, false)) then
         return MAJORANA_AllConjugates(mat, vec, unknowns, rep);
     else
@@ -332,7 +340,9 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     bad := [];
     list := [1 .. Size(rep.setup.coords)];
 
+    # Loop over the non-zero indices of v
     for i in v!.indices[1] do
+        # Loop over all vectors in coords
         for j in list do
             k := MAJORANA_OrbitalRepUnion(rep.setup.orbitalstruct, [i, j]);
             k := rep.setup.pairrepsmap[ k ];
@@ -340,6 +350,8 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
             if k < 0 then k := -k; fi;
 
             if rep.algebraproducts[k] = false then
+                # Add this index to the list of unknown indices and remove it
+                # from <list> as we don't need to check it again.
                 Add(bad,j);
                 list := Difference(list, [j]);
             fi;
@@ -358,8 +370,10 @@ InstallGlobalFunction(MAJORANA_AddEvec,
 
     function(mat, x)
 
+    # Don't add a zero row
     if x!.indices[1] = [] then return mat; fi;
 
+    # Scale the vector so that the last entry is equal to one
     x!.entries[1] := x!.entries[1]/x!.entries[1, Size(x!.entries[1])];
 
     if _IsRowOfSparseMatrix(mat, x) then
@@ -388,15 +402,17 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
     dim := Size(setup.coords);
 
+    # Find the eigenvalue of the new vector
     new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
     pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
 
+    # Find the product of the eigenvectors a and b
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
 
-    if x = false then return; fi;
+    if x in [false, fail] then return; fi;
 
-    if x = fail then return; fi;
-
+    # If the eigenvalues are both equal to 1/4 or to 1/32 then we need to
+    # do more work to recover the eigenvectors
     if evals = [2,2] then
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
 
@@ -430,6 +446,7 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
 
     local i, basis;
 
+    # If there is no inner product then we cannot tell if we have a full eigenspace decomposition
     if rep.innerproducts = false then return false; fi;
 
     if Sum(List(evecs, Nrows)) + Nrows(rep.setup.nullspace.vectors) < dim - 1 then
@@ -441,12 +458,12 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
     end );
 
 ##
-## Takes a matrix <mat> and conjugates it with respect to the signed perm <g>
+## Takes a row vector <vec> and finds its image under the signed perm <g>
 ##
 
 InstallGlobalFunction( MAJORANA_ConjugateVec,
 
-    function(mat,g)
+    function(vec,g)
 
     local   i,
             k,
@@ -454,13 +471,15 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
             res,
             pos;
 
-    if ForAll(mat!.indices[1], i -> g[i] = i) then return mat; fi;
+    # If g is the identity on vec then return
+    if ForAll(vec!.indices[1], i -> g[i] = i) then return vec; fi;
 
-    res := SparseMatrix(1, Ncols(mat), [[]], [[]], Rationals);
+    res := SparseMatrix(1, Ncols(vec), [[]], [[]], Rationals);
 
-    for i in [1..Size(mat!.indices[1])] do
+    # Loop over the non-zero indices of vec and add their image to res
+    for i in [1..Size(vec!.indices[1])] do
 
-        k := g[mat!.indices[1, i]];
+        k := g[vec!.indices[1, i]];
 
         sign := 1;
 
@@ -469,7 +488,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
         pos := PositionSorted(res!.indices[1], k);
 
         Add(res!.indices[1], k, pos);
-        Add(res!.entries[1], sign*mat!.entries[1, i], pos);
+        Add(res!.entries[1], sign*vec!.entries[1, i], pos);
     od;
 
     return res;
@@ -493,22 +512,24 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
                 vec,    # output vec
                 vecs,
                 elts,
-                dim,
                 pos;
 
-        dim := Ncols(u);;
+        vec := SparseMatrix(1, Ncols(u), [[]], [[]],  Rationals);
 
-        vec := SparseMatrix(1, dim, [[]], [[]],  Rationals);
-
+        # <elts> will record the permutations that we have to conjugate by
+        # <vecs> will record the corresponding vector that we are permuting
         elts := [];
         vecs := [];
 
+        # Loop over the non-zero coefficients of u and v
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
 
+                # Find the representative of the orbital containing (i,j)
                 k := MAJORANA_OrbitalRepUnion(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
                 k := setup.pairrepsmap[ k ];
 
+                # Adjust the sign
                 if k > 0 then
                     sign := 1;
                 else
@@ -520,25 +541,30 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
                 if not x in [fail, false] then
 
+                    # Find the element that maps the orbital representative to the pair (i,j)
                     g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
-                    g := ListSignedPerm(g, dim);
+                    g := ListSignedPerm(g, Ncols(u));
 
                     pos := Position(elts,g);
 
+                    # If we have already seen this elt then add the product <x> to the corresponding
+                    # vector in vecs, else add the elt and the product to these lists.
                     if pos <> fail then
                         AddRow(x!.indices[1],  sign*u!.entries[1, i]*v!.entries[1, j]*x!.entries[1],  vecs[pos]!.indices, vecs[pos]!.entries, 1);
                     else
                         Add(elts, g);
                         Add(vecs, CopyMat(sign*u!.entries[1, i]*v!.entries[1, j]*x));
                     fi;
-                elif x = false then
-                    # cannot calculate product
+                elif x = false then # cannot calculate product
                     return false;
                 else # product with a vector in the nullspace
                     return fail;
                 fi;
             od;
         od;
+
+        # Now go over all group elements are permute their corresponding vectors, add the
+        # result to the output vec as we go along
 
         for g in elts do
             x := MAJORANA_ConjugateVec(vecs[i], g);
@@ -565,11 +591,14 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
 
         sum := 0;
 
+        # Loop over the non-zero coefficients of u and v
         for i in Reversed([1..Size(u!.indices[1])]) do
             for j in Reversed([1..Size(v!.indices[1])]) do
+                # Find the representative of the orbital containing the pair (i,j)
                 k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
                 k := setup.pairrepsmap[ k ];
 
+                # Adjust the sign
                 if k > 0 then
                     sign := 1;
                 else
@@ -577,7 +606,7 @@ InstallGlobalFunction(  MAJORANA_InnerProduct,
                     k := -k;
                 fi;
 
-                if innerproducts[k] <> false then
+                if not innerproducts[k] in [fail, false] then
                     sum := sum + sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[k];
                 else
                     return false;
@@ -606,9 +635,11 @@ function(range, innerproducts, setup)
     for i in [1..l] do
         for j in [i..l] do
 
+            # Find the representative of the orbital containing the pair <range{[i,j]}>
             k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, range{[i,j]} );
             k := setup.pairrepsmap[k];
 
+            # Adjust for the sign
             if k > 0 then
                 SetEntry(mat, i, j, innerproducts[k]);
                 SetEntry(mat, j, i, innerproducts[k]);
@@ -636,33 +667,34 @@ function(rep)
             u,          # vector with 1 in j th position
             v,          # eigenvector
             x,          # result of SeparateAlgebraProduct
-            y,          # result of SolutionAlgProducts
-            dim;        # size of setup.coords
-
-    dim := Size(rep.setup.coords);
+            y;          # result of SolutionAlgProducts
 
     unknowns := [];
 
     mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
-    vec := SparseMatrix(0, dim, [], [], Rationals);
+    vec := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals);
 
     Info( InfoMajorana, 50, "Building eigenvector unknowns");
 
+    # Loop over the representatives of the action of G on T
     for i in rep.setup.orbitreps do
 
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
 
+        # Loop over the three eigenvalues 0, 1/4 and 1/32
         for ev in [1..3] do
             for j in [1..Nrows(rep.evecs[i, ev])] do
 
                 v := CertainRows(rep.evecs[i, ev], [j]);
 
+                # Create the equation u*evec = 0
                 x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
 
                 if x <> fail then
-
+                    # Adjust to make the equation u*evec = ev*evec
                     x[2] := x[2] + MAJORANA_FusionTable[1, ev + 1]*v;
 
+                    # If this equation has only one unknown, record its value immediately
                     if Size(x[1]!.indices[1]) = 1 then
                         y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns, rep);
 
@@ -671,6 +703,7 @@ function(rep)
                         mat := y.mat; vec := y.vec; unknowns := y.unknowns;
 
                     elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(mat, x[1]) then
+                    # Otherwise add the equation to the linear system
                         mat := UnionOfRows(mat, x[1]);
                         vec := UnionOfRows(vec, x[2]);
                     fi;
@@ -701,23 +734,25 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             vecs,
             x,          # vector with 1 in the ith position
             y,
-            pos,        # position of unknown product
-            dim;        # dimension
-
-    dim := Size(setup.coords);
+            pos;       # position of unknown product
 
     row := SparseZeroMatrix(1, Size(unknowns), Rationals);
-    sum := SparseZeroMatrix(1, dim, Rationals);
+    sum := SparseZeroMatrix(1, Size(setup.coords), Rationals);
 
+    # <elts> will record the permutations that we have to conjugate by
+    # <vecs> will record the corresponding vector that we are permuting
     elts := [];
     vecs := [];
 
+    # Loop over the non-zero coefficients of u and v
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
+            # Find the representative of the orbital containing the pair (i,j)
             k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
             k := setup.pairrepsmap[k];
 
+            # Adjust the sign
             if k > 0 then
                 sign := 1;
             else
@@ -730,9 +765,9 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             if x = fail then return fail; fi;
 
             if x <> false then
-
+                # If the product (i,j) is known then compute the algebra product as usual
                 g := MAJORANA_OrbitalCanonizingElementInverseSigned(setup.orbitalstruct,  [u!.indices[1, i], v!.indices[1, j]]);
-                g := ListSignedPerm(g, dim);
+                g := ListSignedPerm(g, Size(setup.coords));
 
                 pos := Position(elts,g);
 
@@ -743,7 +778,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
                     Add(vecs,- sign*u!.entries[1, i]*v!.entries[1, j]*x);
                 fi;
             else
-
+                # Otherwise, record the coefficient of the unknown pair in the matrix
+                # of the system of linear equations
                 l := [u!.indices[1, i], v!.indices[1, j]];
                 Sort(l);
 
@@ -784,15 +820,15 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     sum := SparseZeroMatrix(1, 1, Rationals);
     row := SparseZeroMatrix(1, Size(unknowns), Rationals);
 
+    # Loop over the nonzero coefficients of u and v
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
+            # Find the representative of the orbital containing the pair (i,j)
             k := MAJORANA_OrbitalRepUnion( setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]] );
-
-            if setup.pairrepsmap[k] = fail then Error(); fi;
-
             k := setup.pairrepsmap[k];
 
+            # Adjust the sign
             if k > 0 then
                 sign := 1;
             else
@@ -800,6 +836,8 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
                 k := -k;
             fi;
 
+            # If the product is known the calculate as usual. Otherwise, add the coefficient
+            # to the matrix of the system of linear equations.
             if innerproducts[k] <> false then
                 AddToEntry(sum, 1, 1, - sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[k]);
             else
@@ -820,21 +858,24 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     local   output,     # output row
             len,        # length of row
             i,          # loop over length of row
-            x,y,
+            y,
             k,
             sign,       # corrects sign of 5A axis
             pos;        # position of new product
 
+    # If the elt is the identity then return
     if ForAll(g, i -> g[i] = i) then return row; fi;
 
     len     := Ncols(row);
     output  := SparseZeroMatrix(1, len, Rationals);
 
+    # Loop over the non-zero coefficients of row
     for i in [1..Size(row!.indices[1])] do
 
-        x := unknowns[row!.indices[1, i]];
-        y := g{x};
+        # Find the image of the corresponding element of unknowns
+        y := g{ unknowns[row!.indices[1, i]] };
 
+        # Adjust the sign
         sign := 1;
 
         if y[1] < 0 then sign := -sign; y[1] := -y[1]; fi;
@@ -842,10 +883,11 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
 
         Sort(y);
 
+        # find the position of the image in unknowns
         k := Position(unknowns,y);
-
         if k = fail then Add(unknowns, y); k := Size(unknowns); fi;
 
+        # Add the value to the ouput row
         pos := PositionSorted(output!.indices[1], k);
 
         Add(output!.indices[1], k, pos);
@@ -855,6 +897,10 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     return output;
 
     end);
+
+#
+# Calculates the reversed echelon form of a matrix
+#
 
 InstallGlobalFunction(MAJORANA_BasisOfEvecs,
 
@@ -1217,9 +1263,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     for i in [1..Size(unknowns)] do
 
         x := unknowns[i];
-
-        # TODO Need to change this to the new orbitals set up
-        y := rep.setup.pairorbit[x[1], x[2]];
+        y := MAJORANA_OrbitalRepUnion(rep.setup.orbitalstruct, x);
 
         sign := 1;
         if y < 0 then sign := -1; y := -y; fi;
@@ -1373,15 +1417,20 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
 
     dim := Size(rep.setup.coords);
 
+    # Calculate the gram matrix wrt to the spanning set coords and find its kernel
     gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
     null := KernelEchelonMatDestructive(gram, [1..dim]).relations;;
     null := ReversedEchelonMatDestructive(null);
 
     rep.setup.nullspace := null;
 
+    # If the kernel is trivial the return
     if null.heads = [] then return; fi;
 
+    # Find the orbits that only involve nullspace vectors and set these to fail
+    # because we don't need to find their values 
     for i in [1..Size(rep.setup.pairreps)] do
+        # TODO need to change this bit to the new orbit setup
         x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
         if ForAll(x, j -> rep.setup.nullspace.heads[j] <> 0) then
             rep.setup.pairreps[i] := fail;
