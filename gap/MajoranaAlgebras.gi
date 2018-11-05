@@ -976,7 +976,13 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     x := MAJORANA_Orbits(rep.generators, dim, rep.setup);
 
+    # TODO these should be in place but makes it slower :(
+
+    #Append( rep.setup.conjelts, x.conjelts );
+    #rep.setup.conjelts := DuplicateFreeList(rep.setup.conjelts);
+
     for i in x.orbitreps do
+    #for i in [1..dim] do
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
         for v in Iterator(rep.setup.nullspace.vectors) do
