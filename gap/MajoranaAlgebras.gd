@@ -6,14 +6,13 @@
 
 #! @Arguments input, index, [axioms]
 #! @Returns a record giving a Majorana representation
-#! @Description This takes two arguments, the first of which must be the output of the function 
-#! <Ref Func="ShapesOfMajoranaRepresentation"/> and the second of which is the index of the desired shape in list <A>input.shapes</A>. 
-#! The third variable is a string that may take one of the following values
+#! @Description This takes two or three arguments, the first of which must be the output of the function
+#! <Ref Func="ShapesOfMajoranaRepresentation"/> and the second of which is the index of the desired shape in list <A>input.shapes</A>.
+#! The optional third variable is a string that may take one of the following two values
 #! * <A>"NoAxioms"</A>: the algorithm assumes no axioms beyond the main axioms of Majorana theory;
-#! * <A>"AxiomM8"</A>: the algorithm assumes axiom M8, but no further additional axioms;
-#! * <A>"AllAxioms"</A>: the algorithm assumes axiom M8, as well as axioms 3A, 4A and 5A.
+#! * <A>"AllAxioms"</A>: the algorithm assumes the axioms 2Aa, 2Ab, 3A, 4A and 5A.
 #! If no third argument is given then the default values is set to be <A>"AllAxioms"</A>.
-#! @ChapterInfo Majorana Representations, Majorana Representations
+#! @ChapterInfo Majorana representations, The main function
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );

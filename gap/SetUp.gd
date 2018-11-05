@@ -1,7 +1,7 @@
 DeclareGlobalFunction( "MAJORANA_SetUp" );
 
-#! @Chapter Majorana Representations
-#! @Section Majorana Representations
+#! @Chapter Majorana representations
+#! @Section The set up functions
 
 #! @Arguments G,T
 #! @Returns a record with a component <A>shapes</A>
@@ -13,7 +13,9 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 #! @Arguments G,T
 #! @Returns a record with a component <A>shapes</A>
 #! @Description Performs exactly the same function as <Ref Func="ShapesOfMajoranaRepresentation"/>
-#! but gives only those shapes that obey axiom M8.
+#! but gives only those shapes at obey axiom M8. That is to say, we additionally assume
+#! that if $t,s \in T$ such that $|ts| = 2$ then the dihedral subalgebra $\langle \langle a_t, a_s \rangle \rangle$
+#! is of type $2A$ if and only if $ts \in T$ (and otherwise is of type $2B$).
 DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 
 DeclareGlobalFunction( "MAJORANA_RecordSubalgebras" );
