@@ -950,8 +950,8 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
     mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
     vec := x.coeffs*vec;
 
-    new_mat := CopyMat(mat);
-    new_vec := CopyMat(vec);
+    new_mat := SparseMatrix( 0, Ncols(mat), [], [], Rationals );
+    new_vec := SparseMatrix( 0, Ncols(vec), [], [], Rationals );
 
     for g in rep.setup.conjelts do
         for i in [1 .. Nrows(mat)] do
@@ -1054,6 +1054,11 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     dim := Size(rep.setup.coords);
 
     x := MAJORANA_Orbits(rep.generators, dim, rep.setup);
+
+    # TODO these should be in place but makes it slower :(
+
+    #Append( rep.setup.conjelts, x.conjelts );
+    #rep.setup.conjelts := DuplicateFreeList(rep.setup.conjelts);
 
     for i in x.orbitreps do
         u := SparseMatrix(1, dim, [[i]], [[1]], mat!.ring);
@@ -1281,11 +1286,6 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             prod;
 
     if Nrows(mat) = 0 then
-
-        unknowns := [];
-        mat := SparseMatrix(0, Size(unknowns), [], [], mat!.ring);
-        vec := SparseMatrix(0, Size(setup.coords), [], [], mat!.ring);
-
         return rec( mat := mat, vec := vec, unknowns := unknowns);
     fi;
 
