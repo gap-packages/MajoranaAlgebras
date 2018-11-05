@@ -2,6 +2,8 @@ DeclareGlobalFunction( "MAJORANA_FuseEigenvectorsNoForm" );
 
 DeclareGlobalFunction( "MAJORANA_IntersectEigenspaces" );
 
+DeclareGlobalFunction( "MAJORANA_RemoveNullspaceNoForm" );
+
 DeclareGlobalFunction( "MAJORANA_MainLoopNoForm" );
 
 #! @Chapter Majorana representations with no frobenius form
