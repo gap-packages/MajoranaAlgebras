@@ -177,7 +177,7 @@ function(arg)
                 new.(ev) := MAJORANA_BasisOfEvecs(new.(ev));
             od;
 
-            if ForAll(RecNames(new), j -> Nrows(new.(ev)) = Nrows(rep.evecs[i].(ev))) then
+            if ForAll(RecNames(new), ev -> Nrows(new.(ev)) = Nrows(rep.evecs[i].(ev))) then
                 break;
             fi;
 
