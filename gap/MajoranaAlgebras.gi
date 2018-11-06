@@ -938,7 +938,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     if res[1]!.indices[1] = [] or res = fail then return false; fi;
 
-    ev := MAJORANA_FusionTable[ evals ];
+    ev := MAJORANA_FusionTable[ evals ][1];
 
     res := ev*res;
 

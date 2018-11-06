@@ -21,15 +21,13 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
 
     function(rep)
 
-    local   u, v, i, j, k, ev, x, y;
+    local   u, v, i, ev, x, y;
 
     for i in rep.setup.orbitreps do
         u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], Rationals);
 
-        for j in [1..3] do
-            ev := MAJORANA_FusionTable[1, j + 1];
-            for k in [1..Nrows(rep.evecs[i, j])] do
-                v := CertainRows(rep.evecs[i, j], [k]);
+        for ev in rep.eigenvalues do
+            for v in Iterator( rep.evecs[i].(String(ev)) ) do
 
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
@@ -46,54 +44,34 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
 
 InstallGlobalFunction( MAJORANA_TestFusionAxis,
 
-    function(u, evecs, innerproducts, algebraproducts, setup)
+    function(u, evecs, rep)
 
-    local   dim,            # size of setup.coords
-            evals,
-            new,
-            a,              # first eigenvalue
-            b,              # second eigenvalue
-            ev_a,           # a - eigenvectors
-            ev_b,           # b - eigenvectors
-            ev,             # new eigenvalue
-            i,              # loop over T
-            j,
-            k,
-            x,              # product of eigenvectors
-            y;              # product of x with u
+    local   dim, evals, new, ev, a, b, x;
 
-    dim := Size(setup.coords);
+    dim := Size(rep.setup.coords);
 
-    for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
+    for evals in UnorderedTuples( RecNames(evecs), 2 ) do
 
-        new := [0,0,0];
+        new := rec();
 
-        for j in [1..3] do
-            new[j] := SparseMatrix(0, dim, [], [], Rationals);
+        for ev in RecNames(evecs) do
+            new.(ev) := SparseMatrix(0, dim, [], [], Rationals);
         od;
 
-        ev_a := evecs[evals[1]];
-        ev_b := evecs[evals[2]];
-
-        for j in [1..Nrows(ev_a)] do
-            a := CertainRows(ev_a, [j]);
-            for k in [1..Nrows(ev_b)] do
-                b := CertainRows(ev_b, [k]);
+        for a in Iterator( evecs.(evals[1]) ) do
+            for b in Iterator( evecs.(evals[2]) ) do
                 MAJORANA_FuseEigenvectorsNoForm(  a, b, u, evals, new,
-                                            innerproducts,
-                                            algebraproducts,
-                                            setup );
+                                            rep.innerproducts,
+                                            rep.algebraproducts,
+                                            rep.setup );
             od;
         od;
 
-        for j in [1..3] do
-            ev := MAJORANA_FusionTable[1, j + 1];
+        for ev in rep.eigenvalues do
+            new.(String(ev)) := EchelonMatDestructive(new.(String(ev))).vectors;
 
-            new[j] := EchelonMatDestructive(new[j]).vectors;
-
-            for k in [1..Nrows(new[j])] do
-                a := CertainRows(new[j], [k]);
-                x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
+            for a in Iterator( new.(String(ev)) ) do
+                x := MAJORANA_AlgebraProduct(u, a, rep.algebraproducts, rep.setup);
                 if not x in [ev*a, false, fail] then
                     Error("The algebra does not obey the fusion rules");
                 fi;
@@ -116,7 +94,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
     for i in rep.setup.orbitreps do
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
-        MAJORANA_TestFusionAxis(u, rep.evecs[i], rep.innerproducts, rep.algebraproducts, rep.setup);
+        MAJORANA_TestFusionAxis(u, rep.evecs[i], rep);
     od;
 
     return true;

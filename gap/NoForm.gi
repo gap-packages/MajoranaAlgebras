@@ -91,7 +91,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
 
     local   dim,
             test,
-            new_ev,
+            ev,
             pos,
             x,
             y,
@@ -99,20 +99,19 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
 
     dim := Size(setup.coords);
 
-    new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
-    pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
+    ev := MAJORANA_FusionTable[ evals ][1];
 
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
 
     if x in [false, fail] then return; fi;
 
-    if evals = [2,2] then
+    if evals = ["1/4", "1/4"] then
         y := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
 
         if y in [fail, false] then return; fi;
 
-        new[1] := MAJORANA_AddEvec(new[1], x - y);
-    elif evals = [3,3] then
+        new.("0") := MAJORANA_AddEvec(new.("0"), x - y);
+    elif evals = ["1/32", "1/32"] then
         y := MAJORANA_AlgebraProduct(u, x, algebraproducts, setup);
 
         if y in [fail, false] then return; fi;
@@ -121,10 +120,10 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
 
         if z in [fail, false] then return; fi;
 
-        new[2] := MAJORANA_AddEvec(new[2], y - z);
-        new[1] := MAJORANA_AddEvec(new[1], x - 5*y + 4*z);
+        new.("1/4") := MAJORANA_AddEvec(new.("1/4"), y - z);
+        new.("0") := MAJORANA_AddEvec(new.("0"), x - 5*y + 4*z);
     else
-        new[pos] := MAJORANA_AddEvec(new[pos],x);
+        new.(String(ev)) := MAJORANA_AddEvec(new.(String(ev)), x);
     fi;
 
     end );

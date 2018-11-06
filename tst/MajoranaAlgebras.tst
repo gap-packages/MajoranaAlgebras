@@ -9,8 +9,8 @@ gap> MAJORANA_AxiomM1(rep);;
 gap> AsSet(rep.innerproducts) = AsSet([ 1, 1/8, 13/256, 3/128, 3/128, 1/4, 8/5, 0, 875/524288, 1/9, 1/18, 1/18, 49/16384, -49/16384, false, 16/405, 35/4608, -35/4608, 203/524288 ]);
 true
 gap> MAJORANA_Fusion(rep);;
-gap> List(rep.evecs[1], Nrows);
-[ 9, 6, 12 ]
+gap> Nrows(rep.evecs[1].("0"));
+9
 gap> MAJORANA_EigenvectorsAlgebraUnknowns(rep);;
 gap> MajoranaAlgebraTest(rep);
 true
