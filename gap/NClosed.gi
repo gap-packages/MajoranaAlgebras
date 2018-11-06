@@ -2,7 +2,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
 
     function(rep, index)
 
-    local   unknowns, dim, new_dim, x, elts, k, i, j, gens, pos, sign, new;
+    local   unknowns, dim, new_dim, x, elts, k, i, j, ev, gens, pos, sign, new;
 
     dim := Size(rep.setup.coords);
 
@@ -49,8 +49,8 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     od;
 
     for i in rep.setup.orbitreps do
-        for j in [1..3] do
-            rep.evecs[i, j]!.ncols := new_dim;
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev)!.ncols := new_dim;
         od;
     od;
 

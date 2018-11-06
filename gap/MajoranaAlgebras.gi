@@ -141,7 +141,7 @@ InstallGlobalFunction( MAJORANA_Fusion,
 
 function(arg)
 
-    local   i, j, k, a, b, dim, new, evals, rep, FUSE, u;
+    local   i, ev, a, b, dim, new, rep, FUSE, u;
 
     rep := arg[1];
     FUSE := MAJORANA_FuseEigenvectors;
@@ -159,25 +159,25 @@ function(arg)
         while true do
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
-            new := [0,0,0];
+            new := rec();
 
-            for j in [1..3] do
-                new[j] := CopyMat(rep.evecs[i, j]);
+            for ev in RecNames(rep.evecs[i]) do
+                new.(ev) := CopyMat(rep.evecs[i].(ev));
             od;
 
-            for evals in [[1,1], [1,2], [1,3], [2,3], [2,2], [3,3]] do
-                for a in Iterator(rep.evecs[i, evals[1]]) do
-                    for b in Iterator(rep.evecs[i, evals[2]]) do
-                        FUSE(a, b, u, evals, new, rep.innerproducts, rep.algebraproducts, rep.setup);
+            for ev in UnorderedTuples(RecNames(rep.evecs[i]), 2) do
+                for a in Iterator( rep.evecs[i].(ev[1]) ) do
+                    for b in Iterator( rep.evecs[i].(ev[2]) ) do
+                        FUSE(a, b, u, ev, new, rep.innerproducts, rep.algebraproducts, rep.setup);
                     od;
                 od;
             od;
 
-            for j in [1..3] do
-                new[j] := MAJORANA_BasisOfEvecs(new[j]);
+            for ev in RecNames(new) do
+                new.(ev) := MAJORANA_BasisOfEvecs(new.(ev));
             od;
 
-            if ForAll([1..3], j -> Nrows(new[j]) = Nrows(rep.evecs[i, j])) then
+            if ForAll(RecNames(new), j -> Nrows(new.(ev)) = Nrows(rep.evecs[i].(ev))) then
                 break;
             fi;
 
@@ -199,12 +199,12 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     function(arg)
 
-    local   dim, x, y, i, j, k, evals, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
+    local   dim, x, y, i, j, k, ev_a, ev_b, mat, vec, unknowns, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
 
     rep := arg[1];
-    evals_list := [[1,2],[2,1],[1,3],[2,3]];
+    evals_list := [0, 1/4];
 
-    if Size(arg) = 2 and arg[2] = false then evals_list := [[1,2], [1,3]]; fi;
+    if Size(arg) = 2 and arg[2] = false then evals_list := [0]; fi;
 
     dim := Size(rep.setup.coords);
 
@@ -224,75 +224,62 @@ InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
     Info(   InfoMajorana, 50, "Building resurrection");
 
-    for evals in evals_list do
-        for i in rep.setup.orbitreps do
+    for ev_a in evals_list do
+        for ev_b in Difference(rep.eigenvalues, [ev_a]) do
+            for i in rep.setup.orbitreps do
 
-            evecs_a := rep.evecs[i, evals[1]];
-            evecs_b := rep.evecs[i, evals[2]];
+                evecs_a := rep.evecs[i].(String(ev_a));
+                evecs_b := rep.evecs[i].(String(ev_b));
 
-            u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+                u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
-            list := [,];
+                list := MAJORANA_ListOfBadIndicesForResurrection(evecs_a, evecs_b, rep);
 
-            list[1] := List([1..Nrows(evecs_a)], i -> []);
-            list[2] := List([1..Nrows(evecs_a)], i -> []);
+                for index in [1,2] do
+                    for j in [1..Nrows(evecs_a)] do
+                        c := CertainRows(evecs_a, [j]);
+                        for k in list[index, j] do
+                            b := CertainRows(evecs_b, [k]);
 
-            for j in [1..Nrows(evecs_a)] do
-                bad := MAJORANA_FindBadIndices(CertainRows(evecs_a,[j]), rep.algebraproducts, rep.setup);
-                for k in [1..Nrows(evecs_b)] do
-                    x := Size(Intersection(bad, evecs_b!.indices[k]));
-                    if x = 1 then
-                        Add(list[1, j], k);
-                    elif x > 1 then
-                        Add(list[2, j], k);
-                    fi;
-                od;
-            od;
+                            bad := MAJORANA_FindBadIndices(c, rep.algebraproducts, rep.setup);
 
-            for index in [1,2] do
-                for j in [1..Nrows(evecs_a)] do
-                    c := CertainRows(evecs_a, [j]);
-                    for k in list[index, j] do
-                        b := CertainRows(evecs_b, [k]);
+                            for a in Iterator( evecs_a ) do
 
-                        bad := MAJORANA_FindBadIndices(c, rep.algebraproducts, rep.setup);
+                                if CertainColumns(a, bad) = CertainColumns(b, bad) then
 
-                        for a in Iterator( evecs_a ) do
-
-                            if CertainColumns(a, bad) = CertainColumns(b, bad) then
-
-                                x := MAJORANA_Resurrection(  u, a, b, c, evals,
-                                                        unknowns,
-                                                        rep.innerproducts,
-                                                        rep.algebraproducts,
-                                                        rep.setup);
-
-                                if x <> false and x[1]!.indices[1] <> [] then
-                                    if Size(x[1]!.indices[1]) = 1 then
-                                        y := MAJORANA_SolveSingleSolution( x,
-                                                            mat, vec, unknowns,
+                                    x := MAJORANA_Resurrection(  u, a, b, c, [String(ev_a), String(ev_b)],
+                                                            unknowns,
+                                                            rep.innerproducts,
                                                             rep.algebraproducts,
                                                             rep.setup);
 
-                                        mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+                                    if x <> false and x[1]!.indices[1] <> [] then
+                                        if Size(x[1]!.indices[1]) = 1 then
+                                            y := MAJORANA_SolveSingleSolution( x,
+                                                                mat, vec, unknowns,
+                                                                rep.algebraproducts,
+                                                                rep.setup);
 
-                                        if not false in rep.algebraproducts then return true; fi;
-                                    elif not _IsRowOfSparseMatrix(mat, x[1]) then
-                                        mat := UnionOfRows(mat, x[1]);
-                                        vec := UnionOfRows(vec, x[2]);
+                                            mat := y.mat; vec := y.vec; unknowns := y.unknowns;
+
+                                            if not false in rep.algebraproducts then return true; fi;
+                                        elif not _IsRowOfSparseMatrix(mat, x[1]) then
+                                            mat := UnionOfRows(mat, x[1]);
+                                            vec := UnionOfRows(vec, x[2]);
+                                        fi;
                                     fi;
                                 fi;
+                            od;
+
+                            if Nrows(mat) > Ncols(mat) or Nrows(mat) > 8000 then
+                                x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
+
+                                mat := x.mat; vec := x.vec; unknowns := x.unknowns;
+
+                                if not false in rep.algebraproducts then return true; fi;
                             fi;
+
                         od;
-
-                        if Nrows(mat) > Ncols(mat) or Nrows(mat) > 8000 then
-                            x := MAJORANA_SolutionAlgProducts(mat,vec,unknowns, rep.algebraproducts, rep.setup);
-
-                            mat := x.mat; vec := x.vec; unknowns := x.unknowns;
-
-                            if not false in rep.algebraproducts then return true; fi;
-                        fi;
-
                     od;
                 od;
             od;
@@ -350,6 +337,37 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
     end );
 
 ##
+##
+##
+
+InstallGlobalFunction(MAJORANA_ListOfBadIndicesForResurrection,
+
+    function(evecs_a, evecs_b, rep)
+
+    local list, j, k, x, bad;
+
+    list := [,];
+
+    list[1] := List([1..Nrows(evecs_a)], i -> []);
+    list[2] := List([1..Nrows(evecs_a)], i -> []);
+
+    for j in [1..Nrows(evecs_a)] do
+        bad := MAJORANA_FindBadIndices(CertainRows(evecs_a,[j]), rep.algebraproducts, rep.setup);
+        for k in [1..Nrows(evecs_b)] do
+            x := Size(Intersection(bad, evecs_b!.indices[k]));
+            if x = 1 then
+                Add(list[1, j], k);
+            elif x > 1 then
+                Add(list[2, j], k);
+            fi;
+        od;
+    od;
+
+    return list;
+
+end );
+
+##
 ## Add a new eigenvector to a list of existing eigenvectors if not already a member
 ##
 
@@ -379,7 +397,7 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
     local   dim,
             test,
-            new_ev,
+            ev,
             pos,
             x,
             y,
@@ -387,22 +405,19 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
     dim := Size(setup.coords);
 
-    new_ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
-    pos := Position(MAJORANA_FusionTable[1], new_ev) - 1 ;
+    ev := MAJORANA_FusionTable[ evals ][1];
 
     x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
 
-    if x = false then return; fi;
+    if x in [fail, false] then return; fi;
 
-    if x = fail then return; fi;
-
-    if evals = [2,2] then
+    if evals = ["1/4", "1/4"] then
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
 
         if y = false then return; fi;
 
-        new[1] := MAJORANA_AddEvec(new[1], x - (1/4)*u*y);
-    elif evals = [3,3] then
+        new.("0") := MAJORANA_AddEvec(new.("0"), x - (1/4)*u*y);
+    elif evals = ["1/32", "1/32"] then
         y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
 
         if y = false then return; fi;
@@ -411,10 +426,10 @@ InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
         if z in [false,  fail] then return; fi;
 
-        new[2] := MAJORANA_AddEvec(new[2], z - (1/32)*u*y);
-        new[1] := MAJORANA_AddEvec(new[1], x + (3/32)*u*y - 4*z);
+        new.("1/4") := MAJORANA_AddEvec(new.("1/4"), z - (1/32)*u*y);
+        new.("0") := MAJORANA_AddEvec(new.("0"), x + (3/32)*u*y - 4*z);
     else
-        new[pos] := MAJORANA_AddEvec(new[pos],x);
+        new.(String(ev)) := MAJORANA_AddEvec(new.(String(ev)), x);
     fi;
 
     end );
@@ -646,14 +661,14 @@ function(rep)
 
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
-        for ev in [1..3] do
-            for v in Iterator(rep.evecs[i, ev]) do
+        for ev in rep.eigenvalues do
+            for v in Iterator(rep.evecs[i].(String(ev))) do
 
                 x := MAJORANA_SeparateAlgebraProduct(u, v, unknowns, rep.algebraproducts, rep.setup);
 
                 if x <> fail then
 
-                    x[2] := x[2] + MAJORANA_FusionTable[1, ev + 1]*v;
+                    x[2] := x[2] + ev*v;
 
                     if Size(x[1]!.indices[1]) = 1 then
                         y := MAJORANA_SolveSingleSolution(  x, mat, vec, unknowns,
@@ -923,7 +938,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     if res[1]!.indices[1] = [] or res = fail then return false; fi;
 
-    ev := MAJORANA_FusionTable[evals[1] + 1, evals[2] + 1];
+    ev := MAJORANA_FusionTable[ evals ];
 
     res := ev*res;
 
@@ -939,7 +954,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
 
     n := a - b;
 
-    if evals[1] = 2 then
+    if evals[1] = "1/4" then
         i := u!.indices[1, 1];
 
         y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], Rationals), c, innerproducts, setup);
@@ -1365,7 +1380,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
 
     function(rep)
 
-    local   dim, gram, null, unknowns, i, j, x;
+    local   dim, gram, null, unknowns, i, ev, x;
 
     if fail in rep.innerproducts then return; fi;
 
@@ -1395,9 +1410,9 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     od;
 
     for i in rep.setup.orbitreps do
-        for j in [1..3] do
-            rep.evecs[i, j] := RemoveMatWithHeads(rep.evecs[i, j], null);
-            rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev) := RemoveMatWithHeads(rep.evecs[i].(ev), null);
+            rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
         od;
     od;
 

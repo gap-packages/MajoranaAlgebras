@@ -51,6 +51,8 @@ DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
 
 DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 
+DeclareGlobalFunction( "MAJORANA_ListOfBadIndicesForResurrection" );
+
 DeclareGlobalFunction( "MAJORANA_AllConjugates" );
 
 DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );

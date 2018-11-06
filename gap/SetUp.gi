@@ -1,3 +1,4 @@
+
 ##
 ## Finds all possible shapes of a Majorana representation of the form (G,T,V)
 ## that obey axiom M8.
@@ -290,7 +291,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     function( arg )
 
-    local input, index, axioms, rep, s, t, i, j, k, gens, orbs, dim, algebras;
+    local input, index, axioms, rep, s, t, i, dim, algebras, ev, orbs;
 
     input := arg[1];
     index := arg[2];
@@ -340,7 +341,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     for i in rep.setup.orbitreps do
         rep.evecs[i] := rec(  );
         for ev in rep.eigenvalues do
-            rep.evecs.(String(ev)) := SparseMatrix(0, t, [], [], Rationals);
+            rep.evecs[i].(String(ev)) := SparseMatrix(0, t, [], [], Rationals);
         od;
     od;
 
@@ -366,9 +367,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
                                     vectors := SparseMatrix( 0, dim, [], [], Rationals) );
 
     for i in rep.setup.orbitreps do
-        for ev in rep.eigenvectors do
-            rep.evecs[i].(String(ev))!.ncols := dim;
-            rep.evecs[i].(String(ev)) := MAJORANA_BasisOfEvecs(rep.evecs[i].(String(ev)));
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev)!.ncols := dim;
+            rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(String(ev)));
         od;
     od;
 

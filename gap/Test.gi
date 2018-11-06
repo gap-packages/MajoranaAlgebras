@@ -1,10 +1,21 @@
-# Table of fusion rules
+##
+## The Majorana fusion table, implemented as a hashmap.
+##
 
-BindGlobal("MAJORANA_FusionTable",
-           [ [    1,    0,   1/4, 1/32]
-            ,[    0,    0,   1/4, 1/32]
-            ,[  1/4,  1/4,     0, 1/32]
-            ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
+BindGlobal("MAJORANA_FusionTable", HashMap( 16 ) );
+
+MAJORANA_FusionTable[ [ "0", "0" ] ]        := [ 0 ];
+MAJORANA_FusionTable[ [ "0", "1/4" ] ]      := [ 1/4 ];
+MAJORANA_FusionTable[ [ "0", "1/32" ] ]     := [ 1/32 ];
+
+MAJORANA_FusionTable[ [ "1/4", "0" ] ]      := [ 1/4 ];
+MAJORANA_FusionTable[ [ "1/4", "1/4" ] ]    := [ 1, 0 ];
+MAJORANA_FusionTable[ [ "1/4", "1/32" ] ]   := [ 1/32 ];
+
+MAJORANA_FusionTable[ [ "1/32", "0" ] ]     := [ 1/32 ];
+MAJORANA_FusionTable[ [ "1/32", "1/4" ] ]   := [ 1/32 ];
+MAJORANA_FusionTable[ [ "1/32", "1/32" ] ]  := [ 1, 0, 1/4 ];
+
 
 InstallGlobalFunction(MAJORANA_TestEvecs,
 
