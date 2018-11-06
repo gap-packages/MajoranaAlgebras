@@ -237,29 +237,29 @@ rec(    algebraproducts := [    SparseMatrix( 1, 8, [ [ 1 ] ], [ [ 1 ] ], Ration
 BindGlobal( "MAJORANA_DihedralAlgebrasTauMaps", rec());
 
 for type in RecNames( MAJORANA_DihedralAlgebras ) do
-    MAJORANA_DihedralAlgebrasTauMaps.(type) := ShallowCopy( MAJORANA_DihedralAlgebras.(type) );
+    MAJORANA_DihedralAlgebrasTauMaps.(type) := StructuralCopy( MAJORANA_DihedralAlgebras.(type) );
 od;
 
 g := MAJORANA_DihedralAlgebrasTauMaps.2A.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.2A.orbits := [ [ e, ], [ , e ] ];
+MAJORANA_DihedralAlgebrasTauMaps.2A.setup.orbits := [ [ e, ], [ , e ] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.2B.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.2B.orbits := [ [ e, ], [ , e ] ];
+MAJORANA_DihedralAlgebrasTauMaps.2B.setup.orbits := [ [ e, ], [ , e ] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.3A.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.3A.orbits := [ [ e, g.2*g.1, g.1 ] ];
+MAJORANA_DihedralAlgebrasTauMaps.3A.setup.orbits := [ [ e, g.2*g.1, g.1 ] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.3C.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.3C.orbits := [ [ e, g.2*g.1, g.1 ] ];
+MAJORANA_DihedralAlgebrasTauMaps.3C.setup.orbits := [ [ e, g.2*g.1, g.1 ] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.4A.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.4A.orbits := [ [ e, , g.2, ], [ , e, ,g.1] ];
+MAJORANA_DihedralAlgebrasTauMaps.4A.setup.orbits := [ [ e, , g.2, ], [ , e, ,g.1] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.4B.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.4B.orbits := [ [ e, , g.2, ], [ , e, ,g.1] ];
+MAJORANA_DihedralAlgebrasTauMaps.4B.setup.orbits := [ [ e, , g.2, ], [ , e, ,g.1] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.5A.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.5A.orbits := [ [ e, , , g.2*g.1, g.2 ], [ , e, g.1, , , ] ];
+MAJORANA_DihedralAlgebrasTauMaps.5A.setup.orbits := [ [ e, , , g.2*g.1, g.2 ], [ , e, g.1, , , ] ];
 
 g := MAJORANA_DihedralAlgebrasTauMaps.6A.group; e := Identity(g);
-MAJORANA_DihedralAlgebrasTauMaps.6A.orbits := [ [ e, , , , g.2, g.2*g.1 ], [ , e, g.1, g.1*g.2, , ] ];
+MAJORANA_DihedralAlgebrasTauMaps.6A.setup.orbits := [ [ e, , , , g.2, g.2*g.1 ], [ , e, g.1, g.1*g.2, , ] ];
