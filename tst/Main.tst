@@ -25,8 +25,6 @@ gap> MajoranaAlgebraTest(rep);
 true
 gap> MAJORANA_Dimension(rep);
 26
-gap> MAJORANA_TestOrthogonality(rep);
-true
 gap> MAJORANA_TestEvecs(rep);
 true
 gap> rep := MajoranaRepresentationNoForm(ex, 1);;
