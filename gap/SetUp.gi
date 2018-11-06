@@ -303,6 +303,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
+                        eigenvalues := [0, 1/4, 1/32], # The eigenvalues not equal to one
                         generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
                         axioms      := axioms   );
@@ -334,18 +335,13 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.algebraproducts := List([1..s], x -> false);
     rep.innerproducts   := List([1..s], x -> false);
-    rep.evecs           := NullMat(t,3);
+    rep.evecs           := [];
 
-    for j in [1..t] do
-        if j in rep.setup.orbitreps then
-            for k in [1..3] do
-                rep.evecs[j, k] := SparseMatrix(0, t, [], [], Rationals);
-            od;
-        else
-            for k in [1..3] do
-                rep.evecs[j, k] := false;
-            od;
-        fi;
+    for i in rep.setup.orbitreps do
+        rep.evecs[i] := rec(  );
+        for ev in rep.eigenvalues do
+            rep.evecs.(String(ev)) := SparseMatrix(0, t, [], [], Rationals);
+        od;
     od;
 
     ## Embed dihedral algebras
@@ -370,9 +366,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
                                     vectors := SparseMatrix( 0, dim, [], [], Rationals) );
 
     for i in rep.setup.orbitreps do
-        for j in [1..3] do
-            rep.evecs[i, j]!.ncols := dim;
-            rep.evecs[i, j] := MAJORANA_BasisOfEvecs(rep.evecs[i, j]);
+        for ev in rep.eigenvectors do
+            rep.evecs[i].(String(ev))!.ncols := dim;
+            rep.evecs[i].(String(ev)) := MAJORANA_BasisOfEvecs(rep.evecs[i].(String(ev)));
         od;
     od;
 
