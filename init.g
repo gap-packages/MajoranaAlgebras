@@ -6,6 +6,8 @@
 
 ReadPackage( "MajoranaAlgebras", "gap/SignedPerm.gd");
 
+ReadPackage( "MajoranaAlgebras", "gap/OrbitalStructure.gd");
+
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Test.gd");
