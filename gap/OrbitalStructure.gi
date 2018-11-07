@@ -92,19 +92,19 @@ end);
 
 InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementInverse,
 function(os, pair)
-
+    return MAJORANA_OrbitalCanonizingElement(os, pair)^-1;
     # Returns a group elements that maps the orbital representative of <pair>
     # to <pair> itself. This will be the inverse of the output of
     # MAJORANA_OrbitalCanonizingElement( os, pair )
 
-    local fo, so, p1, p2;
+#    local fo, so, p1, p2;
 
-    fo := os.orbnums[pair[1]];
-    p1 := RepresentativeAction(os.group, os.orbreps[fo], pair[1]);
-    so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
-    p2 := RepresentativeAction(os.orbstabs[fo].stab, os.orbstabs[fo].orbreps[so], os.act(pair[2], p1));
+#    fo := os.orbnums[pair[1]];
+#    p1 := RepresentativeAction(os.group, os.orbreps[fo], pair[1]);
+#    so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
+#    p2 := RepresentativeAction(os.orbstabs[fo].stab, os.orbstabs[fo].orbreps[so], os.act(pair[2], p1));
 
-    return p1 * p2;
+#    return p1 * p2;
 end);
 
 # Acting on sets of size 2
@@ -156,9 +156,9 @@ function(os, pair)
                                    , os.orbstabs[oa].orbreps[ob]);
     else
         p1 := RepresentativeAction(os.group, b, r2);
-        oa := os.orbstabs[ob].orbnums[os.act(a, p1)];
+        oa := os.orbstabs[os.orbnums[r2]].orbnums[os.act(a, p1)];
         p2 := RepresentativeAction(os.orbstabs[ob].stab, os.act(a, p1)
-                                   , os.orbstabs[oa].orbreps[ob]);
+                                   , os.orbstabs[ob].orbreps[oa]);
     fi;
 
     return p1 * p2;
