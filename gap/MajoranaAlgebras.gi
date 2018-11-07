@@ -198,8 +198,6 @@ function(arg)
             rep.evecs[i] := new;
 
             # Calculate the intersection of the eigenspaces to find new nullspace vectors
-            # Do not understand why we have to do this twice!
-            MAJORANA_IntersectEigenspaces(rep);
             MAJORANA_IntersectEigenspaces(rep);
         od;
     od;
@@ -1113,8 +1111,6 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     # Adjust the system of linear equations to take into account the new known products
     system := MAJORANA_RemoveKnownAlgProducts(system, rep);
 
-    # TODO which one of these?
-    # return system;
     return MAJORANA_SolutionAlgProducts(system, rep);
 
     end );

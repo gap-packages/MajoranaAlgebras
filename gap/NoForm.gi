@@ -83,6 +83,8 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         od;
     od;
 
+    MAJORANA_IntersectEigenspaces(rep);
+
     end );
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectorsNoForm,
