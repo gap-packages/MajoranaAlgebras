@@ -912,12 +912,6 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
 
     Info(   InfoMajorana, 50, "All conjugates") ;
 
-    # TODO Why do we do this?
-    x := EchelonMatTransformationDestructive(CertainColumns(system.mat, [Size(system.unknowns), Size(system.unknowns) - 1..1]));
-
-    system.mat := CertainColumns(x.vectors, [Size(system.unknowns), Size(system.unknowns) - 1..1]);
-    system.vec := x.coeffs*system.vec;
-
     new := rec( mat := SparseMatrix( 0, 0, [], [], Rationals ),
                 vec := SparseMatrix( 0, Ncols(system.vec), [], [], Rationals ),
                 unknowns := system.unknowns );
