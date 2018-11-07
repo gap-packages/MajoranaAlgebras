@@ -64,18 +64,18 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
 
     local i, j, v, x, pos;
 
-    rep.vec!.ncols := Size(rep.setup.coords);
+    rep.system.vec!.ncols := Size(rep.setup.coords);
     rep.setup.nullspace.vectors!.ncols := Size(rep.setup.coords);
 
-    for i in [1..Nrows(rep.mat)] do
-        if ForAll(rep.mat!.indices[i], x -> rep.unknowns[x] in rep.setup.coords) then
-            v := CertainRows(rep.vec, [i]);
-            for j in [1..Size(rep.mat!.indices[i])] do
-                x := rep.mat!.indices[i, j];
+    for i in [1..Nrows(rep.system.mat)] do
+        if ForAll(rep.system.mat!.indices[i], x -> rep.system.unknowns[x] in rep.setup.coords) then
+            v := CertainRows(rep.system.vec, [i]);
+            for j in [1..Size(rep.system.mat!.indices[i])] do
+                x := rep.system.mat!.indices[i, j];
 
-                pos := Position(rep.setup.coords, rep.unknowns[x]);
+                pos := Position(rep.setup.coords, rep.system.unknowns[x]);
 
-                SetEntry(v, 1, pos, -rep.mat!.entries[i, j]);
+                SetEntry(v, 1, pos, -rep.system.mat!.entries[i, j]);
 
                 rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, v);
             od;

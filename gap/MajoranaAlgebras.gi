@@ -37,7 +37,7 @@ function(arg)
         elif ForAll(rep.algebraproducts{unknowns}, x -> x = false) then
             # No more algebra products have been found - the algebra is incomplete
             Info( InfoMajorana, 10, "Fail" );
-            rep.system := main.system;
+            rep.system := main;
             return rep;
         fi;
     od;
