@@ -1,7 +1,7 @@
 
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
-function(mat,vec) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns record where solutions[i] gives the value of unknown variable i if found, and fail otherwise
+function(system) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns record where solutions[i] gives the value of unknown variable i if found, and fail otherwise
 
     local   n,
             res,
@@ -11,11 +11,11 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
             elm,
             rowlist;
 
-    n := Ncols(mat);
+    n := Ncols(system.mat);
 
-    res := EchelonMatTransformationDestructive(mat);
-    mat := res.vectors;
-    vec := res.coeffs*vec;
+    res := EchelonMatTransformationDestructive(system.mat);
+    system.mat := res.vectors;
+    system.vec := res.coeffs*system.vec;
 
     sol := [1..n]*0;
     rowlist := [];
@@ -26,17 +26,18 @@ function(mat,vec) # Takes as input two matrices, the second being interpreted as
 
         if pos = 0 then
             sol[i] := fail;
-        elif Size(mat!.indices[pos]) > 1 then
+        elif Size(system.mat!.indices[pos]) > 1 then
             Add(rowlist, pos);
             sol[i] := fail;
         else
-            sol[i] := CertainRows(vec, [pos]);
+            sol[i] := CertainRows(system.vec, [pos]);
         fi;
     od;
 
     return rec( solutions := sol,
-                mat := CertainRows(mat, rowlist),
-                vec := CertainRows(vec, rowlist)  );
+                mat := CertainRows(system.mat, rowlist),
+                vec := CertainRows(system.vec, rowlist),
+                unknowns := system.unknowns  );
 
     end );
 

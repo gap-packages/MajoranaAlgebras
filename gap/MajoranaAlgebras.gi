@@ -910,31 +910,29 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
 
     function(system, rep)
 
-    local mat, vec, unknowns, i, new, nonzero, g, conj, x;
+    local i, new, nonzero, g, conj, x;
 
     Info(   InfoMajorana, 50, "All conjugates") ;
 
-    mat := system.mat; vec := system.vec; unknowns := system.unknowns;
-
     # TODO Why do we do this?
-    x := EchelonMatTransformationDestructive(CertainColumns(mat, [Size(unknowns), Size(unknowns) - 1..1]));
+    x := EchelonMatTransformationDestructive(CertainColumns(system.mat, [Size(system.unknowns), Size(system.unknowns) - 1..1]));
 
-    mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
-    vec := x.coeffs*vec;
+    system.mat := CertainColumns(x.vectors, [Size(system.unknowns), Size(system.unknowns) - 1..1]);
+    system.vec := x.coeffs*system.vec;
 
-    new := rec( mat := SparseMatrix( 0, Ncols(mat), [], [], Rationals ),
-                vec := SparseMatrix( 0, Ncols(vec), [], [], Rationals ),
-                unknowns := unknowns );
+    new := rec( mat := SparseMatrix( 0, 0, [], [], Rationals ),
+                vec := SparseMatrix( 0, Ncols(system.vec), [], [], Rationals ),
+                unknowns := system.unknowns );
 
     # Loop over group elements and matrix rows
     for g in rep.setup.conjelts do
-        for i in [1 .. Nrows(mat)] do
-            if mat!.indices[i] <> [] then
+        for i in [1 .. Nrows(system.mat)] do
+            if system.mat!.indices[i] <> [] then
                 conj := [,];
 
                 # Calculate the images under g
-                conj[1] := MAJORANA_ConjugateRow(CertainRows(mat, [i]), g, unknowns );
-                conj[2] := MAJORANA_ConjugateVec(CertainRows(vec, [i]), g);
+                conj[1] := MAJORANA_ConjugateRow(CertainRows(system.mat, [i]), g, new.unknowns );
+                conj[2] := MAJORANA_ConjugateVec(CertainRows(system.vec, [i]), g);
 
                 new.mat := UnionOfRows(new.mat, conj[1]);
                 new.vec := UnionOfRows(new.vec, conj[2]);
@@ -1080,7 +1078,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     local   sol,        # solution of system
             sign,       # correct sign of 5A axes
             i,          # loop over <unknowns>
-            x,
+            d,
             nonzero;
 
     # If the matrix is zero then return
@@ -1092,9 +1090,9 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
     # Turn the matrix into an integer matrix
     for i in [1..Nrows(system.mat)] do
-        x := _FoldList2(system.mat!.entries[i], DenominatorRat, LcmInt);
-        system.mat!.entries[i] := system.mat!.entries[i]*x;
-        system.vec!.entries[i] := system.vec!.entries[i]*x;
+        d := _FoldList2(system.mat!.entries[i], DenominatorRat, LcmInt);
+        system.mat!.entries[i] := system.mat!.entries[i]*d;
+        system.vec!.entries[i] := system.vec!.entries[i]*d;
     od;
 
     # Turn the matrix into an integer matrix
@@ -1118,7 +1116,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     Unbind(system.solutions);
 
     # Adjust the system of linear equations to take into account the new known products
-    x := MAJORANA_RemoveKnownAlgProducts(system, rep);
+    system := MAJORANA_RemoveKnownAlgProducts(system, rep);
 
     # Take out any zero rows
     nonzero := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
@@ -1126,7 +1124,9 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     system.mat := CertainRows(system.mat, nonzero);
     system.vec := CertainRows(system.vec, nonzero);
 
-    return MAJORANA_SolutionAlgProducts(system, rep);
+    # TODO which one of these?
+    return system;
+    # return MAJORANA_SolutionAlgProducts(system, rep);
 
     end );
 
