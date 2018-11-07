@@ -910,7 +910,7 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
 
     function(system, rep)
 
-    local i, new, nonzero, g, conj, x;
+    local i, new, g, conj, x;
 
     Info(   InfoMajorana, 50, "All conjugates") ;
 
@@ -946,15 +946,8 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
 
             if not false in rep.algebraproducts then return true; fi;
 
-            # Take only the nonzero rows of new_mat and new_vec
-            nonzero := Filtered([1..Nrows(new.mat)], j -> new.mat!.indices[j] <> []);
-            new.mat := CertainRows(new.mat, nonzero);
-            new.vec := CertainRows(new.vec, nonzero);
-
             # And also remove the known products from the original system
-            system := MAJORANA_RemoveKnownAlgProducts(system, rep);
-
-            if not false in rep.algebraproducts then return true; fi;
+            system := MAJORANA_RemoveKnownAlgProducts(system, rep, false);
         fi;
     od;
 
@@ -1113,16 +1106,12 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         fi;
     od;
 
+    if not false in rep.algebraproducts then return system; fi;
+
     Unbind(system.solutions);
 
     # Adjust the system of linear equations to take into account the new known products
     system := MAJORANA_RemoveKnownAlgProducts(system, rep);
-
-    # Take out any zero rows
-    nonzero := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
-
-    system.mat := CertainRows(system.mat, nonzero);
-    system.vec := CertainRows(system.vec, nonzero);
 
     # TODO which one of these?
     return system;
@@ -1134,7 +1123,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
 
     function(x, system, rep)
 
-    local   elm, ind, y, switch, nonzero, i;
+    local   elm, ind, y, switch, i;
 
     Info( InfoMajorana, 60, "Solved a single solution");
 
@@ -1147,12 +1136,6 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
 
     # Reduce the system of linear equations using this new product
     system := MAJORANA_RemoveKnownAlgProducts( system, rep );
-
-    # Remove any nonzero rows
-    nonzero := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
-
-    system.mat := CertainRows(system.mat, nonzero);
-    system.vec := CertainRows(system.vec, nonzero);
 
     # While we continue to find new products
     switch := true;
@@ -1175,20 +1158,11 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
 
         if switch = true then
             Info( InfoMajorana, 60, "Solved a new single solution");
+            # Reduce the system of linear equations using this new product
+            system := MAJORANA_RemoveKnownAlgProducts( system, rep );
         fi;
-
-        # Reduce the system of linear equations using this new product
-        system := MAJORANA_RemoveKnownAlgProducts( system, rep );
-
-        # Remove any nonzero rows
-        nonzero := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
-
-        system.mat := CertainRows(system.mat, nonzero);
-        system.vec := CertainRows(system.vec, nonzero);
     od;
 
-    # TODO which of these?
-    #return system;
     return MAJORANA_SolutionAlgProducts(system, rep);
 
     end );
@@ -1228,9 +1202,10 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
 
 InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
 
-    function( system, rep)
+    function( arg )
 
-    local   unsolved,
+    local   system, rep, nonzero,
+            unsolved,
             i,
             j,
             elm,
@@ -1239,7 +1214,14 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
             sign,
             g,
             pos,
-            prod;
+            prod,
+            nonzero_rows;
+
+    system := arg[1]; rep := arg[2];
+
+    nonzero := true;
+
+    if Length(arg) > 2 then nonzero := arg[3]; fi;
 
     if Nrows(system.mat) = 0 then return system; fi;
 
@@ -1280,8 +1262,12 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     system.mat := CertainColumns(system.mat, unsolved);
     system.unknowns := system.unknowns{unsolved};
 
-    # We don't want to remove the non-zero rows because we want to preserve the
-    # row indexing when we use this inside MAJORANA_AllConjugates.
+    if nonzero = true then
+        # Take out any zero rows
+        nonzero_rows := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
+        system.mat := CertainRows(system.mat, nonzero_rows);
+        system.vec := CertainRows(system.vec, nonzero_rows);
+    fi;
 
     return system;
 
@@ -1296,7 +1282,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
 
     function(system, innerproducts)
 
-    local   unsolved, i, j, elm, prod, nonzero;
+    local   unsolved, i, j, elm, prod, nonzero_rows;
 
     unsolved := [];
 
@@ -1325,9 +1311,9 @@ InstallGlobalFunction( MAJORANA_RemoveKnownInnProducts,
     system.unknowns := system.unknowns{unsolved};
 
     # Remove any zero rows
-    nonzero := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
-    system.mat := CertainRows(system.mat, nonzero);
-    system.vec := CertainRows(system.vec, nonzero);
+    nonzero_rows := Filtered([1..Nrows(system.mat)], j -> system.mat!.indices[j] <> []);
+    system.mat := CertainRows(system.mat, nonzero_rows);
+    system.vec := CertainRows(system.vec, nonzero_rows);
 
     return system;
 
