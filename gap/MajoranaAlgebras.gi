@@ -1104,7 +1104,7 @@ InstallGlobalFunction( MAJORANA_SolveSingleSolution,
 
         switch := false;
 
-        for i in Filtered( [1..Nrows(mat)], j -> Size(mat!.indices[i]) = 1 )  do
+        for i in Filtered( [1..Nrows(mat)], j -> Size(mat!.indices[j]) = 1 )  do
             switch := true;
             elm := mat!.entries[i, 1];
             MAJORANA_RecordSolution( CertainRows(vec, [i])*(1/elm), unknowns[mat!.indices[i, 1]], rep);
