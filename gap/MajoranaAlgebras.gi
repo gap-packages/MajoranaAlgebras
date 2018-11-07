@@ -164,7 +164,7 @@ function(arg)
             for ev in UnorderedTuples(RecNames(rep.evecs[i]), 2) do
                 for a in Iterator( rep.evecs[i].(ev[1]) ) do
                     for b in Iterator( rep.evecs[i].(ev[2]) ) do
-                        FUSE(a, b, u, ev, new, rep.innerproducts, rep.algebraproducts, rep.setup);
+                        FUSE(a, b, u, ev, new, rep);
                     od;
                 od;
             od;
@@ -374,36 +374,28 @@ InstallGlobalFunction(MAJORANA_AddEvec,
 
 InstallGlobalFunction( MAJORANA_FuseEigenvectors,
 
-    function(a, b, u, evals, new, innerproducts, algebraproducts, setup)
+    function(a, b, u, evals, new, rep)
 
-    local   dim,
-            test,
-            ev,
-            pos,
-            x,
-            y,
-            z;
-
-    dim := Size(setup.coords);
+    local   ev, x, y, z;
 
     ev := MAJORANA_FusionTable[ evals ][1];
 
-    x := MAJORANA_AlgebraProduct(a,b,algebraproducts,setup);
+    x := MAJORANA_AlgebraProduct(a, b, rep.algebraproducts, rep.setup);
 
     if x in [fail, false] then return; fi;
 
     if evals = ["1/4", "1/4"] then
-        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+        y := MAJORANA_InnerProduct(a, b, rep.innerproducts, rep.setup);
 
         if y = false then return; fi;
 
         new.("0") := MAJORANA_AddEvec(new.("0"), x - (1/4)*u*y);
     elif evals = ["1/32", "1/32"] then
-        y := MAJORANA_InnerProduct(a,b,innerproducts,setup);
+        y := MAJORANA_InnerProduct(a, b, rep.innerproducts, rep.setup);
 
         if y = false then return; fi;
 
-        z := MAJORANA_AlgebraProduct(u,x,algebraproducts, setup);
+        z := MAJORANA_AlgebraProduct(u, x, rep.algebraproducts, rep.setup);
 
         if z in [false,  fail] then return; fi;
 

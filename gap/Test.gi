@@ -60,10 +60,7 @@ InstallGlobalFunction( MAJORANA_TestFusionAxis,
 
         for a in Iterator( evecs.(evals[1]) ) do
             for b in Iterator( evecs.(evals[2]) ) do
-                MAJORANA_FuseEigenvectorsNoForm(  a, b, u, evals, new,
-                                            rep.innerproducts,
-                                            rep.algebraproducts,
-                                            rep.setup );
+                MAJORANA_FuseEigenvectorsNoForm(  a, b, u, evals, new, rep );
             od;
         od;
 
