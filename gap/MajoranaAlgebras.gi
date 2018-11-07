@@ -1114,8 +1114,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
     system := MAJORANA_RemoveKnownAlgProducts(system, rep);
 
     # TODO which one of these?
-    return system;
-    # return MAJORANA_SolutionAlgProducts(system, rep);
+    # return system;
+    return MAJORANA_SolutionAlgProducts(system, rep);
 
     end );
 
