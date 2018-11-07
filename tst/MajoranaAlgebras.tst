@@ -30,7 +30,7 @@ gap> rep := MAJORANA_SetUp(ex, 4, "AllAxioms");;
 ## Test bad indices func
 ##
 gap> u := SparseMatrix( 1, 21, [[16]], [[1]], Rationals);;
-gap> Size(MAJORANA_FindBadIndices(u, rep.algebraproducts, rep.setup));
+gap> Size(MAJORANA_FindBadIndices(u, rep));
 27
 
 ##
