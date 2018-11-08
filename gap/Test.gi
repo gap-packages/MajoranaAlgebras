@@ -209,18 +209,6 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
 
     end );
 
-InstallGlobalFunction( MAJORANA_IsComplete,
-
-    function(rep)
-
-    if false in rep.algebraproducts then
-        return false;
-    else
-        return true;
-    fi;
-
-    end );
-
 InstallGlobalFunction( MAJORANA_TestPositiveDefiniteForm,
 
     function(rep)
