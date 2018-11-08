@@ -26,4 +26,4 @@ ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/TauMaps.gd");
 
-
+ReadPackage( "MajoranaAlgebras", "gap/Miscellaneous.gd");
