@@ -177,7 +177,7 @@ InstallGlobalFunction( TauMapMajoranaRepresentation,
             return rep;
         elif ForAll(rep.algebraproducts{unknowns}, x -> x = false) then
             Info( InfoMajorana, 10, "Fail" );
-            rep.mat := main.mat; rep.vec := main.vec; rep.unknowns := main.unknowns;
+            rep.system := main;
             return rep;
         fi;
     od;

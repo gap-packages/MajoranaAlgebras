@@ -22,4 +22,4 @@ gap> NClosedMajoranaRepresentation(rep);;
 gap> MAJORANA_IsComplete(rep);
 true
 gap> MAJORANA_Dimension(rep);
-0
+15
