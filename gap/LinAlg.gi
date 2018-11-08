@@ -1,7 +1,18 @@
 
+##
+## Takes as its input a record <system> with the components <mat>, <vec> and <unknowns>
+## and attempts to solve the system of linear equations where each row of <mat> is
+## a linear combinations of indeterminants indexed by <unknowns> and the corresponding
+## row of <vec> gives the value of this linear combination.
+##
+##
+## The argument <vec> may be an n x m matrix, in which case the solutions of the system
+## will be row vectors of length m. Here n is the number of rows of <mat>.
+##
+
 InstallGlobalFunction(MAJORANA_SolutionMatVecs,
 
-function(system) # Takes as input two matrices, the second being interpreted as a vector of vectors. Returns record where solutions[i] gives the value of unknown variable i if found, and fail otherwise
+function(system)
 
     local   n,
             res,
