@@ -45,10 +45,7 @@ function(system)
         fi;
     od;
 
-    return rec( solutions := sol,
-                mat := CertainRows(system.mat, rowlist),
-                vec := CertainRows(system.vec, rowlist),
-                unknowns := system.unknowns  );
+    system.solutions := sol;
 
     end );
 

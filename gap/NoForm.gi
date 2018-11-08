@@ -128,7 +128,7 @@ InstallGlobalFunction( MAJORANA_MainLoopNoForm,
 
     MAJORANA_Fusion(rep, false);
 
-    MAJORANA_EigenvectorsAlgebraUnknowns(rep);
+    MAJORANA_EigenvectorsAlgebraUnknowns(false, rep);
 
     MAJORANA_Fusion(rep, false);
 

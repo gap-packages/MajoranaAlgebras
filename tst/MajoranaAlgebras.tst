@@ -11,7 +11,12 @@ true
 gap> MAJORANA_Fusion(rep);;
 gap> Nrows(rep.evecs[1].("0"));
 9
-gap> MAJORANA_EigenvectorsAlgebraUnknowns(rep);;
+gap> dim := Size(rep.setup.coords);;
+gap> mat := SparseMatrix(0, 0, [], [], Rationals);;
+gap> vec := SparseMatrix(0, dim, [], [], Rationals);;
+gap> unknowns := [];;
+gap> system := rec( mat := mat, vec := vec, unknowns := unknowns );;
+gap> MAJORANA_EigenvectorsAlgebraUnknowns(system, rep);;
 gap> MajoranaAlgebraTest(rep);
 true
 gap> MAJORANA_AxiomM1(rep);;
@@ -101,8 +106,8 @@ gap> vec := SparseMatrix( 1, 1, [ [ 1 ] ], [ [ 7123/518400 ] ], Rationals );;
 gap> unknowns := [1..5];;
 gap> innerproducts := [false, 289/57600, 1321/518400, false, 23/5184 ];;
 gap> system := rec(mat := mat, vec := vec, unknowns := unknowns);;
-gap> r := MAJORANA_RemoveKnownInnProducts(system, innerproducts);;
-gap> r.unknowns;
+gap> MAJORANA_RemoveKnownInnProducts(system, innerproducts);;
+gap> system.unknowns;
 [ 1, 4 ]
 gap> eq := [ SparseMatrix( 1, 3, [ [ 1 ] ], [ [ -1 ] ], Rationals ), SparseMatrix( 1, 1, [ [ 1 ] ], [ [ -1/8192 ] ], Rationals ) ];;
 gap> mat := SparseMatrix( 0, 3, [  ], [  ], Rationals );;
