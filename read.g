@@ -13,6 +13,8 @@ ReadPackage( "MajoranaAlgebras", "gap/Test.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/SetUp.gi" );
 
+ReadPackage( "MajoranaAlgebras", "gap/Shapes.gi" );
+
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Examples.gi");
