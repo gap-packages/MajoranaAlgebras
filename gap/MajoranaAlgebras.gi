@@ -56,12 +56,6 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     MAJORANA_Fusion(rep);
 
-    MAJORANA_EigenvectorsAlgebraUnknowns(false, rep);
-
-    MAJORANA_AxiomM1(rep);
-
-    MAJORANA_Fusion(rep);
-
     return MAJORANA_UnknownAlgebraProducts(rep);
 
     end);
@@ -671,13 +665,6 @@ function(system, rep)
             x;          # result of SeparateAlgebraProduct
 
     Info( InfoMajorana, 50, "Building eigenvector unknowns");
-
-    if system = false then
-        # Setup the system of linear equations
-        system := rec(  unknowns := [],
-                        mat := SparseMatrix(0, 0, [], [], Rationals),
-                        vec := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals) );
-    fi;
 
     # Loop over the representatives of the action of G on T
     for i in rep.setup.orbitreps do
