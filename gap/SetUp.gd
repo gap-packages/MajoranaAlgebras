@@ -1,7 +1,7 @@
 DeclareGlobalFunction( "MAJORANA_SetUp" );
 
-#! @Chapter Majorana representations
-#! @Section The set up functions
+#! @Chapter Shapes of a Majorana representation
+#! @Section The shape functions
 
 #! @Arguments G,T
 #! @Returns a record with a component <A>shapes</A>
