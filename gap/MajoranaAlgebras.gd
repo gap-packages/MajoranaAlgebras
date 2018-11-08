@@ -19,8 +19,24 @@ DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
 
 DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
 
+#! @Arguments u, v, algebraproducts, setup
+#! @Returns the algebra product of vectors <A>u</A> and <A>v</A>
+#! @Description The arguments <A>u</A> and <A>v</A> must be row vectors in sparse
+#! matrix format. The arguments <A>algebraproducts</A> and <A>setup</A> must be
+#! the components with these names of a representation as outputted by
+#! <Ref Func="MajoranaRepresentation"/>. The output is the algebra product of
+#! <A>u</A> and <A>v</A>, also in sparse matrix representation.
+#! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
 DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 
+#! @Arguments u, v, innerproducts, setup
+#! @Returns the inner product of vectors <A>u</A> and <A>v</A>
+#! @Description The arguments <A>u</A> and <A>v</A> must be row vectors in sparse
+#! matrix format. The arguments <A>innerproducts</A> and <A>setup</A> must be
+#! the components with these names of a representation as outputted by
+#! <Ref Func="MajoranaRepresentation"/>. The output is the inner product of
+#! <A>u</A> and <A>v</A>.
+#! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
 DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
 DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
