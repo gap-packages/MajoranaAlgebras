@@ -100,21 +100,24 @@ gap> mat := SparseMatrix( 1, 5, [ [ 1, 4 ] ], [ [ 1, -1 ] ], Rationals );;
 gap> vec := SparseMatrix( 1, 1, [ [ 1 ] ], [ [ 7123/518400 ] ], Rationals );;
 gap> unknowns := [1..5];;
 gap> innerproducts := [false, 289/57600, 1321/518400, false, 23/5184 ];;
-gap> r := MAJORANA_RemoveKnownInnProducts(mat, vec, unknowns, innerproducts);;
+gap> system := rec(mat := mat, vec := vec, unknowns := unknowns);;
+gap> r := MAJORANA_RemoveKnownInnProducts(system, innerproducts);;
 gap> r.unknowns;
 [ 1, 4 ]
 gap> eq := [ SparseMatrix( 1, 3, [ [ 1 ] ], [ [ -1 ] ], Rationals ), SparseMatrix( 1, 1, [ [ 1 ] ], [ [ -1/8192 ] ], Rationals ) ];;
 gap> mat := SparseMatrix( 0, 3, [  ], [  ], Rationals );;
 gap> vec := SparseMatrix( 0, 1, [  ], [  ], Rationals );;
 gap> unknowns := [ 1, 2, 3 ];;
+gap> system := rec(mat := mat, vec := vec, unknowns := unknowns);;
 gap> innerproducts := [ false, false, false ];;
-gap> MAJORANA_SingleInnerSolution( eq, mat, vec, unknowns, innerproducts );;
+gap> MAJORANA_SingleInnerSolution( eq, system, innerproducts );;
 gap> innerproducts;
 [ 1/8192, false, false ]
 gap> mat := SparseMatrix( 1, 1, [ [ 1 ] ], [ [ 1 ] ], Rationals );;
 gap> vec := SparseMatrix( 1, 1, [ [ 1 ] ], [ [ 1/2 ] ], Rationals );;
 gap> unknowns := [ 1 ];;
 gap> innerproducts := [ false ];;
-gap> MAJORANA_SolutionInnerProducts(mat, vec, unknowns, innerproducts);;
+gap> system := rec(mat := mat, vec := vec, unknowns := unknowns);;
+gap> MAJORANA_SolutionInnerProducts(system, innerproducts);;
 gap> innerproducts;
 [ 1/2 ]
