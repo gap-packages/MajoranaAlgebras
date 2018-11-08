@@ -183,31 +183,3 @@ InstallGlobalFunction( TauMapMajoranaRepresentation,
     od;
 
     end );
-
-InstallGlobalFunction( MAJORANA_TauMappedWord,
-
-    function(rep, subrep, w, gens, inv)
-
-    local im, i, imgs;
-
-    imgs := rep.involutions{inv};
-
-    if IsRowVector(w) then
-        im := List(w, i -> MAJORANA_TauMappedWord( rep, subrep, subrep.setup.coords[i], gens, inv) );
-
-        if im[1] = im[2] then Error(); fi;
-
-        return SortedList( im );
-    else
-        i := Position(subrep.setup.coords, w);
-
-        if IsBound( subrep.setup.orbits[1][i] ) then
-            im := MappedWord( subrep.setup.orbits[1, i], gens, imgs );
-            return inv[1]^im;
-        else
-            im := MappedWord( subrep.setup.orbits[2, i], gens, imgs );
-            return inv[2]^im;
-        fi;
-    fi;
-
-    end );

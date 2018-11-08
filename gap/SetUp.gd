@@ -10,6 +10,8 @@ DeclareGlobalFunction( "SP_Product" );
 
 DeclareGlobalFunction( "MAJORANA_MappedWord" );
 
+DeclareGlobalFunction( "MAJORANA_TauMappedWord" );
+
 DeclareGlobalFunction( "MAJORANA_RemoveDuplicateShapes" );
 
 DeclareGlobalFunction( "MAJORANA_EmbedDihedralAlgebra" );
