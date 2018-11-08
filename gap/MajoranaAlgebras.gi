@@ -1050,7 +1050,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     end );
 
-MAJORANA_SolutionMatVecs_Whatever := MAJORANA_SolutionMatVecs;
+MAJORANA_SolveSystem_Whatever := MAJORANA_SolveSystem;
 InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
     function( system, rep)
@@ -1075,8 +1075,8 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
         system.vec!.entries[i] := system.vec!.entries[i]*d;
     od;
 
-    # Turn the matrix into an integer matrix
-    MAJORANA_SolutionMatVecs_Whatever(system);
+    # Solve the system of linear equations
+    MAJORANA_SolveSystem_Whatever(system);
 
     Info(   InfoMajorana, 40, "Solved it!" );
 
@@ -1337,7 +1337,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
     if Nrows(system.mat) = 0 then return; fi;
 
     # Solve the system of linear equations
-    MAJORANA_SolutionMatVecs(system);
+    MAJORANA_SolveSystem(system);
 
     # Record any new solutions that have been found
     for i in [1..Size(system.solutions)] do

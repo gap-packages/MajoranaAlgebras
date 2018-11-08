@@ -5,12 +5,17 @@
 ## a linear combinations of indeterminants indexed by <unknowns> and the corresponding
 ## row of <vec> gives the value of this linear combination.
 ##
+## Changes the argument <system> in situ. Adds the component <solutions> which is a
+## list where the ith position is the value of the ith indeterminant (given by
+## <system.unknowns>) if found, and fail if not. The components <mat> and <vec>
+## are changed to give only the rows that still contain non-zero coefficients
+## of unsolved indeterminants.
 ##
 ## The argument <vec> may be an n x m matrix, in which case the solutions of the system
 ## will be row vectors of length m. Here n is the number of rows of <mat>.
 ##
 
-InstallGlobalFunction(MAJORANA_SolutionMatVecs,
+InstallGlobalFunction(MAJORANA_SolveSystem,
 
 function(system)
 
@@ -49,9 +54,16 @@ function(system)
 
     end );
 
+##
+## Takes as input a (list of lists) matrix A. If A is positive semidefinite
+## then will return [L,D] such that A= LDL^T. Otherwise returns false.
+##
+## Note: does not test if matrix is square or symmetric.
+##
+
 InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
-    function(A) # Takes as input a matrix A. If A is positive semidefinite then will return [L,D] such that A= LDL^T. Else returns 0. Note: does not test if matrix is square or symmetric.
+    function(A)
 
     local   B,      # input matrix
             n,      # size of matrix
@@ -101,9 +113,13 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
     end );
 
+##
+##
+##
+
 InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
-    function(GramMatrix) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
+    function(GramMatrix)
 
     local   L,          # decomposition of matrix
             Diagonals,  # list of diagonals from decomposition
