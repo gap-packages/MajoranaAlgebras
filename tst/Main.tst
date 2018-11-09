@@ -41,11 +41,11 @@ gap> MAJORANA_Dimension(rep);
 0
 
 ##
-## Test a 3-closed example
+## Test a 3-closed example with no form
 ##
 gap> ex := S4T2();;
-gap> rep := MajoranaRepresentation(ex, 3);;
-gap> NClosedMajoranaRepresentation(rep);;
+gap> rep := MajoranaRepresentationNoForm(ex, 3);;
+gap> NClosedMajoranaRepresentationNoForm(rep);;
 gap> MAJORANA_IsComplete(rep);
 true
 gap> MAJORANA_Dimension(rep);
@@ -62,3 +62,15 @@ gap> MAJORANA_TestAxiomM2(rep);
 true
 gap> MAJORANA_TestPositiveDefiniteForm(rep);
 true
+
+##
+## Test infinite family example
+##
+gap> ex := min3gen9();;
+gap> rep := MajoranaRepresentation(ex, 2);;
+gap> MAJORANA_Dimension(rep);
+7
+gap> rep := MajoranaRepresentation(ex, 1);;
+gap> rep.innerproducts[19] := 100;;
+gap> MAJORANA_MainLoop(rep);;
+gap> NClosedMajoranaRepresentation(rep);;
