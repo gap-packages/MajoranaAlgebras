@@ -62,15 +62,3 @@ gap> MAJORANA_TestAxiomM2(rep);
 true
 gap> MAJORANA_TestPositiveDefiniteForm(rep);
 true
-
-##
-## Test infinite family example
-##
-gap> ex := min3gen9();;
-gap> rep := MajoranaRepresentation(ex, 2);;
-gap> MAJORANA_Dimension(rep);
-7
-gap> rep := MajoranaRepresentation(ex, 1);;
-gap> rep.innerproducts[19] := 100;;
-gap> MAJORANA_MainLoop(rep);;
-gap> NClosedMajoranaRepresentation(rep);;
