@@ -69,3 +69,16 @@ gap> mat.vectors!.indices;
 [ [ 6 ], [ 5 ], [ 4 ], [ 3 ], [ 2 ], [ 1 ] ]
 gap> mat.vectors!.entries;
 [ [ 1 ], [ 1 ], [ 1 ], [ 1 ], [ 1 ], [ 1 ] ]
+
+##
+## Test remove mat with heads
+##
+gap> mat := SparseMatrix( 1, 21, [ [ 1, 5, 9, 10, 15, 16 ] ], [ [ 3/128, 3/128, -1/128, -1/128, -1/128, 1 ] ], Rationals );;
+gap> null := rec( heads := [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ], vectors := SparseMatrix( 1, 21, [ [ 16, 17, 18, 19, 20, 21 ] ], [ [ 1, 1, 1, 1, 1, 1 ] ], Rationals ) );
+rec( heads := [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 
+     ], vectors := <a 1 x 21 sparse matrix over Rationals> )
+gap> mat := RemoveMatWithHeads(mat, null);;
+gap> mat!.indices;
+[ [ 1, 5, 9, 10, 15, 16 ] ]
+gap> mat!.entries;
+[ [ 3/128, 3/128, -1/128, -1/128, -1/128, 1 ] ]
