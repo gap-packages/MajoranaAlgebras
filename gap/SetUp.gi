@@ -405,51 +405,6 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
     end );
 
 ##
-## Here <g> is either a group element or a homomorphism from <subrep.group>
-## to <rep.group>. In the first case, <subrep> = <rep> and the func
-## return <g> as a permutation on <rep.setup.coords>. In the second case,
-## returns <g> as a list sending <subrep.setup.coords> to <rep.setup.coords>.
-##
-
-InstallGlobalFunction( MAJORANA_FindPerm,
-
-    function(g, rep, subrep)
-
-    local   dim, i, list, im, sign, vec;
-
-    dim := Size(subrep.setup.coords);
-    list := [1..dim]*0;
-
-    for i in [1..dim] do
-
-        vec := subrep.setup.coords[i];
-
-        if IsRowVector(vec) then
-
-            im := list{vec};
-
-            sign := 1;
-
-            if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;
-            if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
-
-            if im[1] > im[2] then im := im{[2,1]}; fi;
-
-            list[i] := rep.setup.coordmap[ im ];
-
-            if list[i] = fail then
-                list[i] := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
-            fi;
-        else
-            list[i] := rep.setup.coordmap[ rep.involutions[i]^g ];
-        fi;
-    od;
-
-    return list;
-
-    end);
-
-##
 ## Optional function for use by the user after calling <ShapesOfMajoranaRepresentation>
 ##
 
