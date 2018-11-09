@@ -114,18 +114,19 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
     end );
 
 ##
-##
+## Takes a matrix <mat> and returns 1 or 0 is <mat> is positive definite or
+## positive semidefinite and returns -1 otherwise.
 ##
 
 InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
-    function(GramMatrix)
+    function(mat)
 
     local   L,          # decomposition of matrix
             Diagonals,  # list of diagonals from decomposition
             i;          # loop over sze of matrix
 
-    L := MAJORANA_LDLTDecomposition(GramMatrix);
+    L := MAJORANA_LDLTDecomposition(mat);
 
     if L = false then
         return -1;
@@ -133,7 +134,7 @@ InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
     Diagonals := [];
 
-    for i in [1..Size(GramMatrix)] do
+    for i in [1..Size(mat)] do
         Append(Diagonals,[L[2][i, i]]);
     od;
 
@@ -192,25 +193,31 @@ InstallGlobalFunction(_FoldList2,
     return res[ k * s ];
 end );
 
+##
+## Takes a matrix <mat> and a row vector <row>, both in sparse matrix format.
+## If <row> is already a row of <mat>, return true. Otherwise return false.
+##
+
 InstallGlobalFunction(_IsRowOfSparseMatrix,
 
     function(mat, row)
 
     local pos;
 
-    pos := Position(mat!.indices, row!.indices[1]);
+    pos := Positions(mat!.indices, row!.indices[1]);
 
-    if pos = fail then
-        return false;
-    fi;
-
-    if mat!.entries[pos] = row!.entries[1] then
+    if ForAny(pos, i -> mat!.entries[i] = row!.entries[1]) then
         return true;
     else
         return false;
     fi;
 
     end);
+
+##
+## Performs the same matrix echelon reduction as <EchelonMatDestructive>
+## but outputs the RREF of <mat> where the diagonal submatrix is on the right.
+##
 
 InstallGlobalFunction(ReversedEchelonMatDestructive,
 
@@ -228,6 +235,12 @@ InstallGlobalFunction(ReversedEchelonMatDestructive,
     return ech;
 
     end );
+
+##
+## Takes <mat>, a generic sparse matrix, and <null>, the output from the <EchelonMat> or
+## <ReversedEchelonMat> functions such that the <null.vectors> has the same number of
+## columns as <mat>. Returns that matrix <mat> that has been reduced wrt <null.vectors>.
+##
 
 InstallGlobalFunction(RemoveMatWithHeads,
 
@@ -252,6 +265,10 @@ InstallGlobalFunction(RemoveMatWithHeads,
     return mat;
 
     end );
+
+##
+## Implement an iterator that runs over the rows of a sparse matrix
+##
 
 BindGlobal( "NextIterator_SparseMatrix", function( iter )
 
