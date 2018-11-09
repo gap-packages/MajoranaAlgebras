@@ -573,7 +573,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
         AddRow(x!.indices[1], x!.entries[1], vec!.indices, vec!.entries, 1);
     od;
 
-    return RemoveMatWithHeads(vec, setup.nullspace);
+    if Nrows(setup.nullspace.vectors) > 0 then
+        return RemoveMatWithHeads(vec, setup.nullspace);
+    else
+        return vec;
+    fi;
 
     end );
 
@@ -783,7 +787,11 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
         sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
     od;
 
-    return [row, RemoveMatWithHeads(sum, setup.nullspace)];
+    if Nrows(setup.nullspace) > 0 then
+        sum := RemoveMatWithHeads(sum, setup.nullspace);
+    fi;
+
+    return [row, sum];
 
     end);
 
