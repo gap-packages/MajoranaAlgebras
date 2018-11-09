@@ -250,13 +250,11 @@ InstallGlobalFunction(RemoveMatWithHeads,
 
     v := null.vectors;
 
-    for j in PositionsProperty(null.heads, x -> x <> 0) do
-        k := null.heads[j];
-
-        for i in [1..Nrows(mat)] do
-            x := -GetEntry(mat, i, j);
-
-            if x <> 0 then
+    for i in [1 .. Nrows(mat)] do
+        for j in mat!.indices[i] do
+            k := null.heads[j];
+            if k <> 0 then
+                x := -GetEntry(mat, i, j);
                 AddRow(v!.indices[k], x*v!.entries[k], mat!.indices, mat!.entries, i);
             fi;
         od;
