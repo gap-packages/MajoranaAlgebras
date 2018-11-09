@@ -41,17 +41,6 @@ gap> MAJORANA_Dimension(rep);
 0
 
 ##
-## Test a 3-closed example with no form
-##
-gap> ex := S4T2();;
-gap> rep := MajoranaRepresentationNoForm(ex, 3);;
-gap> NClosedMajoranaRepresentationNoForm(rep);;
-gap> MAJORANA_IsComplete(rep);
-true
-gap> MAJORANA_Dimension(rep);
-13
-
-##
 ## Test Axiom M2 and positive definiteness on S4
 ##
 gap> ex := S4T1();;
