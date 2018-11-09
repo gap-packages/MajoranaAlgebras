@@ -1,23 +1,3 @@
-BindGlobal( "MAJORANA_AllShapes", function( arg )
-    local ex, axioms, reps, i;
-
-    ex := arg[1];
-
-    if Length(arg) = 2 then
-        axioms := arg[2];
-    else
-        axioms := "AllAxioms";
-    fi;
-
-    reps := [];
-
-    for i in [1 .. Size(ex.shapes)] do
-        Add(reps, MajoranaRepresentation(ex, i, axioms));
-    od;
-
-    return reps;
-
-end );
 
 BindGlobal("S3S3", function()
     local G, T, ex;
