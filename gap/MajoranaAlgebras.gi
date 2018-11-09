@@ -787,7 +787,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
         sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
     od;
 
-    if Nrows(setup.nullspace) > 0 then
+    if Nrows(setup.nullspace.vectors) > 0 then
         sum := RemoveMatWithHeads(sum, setup.nullspace);
     fi;
 
