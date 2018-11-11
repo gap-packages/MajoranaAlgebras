@@ -162,12 +162,7 @@ function(arg)
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
             # A record in which to store the new eigenvectors found from fusion
-            # TODO Can we just copy evecs here?
-            new := rec();
-
-            for ev in RecNames(rep.evecs[i]) do
-                new.(ev) := CopyMat(rep.evecs[i].(ev));
-            od;
+            new := ShallowCopy(rep.evecs[i]);
 
             # For pairs of eigenvalues
             for ev in UnorderedTuples(RecNames(rep.evecs[i]), 2) do
@@ -192,7 +187,9 @@ function(arg)
             rep.evecs[i] := new;
 
             # Calculate the intersection of the eigenspaces to find new nullspace vectors
+            Error();
             MAJORANA_IntersectEigenspaces(rep);
+            Display(Nrows(rep.setup.nullspace.vectors));
         od;
     od;
 
@@ -782,9 +779,9 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
         od;
     od;
 
-    # TODO Can we changes this to AddRow to make it more efficient?
     for i in [1..Size(elts)] do
-        sum := sum + MAJORANA_ConjugateVec(vecs[i],setup.pairconjelts[elts[i]]);
+        x := MAJORANA_ConjugateVec(vecs[i], setup.pairconjelts[elts[i]]);
+        AddRow(x!.indices[1], x!.entries[1], sum!.indices, sum!.entries, 1);
     od;
 
     if Nrows(setup.nullspace.vectors) > 0 then
@@ -1019,8 +1016,6 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
 
     # Loop over the representatives of these orbits
     for i in x.orbitreps do
-
-        # TODO Does this make any difference?
         if  ForAny(rep.setup.pairorbit[i], k -> rep.algebraproducts[AbsInt(k)] = false) then
 
             u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
