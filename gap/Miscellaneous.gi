@@ -32,11 +32,13 @@ InstallGlobalFunction( MAJORANA_Eigenvectors,
         Error("Not an eigenvalue of the algebra");
     fi;
 
+    # Find the element <g> that maps the orbit rep to index and use this to
+    # find the orbit rep itself
     g := rep.setup.conjelts[index];
     i := Position(g, index);
 
+    # Conjugate the eigevectors of the orbit rep by g
     evecs := SparseMatrix( 0, Size(rep.setup.coords), [], [], Rationals);
-
     for v in Iterator( rep.evecs[i].(String(eval)) ) do
         evecs := UnionOfRows( evecs, MAJORANA_ConjugateVec( v, g) );
     od;
@@ -53,9 +55,11 @@ InstallGlobalFunction( MAJORANA_Subalgebra,
 
     vecs := EchelonMatDestructive(vecs).vectors;
 
+    # Loop until subalgebra is closed under multiplication
     while true do
         n := Nrows(vecs);
 
+        # For all pairs of vecs, find their prod and add it to the subalg
         for x in Combinations( [1 .. n], 2 ) do
             u := CertainRows( vecs, [x[1]]);
             v := CertainRows( vecs, [x[2]]);
@@ -66,12 +70,18 @@ InstallGlobalFunction( MAJORANA_Subalgebra,
 
         vecs := EchelonMatDestructive(vecs).vectors;
 
+        # If no more vectors have been found, the space is closed under multiplication
         if Nrows(vecs) = n then break; fi;
     od;
 
     return vecs;
 
     end );
+
+##
+## TODO comment this - what is the name of the test we use?
+## Linearised Jordan something?
+##
 
 InstallGlobalFunction( MAJORANA_IsJordanAlgebra,
 
@@ -141,6 +151,8 @@ InstallGlobalFunction( MAJORANA_AdjointAction,
 
     adj := SparseMatrix(0, dim, [], [], field);
 
+    # For each basis elt, add its product with axis to the adjoint matrix
+    # each time in terms of the basis itself
     for i in [1..dim] do
         v := CertainRows(basis, [i]);
         prod := MAJORANA_AlgebraProduct(axis, v, rep.algebraproducts, rep.setup);
@@ -158,11 +170,13 @@ InstallGlobalFunction( MAJORANA_ConvertToBasis,
 
     local mat, vec, x;
 
+    # Use the GAP function solution mat to find the vector v in terms of the basis
     mat := ConvertSparseMatrixToMatrix( basis );
     vec := ConvertSparseMatrixToMatrix( v );
 
     x := SolutionMat( mat, vec[1] );
 
+    # If the vector is not in the linear span of the basis vectors then return fail
     if x = fail then
         return fail;
     else
