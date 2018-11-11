@@ -918,7 +918,7 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
                 unknowns := system.unknowns );
 
     # Loop over group elements and matrix rows
-    for g in rep.setup.conjelts do
+    for g in DuplicateFreeList(rep.setup.conjelts) do
         for i in [1 .. Nrows(system.mat)] do
             if system.mat!.indices[i] <> [] then
                 conj := [,];
@@ -1011,7 +1011,7 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
     dim := Size(rep.setup.coords);
 
     # Calculate the orbits of G on the spanning set coords
-    x := MAJORANA_Orbits(rep.generators, dim, rep.setup);
+    x := MAJORANA_Orbits(rep.generators, rep.setup);
 
     # TODO these should be in place but makes it slower :(
     # Append( rep.setup.conjelts, x.conjelts );
