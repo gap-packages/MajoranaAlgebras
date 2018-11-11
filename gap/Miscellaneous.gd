@@ -21,6 +21,11 @@ DeclareGlobalFunction( "MAJORANA_IsComplete" );
 #! the true dimension of the algebra.
 DeclareGlobalFunction( "MAJORANA_Dimension" );
 
+#! @Arguments index, eval, rep
+#! @Returns the eigenspace of the axis as position <index> with eigenvalue <eval>
+#! as a sparse matrix
+DeclareGlobalFunction( "MAJORANA_Eigenvectors" );
+
 #! @Arguments axis, basis, rep
 #! @Returns a sparse matrix representing the adjoint action of <A>axis</A> on
 #! <A>basis</A>

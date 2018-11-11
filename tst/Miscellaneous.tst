@@ -17,6 +17,17 @@ gap> MajoranaAlgebraTest(rep);
 true
 
 ##
+## Test eigenvectors
+##
+gap> u := SparseMatrix( 1, 15, [[2]], [[1]], Rationals);;
+gap> evecs := MAJORANA_Eigenvectors( 2, 0, rep);;
+gap> for v in Iterator( evecs ) do prod := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup); if prod <> (0)*v then Error(); fi; od;
+gap> evecs := MAJORANA_Eigenvectors( 2, 1/4, rep);;
+gap> for v in Iterator( evecs ) do prod := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup); if prod <> (1/4)*v then Error(); fi; od;
+gap> evecs := MAJORANA_Eigenvectors( 2, 1/32, rep);;
+gap> for v in Iterator( evecs ) do prod := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup); if prod <> (1/32)*v then Error(); fi; od;
+
+##
 ## Test subalgebra
 ##
 gap> vecs := SparseMatrix(2, 15, [[7], [1,2]], [[1], [1, 1]], Rationals);;

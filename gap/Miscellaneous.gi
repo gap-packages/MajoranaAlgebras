@@ -22,6 +22,29 @@ InstallGlobalFunction( MAJORANA_IsComplete,
 
     end );
 
+InstallGlobalFunction( MAJORANA_Eigenvectors,
+
+    function( index, eval, rep)
+
+    local g, i, evecs, v;
+
+    if not eval in rep.eigenvalues then
+        Error("Not an eigenvalue of the algebra");
+    fi;
+
+    g := rep.setup.conjelts[index];
+    i := Position(g, index);
+
+    evecs := SparseMatrix( 0, Size(rep.setup.coords), [], [], Rationals);
+
+    for v in Iterator( rep.evecs[i].(String(eval)) ) do
+        evecs := UnionOfRows( evecs, MAJORANA_ConjugateVec( v, g) );
+    od;
+
+    return RemoveMatWithHeads( evecs, rep.setup.nullspace);
+
+end );
+
 InstallGlobalFunction( MAJORANA_Subalgebra,
 
     function( vecs, rep )
