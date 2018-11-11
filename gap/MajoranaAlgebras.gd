@@ -4,6 +4,14 @@
 # Declarations
 #
 
+DeclareInfoClass( "InfoMajorana" );
+
+################################################################################
+##
+## The main Majorana representation function.
+##
+################################################################################
+
 #! @Arguments input, index, [axioms]
 #! @Returns a record giving a Majorana representation
 #! @Description This takes two or three arguments, the first of which must be the output of the function
@@ -15,9 +23,53 @@
 #! @ChapterInfo Majorana representations, The main function
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
+################################################################################
+##
+## The main loop functions
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_MainLoop" );
+
+DeclareGlobalFunction( "MAJORANA_AxiomM1" );
+
+DeclareGlobalFunction( "MAJORANA_Fusion" );
+
+DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
+
+################################################################################
+##
+## Functions used in fusion
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_AddEvec" );
+
+DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
+
+DeclareGlobalFunction( "MAJORANA_CheckBasis" );
+
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
 
-DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
+################################################################################
+##
+## Functions used in MAJORANA_UnknownAlgebraProducts
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
+
+DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
+
+DeclareGlobalFunction( "MAJORANA_Resurrection" );
+
+DeclareGlobalFunction( "MAJORANA_AllConjugates" );
+
+################################################################################
+##
+## The product functions
+##
+################################################################################
 
 #! @Arguments u, v, algebraproducts, setup
 #! @Returns the algebra product of vectors <A>u</A> and <A>v</A>
@@ -39,56 +91,56 @@ DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 #! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
 DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
+################################################################################
+##
+## Functions for finding indices that give unknown algebra products
+##
+################################################################################
+
 DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
-
-DeclareGlobalFunction( "MAJORANA_AddEvec" );
-
-DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
-
-DeclareGlobalFunction( "MAJORANA_Fusion" );
-
-DeclareGlobalFunction( "MAJORANA_CheckBasis" );
-
-DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
-
-DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
-
-DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
-
-DeclareGlobalFunction( "MAJORANA_AxiomM1" );
-
-DeclareGlobalFunction( "MAJORANA_Orthogonality" );
-
-DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
-
-DeclareGlobalFunction( "MAJORANA_RecordSolution" );
-
-DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
-
-DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
 
 DeclareGlobalFunction( "MAJORANA_ListOfBadIndicesForResurrection" );
 
-DeclareGlobalFunction( "MAJORANA_AllConjugates" );
+################################################################################
+##
+## The conjugating functions
+##
+################################################################################
 
-DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
+DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
 
-DeclareGlobalFunction( "MAJORANA_Resurrection" );
+DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
+
+################################################################################
+##
+## Ancilliary functions for finding unknown algebra products
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
 DeclareGlobalFunction( "MAJORANA_SolveSingleSolution" );
 
-DeclareGlobalFunction( "MAJORANA_SingleInnerSolution" );
+DeclareGlobalFunction( "MAJORANA_RecordSolution" );
 
 DeclareGlobalFunction( "MAJORANA_RemoveKnownAlgProducts" );
 
+################################################################################
+##
+## Ancilliary functions for finding unknown inner products
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
+
 DeclareGlobalFunction( "MAJORANA_RemoveKnownInnProducts" );
+
+DeclareGlobalFunction( "MAJORANA_SingleInnerSolution" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
+DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
+
 DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
-
-DeclareGlobalFunction( "MAJORANA_MainLoop" );
-
-DeclareInfoClass( "InfoMajorana" );
