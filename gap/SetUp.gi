@@ -75,7 +75,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     ## Orbits on axes for eigenvectors
 
-    orbs := MAJORANA_Orbits(input.generators, t, rep.setup);
+    orbs := MAJORANA_Orbits(input.generators, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
     rep.setup.orbitreps := orbs.orbitreps;
@@ -401,56 +401,6 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
             fi;
         fi;
     od;
-
-    end );
-
-##
-## Optional function for use by the user after calling <ShapesOfMajoranaRepresentation>
-##
-
-InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
-
-    function(input)
-
-    local autgp, inner_autgp, outer_auts, perm, g, i, pos, im;
-
-    autgp := AutomorphismGroup(input.group);
-    inner_autgp := InnerAutomorphismsAutomorphismGroup(autgp);
-    outer_auts := [];
-
-    for g in RightTransversal(autgp, inner_autgp) do
-        if AsSet(OnTuples(input.involutions, g)) = AsSet(input.involutions) then
-            perm := [];
-
-            for i in [1..Size(input.orbitals)] do
-
-                im := OnPairs(Representative(input.orbitals[i]), g);
-
-                pos := PositionProperty(input.orbitals, x -> im in x);
-
-                if pos = fail then pos := PositionProperty(input.orbitals, x -> Reversed(im) in x); fi;
-
-                if pos = fail then Error(); fi;
-
-                Add(perm, pos);
-            od;
-
-            Add(outer_auts, perm);
-        fi;
-    od;
-
-    for i in [1..Size(input.shapes)] do
-        if IsBound(input.shapes[i]) then
-            for g in outer_auts do
-                pos := Position(input.shapes, input.shapes[i]{g});
-                if pos <> fail and pos <> i then
-                    Unbind(input.shapes[pos]);
-                fi;
-            od;
-        fi;
-    od;
-
-    input.shapes := Compacted(input.shapes);
 
     end );
 

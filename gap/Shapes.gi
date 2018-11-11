@@ -144,7 +144,6 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     input.pairorbit := NullMat(t,t);
     input.pairconj  := NullMat(t,t);
     input.pairreps  := [];
-    input.orbitals  := [];
     input.pairconjelts := [ [1..t] ];
     input.coords := [1..t];
     input.involutions := T;
@@ -160,8 +159,6 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     od;
 
     MAJORANA_Orbitals(input.generators, 0, input);
-
-    input.orbitals := List( input.orbitals, x -> List(x, y -> T{y}) );
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
@@ -189,7 +186,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     # Check for inclusions of 2X in 4X
 
-    gph := List( [1 .. Size(input.orbitals)], x -> [] );
+    gph := List( [1 .. Size(input.pairreps)], x -> [] );
 
     for i in Positions(shape, "4X") do
         gph[i] := MAJORANA_RecordSubalgebras(i, shape, input);
@@ -245,5 +242,50 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
     od;
 
     return input;
+
+    end );
+
+##
+## Optional function for use by the user after calling <ShapesOfMajoranaRepresentation>
+##
+
+InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
+
+    function(input)
+
+    local autgp, inner_autgp, outer_auts, perm, g, i, im, pos, rep;
+
+    autgp := AutomorphismGroup(input.group);
+    inner_autgp := InnerAutomorphismsAutomorphismGroup(autgp);
+    outer_auts := [];
+
+    for g in RightTransversal(autgp, inner_autgp) do
+        if AsSet(OnTuples(input.involutions, g)) = AsSet(input.involutions) then
+            perm := [];
+
+            for rep in input.pairreps do
+
+                im := OnPairs( input.involutions{rep}, g );
+                im := List(im, x -> Position(input.involutions, x));
+
+                Add(perm, input.pairorbit[im[1], im[2]]);
+            od;
+
+            Add(outer_auts, perm);
+        fi;
+    od;
+
+    for i in [1..Size(input.shapes)] do
+        if IsBound(input.shapes[i]) then
+            for g in outer_auts do
+                pos := Position(input.shapes, input.shapes[i]{g});
+                if pos <> fail and pos <> i then
+                    Unbind(input.shapes[pos]);
+                fi;
+            od;
+        fi;
+    od;
+
+    input.shapes := Compacted(input.shapes);
 
     end );
