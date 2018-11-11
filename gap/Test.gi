@@ -315,4 +315,6 @@ InstallGlobalFunction( MAJORANA_TestSetup,
         od;
     od;
 
+    return true;
+
     end );
