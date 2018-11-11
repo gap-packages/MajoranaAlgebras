@@ -1,37 +1,3 @@
-InstallGlobalFunction( MAJORANA_RecordSubalgebras,
-
-    function( i, shape, input )
-
-        local output, x, inv, pos, k;
-
-        output := [];
-
-        for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
-
-            inv := input.involutions{x};
-
-            if shape[i] = "6A" then
-
-                pos := Position( input.involutions, inv[1]^inv[2] );
-                k := input.pairorbit[x[1]][pos];
-                shape[k] := "3A";
-
-                pos := Position( input.involutions, inv[2]^Product(inv) );
-                k := input.pairorbit[x[1]][pos];
-                shape[k] := "2A";
-
-            elif shape[i][1] = '4' then
-
-                pos := Position( input.involutions, inv[1]^inv[2] );
-                k := input.pairorbit[x[1]][pos];
-                Add( output, k );
-
-            fi;
-        od;
-
-        return output;
-
-    end );
 
 ##
 ## The main setup function for the algorithm <MajoranaRepresentation>

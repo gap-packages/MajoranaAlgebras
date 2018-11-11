@@ -1,7 +1,5 @@
 DeclareGlobalFunction( "MAJORANA_SetUp" );
 
-DeclareGlobalFunction( "MAJORANA_RecordSubalgebras" );
-
 DeclareGlobalFunction( "SP_Inverse" );
 
 DeclareGlobalFunction( "SP_Product" );

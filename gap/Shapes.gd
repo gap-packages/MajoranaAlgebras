@@ -1,5 +1,5 @@
 #! @Chapter Shapes of a Majorana representation
-#! @Section The shape functions
+#! @Section The shapes functions
 
 #! @Arguments G,T
 #! @Returns a record with a component <A>shapes</A>
@@ -17,7 +17,7 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 
 #! @Arguments input
-#! @Description If an automorphism of the group <A>G</> stabilises the set
+#! @Description If an automorphism of the group <A>G</A> stabilises the set
 #! <A>T</A> then it induces an action on the pairs of elements of <A>T</A> and
 #! therefore on the shapes of a possible Majorana representation of the form
 #! <A>(G,T,V)</A>. If one shape is mapped to another in this way then their
@@ -28,3 +28,5 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 #! and replaces <A>input.shapes</A> with a list of shapes such that no two
 #! can be mapped to each other by an automorphism of <A>G</A>.
 DeclareGlobalFunction( "MAJORANA_RemoveDuplicateShapes" );
+
+DeclareGlobalFunction( "MAJORANA_RecordSubalgebras" );
