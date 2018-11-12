@@ -10,8 +10,6 @@ DeclareGlobalFunction( "MAJORANA_MaximalSubgps" );
 
 DeclareGlobalFunction( "MAJORANA_AllEmbeddings" );
 
-DeclareGlobalFunction( "MAJORANA_Image" );
-
 DeclareGlobalFunction( "MAJORANA_EmbedDihedral" );
 
 DeclareGlobalFunction( "MAJORANA_FindPerm" );

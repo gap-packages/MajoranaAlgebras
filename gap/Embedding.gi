@@ -348,21 +348,3 @@ InstallGlobalFunction( "MAJORANA_ImageVector",
     return res;
 
     end );
-
-InstallGlobalFunction( MAJORANA_Image,
-
-    function(rep, subrep, emb, x)
-
-    local y, pos;
-
-    if IsRowVector(x) then
-        y := subrep.setup.coords{x};
-
-        pos := List(y, i -> Position(rep.setup.longcoords, Image(emb, i))); # TODO fix signs
-
-        return SortedList(rep.setup.poslist{pos});
-    else
-        return Image(emb, x);
-    fi;
-
-    end );
