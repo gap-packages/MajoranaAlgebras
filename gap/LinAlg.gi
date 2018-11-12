@@ -248,6 +248,7 @@ InstallGlobalFunction(RemoveMatWithHeads,
 
     local i, j, k, x;
 
+    Error();
     for i in [1 .. Nrows(mat)] do
         for j in mat!.indices[i] do
             k := null.heads[j];
