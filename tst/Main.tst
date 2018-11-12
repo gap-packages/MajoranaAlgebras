@@ -30,7 +30,8 @@ true
 gap> rep := MajoranaRepresentation(ex, 1, rec(form := false));;
 gap> MAJORANA_Dimension(rep);
 21
-gap> MajoranaAlgebraTestNoForm(rep);
+gap> MajoranaAlgebraTest(rep);
+true
 
 ##
 ## Test an A6 example that gives no algebra
