@@ -11,7 +11,7 @@ gap> MajoranaAlgebraTest(rep);
 true
 gap> MAJORANA_Dimension(rep);
 21
-gap> rep := MajoranaRepresentation(ex, 1, "NoAxioms");;
+gap> rep := MajoranaRepresentation(ex, 1, rec( axioms := "NoAxioms") );;
 gap> MajoranaAlgebraTest(rep);
 true
 gap> MAJORANA_Dimension(rep);
@@ -27,7 +27,7 @@ gap> MAJORANA_Dimension(rep);
 26
 gap> MAJORANA_TestEvecs(rep);
 true
-gap> rep := MajoranaRepresentationNoForm(ex, 1);;
+gap> rep := MajoranaRepresentation(ex, 1, rec(form := false));;
 gap> MAJORANA_Dimension(rep);
 21
 gap> MajoranaAlgebraTestNoForm(rep);
@@ -51,3 +51,14 @@ gap> MAJORANA_TestAxiomM2(rep);
 true
 gap> MAJORANA_TestPositiveDefiniteForm(rep);
 true
+
+##
+## Test a 3-closed example with no form
+##
+gap> ex := S4T2();;
+gap> rep := MajoranaRepresentation(ex, 3, rec( form := false ));;
+gap> NClosedMajoranaRepresentation(rep);;
+gap> MAJORANA_IsComplete(rep);
+true
+gap> MAJORANA_Dimension(rep);
+13

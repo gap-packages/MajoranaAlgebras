@@ -4,12 +4,12 @@
 gap> a5 := A5();;
 gap> Length(a5.shapes) = 4;
 true
-gap> setup := MAJORANA_SetUp(a5, 1, "AllAxioms");;
+gap> setup := MAJORANA_SetUp(a5, 1, rec( axioms := "AllAxioms"));;
 gap> Set([ "1A", "2B", "3C", "5A", "5A" ]) = Set(setup.shape);
 true
 gap> MajoranaAlgebraTest(setup);
 true
-gap> setup := MAJORANA_SetUp(a5, 2, "NoAxioms");;
+gap> setup := MAJORANA_SetUp(a5, 2, rec( axioms := "NoAxioms"));;
 gap> MajoranaAlgebraTest(setup);
 true
 
@@ -17,11 +17,11 @@ true
 ##  Test main funcs for S5
 ##
 gap> s5 := S5();;
-gap> setup := MAJORANA_SetUp(s5, 1, "AllAxioms");;
+gap> setup := MAJORANA_SetUp(s5, 1, rec( axioms := "AllAxioms"));;
 gap> MAJORANA_TestSetup(setup);
 true
 gap> s5 := S5();;
-gap> setup := MAJORANA_SetUp(s5, 1, "NoAxioms");;
+gap> setup := MAJORANA_SetUp(s5, 1, rec( axioms := "NoAxioms"));;
 gap> MAJORANA_TestSetup(setup);
 true
 
@@ -29,7 +29,7 @@ true
 ## Test main funcs for A7
 ##
 gap> a7 := A7();;
-gap> rep := MAJORANA_SetUp(a7, 2, "AllAxioms");;
+gap> rep := MAJORANA_SetUp(a7, 2, rec( axioms := "AllAxioms") );;
 gap> Size(rep.setup.coords);
 406
 gap> MajoranaAlgebraTest(rep);
