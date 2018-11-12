@@ -47,9 +47,13 @@ DeclareGlobalFunction( "MAJORANA_AddEvec" );
 
 DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
 
+DeclareGlobalFunction( "MAJORANA_FuseEigenvectorsNoForm" );
+
 DeclareGlobalFunction( "MAJORANA_CheckBasis" );
 
 DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
+
+DeclareGlobalFunction( "MAJORANA_IntersectEigenspaces" );
 
 ################################################################################
 ##

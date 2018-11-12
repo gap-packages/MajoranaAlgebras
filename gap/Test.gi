@@ -25,7 +25,9 @@ InstallGlobalFunction(MajoranaAlgebraTest,
 
     function(rep)
 
-    MAJORANA_TestAxiomM1(rep);
+    if IsBound(rep.innerproducts) then
+        MAJORANA_TestAxiomM1(rep);
+    fi;
 
     # TODO don't really need this any more, intersection of eigenspaces is sufficient
     # But keep it here for testing purposes.
