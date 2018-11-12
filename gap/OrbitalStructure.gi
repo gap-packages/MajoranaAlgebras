@@ -110,7 +110,7 @@ end);
 # Acting on sets of size 2
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalRep,
 function(os, p)
-    local a, b, oa, ob, r1, r2, p1;
+    local a, b, oa, ob, r1, r2, p1, tmp;
 
     a := p[1];
     b := p[2];
@@ -121,15 +121,20 @@ function(os, p)
     r1 := os.orbreps[oa];
     r2 := os.orbreps[ob];
 
-    if r1 < r2 then
-        p1 := RepresentativeAction(os.group, a, r1);
-        ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
-        return [ r1, os.orbstabs[oa].orbreps[ob]];
-    else
-        p1 := RepresentativeAction(os.group, b, r2);
-        oa := os.orbstabs[ob].orbnums[os.act(a, p1)];
-        return [ r2, os.orbstabs[ob].orbreps[oa] ];
+    # b has the smaller orbrep, i.e. in the orbitalrep
+    # has the smaller representative. We swap roles of a and b
+    if r2 < r1 then
+        tmp := b; b := a; a := tmp;
+        tmp := r2; r2 := r1; r1 := tmp;
+        tmp := ob; ob := oa; oa := tmp;
     fi;
+
+    # Move a to the smaller rep
+    p1 := RepresentativeAction(os.group, a, r1);
+    # Now look in the point stabiliser of r1 what
+    # element we can map b^p1 to
+    ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
+    return [ r1, os.orbstabs[oa].orbreps[ob]];
 end);
 
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElement,
