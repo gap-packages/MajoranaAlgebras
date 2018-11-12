@@ -9,6 +9,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     local rep, s, t, i, dim, algebras, ev, orbs;
 
+    if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
+    if not IsBound(options.form) then options.form := true; fi;
+
     algebras := MAJORANA_DihedralAlgebras;
 
     rep         := rec( group       := input.group,

@@ -17,16 +17,12 @@ function(arg)
     local   input, index, options, rep, unknowns, main;
 
     input := arg[1]; index := arg[2];
-
-    # If options are not given then set defaults
+    
     if Size(arg) = 2 then
         options := rec( );
     else
         options := arg[3];
     fi;
-
-    if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
-    if not IsBound(options.form) then options.form := true; fi;
 
     # Run the setup function
     rep :=  MAJORANA_SetUp(input, index, options);
