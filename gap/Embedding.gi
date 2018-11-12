@@ -263,9 +263,11 @@ InstallGlobalFunction( "MAJORANA_Embed",
                 fi;
             fi;
 
-            if not IsBound(rep.innerproducts[k]) or rep.innerproducts[k] = false then
-                if subrep.innerproducts[i] <> false then
-                    rep.innerproducts[k] := sign*subrep.innerproducts[i];
+            if IsBound(rep.innerproducts) then
+                if not IsBound(rep.innerproducts[k]) or rep.innerproducts[k] = false then
+                    if subrep.innerproducts[i] <> false then
+                        rep.innerproducts[k] := sign*subrep.innerproducts[i];
+                    fi;
                 fi;
             fi;
         fi;

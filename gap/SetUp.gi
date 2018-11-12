@@ -5,25 +5,18 @@
 
 InstallGlobalFunction( MAJORANA_SetUp,
 
-    function( arg )
+    function( input, index, options )
 
-    local input, index, axioms, rep, s, t, i, dim, algebras, ev, orbs;
+    local rep, s, t, i, dim, algebras, ev, orbs;
 
-    input := arg[1];
-    index := arg[2];
-    axioms := arg[3];
-    if Length(arg) = 4 and arg[4] = true then
-        algebras := MAJORANA_DihedralAlgebrasTauMaps;
-    else
-        algebras := MAJORANA_DihedralAlgebras;
-    fi;
+    algebras := MAJORANA_DihedralAlgebras;
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
                         eigenvalues := [0, 1/4, 1/32], # The eigenvalues not equal to one
                         generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
-                        axioms      := axioms   );
+                        axioms      := options.axioms );
 
     t := Size(rep.involutions);
 
@@ -51,8 +44,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
     s := Size(rep.setup.pairreps);
 
     rep.algebraproducts := List([1..s], x -> false);
-    rep.innerproducts   := List([1..s], x -> false);
     rep.evecs           := [];
+    if options.form = true then
+        rep.innerproducts   := List([1..s], x -> false);
+    fi;
 
     for i in rep.setup.orbitreps do
         rep.evecs[i] := rec(  );
@@ -97,7 +92,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
         if not IsBound(rep.algebraproducts[i]) then
             rep.algebraproducts[i] := false;
-            rep.innerproducts[i] := false;
+            if IsBound(rep.innerproducts) then
+                rep.innerproducts[i] := false;
+            fi;
         elif rep.algebraproducts[i] <> false then
             rep.algebraproducts[i]!.ncols := dim;
         fi;

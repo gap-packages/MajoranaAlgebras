@@ -54,7 +54,7 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
 
     for i in [Size(rep.algebraproducts) + 1 .. Size(rep.setup.pairreps)] do
         rep.algebraproducts[i] := false;
-        if rep.innerproducts <> false then rep.innerproducts[i] := false; fi;
+        if IsBound(rep.innerproducts) then rep.innerproducts[i] := false; fi;
     od;
 
     for i in rep.setup.orbitreps do
@@ -92,7 +92,7 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
                 x := rep.system.mat!.indices[i, j];
                 pos := Position(rep.setup.coords, rep.system.unknowns[x]);
                 SetEntry(v, 1, pos, -rep.system.mat!.entries[i, j]);
-                
+
                 rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, v);
             od;
         fi;
@@ -122,7 +122,9 @@ InstallGlobalFunction( NClosedMajoranaRepresentation,
         MAJORANA_MainLoop(rep);
 
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
-        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+        if IsBound(rep.innerproducts) then
+            Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+        fi;
 
         if not false in rep.algebraproducts then
             Info( InfoMajorana, 10, "Success" );

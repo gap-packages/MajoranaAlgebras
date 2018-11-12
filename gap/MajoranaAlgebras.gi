@@ -14,13 +14,22 @@ InstallGlobalFunction(MajoranaRepresentation,
 
 function(arg)
 
-    local   rep, unknowns, main;
+    local   input, index, options, rep, unknowns, main;
 
-    # The default axiomatic setting is to assume all axioms as given in Seress (2012)
-    if Size(arg) = 2 then arg[3] := "AllAxioms"; fi;
+    input := arg[1]; index := arg[2];
+
+    # If options are not given then set defaults
+    if Size(arg) = 2 then
+        options := rec( );
+    else
+        options := arg[3];
+    fi;
+
+    if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
+    if not IsBound(options.form) then options.form := true; fi;
 
     # Run the setup function
-    rep :=  MAJORANA_SetUp(arg[1], arg[2],  arg[3]);
+    rep :=  MAJORANA_SetUp(input, index, options);
 
     # While there are still unknown algebra product loop over the main part of the algorithm
     while true do
@@ -30,7 +39,9 @@ function(arg)
         main := MAJORANA_MainLoop(rep);
 
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
-        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+        if IsBound(rep.innerproducts) then
+            Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+        fi;
 
         if not false in rep.algebraproducts then
             # We have completely constructed the algebra
@@ -78,9 +89,11 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
     local   dim, system, i, j, k, u, v, w, x, y, z, eq;
 
-    if not false in rep.innerproducts then
-        return;
-    fi;
+    # If the algebra does not have a form
+    if not IsBound(rep.innerproducts) then return; fi;
+
+    # Or if all inner product values have been found
+    if not false in rep.innerproducts then return; fi;
 
     Info(   InfoMajorana, 50, "Axiom M1");
 
@@ -151,15 +164,14 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
 
 InstallGlobalFunction( MAJORANA_Fusion,
 
-function(arg)
+function(rep)
 
-    local   i, ev, a, b, dim, new, rep, FUSE, u;
+    local   i, ev, a, b, dim, new, FUSE, u;
 
-    rep := arg[1];
     FUSE := MAJORANA_FuseEigenvectors;
 
     # If specified by the optional second argument, do not assume that we have a Frobenius form
-    if Size(arg) = 2 and arg[2] = false then FUSE := MAJORANA_FuseEigenvectorsNoForm; fi;
+    if not IsBound(rep.innerproducts) then FUSE := MAJORANA_FuseEigenvectorsNoForm; fi;
 
     # Loop over representatives of the orbits of G on T
     for i in rep.setup.orbitreps do
@@ -208,15 +220,14 @@ function(arg)
 
 InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
 
-    function(arg)
+    function(rep)
 
-    local   x, i, j, k, evals, system, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, rep, evals_list;
+    local   x, i, j, k, evals, system, u, a, b, c, bad, list, evecs_a, evecs_b, index, n, evals_list;
 
-    rep := arg[1];
     evals_list := [["0", "1/4"], ["1/4", "0"], ["0", "1/32"], ["1/4", "1/32"]];
 
     # If specified by the optional second argument, do not assume that we have a Frobenius form
-    if Size(arg) = 2 and arg[2] = false then evals_list := [["0", "1/4"], ["0", "1/32"]]; fi;
+    if not IsBound(rep.innerproducts) then evals_list := [["0", "1/4"], ["0", "1/32"]]; fi;
 
     # Keep track of the number of unknown algebra products
     n := Size(Positions(rep.algebraproducts, false));
@@ -516,7 +527,6 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                 if x <> fail and Size(x[1]!.indices[1]) = 1 then
 
                     MAJORANA_SolveSingleSolution( x, system, rep);
-
                     if not false in rep.algebraproducts then return true; fi;
 
                 elif x <> fail and x[1]!.indices[1] <> [] then
