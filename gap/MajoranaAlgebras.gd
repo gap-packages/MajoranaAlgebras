@@ -12,14 +12,28 @@ DeclareInfoClass( "InfoMajorana" );
 ##
 ################################################################################
 
-#! @Arguments input, index, [axioms]
+#! @Arguments input, index, [options]
 #! @Returns a record giving a Majorana representation
-#! @Description This takes two or three arguments, the first of which must be the output of the function
-#! <Ref Func="ShapesOfMajoranaRepresentation"/> and the second of which is the index of the desired shape in list <A>input.shapes</A>.
-#! The optional third variable is a string that may take one of the following two values
-#! * <A>"NoAxioms"</A>: the algorithm assumes no axioms beyond the main axioms of Majorana theory;
-#! * <A>"AllAxioms"</A>: the algorithm assumes the axioms 2Aa, 2Ab, 3A, 4A and 5A.
-#! If no third argument is given then the default values is set to be <A>"AllAxioms"</A>.
+#! @Description This takes two or three arguments, the first of which must be
+#! the output of the function <Ref Func="ShapesOfMajoranaRepresentation"/> and
+#! the second of which is the index of the desired shape in list <A>input.shapes</A>.
+#!
+#! If the optional argument <A>options</A> is given then it must be a record.
+#! The following components of <A>options</A> are recognised:
+#! <List>
+#!  <Mark><C>axioms</C></Mark>
+#!  <Item> This component must be bound to a the string <A>"AllAxioms"</A> or
+#!  <A>"NoAxioms"</A>. If bound to <A>"AllAxioms"</A> then the algorithm assumes the axioms
+#!  2Aa, 2Ab, 3A, 4A and 5A as in Seress (2012). If bound to <A>"NoAxioms"</A> then
+#!  the algorithm only assumes the Majorana axioms M1 - M7. The default value is
+#!  <A>"AllAxioms"</A>. </Item>
+#!  <Mark><C>form</C></Mark>
+#!  <Item> If this is bound to <A>true</A> then the algorithm assume the existence
+#!  of an inner product (as in the definition of a Majorana algebra). Otherwise, if
+#!  bound to <A>false</A> then no inner product is assumed (and we are in fact
+#!  constructing an axial algebra that satisfies the Majorana fusion law).
+#!  The default value is <A>true</A>.</Item>
+#! </List>
 #! @ChapterInfo Majorana representations, The main function
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
