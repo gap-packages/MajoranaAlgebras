@@ -85,13 +85,13 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
     od;
 
     for i in rep.setup.orbitreps do
-        for ev in RecNames(rep.evec[i]) do
+        for ev in RecNames(rep.evecs[i]) do
             rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
         od;
     od;
 
-    if Nrows(rep.nullspace) > 0 then
-        rep.nullspace := ShallowCopy(MAJORANA_BasisOfEvecs(rep.nullspace));
+    if Nrows(rep.setup.nullspace.vectors) > 0 then
+        rep.setup.nullspace := ReversedEchelonMatDestructive(rep.setup.nullspace.vectors);
     fi;
 
     end );
@@ -176,52 +176,52 @@ InstallGlobalFunction( "MAJORANA_EmbedKnownRep",
 
     end );
 
-    ##
-    ## Here <g> is either a group element or a homomorphism from <subrep.group>
-    ## to <rep.group>. In the first case, <subrep> = <rep> and the func
-    ## return <g> as a permutation on <rep.setup.coords>. In the second case,
-    ## returns <g> as a list sending <subrep.setup.coords> to <rep.setup.coords>.
-    ##
+##
+## Here <g> is either a group element or a homomorphism from <subrep.group>
+## to <rep.group>. In the first case, <subrep> = <rep> and the func
+## return <g> as a permutation on <rep.setup.coords>. In the second case,
+## returns <g> as a list sending <subrep.setup.coords> to <rep.setup.coords>.
+##
 
-    ## TODO this is only used in embedding, need to fix it so that it works for this purpose!
+## TODO this is only used in embedding, need to fix it so that it works for this purpose!
 
-    InstallGlobalFunction( MAJORANA_FindPerm,
+InstallGlobalFunction( MAJORANA_FindPerm,
 
-        function(g, rep, subrep)
+    function(emb, rep, subrep)
 
-        local   dim, i, list, im, sign, vec;
+    local   dim, i, list, im, sign, vec;
 
-        dim := Size(subrep.setup.coords);
-        list := [1..dim]*0;
+    dim := Size(subrep.setup.coords);
+    list := [1..dim]*0;
 
-        for i in [1..dim] do
+    for i in [1..dim] do
 
-            vec := subrep.setup.coords[i];
+        vec := subrep.setup.coords[i];
 
-            if IsRowVector(vec) then
+        if IsRowVector(vec) then
 
-                im := list{vec};
+            im := list{vec};
 
-                sign := 1;
+            sign := 1;
 
-                if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;
-                if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
+            if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;
+            if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
 
-                if im[1] > im[2] then im := im{[2,1]}; fi;
+            if im[1] > im[2] then im := im{[2,1]}; fi;
 
-                list[i] := rep.setup.coordmap[ im ];
+            list[i] := rep.setup.coordmap[ im ];
 
-                if list[i] = fail then
-                    list[i] := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
-                fi;
-            else
-                list[i] := rep.setup.coordmap[ rep.involutions[i]^g ];
+            if list[i] = fail then
+                list[i] := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
             fi;
-        od;
+        else
+            list[i] := rep.setup.coordmap[ subrep.involutions[i]^emb ];
+        fi;
+    od;
 
-        return list;
+    return list;
 
-        end);
+    end);
 
 InstallGlobalFunction( "MAJORANA_Embed",
 
@@ -290,8 +290,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
             for ev in RecNames(subrep.evecs[i]) do
                 if Nrows(subrep.evecs[i].(ev)) > 0 then
                     im := MAJORANA_ImageVector(subrep.evecs[i].(ev), emb, rep, subrep);
-                    for l in [1..Nrows(im)] do
-                        v := CertainRows(im, [l]);
+                    for v in Iterator(im) do
                         v := MAJORANA_ConjugateVec(v, g);
                         rep.evecs[g[k]].(ev) := UnionOfRows(rep.evecs[g[k]].(ev), v);
                     od;
@@ -299,6 +298,11 @@ InstallGlobalFunction( "MAJORANA_Embed",
             od;
         fi;
     od;
+
+    if Nrows( subrep.setup.nullspace.vectors ) > 0 then
+        im := MAJORANA_ImageVector(subrep.setup.nullspace.vectors, emb, rep, subrep);
+        rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, im);
+    fi;
 
     end );
 

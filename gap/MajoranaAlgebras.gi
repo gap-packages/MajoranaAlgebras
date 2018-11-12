@@ -27,6 +27,11 @@ function(arg)
     # Run the setup function
     rep :=  MAJORANA_SetUp(input, index, options);
 
+    # Find representations of the maximal subgroups of G and embed them
+    if IsBound(options.embeddings) and options.embeddings = true and Size(rep.group) > 120 then
+        MAJORANA_MaximalSubgps(rep, options);
+    fi;
+
     # While there are still unknown algebra product loop over the main part of the algorithm
     while true do
 
