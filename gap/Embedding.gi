@@ -1,3 +1,7 @@
+##
+## Not currently used - maximal subgroups is generally faster
+##
+
 InstallGlobalFunction( "MAJORANA_AllEmbeddings",
 
     function(rep)
@@ -55,12 +59,18 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
 
     end );
 
+##
+## Attempts to construct Majorana representations of the maximal subgroups of
+## G and embeds the results into the incomplete algebra
+##
+
 InstallGlobalFunction( "MAJORANA_MaximalSubgps",
 
     function(rep,axioms)
 
     local   max, inv, i, j, ev, ex, subrep;
 
+    # Find all maximal subgroups and their intersections with T
     max := MaximalSubgroupClassReps(rep.group);
     max := Filtered(max, x -> Size(x) > 12);
 
@@ -69,21 +79,25 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
 
     max := List(inv, Group);
 
+    # Loop over these maximal subgroups
     for i in [1..Size(max)] do
         ex := ShapesOfMajoranaRepresentationAxiomM8(max[i], inv[i]);
+        # Loop over all possible shapes
         for j in [1..Size(ex.shapes)] do
+            # If the shapes match
             if IsSubsetSet(AsSet(rep.shape), AsSet(ex.shapes[j])) then
 
                 Info(   InfoMajorana, 10,
                         STRINGIFY("Constructing subrep of ", StructureDescription(ex.group) ) );
 
+                # Construct the subrep and embed it
                 subrep := MajoranaRepresentation(ex,j,axioms);
-
                 MAJORANA_EmbedKnownRep(rep, subrep);
             fi;
         od;
     od;
 
+    # Find bases for the eigevectors and the nullspace
     for i in rep.setup.orbitreps do
         for ev in RecNames(rep.evecs[i]) do
             rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
@@ -183,8 +197,6 @@ InstallGlobalFunction( "MAJORANA_EmbedKnownRep",
 ## returns <g> as a list sending <subrep.setup.coords> to <rep.setup.coords>.
 ##
 
-## TODO this is only used in embedding, need to fix it so that it works for this purpose!
-
 InstallGlobalFunction( MAJORANA_FindPerm,
 
     function(emb, rep, subrep)
@@ -194,14 +206,16 @@ InstallGlobalFunction( MAJORANA_FindPerm,
     dim := Size(subrep.setup.coords);
     list := [1..dim]*0;
 
+    # Loop over the spanning set of the subrepresentation
     for i in [1..dim] do
-
         vec := subrep.setup.coords[i];
 
+        # If spanning set element is a row vector then use the images we have already calculated
         if IsRowVector(vec) then
 
             im := list{vec};
 
+            # Adjust the sign
             sign := 1;
 
             if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;
@@ -215,6 +229,7 @@ InstallGlobalFunction( MAJORANA_FindPerm,
                 list[i] := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
             fi;
         else
+            # Otherwise, use the images of the group elements
             list[i] := rep.setup.coordmap[ subrep.involutions[i]^emb ];
         fi;
     od;
@@ -238,31 +253,27 @@ InstallGlobalFunction( "MAJORANA_Embed",
         if subrep.setup.pairreps[i] <> fail then
             sign := 1;
 
+            # Find the image of the pair representative and adjust the sign
             im := emb{subrep.setup.pairreps[i]};
+            if im[1] < 0 then sign := -sign; im[1] := -im[1]; fi;
+            if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
 
-            if im[1] < 0 then
-                sign := -sign; im[1] := -im[1];
-            fi;
-
-            if im[2] < 0 then
-                sign := -sign; im[2] := -im[2];
-            fi;
-
+            # Find the corresponding pair orbit in rep
             k := rep.setup.pairorbit[im[1], im[2]];
+            if k < 0 then sign := -sign; k := -k; fi;
 
-            if k < 0 then
-                sign := -sign; k := -k;
-            fi;
-
+            # Use the inverse of the conjugating element
             g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1], im[2]]]);
 
+            # Record the new algebraproduct
             if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then
                 if subrep.algebraproducts[i] <> false then
-                    v := MAJORANA_ImageVector(subrep.algebraproducts[i], emb, rep, subrep);
+                    v := MAJORANA_ImageMat(subrep.algebraproducts[i], emb, rep, subrep);
                     rep.algebraproducts[k] := sign*MAJORANA_ConjugateVec(v,g);
                 fi;
             fi;
 
+            # Record the new inner product
             if IsBound(rep.innerproducts) then
                 if not IsBound(rep.innerproducts[k]) or rep.innerproducts[k] = false then
                     if subrep.innerproducts[i] <> false then
@@ -273,75 +284,59 @@ InstallGlobalFunction( "MAJORANA_Embed",
         fi;
     od;
 
+    # Record the new eigevectors
     for i in subrep.setup.orbitreps do
 
         k := emb[i];
 
-        g := false;
+        # Use the inverse of the conjugating element
+        g := SP_Inverse(rep.setup.conjelts[k]);
 
-        for x in List(rep.setup.conjelts, x -> SP_Inverse(x)) do
-            if x[k] in rep.setup.orbitreps then
-                g := x;
-                break;
+        # Record new eigenvectors
+        for ev in RecNames(subrep.evecs[i]) do
+            if Nrows(subrep.evecs[i].(ev)) > 0 then
+                im := MAJORANA_ImageMat(subrep.evecs[i].(ev), emb, rep, subrep);
+                for v in Iterator(im) do
+                    v := MAJORANA_ConjugateVec(v, g);
+                    rep.evecs[g[k]].(ev) := UnionOfRows(rep.evecs[g[k]].(ev), v);
+                od;
             fi;
         od;
-
-        if g <> false then
-            for ev in RecNames(subrep.evecs[i]) do
-                if Nrows(subrep.evecs[i].(ev)) > 0 then
-                    im := MAJORANA_ImageVector(subrep.evecs[i].(ev), emb, rep, subrep);
-                    for v in Iterator(im) do
-                        v := MAJORANA_ConjugateVec(v, g);
-                        rep.evecs[g[k]].(ev) := UnionOfRows(rep.evecs[g[k]].(ev), v);
-                    od;
-                fi;
-            od;
-        fi;
     od;
 
+    # Record new nullspace vectors
     if Nrows( subrep.setup.nullspace.vectors ) > 0 then
-        im := MAJORANA_ImageVector(subrep.setup.nullspace.vectors, emb, rep, subrep);
+        im := MAJORANA_ImageMat(subrep.setup.nullspace.vectors, emb, rep, subrep);
         rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, im);
     fi;
 
     end );
 
-InstallGlobalFunction( "MAJORANA_ImageVector",
+##
+## Finds the image of the matrix <mat> under the embedding <emb>
+##
+
+InstallGlobalFunction( "MAJORANA_ImageMat",
 
     function(mat, emb, rep, subrep)
 
-    local   i,
-            j,
-            im,
-            res,
-            sign,
-            pos,
-            nrows,
-            ncols,
-            indices,
-            entries;
+    local   res, i, j, sign, im;
 
-    nrows := Nrows(mat);
-    ncols := Ncols(mat);
+    res := SparseZeroMatrix(mat!.nrows, mat!.ncols, Rationals);
 
-    res := SparseZeroMatrix(nrows, ncols, Rationals);
+    # Loop over all nonzero matrix elements
+    for i in [1..mat!.nrows] do
+        for j in [1..Size(mat!.indices[i])] do
 
-    indices := IndicesOfSparseMatrix(mat);
-    entries := EntriesOfSparseMatrix(mat);
+            # Find the image
+            im := emb[mat!.indices[i, j]];
 
-    for i in [1..nrows] do
-        for j in [1..Size(indices[i])] do
-
+            # Adjust the sign
             sign := 1;;
+            if im < 0 then sign := -sign; im := -im; fi;
 
-            im := emb[indices[i, j]];
-
-            if im < 0 then
-                sign := -sign;
-                im := -im;
-            fi;
-
-            SetEntry(res, i, im, sign*entries[i, j]);
+            # Record the image
+            SetEntry(res, i, im, sign*mat!.entries[i, j]);
         od;
     od;
 
