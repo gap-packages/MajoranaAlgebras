@@ -72,11 +72,11 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 
     function(rep)
 
-    MAJORANA_AxiomM1(rep);
+    MAJORANA_FindInnerProducts(rep);
 
     MAJORANA_Fusion(rep);
 
-    return MAJORANA_UnknownAlgebraProducts(rep);
+    return MAJORANA_FindAlgebraProducts(rep);
 
     end);
 
@@ -84,7 +84,7 @@ InstallGlobalFunction(MAJORANA_MainLoop,
 ## Uses axiom M1 to find inner products
 ##
 
-InstallGlobalFunction(MAJORANA_AxiomM1,
+InstallGlobalFunction(MAJORANA_FindInnerProducts,
 
     function(rep)
 
@@ -219,7 +219,7 @@ function(rep)
 ## algebra product values
 ##
 
-InstallGlobalFunction(MAJORANA_UnknownAlgebraProducts,
+InstallGlobalFunction(MAJORANA_FindAlgebraProducts,
 
     function(rep)
 
@@ -567,7 +567,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
 ################################################################################
 ##
-## Functions used in MAJORANA_UnknownAlgebraProducts
+## Functions used in MAJORANA_FindAlgebraProducts
 ##
 ################################################################################
 

@@ -22,7 +22,7 @@ DeclareInfoClass( "InfoMajorana" );
 #! The following components of <A>options</A> are recognised:
 #! <List>
 #!  <Mark><C>axioms</C></Mark>
-#!  <Item> This component must be bound to a the string <A>"AllAxioms"</A> or
+#!  <Item> This component must be bound to the string <A>"AllAxioms"</A> or
 #!  <A>"NoAxioms"</A>. If bound to <A>"AllAxioms"</A> then the algorithm assumes the axioms
 #!  2Aa, 2Ab, 3A, 4A and 5A as in Seress (2012). If bound to <A>"NoAxioms"</A> then
 #!  the algorithm only assumes the Majorana axioms M1 - M7. The default value is
@@ -33,6 +33,10 @@ DeclareInfoClass( "InfoMajorana" );
 #!  bound to <A>false</A> then no inner product is assumed (and we are in fact
 #!  constructing an axial algebra that satisfies the Majorana fusion law).
 #!  The default value is <A>true</A>.</Item>
+#!  <Mark><C>embedding</C></Mark>
+#!  <Item> If this is bound to <A>true</A> then the algorithm first attempts to construct
+#!  large subalgebras of the final representation before starting the main construction.
+#!  The default value is <A>false</A>.</Item>
 #! </List>
 #! @ChapterInfo Majorana representations, The main function
 DeclareGlobalFunction( "MajoranaRepresentation" );
@@ -45,11 +49,11 @@ DeclareGlobalFunction( "MajoranaRepresentation" );
 
 DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
-DeclareGlobalFunction( "MAJORANA_AxiomM1" );
+DeclareGlobalFunction( "MAJORANA_FindInnerProducts" );
 
 DeclareGlobalFunction( "MAJORANA_Fusion" );
 
-DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
+DeclareGlobalFunction( "MAJORANA_FindAlgebraProducts" );
 
 ################################################################################
 ##
@@ -71,7 +75,7 @@ DeclareGlobalFunction( "MAJORANA_IntersectEigenspaces" );
 
 ################################################################################
 ##
-## Functions used in MAJORANA_UnknownAlgebraProducts
+## Functions used in MAJORANA_FindAlgebraProducts
 ##
 ################################################################################
 
@@ -95,7 +99,7 @@ DeclareGlobalFunction( "MAJORANA_AllConjugates" );
 #! matrix format. The arguments <A>algebraproducts</A> and <A>setup</A> must be
 #! the components with these names of a representation as outputted by
 #! <Ref Func="MajoranaRepresentation"/>. The output is the algebra product of
-#! <A>u</A> and <A>v</A>, also in sparse matrix representation.
+#! <A>u</A> and <A>v</A>, also in sparse matrix format.
 #! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
 DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 

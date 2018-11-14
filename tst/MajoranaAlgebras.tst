@@ -5,7 +5,7 @@ gap> SetInfoLevel(InfoMajorana, 0);
 ##
 gap> ex := A5();;
 gap> rep := MAJORANA_SetUp(ex, 4, rec( axioms := "AllAxioms"));;
-gap> MAJORANA_AxiomM1(rep);;
+gap> MAJORANA_FindInnerProducts(rep);;
 gap> AsSet(rep.innerproducts) = AsSet([ 1, 1/8, 13/256, 3/128, 3/128, 1/4, 8/5, 0, 875/524288, 1/9, 1/18, 1/18, 49/16384, -49/16384, false, 16/405, 35/4608, -35/4608, 203/524288 ]);
 true
 gap> MAJORANA_Fusion(rep);;
@@ -19,9 +19,9 @@ gap> system := rec( mat := mat, vec := vec, unknowns := unknowns );;
 gap> MAJORANA_EigenvectorsAlgebraUnknowns(system, rep);;
 gap> MajoranaAlgebraTest(rep);
 true
-gap> MAJORANA_AxiomM1(rep);;
+gap> MAJORANA_FindInnerProducts(rep);;
 gap> MAJORANA_Fusion(rep);;
-gap> MAJORANA_UnknownAlgebraProducts(rep);;
+gap> MAJORANA_FindAlgebraProducts(rep);;
 gap> MajoranaAlgebraTest(rep);
 Error, The algebra does not obey the fusion rules
 

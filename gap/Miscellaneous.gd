@@ -22,8 +22,8 @@ DeclareGlobalFunction( "MAJORANA_IsComplete" );
 DeclareGlobalFunction( "MAJORANA_Dimension" );
 
 #! @Arguments index, eval, rep
-#! @Returns the eigenspace of the axis as position <A>index</A> with eigenvalue
-#! <A>eval</A> as a sparse matrix
+#! @Returns a basis of the eigenspace of the axis as position <A>index</A> with
+#! eigenvalue <A>eval</A> as a sparse matrix
 DeclareGlobalFunction( "MAJORANA_Eigenvectors" );
 
 #! @Arguments axis, basis, rep
