@@ -96,15 +96,6 @@ function(os, pair)
     # Returns a group elements that maps the orbital representative of <pair>
     # to <pair> itself. This will be the inverse of the output of
     # MAJORANA_OrbitalCanonizingElement( os, pair )
-
-#    local fo, so, p1, p2;
-
-#    fo := os.orbnums[pair[1]];
-#    p1 := RepresentativeAction(os.group, os.orbreps[fo], pair[1]);
-#    so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
-#    p2 := RepresentativeAction(os.orbstabs[fo].stab, os.orbstabs[fo].orbreps[so], os.act(pair[2], p1));
-
-#    return p1 * p2;
 end);
 
 # Acting on sets of size 2
@@ -143,7 +134,7 @@ function(os, pair)
     # Returns a group elements that maps <pair> to its orbital representative
     # (as given by MAJORANA_OrbitalRep).
 
-    local a, b, oa, ob, r1, r2, p1, p2;
+    local a, b, oa, ob, r1, r2, p1, p2, tmp;
 
     a := pair[1];
     b := pair[2];
@@ -154,17 +145,16 @@ function(os, pair)
     r1 := os.orbreps[oa];
     r2 := os.orbreps[ob];
 
-    if r1 < r2 then
-        p1 := RepresentativeAction(os.group, a, r1);
-        ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
-        p2 := RepresentativeAction(os.orbstabs[oa].stab, os.act(b, p1)
-                                   , os.orbstabs[oa].orbreps[ob]);
-    else
-        p1 := RepresentativeAction(os.group, b, r2);
-        oa := os.orbstabs[os.orbnums[r2]].orbnums[os.act(a, p1)];
-        p2 := RepresentativeAction(os.orbstabs[ob].stab, os.act(a, p1)
-                                   , os.orbstabs[ob].orbreps[oa]);
+    if r2 < r1 then
+        tmp := b; b := a; a := tmp;
+        tmp := r2; r2 := r1; r1 := tmp;
+        tmp := ob; ob := oa; oa := tmp;
     fi;
+
+    p1 := RepresentativeAction(os.group, a, r1);
+    b := os.act(b, p1);
+    ob := os.orbstabs[oa].orbnums[b];
+    p2 := RepresentativeAction(os.orbstabs[oa].stab, b, os.orbstabs[oa].orbreps[ob]);
 
     return p1 * p2;
 end);
