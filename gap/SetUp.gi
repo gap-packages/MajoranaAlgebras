@@ -385,12 +385,12 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
             new.(ev) := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals);
 
             for v in Iterator(rep.evecs[i].(ev)) do
-                for g in rep.setup.pairconjelts do
+                for g in Filtered(rep.setup.pairconjelts, h -> h[i] = i) do
                     # Find the image of each eigenvector under g
                     im := MAJORANA_ConjugateVec(v, g);
-
+                    
                     # Add the image to the new eigenspaces
-                    if not _IsRowOfSparseMatrix(new.(ev), v) then
+                    if not _IsRowOfSparseMatrix(new.(ev), im) then
                         new.(ev) := UnionOfRows(new.(ev), im);
                     fi;
                 od;
