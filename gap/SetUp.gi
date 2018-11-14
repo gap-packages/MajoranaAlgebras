@@ -80,12 +80,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup.nullspace := rec(     heads := [1 .. dim]*0,
                                     vectors := SparseMatrix( 0, dim, [], [], Rationals) );
 
-    for i in rep.setup.orbitreps do
-        for ev in RecNames(rep.evecs[i]) do
-            rep.evecs[i].(ev)!.ncols := dim;
-            rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(String(ev)));
-        od;
-    od;
+    MAJORANA_AddConjugateEvecs(rep);
 
     for i in rep.generators do MAJORANA_ExtendPerm( i, rep); od;
 
@@ -369,6 +364,43 @@ InstallGlobalFunction( MAJORANA_AddConjugateVectors,
     od;
 
     end );
+
+##
+##  Use the group action to find more eigenvectors
+##
+
+InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
+
+    function(rep)
+
+    local i, new, ev, v, g, im;
+
+    for i in rep.setup.orbitreps do
+
+        # Setup a record to record the new evecs
+        new := rec();
+
+        # Loop over eigenvalues
+        for ev in RecNames(rep.evecs[i]) do
+            new.(ev) := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals);
+
+            for v in Iterator(rep.evecs[i].(ev)) do
+                for g in rep.setup.pairconjelts do
+                    # Find the image of each eigenvector under g
+                    im := MAJORANA_ConjugateVec(v, g);
+
+                    # Add the image to the new eigenspaces
+                    if not _IsRowOfSparseMatrix(new.(ev), v) then
+                        new.(ev) := UnionOfRows(new.(ev), im);
+                    fi;
+                od;
+            od;
+
+            # Find a basis of the new eigenspaces
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(new.(ev)).vectors;
+        od;
+    od;
+end );
 
 ##
 ## <MappedWord> for indices or pairs of indices referring to elements of coords
