@@ -14,6 +14,8 @@ DeclareGlobalFunction( "MAJORANA_AddNewVectors" );
 
 DeclareGlobalFunction( "MAJORANA_AddConjugateVectors" );
 
+DeclareGlobalFunction( "MAJORANA_AddConjugateEvecs" );
+
 DeclareGlobalFunction( "MAJORANA_FindEmbedding" );
 
 DeclareGlobalFunction( "MAJORANA_ExtendPerm" );
