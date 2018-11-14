@@ -52,7 +52,7 @@ InstallGlobalFunction( "MAJORANA_AllEmbeddings",
     for i in rep.setup.orbitreps do
         for ev in RecNames(rep.evec[i]) do
             if Nrows(rep.evecs[i].(ev)) > 0 then
-                rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
+                rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
             fi;
         od;
     od;
@@ -100,7 +100,7 @@ InstallGlobalFunction( "MAJORANA_MaximalSubgps",
     # Find bases for the eigevectors and the nullspace
     for i in rep.setup.orbitreps do
         for ev in RecNames(rep.evecs[i]) do
-            rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
         od;
     od;
 

@@ -197,7 +197,7 @@ function(rep)
 
             # Find a basis of the new eigenspaces
             for ev in RecNames(new) do
-                new.(ev) := MAJORANA_BasisOfEvecs(new.(ev));
+                new.(ev) := ReversedEchelonMatDestructive(new.(ev)).vectors;
             od;
 
             # If no new eigenvectors have been found then break
@@ -455,24 +455,6 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
     end );
 
 ##
-## Calculates the reversed echelon form of a matrix
-##
-
-InstallGlobalFunction(MAJORANA_BasisOfEvecs,
-
-    function(mat)
-
-    local ech, dim;
-
-    dim := Ncols(mat);
-
-    ech := EchelonMatDestructive(CertainColumns(mat, [dim, dim - 1..1]));
-
-    return CertainColumns(ech.vectors, [dim, dim - 1..1]);
-
-    end);
-
-##
 ## Adds any nonzero intersection of eigenspaces to the nullspace
 ##
 
@@ -557,7 +539,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     for i in rep.setup.orbitreps do
         for ev in RecNames(rep.evecs[i]) do
             rep.evecs[i].(ev) := RemoveMatWithHeads(rep.evecs[i].(ev), rep.setup.nullspace);
-            rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
         od;
     od;
 
@@ -1607,7 +1589,7 @@ InstallGlobalFunction(MAJORANA_CheckNullSpace,
     for i in rep.setup.orbitreps do
         for ev in RecNames(rep.evecs[i]) do
             rep.evecs[i].(ev) := RemoveMatWithHeads(rep.evecs[i].(ev), null);
-            rep.evecs[i].(ev) := MAJORANA_BasisOfEvecs(rep.evecs[i].(ev));
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
         od;
     od;
 

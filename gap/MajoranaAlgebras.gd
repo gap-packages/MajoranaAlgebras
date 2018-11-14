@@ -69,8 +69,6 @@ DeclareGlobalFunction( "MAJORANA_FuseEigenvectorsNoForm" );
 
 DeclareGlobalFunction( "MAJORANA_CheckBasis" );
 
-DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
-
 DeclareGlobalFunction( "MAJORANA_IntersectEigenspaces" );
 
 ################################################################################
