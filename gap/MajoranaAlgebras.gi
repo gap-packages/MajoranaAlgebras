@@ -130,11 +130,6 @@ InstallGlobalFunction(MAJORANA_FindInnerProducts,
                     if Size(eq[1]!.indices[1]) = 1 then
                         # If there is only one unknown value in the equation then immediately record this value
                         MAJORANA_SingleInnerSolution( eq, system, rep.innerproducts );
-
-                        # If all inner products have been found then calculate the nullspace of the alg
-                        if system.unknowns = [] then
-                            MAJORANA_CheckNullSpace(rep); return;
-                        fi;
                     elif eq[1]!.indices[1] <> [] then
                         # Otherwise, add this equation to the system of unknowns
                         eq := eq*(1/eq[1]!.entries[1, 1]);
@@ -150,10 +145,6 @@ InstallGlobalFunction(MAJORANA_FindInnerProducts,
 
     # Solve this system of linear equations
     MAJORANA_SolutionInnerProducts( system, rep.innerproducts );
-
-    if system.unknowns = [] then
-        MAJORANA_CheckNullSpace(rep);
-    fi;
 
     return system;
 
@@ -1539,58 +1530,5 @@ function(range, innerproducts, setup)
     od;
 
     return mat;
-
-    end );
-
-##
-## Calculate the nullspace from the Gram matrix of the form and removes the
-## relevant vectors from algebra products and eigenvectors
-##
-
-InstallGlobalFunction(MAJORANA_CheckNullSpace,
-
-    function(rep)
-
-    local   dim, gram, null, unknowns, i, ev, x;
-
-    if fail in rep.innerproducts then return; fi;
-
-    dim := Size(rep.setup.coords);
-
-    # Calculate the gram matrix wrt to the spanning set coords and find its kernel
-    gram := MAJORANA_FillGramMatrix([1..dim], rep.innerproducts, rep.setup);
-    null := KernelEchelonMatDestructive(gram, [1..dim]).relations;;
-    null := ReversedEchelonMatDestructive(null);
-
-    rep.setup.nullspace := null;
-
-    # If the kernel is trivial the return
-    if null.heads = [] then return; fi;
-
-    # Find the orbits that only involve nullspace vectors and set these to fail
-    # because we don't need to find their values
-    for i in [1..Size(rep.setup.pairreps)] do
-        # TODO wow this is ugly
-        x := Filtered([1..dim], j -> i in rep.setup.pairorbit[j]);
-        if ForAll(x, j -> rep.setup.nullspace.heads[j] <> 0) then
-            rep.setup.pairreps[i] := fail;
-            rep.algebraproducts[i] := fail;
-            rep.innerproducts[i] := fail;
-        fi;
-    od;
-
-    # Quotient out the algebra products and evecs by the nullspace vectors
-    for i in [1..Size(rep.algebraproducts)] do
-        if not rep.algebraproducts[i] in [false, fail] then
-            rep.algebraproducts[i] := RemoveMatWithHeads(rep.algebraproducts[i], null);
-        fi;
-    od;
-
-    for i in rep.setup.orbitreps do
-        for ev in RecNames(rep.evecs[i]) do
-            rep.evecs[i].(ev) := RemoveMatWithHeads(rep.evecs[i].(ev), null);
-            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
-        od;
-    od;
 
     end );

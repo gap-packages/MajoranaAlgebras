@@ -162,5 +162,3 @@ DeclareGlobalFunction( "MAJORANA_SingleInnerSolution" );
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
 DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
-
-DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
