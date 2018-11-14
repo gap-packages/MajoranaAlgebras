@@ -10,3 +10,7 @@ gap> ForAll(Tuples([1..20], 2), t -> OnTuples(t, MAJORANA_OrbitalCanonizingEleme
 true
 gap> ForAll(Arrangements([1..20], 2), t -> OnSets(Set(t), MAJORANA_UnorderedOrbitalCanonizingElement(os, t)) = MAJORANA_UnorderedOrbitalRep(os, t));
 true
+gap> it := MAJORANA_OrbitalTransversalIterator(os, [5,4]);;
+gap> List(it);;
+gap> it := MAJORANA_UnorderedOrbitalTransversalIterator(os, [5,4]);;
+gap> List(it);;
