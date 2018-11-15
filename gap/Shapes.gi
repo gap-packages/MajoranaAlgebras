@@ -181,6 +181,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
         elif Order(x[1]*x[2]) = 6 then
             shape[i]:="6A";
             MAJORANA_RecordSubalgebras( i, shape, input);
+        elif Order(x[1]*x[2]) > 6 then
+            Error("This is not a 6-transposition group");
         fi;
     od;
 
@@ -288,7 +290,7 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
             fi;
         od;
 
-        return output;
+        return DuplicateFreeList(output);
 
     end );
 
