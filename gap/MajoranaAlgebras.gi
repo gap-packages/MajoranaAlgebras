@@ -160,19 +160,19 @@ InstallGlobalFunction(MAJORANA_AxiomM1,
     dim := Size(rep.setup.coords);
     unknowns := Positions(rep.innerproducts, false);
 
-    mat := SparseMatrix(0, Size(unknowns), [], [], Rationals);
-    vec := SparseMatrix(0, 1, [], [], Rationals);
+    mat := SparseMatrix(0, Size(unknowns), [], [], rep.field);
+    vec := SparseMatrix(0, 1, [], [], rep.field);
 
     for i in Filtered([1..Size(rep.algebraproducts)], x -> not rep.algebraproducts[x] in [false, fail]) do
         x := rep.algebraproducts[i];
         for j in [rep.setup.pairreps[i], Reversed(rep.setup.pairreps[i])] do
 
-            u := SparseMatrix(1, dim, [[ j[1] ]], [[ 1 ]], Rationals);
-            v := SparseMatrix(1, dim, [[ j[2] ]], [[ 1 ]], Rationals);
+            u := SparseMatrix(1, dim, [[ j[1] ]], [[ 1 ]], rep.field);
+            v := SparseMatrix(1, dim, [[ j[2] ]], [[ 1 ]], rep.field);
 
             for k in Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0) do
 
-                w := SparseMatrix(1, dim, [[ k ]], [[ 1 ]], Rationals);
+                w := SparseMatrix(1, dim, [[ k ]], [[ 1 ]], rep.field);
 
                 y := MAJORANA_AlgebraProduct(v, w, rep.algebraproducts, rep.setup);
 
@@ -234,7 +234,7 @@ function(arg)
 
     for i in rep.setup.orbitreps do
 
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
 
         while true do
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
@@ -895,7 +895,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     if ForAll(g, i -> g[i] = i) then return row; fi;
 
     len     := Ncols(row);
-    output  := SparseZeroMatrix(1, len, Rationals);
+    output  := SparseZeroMatrix(1, len, row!.ring);
 
     for i in [1..Size(row!.indices[1])] do
 
@@ -950,8 +950,8 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
     mat := CertainColumns(x.vectors, [Size(unknowns), Size(unknowns) - 1..1]);
     vec := x.coeffs*vec;
 
-    new_mat := SparseMatrix( 0, Ncols(mat), [], [], Rationals );
-    new_vec := SparseMatrix( 0, Ncols(vec), [], [], Rationals );
+    new_mat := SparseMatrix( 0, Ncols(mat), [], [], rep.field );
+    new_vec := SparseMatrix( 0, Ncols(vec), [], [], rep.field );
 
     for g in rep.setup.conjelts do
         for i in [1 .. Nrows(mat)] do
@@ -1021,7 +1021,7 @@ InstallGlobalFunction(MAJORANA_Resurrection,
     if evals[1] = 2 then
         i := u!.indices[1, 1];
 
-        y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], Rationals), c, rep.innerproducts, rep.setup);
+        y := MAJORANA_InnerProduct(n - SparseMatrix(1, n!.ncols, [[i]], [[GetEntry(n, 1, i)]], rep.field), c, rep.innerproducts, rep.setup);
 
         if y <> false then
             res[2] := res[2] + (1/4)*y*u;
