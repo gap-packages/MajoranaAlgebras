@@ -8,7 +8,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     function(G,T)
 
-    local   g, perm, pos_1, pos_2,
+    local   g, perm, pos_1, pos_2, hom,
             t,              # size of T
             i,              # indices
             j,
@@ -21,6 +21,14 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
             input;          #
 
     t := Size(T);
+
+    # If G in not a permutation group then convert it to permutations on T
+
+    if not IsPermGroup(G) then
+        hom := ActionHomomorphism(G,T);
+        T := Image(hom, T);
+        G := Group(T);
+    fi;
 
     # Check that T obeys axiom M8
 
@@ -123,7 +131,8 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     function(G,T)
 
-    local   t,              # size of T
+    local   hom,
+            t,              # size of T
             i,              # indices
             j,
             k,
@@ -136,6 +145,14 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
             input;          #
 
     t := Size(T);
+
+    # If G in not a permutation group then convert it to permutations on T
+
+    if not IsPermGroup(G) then
+        hom := ActionHomomorphism(G,T);
+        T := Image(hom, T);
+        G := Group(T);
+    fi;
 
     # Construct orbitals of  on T x T
 
@@ -338,3 +355,42 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
     input.shapes := Compacted(input.shapes);
 
     end );
+
+InstallGlobalFunction( MAJORANA_IsSixTranspositionGroup,
+
+    function(G,T)
+
+    local t, s, g;
+
+    # Test if T is a set of involutions
+    if ForAny(T, t -> Order(t) <> 2) then
+        return false;
+    fi;
+
+    # Test if T generates G
+    if not Group(T) = G then
+        return false;
+    fi;
+
+    # Test if T is closed under conjugation by G
+    for g in GeneratorsOfGroup(G) do
+        for t in T do
+            if not t^g in T then
+                return false;
+            fi;
+        od;
+    od;
+
+    # Test if the product of any two elements of T has order at most 6
+
+    for t in T do
+        for s in T do
+            if Order(t*s) > 6 then
+                return false;
+            fi;
+        od;
+    od;
+
+    return true;
+
+end );

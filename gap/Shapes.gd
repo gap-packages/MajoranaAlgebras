@@ -16,6 +16,15 @@ DeclareGlobalFunction( "ShapesOfMajoranaRepresentation" );
 #! is of type $2A$ if and only if $ts \in T$ (and otherwise is of type $2B$).
 DeclareGlobalFunction( "ShapesOfMajoranaRepresentationAxiomM8" );
 
+#! @Arguments G,T
+#! @Returns true if <A>(G,T)</A> is a 6-transposition group, otherwise returns false
+#! @Description For a group <A>G</A> and a subset <A>T</A> of <A>G</A>, returns true
+#! if all of the following conditions are satisfied:
+#! *<A>T</A> is a set of involutions that generate <A>G</A>;
+#! *<A>T</A> is closed under conjugation by <A>G</A>;
+#! *the order of the product of two elements of <A>T</A> is at most 6.
+DeclareGlobalFunction( "MAJORANA_IsSixTranspositionGroup" );
+
 #! @Arguments input
 #! @Description If an automorphism of the group <A>G</A> stabilises the set
 #! <A>T</A> then it induces an action on the pairs of elements of <A>T</A> and

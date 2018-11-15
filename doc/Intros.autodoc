@@ -40,7 +40,7 @@ MAJORANA_Dimension(rep);
 #! 21
 @EndExample
 
-If an imcomplete algebra is returned then the function
+If an incomplete algebra is returned then the function
 <Ref Func="NClosedMajoranaRepresentation"/> can be used to attempt to find the
 3-closed part of the algebra.
 
