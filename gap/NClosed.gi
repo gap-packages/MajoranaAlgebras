@@ -110,7 +110,7 @@ InstallGlobalFunction( NClosedMajoranaRepresentation,
 
     # Find the positions of the unknown algebra products
     products := Positions(rep.algebraproducts, false);
-    if products = [] then return rep; fi;
+    if products = [] then return; fi;
 
     # Added the first of these products to the spanning set of the algebra
     MAJORANA_NClosedSetUp(rep, products[1]);
