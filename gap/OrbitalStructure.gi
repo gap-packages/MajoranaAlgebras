@@ -72,6 +72,15 @@ function(os, pair)
     return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
 end);
 
+InstallGlobalFunction(MAJORANA_OrbitalReps,
+function(os)
+    return Union(List(os.orbreps, i -> [i,i])
+                , ListX( [1..Length(os.orbreps)]
+                       , k -> os.orbstabs[k].orbreps
+                       , {x,y} -> [os.orbreps[x],y] ) );
+end);
+
+
 # TODO: fix this.
 InstallGlobalFunction(MAJORANA_OrbitalCanonizingElement,
 function(os, pair)
@@ -162,6 +171,7 @@ end);
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElementInverse,
      {os, pair} -> MAJORANA_UnorderedOrbitalCanonizingElement(os, pair) ^ -1);
 
+# TODO: fix this
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalReps,
 function(os)
     local reps, reps2, p, q;
@@ -241,5 +251,105 @@ function( os, rep )
             );
     r.orb[rep] := [];
     return IteratorByFunctions(r);
+end);
+
+BindGlobal("UnorderedOrbitalTest",
+function(os, domain)
+    local o, orbs, reps, muoreps;
+    orbs := Orbits(os.group, Combinations(domain, 2), OnSets);
+    reps := List(orbs, Minimum);
+
+    muoreps := MAJORANA_UnorderedOrbitalReps(os);
+    for o in domain do
+        if o in os.orbreps then
+            if not ([o,o] in muoreps) then
+                Error("The element ", o, " is an orbit representative, but its diagonal is not a representative");
+            fi;
+            Remove(muoreps, Position(muoreps, [o,o]));
+        else
+            if [o,o] in muoreps then
+                Error("The element ", o, " is not an orbit representative, but its diagonal is a representative");   
+            fi;
+        fi;
+    od;
+    if not IsSet(muoreps) then
+        Error("Representatives do not form a set");
+    fi;
+    if not Set(muoreps) = Set(reps) then
+        Print("Elements in muoreps that are not in reps: ", Difference(muoreps, reps), "\n");
+        Print("Elements in reps that are not in muoreps: ", Difference(reps, muoreps), "\n");
+        Error("differences between orbital reps and reps");
+    fi;
+    return true;
+end);
+
+BindGlobal("UnorderedOrbitalCanonizingTest",
+function(os, domain)
+    local o, orbs, r, reps, i, iter, e, p;
+
+    orbs := Orbits(os.group, Combinations(domain, 2), OnSets);
+    reps := List(orbs, Minimum);
+
+    for r in reps do
+        o := ShallowCopy(Filtered(orbs, x -> r in x)[1]);
+        iter := MAJORANA_OrbitalTransversalIterator(os, r);
+        for i in iter do
+            e := OnSets(r, i);
+            p := Position(o, e);
+            if p = fail then
+                Print("element ", e, " = ", r, "^", i, " not found\n");
+            else
+                Remove(o, p);
+            fi;
+        od;
+        if not IsEmpty(o) then
+            Error("leftover elements in orbit: ", o, " with rep ", r, "\n");
+        fi;
+    od;
+    return true;
+end);
+
+BindGlobal("OrbitalTest",
+function(os, domain)
+    local o, orbs, reps, muoreps;
+    orbs := Orbits(os.group, Tuples(domain, 2), OnTuples);
+    reps := List(orbs, Minimum);
+
+    muoreps := MAJORANA_OrbitalReps(os);
+    if not IsSet(muoreps) then
+        Error("Representatives do not form a set");
+    fi;
+    if not Set(muoreps) = Set(reps) then
+        Print("Elements in muoreps that are not in reps: ", Difference(muoreps, reps), "\n");
+        Print("Elements in reps that are not in muoreps: ", Difference(reps, muoreps), "\n");
+        Error("differences between orbital reps and reps");
+    fi;
+    return true;
+end);
+
+BindGlobal("OrbitalCanonizingTest",
+function(os, domain)
+    local o, orbs, r, reps, i, iter, e, p;
+
+    orbs := Orbits(os.group, Arrangements(domain, 2), OnTuples);
+    reps := List(orbs, Minimum);
+
+    for r in reps do
+        o := ShallowCopy(Filtered(orbs, x -> r in x)[1]);
+        iter := MAJORANA_OrbitalTransversalIterator(os, r);
+        for i in iter do
+            e := OnTuples(r, i);
+            p := Position(o, e);
+            if p = fail then
+                Print("element ", e, " = ", r, "^", i, " not found\n");
+            else
+                Remove(o, p);
+            fi;
+        od;
+        if not IsEmpty(o) then
+            Error("leftover elements in orbit: ", o, " with rep ", r, "\n");
+        fi;
+    od;
+    return true;
 end);
 
