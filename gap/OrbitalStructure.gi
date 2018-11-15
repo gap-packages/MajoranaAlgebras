@@ -110,7 +110,7 @@ end);
 # Acting on sets of size 2
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalRep,
 function(os, p)
-    local a, b, oa, ob, r1, r2, p1, tmp;
+    local a, b, oa, ob, r1, r2, p1, p2, tmp, tmp2;
 
     a := p[1];
     b := p[2];
@@ -121,10 +121,17 @@ function(os, p)
     r1 := os.orbreps[oa];
     r2 := os.orbreps[ob];
 
+    if r1 = r2 then
+    # a and b are in the same orbit
+        p1 := RepresentativeAction(os.group, a, r1);
+        p2 := RepresentativeAction(os.group, b, r1);
+        tmp := [r1, os.act(b,p1)];
+        tmp2 := [r1, os.act(a, p2)];
+        return Minimum(tmp,tmp2);
+    elif r2 < r1 then
     # b has the smaller orbrep, i.e. in the orbitalrep
     # has the smaller representative. We swap roles of a and b
-    if r2 < r1 then
-        tmp := b; b := a; a := tmp;
+            tmp := b; b := a; a := tmp;
         tmp := r2; r2 := r1; r1 := tmp;
         tmp := ob; ob := oa; oa := tmp;
     fi;
@@ -143,7 +150,7 @@ function(os, pair)
     # Returns a group elements that maps <pair> to its orbital representative
     # (as given by MAJORANA_OrbitalRep).
 
-    local a, b, oa, ob, r1, r2, p1, p2, tmp;
+    local a, b, oa, ob, r1, r2, p1, p2, tmp, tmp2;
 
     a := pair[1];
     b := pair[2];
@@ -154,7 +161,17 @@ function(os, pair)
     r1 := os.orbreps[oa];
     r2 := os.orbreps[ob];
 
-    if r2 < r1 then
+    if r1 = r2 then
+        p1 := RepresentativeAction(os.group, a, r1);
+        p2 := RepresentativeAction(os.group, b, r1);
+        tmp := [r1, os.act(b,p1)];
+        tmp2 := [r1, os.act(a, p2)];
+        if tmp < tmp2 then
+            return p1;
+        else
+            return p2;
+        fi;
+    elif r2 < r1 then
         tmp := b; b := a; a := tmp;
         tmp := r2; r2 := r1; r1 := tmp;
         tmp := ob; ob := oa; oa := tmp;
@@ -221,8 +238,6 @@ function( os, rep )
     # Make sure we have *the* rep, not *a* rep
     rep := MAJORANA_UnorderedOrbitalRep(os, rep);
 
-
-
     r := rec( orb := HashMap()
             , new := [ [ rep, [] ] ]
             , NextIterator := function(iter)
@@ -268,7 +283,7 @@ function(os, domain)
             Remove(muoreps, Position(muoreps, [o,o]));
         else
             if [o,o] in muoreps then
-                Error("The element ", o, " is not an orbit representative, but its diagonal is a representative");   
+                Error("The element ", o, " is not an orbit representative, but its diagonal is a representative");
             fi;
         fi;
     od;
@@ -292,7 +307,7 @@ function(os, domain)
 
     for r in reps do
         o := ShallowCopy(Filtered(orbs, x -> r in x)[1]);
-        iter := MAJORANA_OrbitalTransversalIterator(os, r);
+        iter := MAJORANA_UnorderedOrbitalTransversalIterator(os, r);
         for i in iter do
             e := OnSets(r, i);
             p := Position(o, e);
@@ -352,4 +367,3 @@ function(os, domain)
     od;
     return true;
 end);
-
