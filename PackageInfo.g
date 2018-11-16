@@ -10,8 +10,8 @@ SetPackageInfo( rec(
 
 PackageName := "MajoranaAlgebras",
 Subtitle := "A package for constructing Majorana algebras and representations.",
-Version := "0.1",
-Date := "06/03/2017", # dd/mm/yyyy format
+Version := "1.0",
+Date := "16/11/2018", # dd/mm/yyyy format
 
 Persons := [
   rec(
