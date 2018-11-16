@@ -67,7 +67,7 @@ function(os, pair)
 
     local fo, so, p;
     fo := os.orbnums[pair[1]];
-    p := RepresentativeAction(os.group, pair[1], os.orbreps[fo] );
+    p := RepresentativeAction(os.group, pair[1], os.orbreps[fo], os.act );
     so := os.orbstabs[fo].orbnums[os.act(pair[2], p)];
     return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
 end);
@@ -91,10 +91,10 @@ function(os, pair)
     local fo, so, p1, p2;
 
     fo := os.orbnums[pair[1]];
-    p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo]);
+    p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo], os.act);
     so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
     p2 := RepresentativeAction( os.orbstabs[fo].stab, os.act(pair[2], p1)
-                               , os.orbstabs[fo].orbreps[so]);
+                               , os.orbstabs[fo].orbreps[so], os.act);
 
     return p1 * p2;
 end);
@@ -123,8 +123,8 @@ function(os, p)
 
     if r1 = r2 then
     # a and b are in the same orbit
-        p1 := RepresentativeAction(os.group, a, r1);
-        p2 := RepresentativeAction(os.group, b, r1);
+        p1 := RepresentativeAction(os.group, a, r1, os.act);
+        p2 := RepresentativeAction(os.group, b, r1, os.act);
         tmp := [r1, os.act(b,p1)];
         tmp2 := [r1, os.act(a, p2)];
         return Minimum(tmp,tmp2);
@@ -137,7 +137,7 @@ function(os, p)
     fi;
 
     # Move a to the smaller rep
-    p1 := RepresentativeAction(os.group, a, r1);
+    p1 := RepresentativeAction(os.group, a, r1, os.act);
     # Now look in the point stabiliser of r1 what
     # element we can map b^p1 to
     ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
@@ -162,8 +162,8 @@ function(os, pair)
     r2 := os.orbreps[ob];
 
     if r1 = r2 then
-        p1 := RepresentativeAction(os.group, a, r1);
-        p2 := RepresentativeAction(os.group, b, r1);
+        p1 := RepresentativeAction(os.group, a, r1, os.act);
+        p2 := RepresentativeAction(os.group, b, r1, os.act);
         tmp := [r1, os.act(b,p1)];
         tmp2 := [r1, os.act(a, p2)];
         if tmp < tmp2 then
@@ -177,10 +177,10 @@ function(os, pair)
         tmp := ob; ob := oa; oa := tmp;
     fi;
 
-    p1 := RepresentativeAction(os.group, a, r1);
+    p1 := RepresentativeAction(os.group, a, r1, os.act);
     b := os.act(b, p1);
     ob := os.orbstabs[oa].orbnums[b];
-    p2 := RepresentativeAction(os.orbstabs[oa].stab, b, os.orbstabs[oa].orbreps[ob]);
+    p2 := RepresentativeAction(os.orbstabs[oa].stab, b, os.orbstabs[oa].orbreps[ob], os.act);
 
     return p1 * p2;
 end);
@@ -203,29 +203,36 @@ InstallGlobalFunction(MAJORANA_OrbitalTransversalIterator,
 function( os, rep )
     local r, fo, so;
 
-    fo := os.orbnums[rep[1]];
-    so := os.orbstabs[fo].orbnums[rep[2]];
+    # Make sure we have *the* rep, not *a* rep
+    rep := MAJORANA_UnorderedOrbitalRep(os, rep);
 
-    r := rec( lorb := ShallowCopy(os.orbits[fo])
-            , rorb := ShallowCopy(os.orbstabs[fo].orbs[so])
+    r := rec( orb := HashMap()
+            , new := [ [ rep, [] ] ]
             , NextIterator := function(iter)
-                local lrep, rrep, fact;
+                local i, pntp, pnt, npntp, npnt;
 
-                lrep := RepresentativeAction(os.group, rep[1], iter!.lorb[1]);
-                rrep := RepresentativeAction(os.orbstabs[fo].stab, rep[2], iter!.rorb[1]);
-                Remove(iter!.rorb, 1);
-                if IsEmpty(iter!.rorb) then
-                    iter!.rorb := ShallowCopy(os.orbstabs[fo].orbs[so]);
-                    Remove(iter!.lorb, 1);
+                pntp := Remove(iter!.new, 1);
+                pnt := pntp[1];
+
+                for i in [1..Length(os.gens)] do
+                    npnt := List(pnt, x -> os.act(x, os.gens[i]));
+                    if not npnt in iter!.orb then
+                        npntp := [ npnt, Concatenation(pntp[2], [i]) ];
+                        iter!.orb[npnt] := npntp[2];
+                        Add(iter!.new, npntp);
+                    fi;
+                od;
+                if Length(pntp[2]) = 0 then
+                    return One(os.group);
+                else
+                    return Product(List(pntp[2], i -> os.gens[i]));
                 fi;
-
-                fact := Factorization(os.group, rrep * lrep);
-                return MappedWord(fact, GeneratorsOfGroup(FamilyObj(fact)!.freeGroup), os.gens);
             end
-            , IsDoneIterator := iter -> iter!.lorb = []
-            , ShallowCopy := iter -> rec( lorb := ShallowCopy(iter!.lorb)
-                                        , rorb := ShallowCopy(iter!.rorb) )
+            , IsDoneIterator := iter -> iter!.new = []
+            , ShallowCopy := iter -> rec( orb := StructuralCopy(iter!.orb)
+                                        , new := ShallowCopy(iter!.new) )
             );
+    r.orb[rep] := [];
     return IteratorByFunctions(r);
 end);
 
