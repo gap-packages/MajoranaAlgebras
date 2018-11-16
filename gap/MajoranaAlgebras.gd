@@ -111,6 +111,23 @@ DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
 #! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
 DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 
+#! @Chapter Functions for calculating with Majorana representations
+#! @Section Calculating products
+#! @BeginExampleSession
+#! gap> G := AlternatingGroup(5);;
+#! gap> T := AsList(ConjugacyClass(G, (1,2)(3,4)));;
+#! gap> input := ShapesOfMajoranaRepresentation(G,T);;
+#! gap> rep := MajoranaRepresentation(input, 1);;
+#! gap> Size(rep.setup.coords);
+#! 21
+#! gap> u := SparseMatrix( 1, 21, [ [ 1 ] ], [ [ 1 ] ], Rationals);;
+#! gap> v := SparseMatrix( 1, 21, [ [ 17 ] ], [ [ 1 ] ], Rationals);;
+#! gap> MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+#! <a 1 x 21 sparse matrix over Rationals>
+#! gap> MAJORANA_InnerProduct(u, v, reo.innerproducts, rep.setup);
+#! -1/8192 
+#! @EndExampleSession
+
 ################################################################################
 ##
 ## Functions for finding indices that give unknown algebra products
