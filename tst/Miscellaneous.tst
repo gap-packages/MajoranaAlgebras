@@ -64,3 +64,10 @@ gap> vec!.indices;
 [ [ 1, 3 ] ]
 gap> vec!.entries;
 [ [ 1, -1 ] ]
+
+##
+## Test eigenvectors (again)
+##
+gap> rep := MAJORANA_DihedralAlgebras.3C;;
+gap> List( [1, 0, 1/4, 1/32], i -> Nrows(MAJORANA_Eigenvectors( 1, i, rep)) );
+[ 1, 1, 0, 1 ]

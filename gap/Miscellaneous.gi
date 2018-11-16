@@ -28,14 +28,18 @@ InstallGlobalFunction( MAJORANA_Eigenvectors,
 
     local g, i, evecs, v;
 
-    if not eval in rep.eigenvalues then
-        Error("Not an eigenvalue of the algebra");
-    fi;
-
     # Find the element <g> that maps the orbit rep to index and use this to
     # find the orbit rep itself
     g := rep.setup.conjelts[index];
     i := Position(g, index);
+
+    if not IsBound(rep.evecs[i].(String(eval))) then
+        if eval = 1 then
+            return SparseMatrix( 1, Size(rep.setup.coords), [ [ index ] ], [ [ 1 ] ], Rationals);
+        else
+            return SparseMatrix( 0, Size(rep.setup.coords), [], [], Rationals);
+        fi;
+    fi;
 
     # Conjugate the eigevectors of the orbit rep by g
     evecs := SparseMatrix( 0, Size(rep.setup.coords), [], [], Rationals);
