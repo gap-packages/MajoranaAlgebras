@@ -211,7 +211,7 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
 
     end );
 
-InstallGlobalFunction( MAJORANA_TestPositiveDefiniteForm,
+InstallGlobalFunction( MAJORANA_TestInnerProduct,
 
     function(rep)
 

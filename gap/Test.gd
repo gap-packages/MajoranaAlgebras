@@ -12,6 +12,6 @@ DeclareGlobalFunction( "MAJORANA_TestEvecs" );
 
 DeclareGlobalFunction( "MAJORANA_TestPrimitivity" );
 
-DeclareGlobalFunction( "MAJORANA_TestPositiveDefiniteForm" );
+DeclareGlobalFunction( "MAJORANA_TestInnerProduct" );
 
 DeclareGlobalFunction( "MAJORANA_TestSetup");

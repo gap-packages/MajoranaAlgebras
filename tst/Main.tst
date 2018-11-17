@@ -50,7 +50,7 @@ gap> MAJORANA_Dimension(rep);
 12
 gap> MAJORANA_TestAxiomM2(rep);
 true
-gap> MAJORANA_TestPositiveDefiniteForm(rep);
+gap> MAJORANA_InnerProduct(rep);
 true
 
 ##
