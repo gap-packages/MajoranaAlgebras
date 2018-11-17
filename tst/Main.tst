@@ -42,7 +42,7 @@ gap> MAJORANA_Dimension(rep);
 0
 
 ##
-## Test Axiom M2 and positive definiteness on S4
+## Test Axiom M2 and positive definiteness and fusion on S4
 ##
 gap> ex := S4T1();;
 gap> rep := MajoranaRepresentation(ex, 1);;
@@ -50,7 +50,9 @@ gap> MAJORANA_Dimension(rep);
 12
 gap> MAJORANA_TestAxiomM2(rep);
 true
-gap> MAJORANA_InnerProduct(rep);
+gap> MAJORANA_TestInnerProduct(rep);
+true
+gap> MAJORANA_TestFusion(rep);
 true
 
 ##

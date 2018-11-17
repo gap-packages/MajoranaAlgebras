@@ -23,7 +23,7 @@ gap> MAJORANA_FindInnerProducts(rep);;
 gap> MAJORANA_Fusion(rep);;
 gap> MAJORANA_FindAlgebraProducts(rep);;
 gap> MajoranaAlgebraTest(rep);
-Error, The algebra does not obey the fusion rules
+true
 
 ##
 ## Now test all of the smaller components on A5 shape 4

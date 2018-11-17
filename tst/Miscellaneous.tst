@@ -8,7 +8,7 @@ gap> rep := MajoranaRepresentation(ex, 2);;
 gap> MAJORANA_Dimension(rep);
 7
 gap> rep := MajoranaRepresentation(ex, 1);;
-gap> rep.innerproducts[19] := 100;;
+gap> rep.innerproducts[19] := 1/12;;
 gap> MAJORANA_MainLoop(rep);;
 gap> NClosedMajoranaRepresentation(rep);;
 gap> MAJORANA_Dimension(rep);

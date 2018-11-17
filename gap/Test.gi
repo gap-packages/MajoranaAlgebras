@@ -26,14 +26,16 @@ InstallGlobalFunction(MajoranaAlgebraTest,
     function(rep)
 
     if IsBound(rep.innerproducts) then
-        MAJORANA_TestFrobeniusForm(rep);
+        if MAJORANA_TestFrobeniusForm(rep) = false then
+            return false;
+        elif MAJORANA_TestInnerProduct(rep) = false then
+            return false;
+        fi;
     fi;
 
-    # TODO don't really need this any more, intersection of eigenspaces is sufficient
-    # But keep it here for testing purposes.
-    MAJORANA_TestFusion(rep);
-
-    MAJORANA_TestPrimitivity(rep);
+    if MAJORANA_TestPrimitivity(rep) = false then
+        return false;
+    fi;
 
     return true;
 
@@ -157,8 +159,8 @@ InstallGlobalFunction(MAJORANA_TestFrobeniusForm,
                         y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
 
                         if x <> false and y <> false and x <> y then
-                            # return false;
-                            Error("Axiom M1");
+                            return false;
+                            # Error("Axiom M1");
                             Add(ErrorM1,[l[1], l[2] ,k]);
                         fi;
 
@@ -168,7 +170,7 @@ InstallGlobalFunction(MAJORANA_TestFrobeniusForm,
         fi;
     od;
 
-    if Size(ErrorM1) > 0 then Error("Axiom M1"); fi;
+    # if Size(ErrorM1) > 0 then Error("Axiom M1"); fi;
 
     return true;
 
@@ -181,6 +183,8 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
     local i, dim, u, v, j, x, mat, espace, basis;
 
     if false in rep.algebraproducts then return fail; fi;
+
+    if MAJORANA_Dimension(rep) = 0 then return true; fi;
 
     dim := Size(rep.setup.coords);
 
@@ -217,14 +221,18 @@ InstallGlobalFunction( MAJORANA_TestInnerProduct,
 
     local dim, gram;
 
-    dim := Size(rep.setup.coords);
+    if IsBound(rep.innerproducts) and not false in rep.innerproducts then
+        dim := Size(rep.setup.coords);
 
-    gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep.innerproducts, rep.setup);
+        gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep.innerproducts, rep.setup);
 
-    if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram)) < 0 then
-        return false;
+        if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram)) < 0 then
+            return false;
+        else
+            return true;
+        fi;
     else
-        return true;
+        return fail;
     fi;
 
     end );
