@@ -124,8 +124,8 @@ DeclareGlobalFunction( "MAJORANA_InnerProduct" );
 #! gap> v := SparseMatrix( 1, 21, [ [ 17 ] ], [ [ 1 ] ], Rationals);;
 #! gap> MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 #! <a 1 x 21 sparse matrix over Rationals>
-#! gap> MAJORANA_InnerProduct(u, v, reo.innerproducts, rep.setup);
-#! -1/8192 
+#! gap> MAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);
+#! -1/8192
 #! @EndExampleSession
 
 ################################################################################
