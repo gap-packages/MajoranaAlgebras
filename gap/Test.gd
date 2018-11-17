@@ -4,7 +4,7 @@ DeclareGlobalFunction( "MAJORANA_TestOrthogonality" );
 
 DeclareGlobalFunction( "MAJORANA_TestFusion" );
 
-DeclareGlobalFunction( "MAJORANA_TestAxiomM1" );
+DeclareGlobalFunction( "MAJORANA_TestFrobeniusForm" );
 
 DeclareGlobalFunction( "MAJORANA_TestAxiomM2" );
 

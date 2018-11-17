@@ -26,7 +26,7 @@ InstallGlobalFunction(MajoranaAlgebraTest,
     function(rep)
 
     if IsBound(rep.innerproducts) then
-        MAJORANA_TestAxiomM1(rep);
+        MAJORANA_TestFrobeniusForm(rep);
     fi;
 
     # TODO don't really need this any more, intersection of eigenspaces is sufficient
@@ -121,7 +121,7 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 ## Checks if algebra obeys axiom M1
 ##
 
-InstallGlobalFunction(MAJORANA_TestAxiomM1,
+InstallGlobalFunction(MAJORANA_TestFrobeniusForm,
 
     function(rep)
 
