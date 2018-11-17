@@ -49,7 +49,7 @@ false
 ## Test AdjointAction
 ##
 gap> axis := SparseMatrix(1, 15, [[1]], [[1]], Rationals);;
-gap> basis := SparseIdentityMatrix(15, Rationals);;
+gap> basis := MAJORANA_Basis(rep);;
 gap> adj := MAJORANA_AdjointAction(axis, basis, rep);;
 gap> adj := ConvertSparseMatrixToMatrix(adj);;
 gap> AsSet(Eigenvalues(Rationals, adj)) = AsSet([1, 0, 1/4, 1/32]);

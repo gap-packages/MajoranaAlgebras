@@ -144,6 +144,26 @@ InstallGlobalFunction( MAJORANA_IsJordanAlgebra,
 
     end );
 
+InstallGlobalFunction( MAJORANA_Basis,
+
+    function(rep)
+
+    local dim, basis, i;
+
+    dim := Size(rep.setup.coords);
+
+    basis := SparseMatrix( 0, dim, [], [], Rationals);
+
+    for i in [1..dim] do
+        if rep.setup.nullspace.heads[i] = 0 then
+            basis := UnionOfRows(basis, SparseMatrix(1, dim, [[i]], [[1]], Rationals));
+        fi;
+    od;
+
+    return basis;
+
+end );
+
 InstallGlobalFunction( MAJORANA_AdjointAction,
 
     function(axis, basis, rep)

@@ -26,6 +26,10 @@ DeclareGlobalFunction( "MAJORANA_Dimension" );
 #! eigenvalue <A>eval</A> as a sparse matrix
 DeclareGlobalFunction( "MAJORANA_Eigenvectors" );
 
+#! @Arguments rep
+#! @Returns a sparse matrix that gives a basis of the algebra
+DeclareGlobalFunction( "MAJORANA_Basis" );
+
 #! @Arguments axis, basis, rep
 #! @Returns a sparse matrix representing the adjoint action of <A>axis</A> on
 #! <A>basis</A>
