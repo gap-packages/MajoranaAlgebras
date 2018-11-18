@@ -14,7 +14,11 @@ gap> OrbitalTest(os, [1..20]);
 true
 gap> OrbitalCanonizingTest(os, [1..20]);
 true
+gap> OrbitalTransversalTest(os, [1..20]);
+true
 gap> UnorderedOrbitalTest(os, [1..20]);
 true
 gap> UnorderedOrbitalCanonizingTest(os, [1..20]);
+true
+gap> UnorderedOrbitalTransversalTest(os, [1..20]);
 true

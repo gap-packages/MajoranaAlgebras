@@ -204,7 +204,7 @@ function( os, rep )
     local r, fo, so;
 
     # Make sure we have *the* rep, not *a* rep
-    rep := MAJORANA_UnorderedOrbitalRep(os, rep);
+    rep := MAJORANA_OrbitalRep(os, rep);
 
     r := rec( orb := HashMap()
             , new := [ [ rep, [] ] ]
@@ -215,7 +215,7 @@ function( os, rep )
                 pnt := pntp[1];
 
                 for i in [1..Length(os.gens)] do
-                    npnt := List(pnt, x -> os.act(x, os.gens[i]));
+                    npnt := OnTuples(pnt, os.gens[i]);
                     if not npnt in iter!.orb then
                         npntp := [ npnt, Concatenation(pntp[2], [i]) ];
                         iter!.orb[npnt] := npntp[2];
@@ -305,7 +305,7 @@ function(os, domain)
     return true;
 end);
 
-BindGlobal("UnorderedOrbitalCanonizingTest",
+BindGlobal("UnorderedOrbitalTransversalTest",
 function(os, domain)
     local o, orbs, r, reps, i, iter, e, p;
 
@@ -331,6 +331,23 @@ function(os, domain)
     return true;
 end);
 
+BindGlobal("UnorderedOrbitalCanonizingTest",
+function(os, domain)
+    local o, orbs, r, rep, i, iter, e, p, can;
+
+    orbs := Orbits(os.group, Combinations(domain, 2), OnSets);
+    for o in orbs do
+        for i in o do
+            rep := MAJORANA_UnorderedOrbitalRep(os, i);
+            can := MAJORANA_UnorderedOrbitalCanonizingElement(os, i);
+            if rep <> OnSets(i, can) then;
+                Error("element ", i, " is not canonized by ", can, "\n");
+            fi;
+        od;
+    od;
+    return true;
+end);
+
 BindGlobal("OrbitalTest",
 function(os, domain)
     local o, orbs, reps, muoreps;
@@ -349,7 +366,7 @@ function(os, domain)
     return true;
 end);
 
-BindGlobal("OrbitalCanonizingTest",
+BindGlobal("OrbitalTransversalTest",
 function(os, domain)
     local o, orbs, r, reps, i, iter, e, p;
 
@@ -364,6 +381,7 @@ function(os, domain)
             p := Position(o, e);
             if p = fail then
                 Print("element ", e, " = ", r, "^", i, " not found\n");
+                Error("");
             else
                 Remove(o, p);
             fi;
@@ -374,3 +392,21 @@ function(os, domain)
     od;
     return true;
 end);
+
+BindGlobal("OrbitalCanonizingTest",
+function(os, domain)
+    local o, orbs, r, rep, i, iter, e, p, can;
+
+    orbs := Orbits(os.group, Combinations(domain, 2), OnTuples);
+    for o in orbs do
+        for i in o do
+            rep := MAJORANA_OrbitalRep(os, i);
+            can := MAJORANA_OrbitalCanonizingElement(os, i);
+            if rep <> OnTuples(i, can) then;
+                Print("element ", i, " is not canonized by ", can, "\n");
+            fi;
+        od;
+    od;
+    return true;
+end);
+
