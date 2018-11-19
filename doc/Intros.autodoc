@@ -1,0 +1,149 @@
+@Chapter Introduction
+@Section A quick guide
+
+In order to construct the Majorana representation of a group <A>G</A> with respect
+to a set of involutions <A>T</A>, you must first call
+<Ref Func="ShapesOfMajoranaRepresentation"/>.
+
+@BeginExample
+G := AlternatingGroup(5);;
+T := AsList( ConjugacyClass(G, (1,2)(3,4)));;
+input := ShapesOfMajoranaRepresentation(G,T);;
+@EndExample
+
+This function outputs a record. One component of this record is labelled <A>shapes</A>
+and contains the possible shapes of a Majorana representation of the form $(G,T,V)$.
+
+@BeginExample
+input.shapes;
+#! [ [ "1A", "2B", "5A", "3C", "5A" ], [ "1A", "2B", "5A", "3A", "5A" ],
+#!   [ "1A", "2A", "5A", "3C", "5A" ], [ "1A", "2A", "5A", "3A", "5A" ] ]
+@EndExample
+
+To construct the Majorana representation with shape at position <A>i</A> of this list,
+call the function <Ref Func="MajoranaRepresentation"/> with <A>input</A> as its first argument
+and <A>i</A> as its second.
+
+@BeginExample
+rep := MajoranaRepresentation(input, 1);;
+rep.shape;
+#! [ "1A", "2B", "5A", "3C", "5A" ]
+@EndExample
+
+There are then a number of functions (see <Ref Chap="Chapter_funcs"/>) that one case use
+on the (potentially incomplete) Majorana representation that this function has outputted.
+
+@BeginExample
+MAJORANA_IsComplete(rep);
+#! true
+MAJORANA_Dimension(rep);
+#! 21
+@EndExample
+
+If an incomplete algebra is returned then the function
+<Ref Func="NClosedMajoranaRepresentation"/> can be used to attempt to find the
+3-closed part of the algebra.
+
+@BeginExample
+G := AlternatingGroup(5);;
+T := AsList( ConjugacyClass(G, (1,2)(3,4)));;
+input := ShapesOfMajoranaRepresentation(G,T);;
+input.shapes;
+#! [ [ "1A", "2B", "5A", "3C", "5A" ], [ "1A", "2B", "5A", "3A", "5A" ],
+#!   [ "1A", "2A", "5A", "3C", "5A" ], [ "1A", "2A", "5A", "3A", "5A" ] ]
+rep := MajoranaRepresentation(input, 2);;
+MAJORANA_IsComplete(rep);
+#! false
+NClosedMajoranaRepresentation(rep);;
+MAJORANA_IsComplete(rep);
+#! true
+MAJORANA_Dimension(rep);
+#! 46
+@EndExample
+
+@Section Understanding the output
+
+**Note that all vectors and matrices are given in sparse matrix format, as provided
+by the GAP package <A>Gauss</A>. If <A>mat</A> is such a matrix then the integers in
+<A>mat!.indices</A> refer to a spanning set of the algebra indexed by the list
+<A>rep.setup.coords</A>. The list <A>mat!.entries</A> give their corresponding coefficients.**
+
+The function <Ref Func="MajoranaRepresentation"/> outputs a record that encodes the
+information required to perform calculations in the Majorana representation that
+has been calculated. The record contains the following components.
+
+<List>
+    <Mark> <C>group</C></Mark>
+    <Item> The group <A>G</A>, as inputted by the user.</Item>
+    <Mark> <C>involutions</C></Mark>
+    <Item> The set <A>T</A>, as inputted by the user.</Item>
+    <Mark> <C>shape</C></Mark>
+    <Item> The shape of the representation, as chosen by the user in the input
+    of <Ref Func="MajoranaRepresentation"/>.</Item>
+    <Mark> <C>eigenvalues</C></Mark>
+    <Item> A list whose values give the eigenvalues of the adjoint action of the
+    axes of the algebra. In this case, it must be equal to (or a subset of)
+    <A>[0, 1/4, 1/32]</A>. Note that we omit the eigenvalue 1 as we assume the algebra
+    to be primitive.</Item>
+    <Mark> <C>axioms</C></Mark>
+    <Item> A string representing the axiomatic setting of the algebra's construction,
+    potentially chosen by the user with the <A>options</A> record in the input of
+    <Ref Func="MajoranaRepresentation"/>.</Item>
+    <Mark> <C>setup</C></Mark>
+    <Item> Is itself a record, containing (among others) the following components.
+        <List>
+            <Mark> <C>coords</C></Mark>
+            <Item> A list whose elements index a spanning set of the algebra.</Item>
+            <Mark> <C>nullspace</C></Mark>
+            <Item> Again a record such that <A>nullspace.vectors</A> gives a basis
+            of the nullspace of the algebra (as the elements <A>rep.setup.coords</A>
+            are not necessarily linearly independent).</Item>
+            <Mark> <C>orbitreps</C></Mark>
+            <Item> A list of indices giving the representatives of the orbits of
+            the action of the group <A>G</A> on <A>T</A>.</Item>
+            <Mark> <C>pairreps</C></Mark>
+            <Item> A list of pairs of indices giving representatives of the orbitals
+            of the action of the group <A>G</A> on <A>rep.setup.coords</A>.</Item>
+        </List>
+    </Item>
+    <Mark> <C>algebraproducts</C></Mark>
+    <Item> A list where the vector at position <A>i</A> denotes the algebra product
+    of the two spanning set vectors whose indices (in <A>rep.setup.coords</A>) are
+    given by <A>rep.setup.pairreps[i]</A>. If the <A>i</A>th entry is set to <A>false</A>
+    then this algebra product has not yet been found and the algebra is incomplete.</Item>
+    <Mark> <C>innerproducts</C></Mark>
+    <Item> Performs the same role as <A>algebraproducts</A> except that, instead of vectors,
+    the entries are rational numbers denoting the inner product between two spanning set
+    vectors.</Item>
+    <Mark> <C>evecs</C></Mark>
+    <Item> A list where if <A>i</A> is contained in <A>rep.setup.orbitreps</A> then
+    <A>rep.evecs[i]</A> is bound to a record. This record has components <A>"ev"</A>
+    where <A>ev</A> is an eigenvalue contained in <A>rep.eigenvalues</A>. This component gives a basis for the eigenspace of the axis corresponding to
+    <A>rep.involutions[i]</A> with eigenvalue <A>ev</A>.</Item>
+</List>
+
+@Chapter Shapes of a Majorana representation
+@Section The shapes functions
+
+@Chapter Majorana representations
+@Section The main function
+@Section The n-closed function
+
+@Chapter Functions for calculating with Majorana representations
+@ChapterLabel funcs
+@Section Calculating products
+@Section Basic functions
+@Section The subalgebra structure
+
+@Chapter Functions for testing Majorana representations
+
+The output of the function <Ref Func="MajoranaRepresentation"/> is guaranteed to be a commutative algebra generated by idempotents whose eigenspaces obey the Majorana fusion law. To check that the output is truly a Majorana algebra, one must also check that
+<List>
+    <Item> the inner product is a Frobenius form (see <Ref Func="MAJORANA_TestFrobeniusForm"/>); </Item>
+    <Item> the inner product is positive definite (see <Ref Func="MAJORANA_TestInnerProduct"/>); </Item>
+    <Item> the inner product obeys axiom M2 (Norton's inequality) (see <Ref Func="MAJORANA_TestAxiomM2"/>); </Item>
+    <Item> the algebra is primitive (see <Ref Func="MAJORANA_TestPrimitivity"/>). </Item>
+</List>
+
+@Section The main function
+@Section Other functions

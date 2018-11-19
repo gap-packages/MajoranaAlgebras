@@ -4,74 +4,178 @@
 # Declarations
 #
 
-#! @Arguments input, index, [axioms]
+DeclareInfoClass( "InfoMajorana" );
+
+################################################################################
+##
+## The main Majorana representation function.
+##
+################################################################################
+
+#! @Arguments input, index, [options]
 #! @Returns a record giving a Majorana representation
-#! @Description This takes two arguments, the first of which must be the output of the function 
-#! <Ref Func="ShapesOfMajoranaRepresentation"/> and the second of which is the index of the desired shape in list <A>input.shapes</A>. 
-#! The third variable is a string that may take one of the following values
-#! * <A>"NoAxioms"</A>: the algorithm assumes no axioms beyond the main axioms of Majorana theory;
-#! * <A>"AxiomM8"</A>: the algorithm assumes axiom M8, but no further additional axioms;
-#! * <A>"AllAxioms"</A>: the algorithm assumes axiom M8, as well as axioms 3A, 4A and 5A.
-#! If no third argument is given then the default values is set to be <A>"AllAxioms"</A>.
-#! @ChapterInfo Majorana Representations, Majorana Representations
+#! @Description This takes two or three arguments, the first of which must be
+#! the output of the function <Ref Func="ShapesOfMajoranaRepresentation"/> and
+#! the second of which is the index of the desired shape in list <A>input.shapes</A>.
+#!
+#! If the optional argument <A>options</A> is given then it must be a record.
+#! The following components of <A>options</A> are recognised:
+#! <List>
+#!  <Mark><C>axioms</C></Mark>
+#!  <Item> This component must be bound to the string <A>"AllAxioms"</A> or
+#!  <A>"NoAxioms"</A>. If bound to <A>"AllAxioms"</A> then the algorithm assumes the axioms
+#!  2Aa, 2Ab, 3A, 4A and 5A as in Seress (2012). If bound to <A>"NoAxioms"</A> then
+#!  the algorithm only assumes the Majorana axioms M1 - M7. The default value is
+#!  <A>"AllAxioms"</A>. </Item>
+#!  <Mark><C>form</C></Mark>
+#!  <Item> If this is bound to <A>true</A> then the algorithm assume the existence
+#!  of an inner product (as in the definition of a Majorana algebra). Otherwise, if
+#!  bound to <A>false</A> then no inner product is assumed (and we are in fact
+#!  constructing an axial algebra that satisfies the Majorana fusion law).
+#!  The default value is <A>true</A>.</Item>
+#!  <Mark><C>embedding</C></Mark>
+#!  <Item> If this is bound to <A>true</A> then the algorithm first attempts to construct
+#!  large subalgebras of the final representation before starting the main construction.
+#!  The default value is <A>false</A>.</Item>
+#! </List>
+#! @ChapterInfo Majorana representations, The main function
 DeclareGlobalFunction( "MajoranaRepresentation" );
 
-DeclareGlobalFunction( "MAJORANA_BasisOfEvecs" );
+################################################################################
+##
+## The main loop functions
+##
+################################################################################
 
-DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
+DeclareGlobalFunction( "MAJORANA_MainLoop" );
 
-DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
+DeclareGlobalFunction( "MAJORANA_FindInnerProducts" );
 
-DeclareGlobalFunction( "MAJORANA_InnerProduct" );
+DeclareGlobalFunction( "MAJORANA_Fusion" );
 
-DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
+DeclareGlobalFunction( "MAJORANA_FindAlgebraProducts" );
+
+################################################################################
+##
+## Functions used in fusion
+##
+################################################################################
 
 DeclareGlobalFunction( "MAJORANA_AddEvec" );
 
 DeclareGlobalFunction( "MAJORANA_FuseEigenvectors" );
 
-DeclareGlobalFunction( "MAJORANA_Fusion" );
+DeclareGlobalFunction( "MAJORANA_FuseEigenvectorsNoForm" );
 
 DeclareGlobalFunction( "MAJORANA_CheckBasis" );
 
-DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );
+DeclareGlobalFunction( "MAJORANA_IntersectEigenspaces" );
 
-DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
+################################################################################
+##
+## Functions used in MAJORANA_FindAlgebraProducts
+##
+################################################################################
 
 DeclareGlobalFunction( "MAJORANA_EigenvectorsAlgebraUnknowns" );
-
-DeclareGlobalFunction( "MAJORANA_AxiomM1" );
-
-DeclareGlobalFunction( "MAJORANA_Orthogonality" );
-
-DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
-
-DeclareGlobalFunction( "MAJORANA_RecordSolution" );
-
-DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
-
-DeclareGlobalFunction( "MAJORANA_UnknownAlgebraProducts" );
-
-DeclareGlobalFunction( "MAJORANA_AllConjugates" );
 
 DeclareGlobalFunction( "MAJORANA_NullspaceUnknowns" );
 
 DeclareGlobalFunction( "MAJORANA_Resurrection" );
 
+DeclareGlobalFunction( "MAJORANA_AllConjugates" );
+
+################################################################################
+##
+## The product functions
+##
+################################################################################
+
+#! @Arguments u, v, algebraproducts, setup
+#! @Returns the algebra product of vectors <A>u</A> and <A>v</A>
+#! @Description The arguments <A>u</A> and <A>v</A> must be row vectors in sparse
+#! matrix format. The arguments <A>algebraproducts</A> and <A>setup</A> must be
+#! the components with these names of a representation as outputted by
+#! <Ref Func="MajoranaRepresentation"/>. The output is the algebra product of
+#! <A>u</A> and <A>v</A>, also in sparse matrix format.
+#! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
+DeclareGlobalFunction( "MAJORANA_AlgebraProduct" );
+
+#! @Arguments u, v, innerproducts, setup
+#! @Returns the inner product of vectors <A>u</A> and <A>v</A>
+#! @Description The arguments <A>u</A> and <A>v</A> must be row vectors in sparse
+#! matrix format. The arguments <A>innerproducts</A> and <A>setup</A> must be
+#! the components with these names of a representation as outputted by
+#! <Ref Func="MajoranaRepresentation"/>. The output is the inner product of
+#! <A>u</A> and <A>v</A>.
+#! @ChapterInfo Functions for calculating with Majorana representations, Calculating products
+DeclareGlobalFunction( "MAJORANA_InnerProduct" );
+
+#! @Chapter Functions for calculating with Majorana representations
+#! @Section Calculating products
+#! @BeginExampleSession
+#! gap> G := AlternatingGroup(5);;
+#! gap> T := AsList(ConjugacyClass(G, (1,2)(3,4)));;
+#! gap> input := ShapesOfMajoranaRepresentation(G,T);;
+#! gap> rep := MajoranaRepresentation(input, 1);;
+#! gap> Size(rep.setup.coords);
+#! 21
+#! gap> u := SparseMatrix( 1, 21, [ [ 1 ] ], [ [ 1 ] ], Rationals);;
+#! gap> v := SparseMatrix( 1, 21, [ [ 17 ] ], [ [ 1 ] ], Rationals);;
+#! gap> MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
+#! <a 1 x 21 sparse matrix over Rationals>
+#! gap> MAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);
+#! -1/8192
+#! @EndExampleSession
+
+################################################################################
+##
+## Functions for finding indices that give unknown algebra products
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_FindBadIndices" );
+
+DeclareGlobalFunction( "MAJORANA_ListOfBadIndicesForResurrection" );
+
+################################################################################
+##
+## The conjugating functions
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_ConjugateVec" );
+
+DeclareGlobalFunction( "MAJORANA_ConjugateRow" );
+
+################################################################################
+##
+## Ancilliary functions for finding unknown algebra products
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_SeparateAlgebraProduct" );
+
 DeclareGlobalFunction( "MAJORANA_SolutionAlgProducts" );
 
 DeclareGlobalFunction( "MAJORANA_SolveSingleSolution" );
 
-DeclareGlobalFunction( "MAJORANA_SingleInnerSolution" );
+DeclareGlobalFunction( "MAJORANA_RecordSolution" );
 
 DeclareGlobalFunction( "MAJORANA_RemoveKnownAlgProducts" );
 
+################################################################################
+##
+## Ancilliary functions for finding unknown inner products
+##
+################################################################################
+
+DeclareGlobalFunction( "MAJORANA_SeparateInnerProduct" );
+
 DeclareGlobalFunction( "MAJORANA_RemoveKnownInnProducts" );
+
+DeclareGlobalFunction( "MAJORANA_SingleInnerSolution" );
 
 DeclareGlobalFunction( "MAJORANA_SolutionInnerProducts" );
 
-DeclareGlobalFunction( "MAJORANA_CheckNullSpace" );
-
-DeclareGlobalFunction( "MAJORANA_MainLoop" );
-
-DeclareInfoClass( "InfoMajorana" );
+DeclareGlobalFunction( "MAJORANA_FillGramMatrix" );

@@ -1,11 +1,18 @@
+
+##
+## Takes an Majorana representation <rep> and an integer <index> that corresponds to
+## an orbit of algebra products (given by rep.setup.pairreps[ index ])
+##
+
 InstallGlobalFunction(MAJORANA_NClosedSetUp,
 
     function(rep, index)
 
-    local   unknowns, dim, new_dim, x, elts, k, i, j, gens, pos, sign, new;
+    local   unknowns, dim, new_dim, x, elts, k, i, j, ev, gens, pos, sign, new;
 
     dim := Size(rep.setup.coords);
 
+    # Add all products that are in the chosen orbit
     for i in [1..dim] do
         for j in [i..dim] do
             if MAJORANA_UnorderedOrbitalRep( rep.setup.orbitalstruct, [i,j]) in [index, -index] then
@@ -15,29 +22,30 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
         od;
     od;
 
-    for x in rep.setup.conjelts do
-        MAJORANA_ExtendPerm(x, rep);
-    od;
+    # Extend all permutations that are stored in the setup record
+    for x in rep.setup.pairconjelts do MAJORANA_ExtendPerm(x, rep); od;
+    for x in rep.setup.conjelts do MAJORANA_ExtendPerm(x, rep); od;
+    for x in rep.generators do MAJORANA_ExtendPerm(x, rep); od;
 
     new_dim := Size(rep.setup.coords);
 
-    gens := GeneratorsOfGroup(rep.group);
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    rep.setup.orbitalstruct := MAJORANA_OrbitalStructure(List(gens, SignedPermList), [1..dim], OnPosPoints);
-
-    # Store representatives of the orbitals and add them to a corresponding hashmap
-
-    rep.setup.pairreps := MAJORANA_UnorderedOrbitalReps(rep.setup.orbitalstruct);
-
-    for i in [1 .. Size(rep.setup.pairreps) ] do
-        rep.setup.pairrepsmap[ rep.setup.pairreps[i] ] := i;
-        rep.setup.pairrepsmap[ Reversed(rep.setup.pairreps[i]) ] := i;
+    # Extend the matrices of pairorbit and pairconj
+    for i in [1..dim] do
+        Append(rep.setup.pairorbit[i], [dim + 1 .. new_dim]*0);
+        Append(rep.setup.pairconj[i], [dim + 1 .. new_dim]*0);
     od;
 
+    Append(rep.setup.pairorbit, NullMat(new_dim - dim, new_dim));
+    Append(rep.setup.pairconj, NullMat(new_dim - dim, new_dim));
+
+    # Calculate the new orbital
+    MAJORANA_Orbitals(rep.generators, dim, rep.setup);
+
+    # Add the new algebra product for the chosen orbit
     pos := rep.setup.coordmap[rep.setup.pairreps[index]];
     rep.algebraproducts[index] := SparseMatrix(1, new_dim, [[pos]], [[1]], Rationals);
 
+    # Adjust the existing algebra products and eigenvectors
     for i in [1..Size(rep.algebraproducts)] do
         if not rep.algebraproducts[i] in [false, fail] then
             rep.algebraproducts[i]!.ncols := new_dim;
@@ -46,12 +54,12 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
 
     for i in [Size(rep.algebraproducts) + 1 .. Size(rep.setup.pairreps)] do
         rep.algebraproducts[i] := false;
-        if rep.innerproducts <> false then rep.innerproducts[i] := false; fi;
+        if IsBound(rep.innerproducts) then rep.innerproducts[i] := false; fi;
     od;
 
     for i in rep.setup.orbitreps do
-        for j in [1..3] do
-            rep.evecs[i, j]!.ncols := new_dim;
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev)!.ncols := new_dim;
         od;
     od;
 
@@ -59,24 +67,31 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
 
     end );
 
+##
+## Takes the last linear system outputted by the main algorithm and uses it
+## to create new nullspace vectors
+##
+
 InstallGlobalFunction( MAJORANA_NClosedNullspace,
 
     function(rep)
 
     local i, j, v, x, pos;
 
-    rep.vec!.ncols := Size(rep.setup.coords);
+    # Adjust the matrices of the system to the new spanning set
+    rep.system.vec!.ncols := Size(rep.setup.coords);
     rep.setup.nullspace.vectors!.ncols := Size(rep.setup.coords);
 
-    for i in [1..Nrows(rep.mat)] do
-        if ForAll(rep.mat!.indices[i], x -> rep.unknowns[x] in rep.setup.coords) then
-            v := CertainRows(rep.vec, [i]);
-            for j in [1..Size(rep.mat!.indices[i])] do
-                x := rep.mat!.indices[i, j];
-
-                pos := Position(rep.setup.coords, rep.unknowns[x]);
-
-                SetEntry(v, 1, pos, -rep.mat!.entries[i, j]);
+    for i in [1..Nrows(rep.system.mat)] do
+        # If the row of the matrix involves only products that are in the new spanning set
+        if ForAll(rep.system.mat!.indices[i], x -> rep.system.unknowns[x] in rep.setup.coords) then
+            # The vector <v> will be the new nullspace vector
+            v := CertainRows(rep.system.vec, [i]);
+            for j in [1..Size(rep.system.mat!.indices[i])] do
+                # Add any coefficients coming from the matrix of the system
+                x := rep.system.mat!.indices[i, j];
+                pos := Position(rep.setup.coords, rep.system.unknowns[x]);
+                SetEntry(v, 1, pos, -rep.system.mat!.entries[i, j]);
 
                 rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, v);
             od;
@@ -93,8 +108,11 @@ InstallGlobalFunction( NClosedMajoranaRepresentation,
 
     local products, unknowns;
 
+    # Find the positions of the unknown algebra products
     products := Positions(rep.algebraproducts, false);
+    if products = [] then return; fi;
 
+    # Added the first of these products to the spanning set of the algebra
     MAJORANA_NClosedSetUp(rep, products[1]);
 
     while true do
@@ -104,13 +122,18 @@ InstallGlobalFunction( NClosedMajoranaRepresentation,
         MAJORANA_MainLoop(rep);
 
         Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.algebraproducts, false)), " unknown algebra products ") );
-        Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+        if IsBound(rep.innerproducts) then
+            Info(InfoMajorana, 20, STRINGIFY( "There are ", Size(Positions(rep.innerproducts, false)), " unknown inner products ") );
+        fi;
 
         if not false in rep.algebraproducts then
             Info( InfoMajorana, 10, "Success" );
             return;
         fi;
 
+        # If no more algebra products have been found then add the next unknown product to the
+        # spanning set of the algebra and run the algorithm again. If all products have been
+        # used then quit with a fail.
         if ForAll(rep.algebraproducts{unknowns}, x -> x = false) then
             products := Filtered(products, x -> rep.algebraproducts[x] = false);
 

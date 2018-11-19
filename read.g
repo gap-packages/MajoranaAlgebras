@@ -7,15 +7,17 @@
 
 ReadPackage( "MajoranaAlgebras", "gap/SignedPerm.gi");
 
-ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebras.gi");
+ReadPackage( "MajoranaAlgebras", "gap/OrbitalStructure.gi");
 
-ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebrasTauMaps.gi");
+ReadPackage( "MajoranaAlgebras", "gap/DihedralAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Test.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/SetUp.gi" );
+
+ReadPackage( "MajoranaAlgebras", "gap/Shapes.gi" );
 
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gi");
 
@@ -36,3 +38,5 @@ ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gi");
 ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/TauMaps.gi");
+
+ReadPackage( "MajoranaAlgebras", "gap/Miscellaneous.gi");

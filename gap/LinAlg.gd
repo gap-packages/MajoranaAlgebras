@@ -1,6 +1,6 @@
 DeclareGlobalFunction( "MAJORANA_LDLTDecomposition" );
 
-DeclareGlobalFunction( "MAJORANA_SolutionMatVecs" );
+DeclareGlobalFunction( "MAJORANA_SolveSystem" );
 
 DeclareGlobalFunction( "MAJORANA_PositiveDefinite" );
 

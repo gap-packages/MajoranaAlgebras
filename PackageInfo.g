@@ -10,8 +10,8 @@ SetPackageInfo( rec(
 
 PackageName := "MajoranaAlgebras",
 Subtitle := "A package for constructing Majorana algebras and representations.",
-Version := "0.1",
-Date := "06/03/2017", # dd/mm/yyyy format
+Version := "1.1",
+Date := "19/11/2018", # dd/mm/yyyy format
 
 Persons := [
   rec(
@@ -30,7 +30,7 @@ Persons := [
     IsMaintainer := true,
     FirstNames := "Madeleine",
     LastName := "Whybrow",
-    WWWHome := "www.madeleinewhybrow.wordpress.com",
+    WWWHome := "https://www.madeleinewhybrow.wordpress.com",
     Email := "mlw10@ic.ac.uk",
     PostalAddress := "Department of Mathematics, Imperial College, South Kensington, SW7 2AZ",
     Place := "London, UK",
@@ -79,7 +79,6 @@ Dependencies := rec(
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
                          , [ "automata", ">= 1.13"]
                          , [ "Gauss", ">=0" ]
-                         , [ "AtlasRep", ">=0" ]
                          , [ "datastructures", ">=0.2.2" ] ],
   SuggestedOtherPackages := [ [ "Char0Gauss", ">=0" ] ],
   ExternalConditions := [ ],
