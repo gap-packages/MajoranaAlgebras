@@ -264,7 +264,9 @@ InstallGlobalFunction( "MAJORANA_Embed",
 
             # TODO Change this to new orbital funcs
             # Use the inverse of the conjugating element
-            g := SP_Inverse(rep.setup.pairconjelts[rep.setup.pairconj[im[1], im[2]]]);
+
+            g := MAJORANA_OrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);
+            g := ListSignedPerm(g, Size(rep.setup.coords));
 
             # Record the new algebraproduct
             if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then

@@ -13,7 +13,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     function( input, index, options )
 
-    local rep, s, t, i, dim, algebras, ev, orbs;
+    local rep, s, t, i, dim, algebras, ev, orbs, gens;
 
     if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
     if not IsBound(options.form) then options.form := true; fi;
@@ -25,11 +25,18 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         eigenvalues := [0, 1/4, 1/32], # The eigenvalues not equal to one
                         generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
-                        axioms      := axioms,
-                        setup       := input.setup
+                        axioms      := options.axioms,
                       );
 
     t := Size(rep.involutions);
+
+    rep.setup   := rec( coords          := [1..t],
+                        coordmap        := HashMap( t*t ),
+                        pairrepsmap     := HashMap( t*t ),
+                        pairorbit       := StructuralCopy(input.pairorbit),
+                        pairconj        := StructuralCopy(input.pairconj),
+                        pairconjelts    := StructuralCopy(input.pairconjelts),
+                        pairreps        := ShallowCopy(input.pairreps)       );
 
     # coordmap gives the position in coords of the coord
     for i in [1..t] do
@@ -37,12 +44,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
         rep.setup.coordmap[rep.involutions[i]] := i;
     od;
 
-    ## Orbits on axes for eigenvectors
-    gens := GeneratorsOfGroup(input.group);
-    # The permutation induced by G acting on T by conjugation
-    gens := List(gens, x -> MAJORANA_FindPerm(x, rep, rep));
-
-    orbs := MAJORANA_Orbits(gens, t, rep.setup);
+    orbs := MAJORANA_Orbits(input.generators, rep.setup);
 
     rep.setup.conjelts := orbs.conjelts;
     rep.setup.orbitreps := orbs.orbitreps;
@@ -91,9 +93,9 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     MAJORANA_AddConjugateEvecs(rep);
 
-    for i in gens do MAJORANA_ExtendPerm(i, rep); od;
+    for i in rep.generators do MAJORANA_ExtendPerm(i, rep); od;
 
-    MAJORANA_FindOrbitals(rep, gens, [1 .. dim]);
+    MAJORANA_FindOrbitals(rep, rep.generators, [1 .. dim]);
 
     ## Fill in the unknown algebra and inner products with the value false
 
@@ -119,9 +121,9 @@ end);
 
 InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 function( i, rep, subrep )
-    local gens, x, inv, elts, emb;
+    local gens, inv, elts, emb;
 
-    x := rep.setup.pairreps[i];
+    inv := rep.setup.pairreps[i];
 
     ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
     MAJORANA_AddNewVectors(rep, subrep, inv);
@@ -149,11 +151,7 @@ function( rep, subrep, inv)
     ## Find the images of the embedding of the subrep into the main rep
     gens := GeneratorsOfGroup(subrep.group);
 
-    if IsBound(subrep.setup.orbits) then
-        imgs := List(subrep.setup.coords, w -> MAJORANA_TauMappedWord(rep, subrep, w, gens, inv) );
-    else
-        imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
-    fi;
+    imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
 
     emb := [];
 
@@ -232,25 +230,18 @@ function(rep, subrep, inv)
         new := []; new_5A := [];
 
         for x in subrep.setup.longcoords{list} do
-            if IsBound(subrep.setup.orbits) then
-                Add( new, MAJORANA_TauMappedWord(rep, subrep, x, gens, inv));
-            else
-                Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
-            fi;
+            Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
         od;
 
         for x in subrep.setup.longcoords{list_5A} do
-            if IsBound(subrep.setup.orbits) then
-                Add( new_5A, MAJORANA_TauMappedWord(rep, subrep, x, gens, inv));
-            else
-                Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
-            fi;
+            Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
         od;
 
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
     od;
 
     for g in rep.setup.conjelts do MAJORANA_ExtendPerm( g, rep); od;
+    for g in rep.generators do MAJORANA_ExtendPerm( g, rep); od;
 
     end );
 
@@ -293,7 +284,7 @@ function( rep, new, new_5A )
     # g is a permutation represented as a list
     for g in transversal do
 
-        g := ListPerm(g, Size(rep.setup.coords));
+        g := ListSignedPerm(g, Size(rep.setup.coords));
 
         # new/new_5A is a list of pairs
         # this computes all conjugates of these pairs
