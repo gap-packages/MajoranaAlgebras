@@ -23,23 +23,13 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     od;
 
     # Extend all permutations that are stored in the setup record
-    for x in rep.setup.pairconjelts do MAJORANA_ExtendPerm(x, rep); od;
     for x in rep.setup.conjelts do MAJORANA_ExtendPerm(x, rep); od;
     for x in rep.generators do MAJORANA_ExtendPerm(x, rep); od;
 
     new_dim := Size(rep.setup.coords);
 
-    # Extend the matrices of pairorbit and pairconj
-    for i in [1..dim] do
-        Append(rep.setup.pairorbit[i], [dim + 1 .. new_dim]*0);
-        Append(rep.setup.pairconj[i], [dim + 1 .. new_dim]*0);
-    od;
-
-    Append(rep.setup.pairorbit, NullMat(new_dim - dim, new_dim));
-    Append(rep.setup.pairconj, NullMat(new_dim - dim, new_dim));
-
     # Calculate the new orbital
-    MAJORANA_Orbitals(rep.generators, dim, rep.setup);
+    MAJORANA_FindOrbitals(rep, rep.generators, [1 .. new_dim]);
 
     # Add the new algebra product for the chosen orbit
     pos := rep.setup.coordmap[rep.setup.pairreps[index]];
