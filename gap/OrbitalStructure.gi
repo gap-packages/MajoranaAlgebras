@@ -193,9 +193,9 @@ InstallGlobalFunction(MAJORANA_UnorderedOrbitalReps,
 function(os)
     local reps, reps2, p, q;
 
-    reps := Set(Union( List( [1..Length(os.orbreps)]
-                       , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
-                                    , {x,y} -> MAJORANA_UnorderedOrbitalRep(os, [x,y]) ) ) ) );
+    reps := MAJORANA_OrbitalReps(os);
+    reps := Filtered(reps, x -> x[1] <= x[2]);
+
     return reps;
 end);
 
@@ -409,4 +409,3 @@ function(os, domain)
     od;
     return true;
 end);
-
