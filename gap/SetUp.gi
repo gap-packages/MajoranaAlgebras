@@ -26,15 +26,12 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
                         axioms      := options.axioms,
+                        setup       := ShallowCopy(input.setup)
                       );
 
     t := Size(rep.involutions);
 
-    rep.setup   := rec( coords          := [1..t],
-                        coordmap        := HashMap( t*t ),
-                        pairrepsmap     := input.setup.pairrepsmap,
-                        pairreps        := ShallowCopy(input.setup.pairreps)       );
-
+    rep.setup.coordmap := HashMap(t*t);
     # coordmap gives the position in coords of the coord
     for i in [1..t] do
         rep.setup.coordmap[i] := i;

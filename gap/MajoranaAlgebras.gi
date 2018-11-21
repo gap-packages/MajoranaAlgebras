@@ -515,7 +515,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     for i in [1..Size(rep.setup.pairreps)] do
         list := UnorderedTuples([1..dim], 2);
-        list := Filtered(list, x -> MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, x) = i);
+        list := Filtered(list, x -> MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, x) = rep.setup.pairreps[i]);
         list := DuplicateFreeList(Flat(list));
 
         if ForAll(list, j -> rep.setup.nullspace.heads[j] <> 0) then
@@ -794,6 +794,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
             # Find the representative of the orbital containing (i,j)
             k := MAJORANA_UnorderedOrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+            k := setup.pairrepsmap[k];
 
             # Adjust the sign
             if k > 0 then
@@ -807,7 +808,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
 
             if not x in [fail, false] then
                 g := MAJORANA_UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-                g := ListSignedPerm(g);
+                g := ListSignedPerm(g, Size(setup.coords));
 
                 pos := Position(elts,g);
 
@@ -864,6 +865,7 @@ function(u, v, innerproducts, setup)
         for j in Reversed([1..Size(v!.indices[1])]) do
             # Find the representative of the orbital containing the pair (i,j)
             k := MAJORANA_UnorderedOrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+            k := setup.pairrepsmap[k];
 
             # Adjust the sign
             if k > 0 then
@@ -909,6 +911,7 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
         # Loop over all vectors in coords
         for j in list do
             k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, [i,j]);;
+            k := rep.setup.pairrepsmap[k];
 
             if k < 0 then k := -k; fi;
 
@@ -1084,6 +1087,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
 
             # Find the representative of the orbital containing the pair (i,j)
             k := MAJORANA_UnorderedOrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+            k := setup.pairrepsmap[k];
 
             # Adjust the sign
             if k > 0 then
@@ -1101,7 +1105,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             if x <> false then
 
                 g := MAJORANA_UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-                g := ListSignedPerm(g);
+                g := ListSignedPerm(g, Size(setup.coords));
 
                 pos := Position(elts,g);
 
@@ -1255,8 +1259,9 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
     local   y, g, sign;
 
     y := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, x);
+    y := rep.setup.pairrepsmap[y];
     g := MAJORANA_UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, x);
-    g := ListSignedPerm(g);
+    g := ListSignedPerm(g, Size(rep.setup.coords));
 
     # Adjust the sign
     sign := 1;
@@ -1308,6 +1313,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         # Find the representative of the orbital containing the unknown value
         x := system.unknowns[i];
         y := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, x);
+        y := rep.setup.pairrepsmap[y];
 
         # Adjust the sign
         sign := 1;
@@ -1318,7 +1324,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
         # If the product is now known the remove its value from the rhs
         if prod <> false then
             g := MAJORANA_UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, x);
-            g := ListSignedPerm(g);
+            g := ListSignedPerm(g, Size(rep.setup.coords));
             prod := MAJORANA_ConjugateVec(prod,g);
 
             for j in [1..Nrows(system.vec)] do
@@ -1374,6 +1380,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
 
             # Find the orbital containing the pair (i,j)
             m := MAJORANA_UnorderedOrbitalRep(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+            m := setup.pairrepsmap[m];
 
             # Adjust the sign
             if m > 0 then
@@ -1519,6 +1526,7 @@ function(range, innerproducts, setup)
 
             # Find the representative of the orbital containing the pair <range{[i,j]}>
             k := MAJORANA_UnorderedOrbitalRep(setup.orbitalstruct, range{[i,j]});
+            k := setup.pairrepsmap[k];
 
             # Adjust for the sign
             if k > 0 then
