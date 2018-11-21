@@ -259,6 +259,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
 
             # Find the corresponding pair orbit in rep
             k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, im);
+            k := rep.setup.pairrepsmap[k];
             if k < 0 then sign := -sign; k := -k; fi;
 
             g := MAJORANA_OrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);
