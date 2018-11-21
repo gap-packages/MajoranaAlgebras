@@ -32,8 +32,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     rep.setup   := rec( coords          := [1..t],
                         coordmap        := HashMap( t*t ),
-                        pairrepsmap     := HashMap( t*t ),
-                        pairreps        := ShallowCopy(input.pairreps)       );
+                        pairrepsmap     := input.setup.pairreps,
+                        pairreps        := ShallowCopy(input.setup.pairreps)       );
 
     # coordmap gives the position in coords of the coord
     for i in [1..t] do

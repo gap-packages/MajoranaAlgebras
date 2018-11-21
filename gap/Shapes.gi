@@ -61,12 +61,12 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := [1 .. Size(input.pairreps)]*0;
+    shape := [1 .. Size(input.setup.pairreps)]*0;
     unknowns := [];;
 
-    for i in [1..Size(input.pairreps)] do
+    for i in [1..Size(input.setup.pairreps)] do
 
-        x := T{input.pairreps[i]};
+        x := T{input.setup.pairreps[i]};
 
         if Order(x[1]*x[2]) = 1 then
             shape[i] := "1A";
@@ -170,11 +170,11 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
-    shape := NullMat(1,Size(input.pairreps))[1];
+    shape := NullMat(1,Size(input.setup.pairreps))[1];
 
-    for i in [1..Size(input.pairreps)] do
+    for i in [1..Size(input.setup.pairreps)] do
 
-        x := T{input.pairreps[i]};
+        x := T{input.setup.pairreps[i]};
 
         if Order(x[1]*x[2]) = 1 then
             shape[i] := "1A";
@@ -196,7 +196,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     # Check for inclusions of 2X in 4X
 
-    gph := List( [1 .. Size(input.pairreps)], x -> [] );
+    gph := List( [1 .. Size(input.setup.pairreps)], x -> [] );
 
     for i in Positions(shape, "4X") do
         gph[i] := MAJORANA_RecordSubalgebras(i, shape, input);
@@ -272,7 +272,7 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
 
         # Do this for both orderings of the pair representative in order to find all
         # subalgebras
-        for x in [input.pairreps[i], Reversed(input.pairreps[i])] do
+        for x in [input.setup.pairreps[i], Reversed(input.setup.pairreps[i])] do
 
             inv := input.involutions{x};
 
@@ -320,7 +320,7 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
         if AsSet(OnTuples(input.involutions, g)) = AsSet(input.involutions) then
             perm := [];
 
-            for rep in input.pairreps do
+            for rep in input.setup.pairreps do
 
                 im := OnPairs( input.involutions{rep}, g );
                 im := List(im, x -> Position(input.involutions, x));
