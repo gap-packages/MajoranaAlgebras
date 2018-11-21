@@ -33,9 +33,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup   := rec( coords          := [1..t],
                         coordmap        := HashMap( t*t ),
                         pairrepsmap     := HashMap( t*t ),
-                        pairorbit       := StructuralCopy(input.pairorbit),
-                        pairconj        := StructuralCopy(input.pairconj),
-                        pairconjelts    := StructuralCopy(input.pairconjelts),
                         pairreps        := ShallowCopy(input.pairreps)       );
 
     # coordmap gives the position in coords of the coord
@@ -91,8 +88,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
     rep.setup.nullspace := rec( heads := [1 .. dim]*0,
                                 vectors := SparseMatrix( 0, dim, [], [], Rationals) );
 
-    MAJORANA_AddConjugateEvecs(rep);
-
     for i in rep.generators do MAJORANA_ExtendPerm(i, rep); od;
 
     MAJORANA_FindOrbitals(rep, rep.generators, [1 .. dim]);
@@ -125,7 +120,7 @@ function( i, rep, subrep )
 
     inv := rep.setup.pairreps[i];
 
-    ## Add new basis vector(s) and their orbit(s) and extend pairconj and pairorbit matrices
+    ## Add new basis vector(s) and their orbit(s)
     MAJORANA_AddNewVectors(rep, subrep, inv);
 
     ## Find the embedding of the subrep into the main algebra
@@ -137,6 +132,8 @@ function( i, rep, subrep )
 
     ## Embed products and evecs
     MAJORANA_Embed( rep, subrep, emb );
+
+    ## Add eigevectors for all subreps, not just the representative
 
     end );
 
@@ -335,9 +332,14 @@ function( rep, new, new_5A )
 ##  Use the group action to find more eigenvectors
 ##
 
+##
+## WARNING: this doesn't work with the new orbitals setup
+## I'm just going to disable it, shouldn't cause problems
+##
+
 InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
 
-    function(rep)
+    function(rep, pair)
 
     local i, new, ev, v, g, im;
 
