@@ -120,7 +120,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
 
     function(rep, subrep, emb)
 
-    local   aut, g, aut_emb, im, i, x, pos1, pos2, k;
+    local   aut, g, aut_emb, im, i, x, pos, k;
 
     aut := AutomorphismGroup(subrep.group);
 
@@ -146,10 +146,9 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
 
                 im := OnPairs(subrep.involutions{x}, aut_emb);
 
-                pos1 := Position(rep.involutions, im[1]);
-                pos2 := Position(rep.involutions, im[2]);
+                pos := List(im, x -> Position(rep.involutions, x));
 
-                k := rep.setup.pairorbit[pos1, pos2];
+                k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, pos);
 
                 if subrep.shape[i] <> rep.shape[k] then
                     return false;
@@ -259,11 +258,8 @@ InstallGlobalFunction( "MAJORANA_Embed",
             if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
 
             # Find the corresponding pair orbit in rep
-            k := rep.setup.pairorbit[im[1], im[2]];
+            k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, im);
             if k < 0 then sign := -sign; k := -k; fi;
-
-            # TODO Change this to new orbital funcs
-            # Use the inverse of the conjugating element
 
             g := MAJORANA_OrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);
             g := ListSignedPerm(g, Size(rep.setup.coords));
