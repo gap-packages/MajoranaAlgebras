@@ -42,14 +42,9 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     input := rec();
 
-    input.pairorbit := NullMat(t,t);
-    input.pairconj  := NullMat(t,t);
-    input.pairreps  := [];
-    input.pairconjelts := [ [1..t] ];
-    input.coords := [1..t];
+    input.setup := rec( pairrepsmap := HashMap( t*t ),pairreps := [], coords := [1..t] );
     input.involutions := T;
     input.group       := G;
-
     input.generators := [];
 
     for g in GeneratorsOfGroup(G) do
@@ -62,7 +57,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentationAxiomM8,
 
     # Construct orbitals of  on T x T
 
-    MAJORANA_Orbitals(input.generators, 0, input);
+    MAJORANA_FindOrbitals(input, input.generators, [1..t]);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
@@ -158,14 +153,10 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
 
     input := rec();
 
-    input.pairorbit := NullMat(t,t);
-    input.pairconj  := NullMat(t,t);
-    input.pairreps  := [];
-    input.pairconjelts := [ [1..t] ];
-    input.coords := [1..t];
+    input.setup := rec( pairrepsmap := HashMap( t*t ), pairreps := [], coords := [1..t] );
     input.involutions := T;
     input.group       := G;
-    input.generators := [];
+    input.generators  := [];
 
     for g in GeneratorsOfGroup(G) do
         perm := [];
@@ -175,7 +166,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
         Add(input.generators, perm);
     od;
 
-    MAJORANA_Orbitals(input.generators, 0, input);
+    MAJORANA_FindOrbitals(input, input.generators, [1..t]);
 
     # Determine occurances of 1A, 2A, 2B, 4A, 4B 5A, 6A in shape
 
@@ -289,19 +280,19 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
 
                 # Record the position of the 3A subalgebra
                 pos := Position( input.involutions, inv[1]^inv[2] );
-                k := input.pairorbit[x[1]][pos];
+                k := MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]);
                 shape[k] := "3A";
 
                 # Record the position of the 2A subalgebra
                 pos := Position( input.involutions, inv[2]^Product(inv) );
-                k := input.pairorbit[x[1]][pos];
+                k := MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]);
                 shape[k] := "2A";
 
             elif shape[i][1] = '4' then
 
                 # Add the position of the 2X subalgebra to the list <output>
                 pos := Position( input.involutions, inv[1]^inv[2] );
-                k := input.pairorbit[x[1]][pos];
+                k := MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]);
                 Add( output, k );
 
             fi;
@@ -334,7 +325,7 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
                 im := OnPairs( input.involutions{rep}, g );
                 im := List(im, x -> Position(input.involutions, x));
 
-                Add(perm, input.pairorbit[im[1], im[2]]);
+                Add(perm, MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, im));
             od;
 
             Add(outer_auts, perm);
