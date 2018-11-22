@@ -40,13 +40,14 @@ function(gens, Omega, Act)
     for o in [1..Length(res.orbits)] do
         Add(res.orbreps, res.orbits[o][1]);
         res.orbstabs[o] := rec( );
-        res.orbstabs[o].stab := Stabilizer(res.group, res.orbits[o][1], Act);
-        res.orbstabs[o].orbs := Orbits(res.orbstabs[o].stab, Omega, Act);
+        res.orbstabs[o].act := Act;
+        res.orbstabs[o].group := Stabilizer(res.group, res.orbits[o][1], Act);
+        res.orbstabs[o].orbits := Orbits(res.orbstabs[o].group, Omega, Act);
         res.orbstabs[o].orbnums := HashMap(Size(Omega));
         res.orbstabs[o].orbreps := [];
-        for so in [1..Length(res.orbstabs[o].orbs)] do
-            Add(res.orbstabs[o].orbreps, res.orbstabs[o].orbs[so][1]);
-            for i in res.orbstabs[o].orbs[so] do
+        for so in [1..Length(res.orbstabs[o].orbits)] do
+            Add(res.orbstabs[o].orbreps, res.orbstabs[o].orbits[so][1]);
+            for i in res.orbstabs[o].orbits[so] do
                 res.orbstabs[o].orbnums[i] := so;
             od;
         od;
@@ -93,7 +94,7 @@ function(os, pair)
     fo := os.orbnums[pair[1]];
     p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo], os.act);
     so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
-    p2 := RepresentativeAction( os.orbstabs[fo].stab, os.act(pair[2], p1)
+    p2 := RepresentativeAction( os.orbstabs[fo].group, os.act(pair[2], p1)
                                , os.orbstabs[fo].orbreps[so], os.act);
 
     return p1 * p2;
@@ -122,16 +123,23 @@ function(os, p)
     r2 := os.orbreps[ob];
 
     if r1 = r2 then
-    # a and b are in the same orbit
+        # a and b are in the same orbit
         p1 := RepresentativeAction(os.group, a, r1, os.act);
         p2 := RepresentativeAction(os.group, b, r1, os.act);
+
         tmp := [r1, os.act(b,p1)];
+        ob := os.orbstabs[oa].orbnums[tmp[2]];
+        tmp[2] := os.orbstabs[oa].orbreps[ob];
+
         tmp2 := [r1, os.act(a, p2)];
+        ob := os.orbstabs[oa].orbnums[tmp2[2]];
+        tmp2[2] := os.orbstabs[oa].orbreps[ob];
+
         return Minimum(tmp,tmp2);
     elif r2 < r1 then
-    # b has the smaller orbrep, i.e. in the orbitalrep
-    # has the smaller representative. We swap roles of a and b
-            tmp := b; b := a; a := tmp;
+        # b has the smaller orbrep, i.e. in the orbitalrep
+        # has the smaller representative. We swap roles of a and b
+        tmp := b; b := a; a := tmp;
         tmp := r2; r2 := r1; r1 := tmp;
         tmp := ob; ob := oa; oa := tmp;
     fi;
@@ -144,45 +152,59 @@ function(os, p)
     return [ r1, os.orbstabs[oa].orbreps[ob]];
 end);
 
+# This could be a lot prettier still...
+_OrbitRep := function(os, pt)
+    return os.orbreps[os.orbnums[pt]];
+end;
+
+_CanoniseIn := function(os, pt)
+    return RepresentativeAction( os.group
+                               , pt
+                               , os.orbreps[os.orbnums[pt]]
+                               , os.act);
+end;
+
+_CanoniseRepIn := function(os, pt)
+    return [ os.orbreps[os.orbnums[pt]]
+           , RepresentativeAction( os.group
+                                 , pt
+                                 , os.orbreps[os.orbnums[pt]]
+                                 , os.act) ];
+end;
+
+_StabOf := function(os, pt)
+    return os.orbstabs[os.orbnums[pt]];
+end;
+
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElement,
 function(os, pair)
-
-    # Returns a group elements that maps <pair> to its orbital representative
-    # (as given by MAJORANA_OrbitalRep).
-
-    local a, b, oa, ob, r1, r2, p1, p2, tmp, tmp2;
+    local a, b, oa, ob, r1, r2, p1, p2, tmp;
 
     a := pair[1];
     b := pair[2];
 
-    oa := os.orbnums[a];
-    ob := os.orbnums[b];
-
-    r1 := os.orbreps[oa];
-    r2 := os.orbreps[ob];
-
+    r1 := _OrbitRep(os, a);
+    r2 := _OrbitRep(os, b);
     if r1 = r2 then
-        p1 := RepresentativeAction(os.group, a, r1, os.act);
-        p2 := RepresentativeAction(os.group, b, r1, os.act);
-        tmp := [r1, os.act(b,p1)];
-        tmp2 := [r1, os.act(a, p2)];
-        if tmp < tmp2 then
-            return p1;
-        else
-            return p2;
+        p1 := _CanoniseIn(os, a);
+        p2 := _CanoniseRepIn(_StabOf(os, r1), os.act(b, p1));
+
+        tmp := [ [r1, p2[1]], p1 * p2[2] ];
+
+        p1 := _CanoniseIn(os, b);
+        p2 := _CanoniseRepIn(_StabOf(os, r1), os.act(a, p1));
+
+        if p2[1] < tmp[1][2] then
+            tmp := [ [r1, p2[1]], p1 * p2[2] ];
         fi;
+        return tmp[2];
     elif r2 < r1 then
-        tmp := b; b := a; a := tmp;
-        tmp := r2; r2 := r1; r1 := tmp;
-        tmp := ob; ob := oa; oa := tmp;
+        p1 := _CanoniseIn(os, b);
+        return p1 * _CanoniseIn(_StabOf(os, r2), os.act(a, p1));
+    else
+        p1 := _CanoniseIn(os, a);
+        return p1 * _CanoniseIn(_StabOf(os, r1), os.act(b, p1));
     fi;
-
-    p1 := RepresentativeAction(os.group, a, r1, os.act);
-    b := os.act(b, p1);
-    ob := os.orbstabs[oa].orbnums[b];
-    p2 := RepresentativeAction(os.orbstabs[oa].stab, b, os.orbstabs[oa].orbreps[ob], os.act);
-
-    return p1 * p2;
 end);
 
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElementInverse,
