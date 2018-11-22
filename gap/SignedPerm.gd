@@ -13,7 +13,13 @@ BindGlobal("SignedPermFamily", NewFamily("SignedPermFamily", IsSignedPerm));
 
 DeclareCategoryCollections( "IsSignedPerm" );
 DeclareCategoryCollections( "IsSignedPermCollection" );
+InstallTrueMethod( IsGeneratorsOfMagmaWithInverses
+                 , IsSignedPermCollection );
 
+DeclareOperation( "ListSignedPerm", [ IsSignedPerm ] );
+DeclareOperation( "ListSignedPerm", [ IsSignedPerm, IsPosInt] );
+
+DeclareGlobalFunction("SignedPerm");
 DeclareConstructor( "NewSignedPerm", [ IsSignedPerm, IsList ] );
 DeclareConstructor( "NewSignedPerm", [ IsSignedPerm, IsPerm, IsList ] );
 
@@ -25,4 +31,6 @@ DeclareRepresentation("IsSignedPermListRep", IsSignedPerm and IsPositionalObject
 BindGlobal("SignedPermListType", NewType(SignedPermFamily, IsSignedPermListRep));
 
 DeclareGlobalFunction("OnPosPoints");
+DeclareGlobalFunction("RandomSignedPermList");
+DeclareGlobalFunction("RandomSignedPerm");
 
