@@ -241,7 +241,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
 
     function(rep, subrep, emb)
 
-    local   i, im, ev, k, g, v, sign, x, l;
+    local   i, im, ev, k, g, v, sign, x, l, temp;
 
     if not IsRowVector(emb) then
         emb := MAJORANA_FindPerm(emb, rep, subrep);
@@ -258,8 +258,8 @@ InstallGlobalFunction( "MAJORANA_Embed",
             if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
 
             # Find the corresponding pair orbit in rep
-            k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, im);
-            k := rep.setup.pairrepsmap[k];
+            temp := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, im);
+            k := rep.setup.pairrepsmap[temp];
             if k < 0 then sign := -sign; k := -k; fi;
 
             g := MAJORANA_OrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);

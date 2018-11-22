@@ -191,12 +191,12 @@ InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElementInverse,
 # TODO: fix this
 InstallGlobalFunction(MAJORANA_UnorderedOrbitalReps,
 function(os)
-    local reps, reps2, p, q;
+    local ordered_reps, unordered_reps;
 
-    reps := MAJORANA_OrbitalReps(os);
-    reps := Filtered(reps, x -> x[1] <= x[2]);
+    ordered_reps := MAJORANA_OrbitalReps(os);
+    unordered_reps := List(ordered_reps, x -> MAJORANA_UnorderedOrbitalRep(os, x));
 
-    return reps;
+    return DuplicateFreeList(unordered_reps);
 end);
 
 InstallGlobalFunction(MAJORANA_OrbitalTransversalIterator,
