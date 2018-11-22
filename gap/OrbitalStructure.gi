@@ -15,7 +15,7 @@
 #         - iterate over a transversal for
 #           a stabilizer of a pair
 
-InstallGlobalFunction(MAJORANA_OrbitalStructure,
+InstallGlobalFunction( OrbitalStructure,
 # gens  - generators of a group acting on Omega
 # Omega - the domain
 # Act   - action of Group(gens) on Omega
@@ -57,33 +57,73 @@ function(gens, Omega, Act)
         od;
     od;
 
-    return res;
+    return Objectify(OrbitalStructureType, res);
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalRep,
+InstallMethod( ViewObj, "for orbital structures",
+               [ IsOrbitalStructure ],
+function(os)
+    Print("<orbital structure>");
+end);
+
+InstallMethod( PrintObj, "for orbital structures",
+               [ IsOrbitalStructure ],
+function(os)
+    Print("<orbital structure>");
+end);
+
+# This could be a lot prettier still...
+InstallGlobalFunction( OS_OrbitRepresentative,
+function(os, pt)
+    return os!.orbreps[os!.orbnums[pt]];
+end);
+
+InstallGlobalFunction( OS_CanonisingElement,
+function(os, pt)
+    return RepresentativeAction( os!.group
+                              , pt
+                              , os!.orbreps[os!.orbnums[pt]]
+                              , os!.act);
+end);
+
+InstallGlobalFunction( OS_CanonisingElementAndRepresentative,
+function(os, pt)
+    return [ os!.orbreps[os!.orbnums[pt]]
+          , RepresentativeAction( os!.group
+                                , pt
+                                , os!.orbreps[os!.orbnums[pt]]
+                                , os!.act) ];
+end);
+
+InstallGlobalFunction( OS_StabilizerOf,
+function(os, pt)
+    return os!.orbstabs[os!.orbnums[pt]];
+end);
+
+InstallGlobalFunction(OrbitalRepresentative,
 function(os, pair)
+    local fo, so, p;
 
     # Returns a representative (as a pair of elements of the G set) for the
     # orbital that contains <pair>.
 
-    local fo, so, p;
-    fo := os.orbnums[pair[1]];
-    p := RepresentativeAction(os.group, pair[1], os.orbreps[fo], os.act );
-    so := os.orbstabs[fo].orbnums[os.act(pair[2], p)];
-    return [ os.orbreps[fo], os.orbstabs[fo].orbreps[so] ];
+    fo := os!.orbnums[pair[1]];
+    p := RepresentativeAction(os!.group, pair[1], os!.orbreps[fo], os!.act );
+    so := os!.orbstabs[fo].orbnums[os!.act(pair[2], p)];
+    return [ os!.orbreps[fo], os!.orbstabs[fo].orbreps[so] ];
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalReps,
+InstallGlobalFunction(AllOrbitalRepresentatives,
 function(os)
-    return Union(List(os.orbreps, i -> [i,i])
-                , ListX( [1..Length(os.orbreps)]
-                       , k -> os.orbstabs[k].orbreps
-                       , {x,y} -> [os.orbreps[x],y] ) );
+    return Union(List(os!.orbreps, i -> [i,i])
+                , ListX( [1..Length(os!.orbreps)]
+                       , k -> os!.orbstabs[k].orbreps
+                       , {x,y} -> [os!.orbreps[x],y] ) );
 end);
 
 
 # TODO: fix this.
-InstallGlobalFunction(MAJORANA_OrbitalCanonizingElement,
+InstallGlobalFunction(OrbitalCanonizingElement,
 function(os, pair)
 
     # Returns a group elements that maps <pair> to its orbital representative
@@ -91,49 +131,49 @@ function(os, pair)
 
     local fo, so, p1, p2;
 
-    fo := os.orbnums[pair[1]];
-    p1 := RepresentativeAction(os.group, pair[1], os.orbreps[fo], os.act);
-    so := os.orbstabs[fo].orbnums[os.act(pair[2], p1)];
-    p2 := RepresentativeAction( os.orbstabs[fo].group, os.act(pair[2], p1)
-                               , os.orbstabs[fo].orbreps[so], os.act);
+    fo := os!.orbnums[pair[1]];
+    p1 := RepresentativeAction(os!.group, pair[1], os!.orbreps[fo], os!.act);
+    so := os!.orbstabs[fo].orbnums[os!.act(pair[2], p1)];
+    p2 := RepresentativeAction( os!.orbstabs[fo].group, os!.act(pair[2], p1)
+                               , os!.orbstabs[fo].orbreps[so], os!.act);
 
     return p1 * p2;
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalCanonizingElementInverse,
+InstallGlobalFunction(OrbitalCanonizingElementInverse,
 function(os, pair)
-    return MAJORANA_OrbitalCanonizingElement(os, pair)^-1;
+    return OrbitalCanonizingElement(os, pair)^-1;
     # Returns a group elements that maps the orbital representative of <pair>
     # to <pair> itself. This will be the inverse of the output of
     # MAJORANA_OrbitalCanonizingElement( os, pair )
 end);
 
 # Acting on sets of size 2
-InstallGlobalFunction(MAJORANA_UnorderedOrbitalRep,
+InstallGlobalFunction(UnorderedOrbitalRepresentative,
 function(os, p)
     local a, b, oa, ob, r1, r2, p1, p2, tmp, tmp2;
 
     a := p[1];
     b := p[2];
 
-    oa := os.orbnums[a];
-    ob := os.orbnums[b];
+    oa := os!.orbnums[a];
+    ob := os!.orbnums[b];
 
-    r1 := os.orbreps[oa];
-    r2 := os.orbreps[ob];
+    r1 := os!.orbreps[oa];
+    r2 := os!.orbreps[ob];
 
     if r1 = r2 then
         # a and b are in the same orbit
-        p1 := RepresentativeAction(os.group, a, r1, os.act);
-        p2 := RepresentativeAction(os.group, b, r1, os.act);
+        p1 := RepresentativeAction(os!.group, a, r1, os!.act);
+        p2 := RepresentativeAction(os!.group, b, r1, os!.act);
 
-        tmp := [r1, os.act(b,p1)];
-        ob := os.orbstabs[oa].orbnums[tmp[2]];
-        tmp[2] := os.orbstabs[oa].orbreps[ob];
+        tmp := [r1, os!.act(b,p1)];
+        ob := os!.orbstabs[oa].orbnums[tmp[2]];
+        tmp[2] := os!.orbstabs[oa].orbreps[ob];
 
-        tmp2 := [r1, os.act(a, p2)];
-        ob := os.orbstabs[oa].orbnums[tmp2[2]];
-        tmp2[2] := os.orbstabs[oa].orbreps[ob];
+        tmp2 := [r1, os!.act(a, p2)];
+        ob := os!.orbstabs[oa].orbnums[tmp2[2]];
+        tmp2[2] := os!.orbstabs[oa].orbreps[ob];
 
         return Minimum(tmp,tmp2);
     elif r2 < r1 then
@@ -145,88 +185,63 @@ function(os, p)
     fi;
 
     # Move a to the smaller rep
-    p1 := RepresentativeAction(os.group, a, r1, os.act);
+    p1 := RepresentativeAction(os!.group, a, r1, os!.act);
     # Now look in the point stabiliser of r1 what
     # element we can map b^p1 to
-    ob := os.orbstabs[oa].orbnums[os.act(b, p1)];
-    return [ r1, os.orbstabs[oa].orbreps[ob]];
+    ob := os!.orbstabs[oa].orbnums[os!.act(b, p1)];
+    return [ r1, os!.orbstabs[oa].orbreps[ob]];
 end);
 
-# This could be a lot prettier still...
-_OrbitRep := function(os, pt)
-    return os.orbreps[os.orbnums[pt]];
-end;
-
-_CanoniseIn := function(os, pt)
-    return RepresentativeAction( os.group
-                               , pt
-                               , os.orbreps[os.orbnums[pt]]
-                               , os.act);
-end;
-
-_CanoniseRepIn := function(os, pt)
-    return [ os.orbreps[os.orbnums[pt]]
-           , RepresentativeAction( os.group
-                                 , pt
-                                 , os.orbreps[os.orbnums[pt]]
-                                 , os.act) ];
-end;
-
-_StabOf := function(os, pt)
-    return os.orbstabs[os.orbnums[pt]];
-end;
-
-InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElement,
+InstallGlobalFunction(UnorderedOrbitalCanonizingElement,
 function(os, pair)
     local a, b, oa, ob, r1, r2, p1, p2, tmp;
 
     a := pair[1];
     b := pair[2];
 
-    r1 := _OrbitRep(os, a);
-    r2 := _OrbitRep(os, b);
+    r1 := OS_OrbitRepresentative(os, a);
+    r2 := OS_OrbitRepresentative(os, b);
     if r1 = r2 then
-        p1 := _CanoniseIn(os, a);
-        p2 := _CanoniseRepIn(_StabOf(os, r1), os.act(b, p1));
+        p1 := OS_CanonisingElement(os, a);
+        p2 := OS_CanonisingElementAndRepresentative(OS_StabilizerOf(os, r1), os!.act(b, p1));
 
         tmp := [ [r1, p2[1]], p1 * p2[2] ];
 
-        p1 := _CanoniseIn(os, b);
-        p2 := _CanoniseRepIn(_StabOf(os, r1), os.act(a, p1));
+        p1 := OS_CanonisingElement(os, b);
+        p2 := OS_CanonisingElementAndRepresentative(OS_StabilizerOf(os, r1), os!.act(a, p1));
 
         if p2[1] < tmp[1][2] then
             tmp := [ [r1, p2[1]], p1 * p2[2] ];
         fi;
         return tmp[2];
     elif r2 < r1 then
-        p1 := _CanoniseIn(os, b);
-        return p1 * _CanoniseIn(_StabOf(os, r2), os.act(a, p1));
+        p1 := OS_CanonisingElement(os, b);
+        return p1 * OS_CanonisingElement(OS_StabilizerOf(os, r2), os!.act(a, p1));
     else
-        p1 := _CanoniseIn(os, a);
-        return p1 * _CanoniseIn(_StabOf(os, r1), os.act(b, p1));
+        p1 := OS_CanonisingElement(os, a);
+        return p1 * OS_CanonisingElement(OS_StabilizerOf(os, r1), os!.act(b, p1));
     fi;
 end);
 
-InstallGlobalFunction(MAJORANA_UnorderedOrbitalCanonizingElementInverse,
-     {os, pair} -> MAJORANA_UnorderedOrbitalCanonizingElement(os, pair) ^ -1);
+InstallGlobalFunction(UnorderedOrbitalCanonizingElementInverse,
+     {os, pair} -> UnorderedOrbitalCanonizingElement(os, pair) ^ -1);
 
-# TODO: fix this
-InstallGlobalFunction(MAJORANA_UnorderedOrbitalReps,
+InstallGlobalFunction(AllUnorderedOrbitalRepresentatives,
 function(os)
     local reps, reps2, p, q;
 
-    reps := Set(Union( List( [1..Length(os.orbreps)]
-                       , k -> ListX(os.orbreps, os.orbstabs[k].orbreps
-                                    , {x,y} -> MAJORANA_UnorderedOrbitalRep(os, [x,y]) ) ) ) );
+    reps := Set(Union( List( [1..Length(os!.orbreps)]
+                       , k -> ListX(os!.orbreps, os!.orbstabs[k].orbreps
+                                    , {x,y} -> UnorderedOrbitalRepresentative(os, [x,y]) ) ) ) );
     return reps;
 end);
 
-InstallGlobalFunction(MAJORANA_OrbitalTransversalIterator,
+InstallGlobalFunction(OrbitalTransversalIterator,
 function( os, rep )
     local r, fo, so;
 
     # Make sure we have *the* rep, not *a* rep
-    rep := MAJORANA_OrbitalRep(os, rep);
+    rep := OrbitalRepresentative(os, rep);
 
     r := rec( orb := HashMap()
             , new := [ [ rep, [] ] ]
@@ -236,8 +251,8 @@ function( os, rep )
                 pntp := Remove(iter!.new, 1);
                 pnt := pntp[1];
 
-                for i in [1..Length(os.gens)] do
-                    npnt := OnTuples(pnt, os.gens[i]);
+                for i in [1..Length(os!.gens)] do
+                    npnt := OnTuples(pnt, os!.gens[i]);
                     if not npnt in iter!.orb then
                         npntp := [ npnt, Concatenation(pntp[2], [i]) ];
                         iter!.orb[npnt] := npntp[2];
@@ -245,9 +260,9 @@ function( os, rep )
                     fi;
                 od;
                 if Length(pntp[2]) = 0 then
-                    return One(os.group);
+                    return One(os!.group);
                 else
-                    return Product(List(pntp[2], i -> os.gens[i]));
+                    return Product(List(pntp[2], i -> os!.gens[i]));
                 fi;
             end
             , IsDoneIterator := iter -> iter!.new = []
@@ -260,12 +275,12 @@ end);
 
 # For now, a disguised orbit algorithm which is probably better
 # than computing RepresentativeAction all the time!
-InstallGlobalFunction(MAJORANA_UnorderedOrbitalTransversalIterator,
+InstallGlobalFunction(UnorderedOrbitalTransversalIterator,
 function( os, rep )
     local r, fo, so;
 
     # Make sure we have *the* rep, not *a* rep
-    rep := MAJORANA_UnorderedOrbitalRep(os, rep);
+    rep := UnorderedOrbitalRepresentative(os, rep);
 
     r := rec( orb := HashMap()
             , new := [ [ rep, [] ] ]
@@ -275,8 +290,8 @@ function( os, rep )
                 pntp := Remove(iter!.new, 1);
                 pnt := pntp[1];
 
-                for i in [1..Length(os.gens)] do
-                    npnt := Set(pnt, x -> os.act(x, os.gens[i]));
+                for i in [1..Length(os!.gens)] do
+                    npnt := Set(pnt, x -> os!.act(x, os!.gens[i]));
                     if not npnt in iter!.orb then
                         npntp := [ npnt, Concatenation(pntp[2], [i]) ];
                         iter!.orb[npnt] := npntp[2];
@@ -284,9 +299,9 @@ function( os, rep )
                     fi;
                 od;
                 if Length(pntp[2]) = 0 then
-                    return One(os.group);
+                    return One(os!.group);
                 else
-                    return Product(List(pntp[2], i -> os.gens[i]));
+                    return Product(List(pntp[2], i -> os!.gens[i]));
                 fi;
             end
             , IsDoneIterator := iter -> iter!.new = []
@@ -300,12 +315,12 @@ end);
 BindGlobal("UnorderedOrbitalTest",
 function(os, domain)
     local o, orbs, reps, muoreps;
-    orbs := Orbits(os.group, Combinations(domain, 2), OnSets);
+    orbs := Orbits(os!.group, Combinations(domain, 2), OnSets);
     reps := List(orbs, Minimum);
 
-    muoreps := MAJORANA_UnorderedOrbitalReps(os);
+    muoreps := AllUnorderedOrbitalRepresentatives(os);
     for o in domain do
-        if o in os.orbreps then
+        if o in os!.orbreps then
             if not ([o,o] in muoreps) then
                 Error("The element ", o, " is an orbit representative, but its diagonal is not a representative");
             fi;
@@ -331,12 +346,12 @@ BindGlobal("UnorderedOrbitalTransversalTest",
 function(os, domain)
     local o, orbs, r, reps, i, iter, e, p;
 
-    orbs := Orbits(os.group, Combinations(domain, 2), OnSets);
+    orbs := Orbits(os!.group, Combinations(domain, 2), OnSets);
     reps := List(orbs, Minimum);
 
     for r in reps do
         o := ShallowCopy(Filtered(orbs, x -> r in x)[1]);
-        iter := MAJORANA_UnorderedOrbitalTransversalIterator(os, r);
+        iter := UnorderedOrbitalTransversalIterator(os, r);
         for i in iter do
             e := OnSets(r, i);
             p := Position(o, e);
@@ -357,11 +372,11 @@ BindGlobal("UnorderedOrbitalCanonizingTest",
 function(os, domain)
     local o, orbs, r, rep, i, iter, e, p, can;
 
-    orbs := Orbits(os.group, Combinations(domain, 2), OnSets);
+    orbs := Orbits(os!.group, Combinations(domain, 2), OnSets);
     for o in orbs do
         for i in o do
-            rep := MAJORANA_UnorderedOrbitalRep(os, i);
-            can := MAJORANA_UnorderedOrbitalCanonizingElement(os, i);
+            rep := UnorderedOrbitalRepresentative(os, i);
+            can := UnorderedOrbitalCanonizingElement(os, i);
             if rep <> OnSets(i, can) then;
                 Error("element ", i, " is not canonized by ", can, "\n");
             fi;
@@ -373,10 +388,10 @@ end);
 BindGlobal("OrbitalTest",
 function(os, domain)
     local o, orbs, reps, muoreps;
-    orbs := Orbits(os.group, Tuples(domain, 2), OnTuples);
+    orbs := Orbits(os!.group, Tuples(domain, 2), OnTuples);
     reps := List(orbs, Minimum);
 
-    muoreps := MAJORANA_OrbitalReps(os);
+    muoreps := AllOrbitalRepresentatives(os);
     if not IsSet(muoreps) then
         Error("Representatives do not form a set");
     fi;
@@ -392,12 +407,12 @@ BindGlobal("OrbitalTransversalTest",
 function(os, domain)
     local o, orbs, r, reps, i, iter, e, p;
 
-    orbs := Orbits(os.group, Arrangements(domain, 2), OnTuples);
+    orbs := Orbits(os!.group, Arrangements(domain, 2), OnTuples);
     reps := List(orbs, Minimum);
 
     for r in reps do
         o := ShallowCopy(Filtered(orbs, x -> r in x)[1]);
-        iter := MAJORANA_OrbitalTransversalIterator(os, r);
+        iter := OrbitalTransversalIterator(os, r);
         for i in iter do
             e := OnTuples(r, i);
             p := Position(o, e);
@@ -419,11 +434,11 @@ BindGlobal("OrbitalCanonizingTest",
 function(os, domain)
     local o, orbs, r, rep, i, iter, e, p, can;
 
-    orbs := Orbits(os.group, Combinations(domain, 2), OnTuples);
+    orbs := Orbits(os!.group, Combinations(domain, 2), OnTuples);
     for o in orbs do
         for i in o do
-            rep := MAJORANA_OrbitalRep(os, i);
-            can := MAJORANA_OrbitalCanonizingElement(os, i);
+            rep := OrbitalRepresentative(os, i);
+            can := OrbitalCanonizingElement(os, i);
             if rep <> OnTuples(i, can) then;
                 Print("element ", i, " is not canonized by ", can, "\n");
             fi;

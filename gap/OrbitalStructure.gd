@@ -1,14 +1,24 @@
-DeclareGlobalFunction( "MAJORANA_OrbitalStructure" );
 
-DeclareGlobalFunction( "MAJORANA_OrbitalRep" );
-DeclareGlobalFunction( "MAJORANA_OrbitalReps" );
-DeclareGlobalFunction( "MAJORANA_OrbitalCanonizingElement" );
-DeclareGlobalFunction( "MAJORANA_OrbitalCanonizingElementInverse" );
-DeclareGlobalFunction( "MAJORANA_OrbitalTransversalIterator" );
+DeclareCategory( "IsOrbitalStructure", IsObject );
+BindGlobal("OrbitalStructureFamily", NewFamily("OrbitalStructureFamily", IsObject ) );
+DeclareRepresentation("IsOrbitalStructureRep", IsOrbitalStructure and IsComponentObjectRep, [] );
+BindGlobal("OrbitalStructureType", NewType(OrbitalStructureFamily, IsOrbitalStructureRep ) );
 
-DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalRep" );
-DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalReps" );
+DeclareGlobalFunction( "OrbitalStructure" );
+DeclareGlobalFunction( "OS_OrbitRepresentative" );
+DeclareGlobalFunction( "OS_CanonisingElement" );
+DeclareGlobalFunction( "OS_CanonisingElementAndRepresentative" );
+DeclareGlobalFunction( "OS_StabilizerOf" );
 
-DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalTransversalIterator" );
-DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalCanonizingElement" );
-DeclareGlobalFunction( "MAJORANA_UnorderedOrbitalCanonizingElementInverse" );
+
+DeclareGlobalFunction( "OrbitalRepresentative" );
+DeclareGlobalFunction( "AllOrbitalRepresentatives" );
+DeclareGlobalFunction( "OrbitalCanonizingElement" );
+DeclareGlobalFunction( "OrbitalCanonizingElementInverse" );
+DeclareGlobalFunction( "OrbitalTransversalIterator" );
+
+DeclareGlobalFunction( "UnorderedOrbitalRepresentative" );
+DeclareGlobalFunction( "AllUnorderedOrbitalRepresentatives" );
+DeclareGlobalFunction( "UnorderedOrbitalTransversalIterator" );
+DeclareGlobalFunction( "UnorderedOrbitalCanonizingElement" );
+DeclareGlobalFunction( "UnorderedOrbitalCanonizingElementInverse" );
