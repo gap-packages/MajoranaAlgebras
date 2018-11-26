@@ -172,6 +172,10 @@ function(l,r)
     return false;
 end);
 
+InstallMethod( LargestMovedPoint, "for a signed permutation",
+               [ IsSignedPermRep ],
+               sp -> Length(sp![2]) );
+
 #
 # Signed permutations in list representation
 #
@@ -294,6 +298,9 @@ function(l,r)
     return l![1] < r![1];
 end);
 
+InstallMethod( LargestMovedPoint, "for a signed permutation in list rep",
+               [ IsSignedPermListRep ],
+               sp -> Length(sp![1]) );
 
 InstallMethod( NewSignedPerm, "for perm, vec rep",
                [ IsSignedPermRep, IsList ],
@@ -307,7 +314,7 @@ function(filt, list)
     if PermList(List(list, AbsInt)) = fail then
         Error("list does not define a signed permutation");
     fi;
-    return Objectify(SignedPermListType, [ list ] );
+    return Objectify(SignedPermListType,  [ TrimSignedPermList( list ) ] );
 end);
 
 InstallGlobalFunction(RandomSignedPermList,
