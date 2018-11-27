@@ -1,3 +1,23 @@
+
+InstallGlobalFunction( SignedPerm,
+function(args...)
+    if Length(args) = 1 then
+        return NewSignedPerm(IsSignedPermListRep, args[1]);
+    elif Length(args) = 2 then
+        return NewSignedPerm(args[1], args[2]);
+    else
+        Error("usage: SignedPerm takes either 1 or 2 arguments");
+    fi;
+end);
+
+# for an int and a signed perm
+InstallGlobalFunction(OnPosPoints,
+                      { pnt, elm } -> AbsInt(pnt ^ elm));
+
+
+#
+# Signed permutations in (perm, sign) representation
+#
 BindGlobal( "TrimSignedPerm",
 function(p)
     local ls;
@@ -7,7 +27,6 @@ function(p)
     p![2] := (p![2]){[1..p![3]]} + ListWithIdenticalEntries(p![3], Z(2) * 0);
     return p;
 end);
-
 
 BindGlobal( "SignedPermList",
 function(l)
@@ -34,18 +53,14 @@ function(l)
     return Objectify( SignedPermType, sp );
 end);
 
-BindGlobal( "ListSignedPerm",
-function( arg )
-    local sp, len, p, s, l, i;
+InstallMethod( ListSignedPerm,
+               "for signed permutations in (perm,signs) rep",
+               [ IsSignedPermRep ],
+function(sp)
+    local len, p, s, l, i;
 
-    sp := arg[1]; p := sp![1]; s := sp![2];
-
-    if Length(arg) = 2 then
-        len := arg[2];
-    else
-        len := Length(s);
-    fi;
-
+    p := sp![1]; s := sp![2];
+    len := Length(s);
     l := ListPerm(p, len);
 
     for i in [ 1 .. len ] do
@@ -55,12 +70,24 @@ function( arg )
     od;
 
     return l;
+end);
 
-end );
+InstallMethod( ListSignedPerm,
+               "for signed permutations in (perm,signs) rep",
+               [ IsSignedPermRep, IsPosInt ],
+function(sp, len)
+    local p, s, l, i;
 
-BindGlobal( "SignedPerm",
-function(p, s)
-    return Objectify( SignedPermType, TrimSignedPerm([ p, s ]));
+    p := sp![1]; s := sp![2];
+    l := ListPerm(p, len);
+
+    for i in [ 1 .. len ] do
+        if IsBound(s[l[i]]) and IsOne(s[l[i]]) then
+            l[i] := -l[i];
+        fi;
+    od;
+
+    return l;
 end);
 
 InstallMethod(ViewObj, "for signed permutations",
@@ -145,16 +172,13 @@ function(l,r)
     return false;
 end);
 
-# for an int and a signed perm
-InstallGlobalFunction(OnPosPoints,
-    { pnt, elm } -> pnt ^ elm![1]);
+InstallMethod( LargestMovedPoint, "for a signed permutation",
+               [ IsSignedPermRep ],
+               sp -> Length(sp![2]) );
 
-InstallTrueMethod( IsGeneratorsOfMagmaWithInverses
-                 , IsSignedPermCollection );
-
-
-
-#### bla
+#
+# Signed permutations in list representation
+#
 BindGlobal( "TrimSignedPermList",
 function(p)
     local ls;
@@ -166,24 +190,37 @@ function(p)
     return p;
 end);
 
-BindGlobal( "SignedPermL",
-function(list)
-    return Objectify( SignedPermListType, [ TrimSignedPermList(list) ]);
+InstallMethod( ListSignedPerm,
+               "for signed permutations in list rep",
+               [ IsSignedPermListRep ],
+               p -> p![1]);
+
+InstallMethod( ListSignedPerm,
+               "for signed permutations in list rep, and a positive int",
+               [ IsSignedPermListRep, IsPosInt ],
+function(p, len)
+    local i, res;
+
+    res := ShallowCopy(p![1]);
+    for i in [Length(res)+1..len] do
+        res[i] := i;
+    od;
+    return res;
 end);
 
-InstallMethod(ViewObj, "for signed permutations (list rep)",
+InstallMethod(ViewObj, "for signed permutations in list rep",
   [ IsSignedPermListRep ],
 function(sp)
     Print("<signed permutation in list rep>");
 end);
 
-InstallMethod(PrintObj, "for signed permutations",
+InstallMethod(PrintObj, "for signed permutations in list rep",
 [ IsSignedPermListRep ],
 function(sp)
     Print("<signed permutation in list rep>");
 end);
 
-InstallMethod(\*, "for signed permutations",
+InstallMethod(\*, "for signed permutations in list rep",
   [ IsSignedPermListRep, IsSignedPermListRep ],
 function(l, r)
     local degree, res, i, ll, rr;
@@ -199,7 +236,7 @@ function(l, r)
     return Objectify(SignedPermListType, [ TrimSignedPermList( res ) ] );
 end);
 
-InstallMethod(InverseOp, "for signed permutations",
+InstallMethod(InverseOp, "for signed permutations in list rep",
   [ IsSignedPermListRep ],
 function(sp)
     local id, rhs, i;
@@ -217,25 +254,25 @@ function(sp)
     return Objectify(SignedPermListType, [ TrimSignedPermList( id ) ] );
 end);
 
-InstallMethod(OneImmutable, "for signed permutations",
+InstallMethod(OneImmutable, "for signed permutations in list rep",
               [ IsSignedPermListRep ],
 function(sp)
     return Objectify(SignedPermListType, [ [] ]);
 end);
 
-InstallMethod(OneMutable, "for signed permutations",
+InstallMethod(OneMutable, "for signed permutations in list rep",
               [ IsSignedPermListRep ],
 function(sp)
     return Objectify(SignedPermListType, [ [] ]);
 end);
 
-InstallMethod(IsOne, "for signed permutations",
+InstallMethod(IsOne, "for signed permutations in list rep",
   [ IsSignedPermListRep ],
 function(sp)
     return IsEmpty(sp![1]);
 end);
 
-InstallMethod(\^, "for an integer and a signed permutation",
+InstallMethod(\^, "for an integer and a signed permutation in list rep",
   [ IsInt, IsSignedPermListRep ],
 function(pt, sp)
     local apt;
@@ -248,19 +285,22 @@ function(pt, sp)
     fi;
 end);
 
-InstallMethod( \=, "for a signed permutation and a signed permutation",
+InstallMethod( \=, "for a signed permutation and a signed permutation in list rep",
                [ IsSignedPermListRep, IsSignedPermListRep ],
 function(l,r)
     # Trim?
     return l![1] = r![1];
 end);
 
-InstallMethod( \<, "for a signed permutation and a signed permutation",
+InstallMethod( \<, "for a signed permutation and a signed permutation in list rep",
                [ IsSignedPermListRep, IsSignedPermListRep ],
 function(l,r)
     return l![1] < r![1];
 end);
 
+InstallMethod( LargestMovedPoint, "for a signed permutation in list rep",
+               [ IsSignedPermListRep ],
+               sp -> Length(sp![1]) );
 
 InstallMethod( NewSignedPerm, "for perm, vec rep",
                [ IsSignedPermRep, IsList ],
@@ -271,10 +311,13 @@ end);
 InstallMethod( NewSignedPerm, "for list rep",
                [ IsSignedPermListRep, IsList ],
 function(filt, list)
-    return SignedPermL(ShallowCopy(list));
+    if PermList(List(list, AbsInt)) = fail then
+        Error("list does not define a signed permutation");
+    fi;
+    return Objectify(SignedPermListType,  [ TrimSignedPermList( list ) ] );
 end);
 
-BindGlobal("RandomSignedPermList",
+InstallGlobalFunction(RandomSignedPermList,
 function(degree)
     local res, i;
 
@@ -284,8 +327,7 @@ function(degree)
     return res;
 end);
 
-
-BindGlobal("RandomSignedPerm",
+InstallGlobalFunction(RandomSignedPerm,
 function(filt, degree)
     return NewSignedPerm(filt, RandomSignedPermList(degree));
 end);
