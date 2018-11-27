@@ -148,7 +148,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
 
                 pos := List(im, x -> Position(rep.involutions, x));
 
-                k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, pos);
+                k := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, pos);
 
                 if subrep.shape[i] <> rep.shape[k] then
                     return false;
@@ -258,11 +258,11 @@ InstallGlobalFunction( "MAJORANA_Embed",
             if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
 
             # Find the corresponding pair orbit in rep
-            temp := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, im);
+            temp := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, im);
             k := rep.setup.pairrepsmap[temp];
             if k < 0 then sign := -sign; k := -k; fi;
 
-            g := MAJORANA_OrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);
+            g := UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);
             g := ListSignedPerm(g, Size(rep.setup.coords));
 
             # Record the new algebraproduct
