@@ -228,7 +228,7 @@ InstallGlobalFunction(UnorderedOrbitalCanonizingElementInverse,
 
 InstallGlobalFunction(AllUnorderedOrbitalRepresentatives,
 function(os)
-    local ordered_reps, unordered_reps;
+    local reps;
 
     reps := Set(Union( List( [1..Length(os!.orbreps)]
                        , k -> ListX(os!.orbreps, os!.orbstabs[k].orbreps
