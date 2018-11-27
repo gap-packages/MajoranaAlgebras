@@ -94,6 +94,8 @@ gap> ListSignedPerm(t) = lt;
 true
 gap> IsOne(Inverse(s*t)*s*t);
 true
+gap> LargestMovedPoint(s);
+6
 gap> ls := [3,-2,1,4,6,-5];; lt := [-1,-2,-3,5,4,10,7,8,-9,6];;
 gap> s := SignedPerm(IsSignedPermRep, ls);;
 gap> t := SignedPerm(IsSignedPermRep, lt);;
@@ -103,6 +105,8 @@ gap> ListSignedPerm(t) = lt;
 true
 gap> IsOne(Inverse(s*t)*s*t);
 true
+gap> LargestMovedPoint(s);
+6
 gap> ls := [3,-2,1,4,6,-5];; lt := [-1,-2,-3,5,4,10,7,8,-9,6];;
 gap> s := SignedPerm(IsSignedPermRep, ls);;
 gap> t := SignedPerm(IsSignedPermListRep, lt);;
