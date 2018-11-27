@@ -280,19 +280,19 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
 
                 # Record the position of the 3A subalgebra
                 pos := Position( input.involutions, inv[1]^inv[2] );
-                k := MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]);
+                k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, [x[1], pos]);
                 shape[k] := "3A";
 
                 # Record the position of the 2A subalgebra
                 pos := Position( input.involutions, inv[2]^Product(inv) );
-                k := MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]);
+                k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, [x[1], pos]);
                 shape[k] := "2A";
 
             elif shape[i][1] = '4' then
 
                 # Add the position of the 2X subalgebra to the list <output>
                 pos := Position( input.involutions, inv[1]^inv[2] );
-                k := MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, [x[1], pos]);
+                k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, [x[1], pos]);
                 Add( output, k );
 
             fi;
@@ -325,7 +325,7 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
                 im := OnPairs( input.involutions{rep}, g );
                 im := List(im, x -> Position(input.involutions, x));
 
-                Add(perm, MAJORANA_UnorderedOrbitalRep(input.setup.orbitalstruct, im));
+                Add(perm, UnorderedOrbitalRepresentative(input.setup.orbitalstruct, im));
             od;
 
             Add(outer_auts, perm);
