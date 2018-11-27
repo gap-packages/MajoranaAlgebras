@@ -98,11 +98,11 @@ InstallGlobalFunction( MAJORANA_FindOrbitals,
 
     # Construct the orbital structure
 
-    rep.setup.orbitalstruct := MAJORANA_OrbitalStructure(gens, Omega, OnPosPoints);
+    rep.setup.orbitalstruct := OrbitalStructure(gens, Omega, OnPosPoints);
 
     # Store representatives of the orbitals and add them to a corresponding hashmap
 
-    new_pairreps := MAJORANA_UnorderedOrbitalReps(rep.setup.orbitalstruct);
+    new_pairreps := AllUnorderedOrbitalRepresentatives(rep.setup.orbitalstruct);
 
     for x in new_pairreps do
         if not x in rep.setup.pairreps then
