@@ -304,9 +304,9 @@ InstallGlobalFunction( MAJORANA_TestSetup,
 
     for i in [1 .. dim] do
         for j in [i .. dim] do
-            k := MAJORANA_UnorderedOrbitalRep(rep.setup.orbitalstruct, [i, j]);
+            k := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, [i, j]);
             k := rep.setup.pairrepsmap[k];
-            g := MAJORANA_UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, [i, j]);
+            g := UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, [i, j]);
             g := ListSignedPerm(g, dim);
 
             sign_k := 1;
