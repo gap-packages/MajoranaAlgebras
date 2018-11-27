@@ -15,7 +15,10 @@ InstallGlobalFunction(MAJORANA_NClosedSetUp,
     # Add all products that are in the chosen orbit
     for i in [1..dim] do
         for j in [i..dim] do
-            if MAJORANA_UnorderedOrbitalRep( rep.setup.orbitalstruct, [i,j]) in [index, -index] then
+
+            k := UnorderedOrbitalRepresentative( rep.setup.orbitalstruct, [i,j]);
+
+            if rep.setup.pairrepsmap[k] in [index, -index] then
                 Add(rep.setup.coords, [i,j]);
                 rep.setup.coordmap[[i,j]] := Size(rep.setup.coords);
             fi;
