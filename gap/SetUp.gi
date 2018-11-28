@@ -102,6 +102,13 @@ InstallGlobalFunction( MAJORANA_SetUp,
         fi;
     od;
 
+    for i in rep.setup.orbitreps do
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev)!.ncols := dim;
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
+        od;
+    od;
+
     return rep;
 end);
 

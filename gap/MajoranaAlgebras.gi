@@ -807,7 +807,7 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             x := algebraproducts[k];
 
             if not x in [fail, false] then
-                g := UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+                g := UnorderedOrbitalCanonizingElementInverse(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
                 g := ListSignedPerm(g, Size(setup.coords));
 
                 pos := Position(elts,g);
@@ -1104,7 +1104,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             # If product is known then calculate as usual
             if x <> false then
 
-                g := UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+                g := UnorderedOrbitalCanonizingElementInverse(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
                 g := ListSignedPerm(g, Size(setup.coords));
 
                 pos := Position(elts,g);
@@ -1260,7 +1260,7 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
 
     y := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, x);
     y := rep.setup.pairrepsmap[y];
-    g := UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, x);
+    g := UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, x);
     g := ListSignedPerm(g, Size(rep.setup.coords));
 
     # Adjust the sign
@@ -1323,7 +1323,7 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
 
         # If the product is now known the remove its value from the rhs
         if prod <> false then
-            g := UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, x);
+            g := UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, x);
             g := ListSignedPerm(g, Size(rep.setup.coords));
             prod := MAJORANA_ConjugateVec(prod,g);
 
