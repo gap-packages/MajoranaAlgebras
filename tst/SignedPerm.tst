@@ -85,6 +85,10 @@ gap> t > s;
 false
 
 # Constructors
+gap> ls := [2, 1, 3];;
+gap> SignedPerm(ls);;
+gap> ls = [2, 1, 3];
+true
 gap> ls := [3,-2,1,4,6,-5];; lt := [-1,-2,-3,5,4,10,7,8,-9,6];;
 gap> s := SignedPerm(IsSignedPermListRep, ls);;
 gap> t := SignedPerm(IsSignedPermListRep, lt);;
