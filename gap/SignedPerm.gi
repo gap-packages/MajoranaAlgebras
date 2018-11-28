@@ -32,6 +32,7 @@ BindGlobal( "SignedPermList",
 function(l)
     local sp, s, ts;
 
+    l := ShallowCopy(l);
     sp := [];
 
     # Signs
@@ -144,7 +145,7 @@ function(pt, sp)
     pt := AbsInt(pt);
 
     pt := pt ^ sp![1];
-    if IsOne(sp![2][pt]) then
+    if IsBound(sp![2][pt]) and IsOne(sp![2][pt]) then
         sign := -sign;
     fi;
     return sign * pt;
@@ -305,7 +306,7 @@ InstallMethod( LargestMovedPoint, "for a signed permutation in list rep",
 InstallMethod( NewSignedPerm, "for perm, vec rep",
                [ IsSignedPermRep, IsList ],
 function(filt, list)
-    return SignedPermList(ShallowCopy(list));
+    return SignedPermList(list);
 end);
 
 InstallMethod( NewSignedPerm, "for list rep",
@@ -314,7 +315,7 @@ function(filt, list)
     if PermList(List(list, AbsInt)) = fail then
         Error("list does not define a signed permutation");
     fi;
-    return Objectify(SignedPermListType,  [ TrimSignedPermList( list ) ] );
+    return Objectify(SignedPermListType,  [ TrimSignedPermList( ShallowCopy(list) ) ] );
 end);
 
 InstallGlobalFunction(RandomSignedPermList,
