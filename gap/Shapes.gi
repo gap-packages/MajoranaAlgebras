@@ -281,11 +281,13 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
                 # Record the position of the 3A subalgebra
                 pos := Position( input.involutions, inv[1]^inv[2] );
                 k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, [x[1], pos]);
+                k := input.setup.pairrepsmap[k];
                 shape[k] := "3A";
 
                 # Record the position of the 2A subalgebra
                 pos := Position( input.involutions, inv[2]^Product(inv) );
                 k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, [x[1], pos]);
+                k := input.setup.pairrepsmap[k];
                 shape[k] := "2A";
 
             elif shape[i][1] = '4' then
@@ -293,6 +295,7 @@ InstallGlobalFunction( MAJORANA_RecordSubalgebras,
                 # Add the position of the 2X subalgebra to the list <output>
                 pos := Position( input.involutions, inv[1]^inv[2] );
                 k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, [x[1], pos]);
+                k := input.setup.pairrepsmap[k];
                 Add( output, k );
 
             fi;
