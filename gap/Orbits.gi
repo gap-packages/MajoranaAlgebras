@@ -92,7 +92,7 @@ InstallGlobalFunction( MAJORANA_FindOrbitals,
 
     function(rep, gens, Omega)
 
-    local new_pairreps, k, x;
+    local new_pairreps, k, x, y;
 
     gens := List(gens, SignedPermList);
 
@@ -108,10 +108,19 @@ InstallGlobalFunction( MAJORANA_FindOrbitals,
         if not x in rep.setup.pairreps then
             # Only add new reps to preserve the ordering of the old reps
             Add(rep.setup.pairreps, x);
-            # Record the position of the new rep in the hashmap
             k := Size(rep.setup.pairreps);
-            rep.setup.pairrepsmap[ x ] := k;
-            rep.setup.pairrepsmap[ Reversed(x) ] := k;
+
+            # Add all possible sign and ordering combinations to the hashmap
+            for y in [x, Reversed(x)] do
+
+                rep.setup.pairrepsmap[ y ] := k;
+
+                if ForAny(y, i -> i > Size(rep.involutions)) then
+                    rep.setup.pairrepsmap[ [-y[1], y[2]] ]  := -k;
+                    rep.setup.pairrepsmap[ [y[1], -y[2]] ]  := -k;
+                    rep.setup.pairrepsmap[ [-y[1], -y[2]] ] := k;
+                fi;
+            od;
         fi;
     od;
 
