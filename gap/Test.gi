@@ -159,8 +159,8 @@ InstallGlobalFunction(MAJORANA_TestFrobeniusForm,
                         y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
 
                         if x <> false and y <> false and x <> y then
+                            Error("Axiom M1");
                             return false;
-                            # Error("Axiom M1");
                             Add(ErrorM1,[l[1], l[2] ,k]);
                         fi;
 
@@ -307,12 +307,12 @@ InstallGlobalFunction( MAJORANA_TestSetup,
 
             g := UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, [i, j]);
             k := rep.setup.pairrepsmap[ OnPairs( [i,j], g) ];
-            g := ListSignedPerm(g, dim);
 
             sign_k := 1;
 
             if k < 0 then k := -k; sign_k := -1; fi;
 
+            g := ListSignedPerm( Inverse(g), dim);
             im := g{rep.setup.pairreps[k]};
 
             sign := 1;
