@@ -1,7 +1,7 @@
 ##
 ## Test main funcs for A5
 ##
-gap> a5 := A5();;
+gap> a5 := MAJORANA_Example_A5();;
 gap> Length(a5.shapes) = 4;
 true
 gap> setup := MAJORANA_SetUp(a5, 1, rec( axioms := "AllAxioms"));;
@@ -16,11 +16,11 @@ true
 ##
 ##  Test main funcs for S5
 ##
-gap> s5 := S5();;
+gap> s5 := MAJORANA_Example_S5();;
 gap> setup := MAJORANA_SetUp(s5, 1, rec( axioms := "AllAxioms"));;
 gap> MAJORANA_TestSetup(setup);
 true
-gap> s5 := S5();;
+gap> s5 := MAJORANA_Example_S5();;
 gap> setup := MAJORANA_SetUp(s5, 1, rec( axioms := "NoAxioms"));;
 gap> MAJORANA_TestSetup(setup);
 true
@@ -28,7 +28,7 @@ true
 ##
 ## Test main funcs for A7
 ##
-gap> a7 := A7();;
+gap> a7 := MAJORANA_Example_A7();;
 gap> rep := MAJORANA_SetUp(a7, 2, rec( axioms := "AllAxioms") );;
 gap> Size(rep.setup.coords);
 406

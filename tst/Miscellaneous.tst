@@ -3,7 +3,7 @@ gap> SetInfoLevel( InfoMajorana, 0);
 ##
 ## Set up infinite family example
 ##
-gap> ex := min3gen9();;
+gap> ex := MAJORANA_Example_min3gen9();;
 gap> rep := MajoranaRepresentation(ex, 2);;
 gap> MAJORANA_Dimension(rep);
 7
