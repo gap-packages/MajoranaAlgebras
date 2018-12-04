@@ -19,7 +19,7 @@ true
 ##
 ## Test eigenvectors
 ##
-gap> u := SparseMatrix( 1, 15, [[2]], [[1]], Rationals);;
+gap> u := SparseMatrix( 1, Size(rep.setup.coords), [[2]], [[1]], Rationals);;
 gap> evecs := MAJORANA_Eigenvectors( 2, 0, rep);;
 gap> for v in Iterator( evecs ) do prod := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup); if prod <> (0)*v then Error(); fi; od;
 gap> evecs := MAJORANA_Eigenvectors( 2, 1/4, rep);;
@@ -48,7 +48,7 @@ false
 ##
 ## Test AdjointAction
 ##
-gap> axis := SparseMatrix(1, 15, [[1]], [[1]], Rationals);;
+gap> axis := SparseMatrix(1, Size(rep.setup.coords), [[1]], [[1]], Rationals);;
 gap> basis := MAJORANA_Basis(rep);;
 gap> adj := MAJORANA_AdjointAction(axis, basis, rep);;
 gap> adj := ConvertSparseMatrixToMatrix(adj);;

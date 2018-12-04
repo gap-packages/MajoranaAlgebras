@@ -34,10 +34,6 @@ gap> Size(rep.setup.coords);
 406
 gap> MajoranaAlgebraTest(rep);
 true
-gap> gens := List(rep.setup.pairconjelts, x -> List(x, AbsInt));;
-gap> gens := List(gens, PermList);;
-gap> Size(Group(gens)) = Size(rep.group);
-true
 
 ##
 ## Test FindEmbedding
@@ -50,7 +46,7 @@ gap> MAJORANA_FindEmbedding(rep, MAJORANA_DihedralAlgebras.2A, [ 1, 2 ]);
 ##
 ## Test ExtendPerm
 ##
-gap> perm := ShallowCopy( rep.setup.pairconjelts[2]{[1..105]} );;
+gap> perm := [1..105];;
 gap> MAJORANA_ExtendPerm(perm, rep);
-gap> perm = rep.setup.pairconjelts[2];
+gap> perm = [1..406];
 true
