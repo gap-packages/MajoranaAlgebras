@@ -54,13 +54,13 @@ gap> Nrows(mat);
 ##
 ## Test conjugate vec func
 ##
-gap> v := rep.algebraproducts[8];;
-gap> g := rep.setup.pairconjelts[55];;
+gap> v := SparseMatrix( 1, 31, [ [ 1, 6, 8, 12, 13, 27 ] ], [ [ 3/128, 3/128, -1/128, -1/128, -1/128, -1 ] ], Rationals );;
+gap> g := [ 2, 3, 1, 15, 14, 13, 8, 9, 7, 5, 6, 4, 11, 10, 12, 24, 21, 22, 17, 20, 19, 23, 18, 25, 16, 29, 28, 31, 30, 26, 27 ];;
 gap> v := MAJORANA_ConjugateVec( v, g );;
 gap> v!.indices;
-[ [ 1, 5, 9, 15, 26 ] ]
+[ [ 2, 4, 9, 11, 13, 28 ] ]
 gap> v!.entries;
-[ [ -7/4096, 7/4096, -7/4096, 7/4096, 7/32 ] ]
+[ [ 3/128, -1/128, -1/128, -1/128, 3/128, -1 ] ]
 
 ##
 ## Test algebra product func
