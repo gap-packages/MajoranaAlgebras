@@ -143,6 +143,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
             if subrep.shape[i, 1] in ['2','3','4'] then
 
                 x := subrep.setup.pairreps[i];
+                # TODO we might have to fix this if the subrep is of dim 0
 
                 im := OnPairs(subrep.involutions{x}, aut_emb);
 
