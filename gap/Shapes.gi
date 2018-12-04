@@ -313,7 +313,7 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
 
     function(input)
 
-    local autgp, inner_autgp, outer_auts, perm, g, i, im, pos, rep;
+    local autgp, inner_autgp, outer_auts, perm, g, i, im, pos, rep, k;
 
     autgp := AutomorphismGroup(input.group);
     inner_autgp := InnerAutomorphismsAutomorphismGroup(autgp);
@@ -328,7 +328,8 @@ InstallGlobalFunction( MAJORANA_RemoveDuplicateShapes,
                 im := OnPairs( input.involutions{rep}, g );
                 im := List(im, x -> Position(input.involutions, x));
 
-                Add(perm, UnorderedOrbitalRepresentative(input.setup.orbitalstruct, im));
+                k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, im);
+                Add(perm, input.setup.pairrepsmap[k]);
             od;
 
             Add(outer_auts, perm);
