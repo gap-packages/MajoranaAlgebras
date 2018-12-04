@@ -122,6 +122,8 @@ has been calculated. The record contains the following components.
     <A>rep.involutions[i]</A> with eigenvalue <A>ev</A>.</Item>
 </List>
 
+@Section Info levels
+
 @Chapter Shapes of a Majorana representation
 @Section The shapes functions
 

@@ -63,3 +63,23 @@ DeclareGlobalFunction( "MAJORANA_IsJordanAlgebra" );
 DeclareGlobalFunction( "MAJORANA_ConvertToBasis" );
 
 DeclareGlobalFunction( "MAJORANA_NaiveProduct" );
+
+#! @BeginExampleSession
+#! gap> G := G := AlternatingGroup(5);;
+#! gap> T := AsList( ConjugacyClass(G, (1,2)(3,4)));;
+#! gap> input := ShapesOfMajoranaRepresentation(G,T);;
+#! gap> rep := MajoranaRepresentation(input, 2);;
+#! gap> MAJORANA_IsComplete(rep);
+#! false
+#! gap> NClosedMajoranaRepresentation(rep);;
+#! gap> MAJORANA_IsComplete(rep);
+#! true
+#! gap> MAJORANA_Dimension(rep);
+#! 46
+#! gap> basis := MAJORANA_Basis(rep);
+#! <a 46 x 61 sparse matrix over Rationals>
+#! gap> subalg := MAJORANA_Subalgebra(basis, rep);
+#! <a 46 x 61 sparse matrix over Rationals>
+#! gap> MAJORANA_IsJordanAlgebra(subalg, rep);
+#! false
+#! @EndExampleSession
