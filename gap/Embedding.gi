@@ -264,7 +264,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
 
             if k < 0 then sign := -sign; k := -k; fi;
 
-            g := ListSignedPerm( Inverse(g), Size(rep.setup.coords));
+            g := ListSignedPerm( g, Size(rep.setup.coords));
 
             # Record the new algebraproduct
             if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then
