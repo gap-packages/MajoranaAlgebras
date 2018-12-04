@@ -258,12 +258,12 @@ InstallGlobalFunction( "MAJORANA_Embed",
             if im[2] < 0 then sign := -sign; im[2] := -im[2]; fi;
 
             # Find the corresponding pair orbit in rep
-            temp := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, im);
-            k := rep.setup.pairrepsmap[temp];
+            g := UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, im);
+            k := rep.setup.pairrepsmap[ OnPairs( im, g ) ];
+
             if k < 0 then sign := -sign; k := -k; fi;
 
-            g := UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, im);
-            g := ListSignedPerm(g, Size(rep.setup.coords));
+            g := ListSignedPerm( Inverse(g), Size(rep.setup.coords));
 
             # Record the new algebraproduct
             if not IsBound(rep.algebraproducts[k]) or rep.algebraproducts[k] = false then
