@@ -792,9 +792,11 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
     for i in Reversed([1..Size(u!.indices[1])]) do
         for j in Reversed([1..Size(v!.indices[1])]) do
 
+            # Find the canonizing element of the pair (i,j)
+            g := UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+
             # Find the representative of the orbital containing (i,j)
-            k := UnorderedOrbitalRepresentative(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-            k := setup.pairrepsmap[k];
+            k := setup.pairrepsmap[ OnPairs( [u!.indices[1, i], v!.indices[1, j]], g) ];;
 
             # Adjust the sign
             if k > 0 then
@@ -807,9 +809,9 @@ InstallGlobalFunction(  MAJORANA_AlgebraProduct,
             x := algebraproducts[k];
 
             if not x in [fail, false] then
-                g := UnorderedOrbitalCanonizingElementInverse(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-                g := ListSignedPerm(g, Size(setup.coords));
 
+                # We now need the inverse of the canonizing element
+                g := ListSignedPerm( Inverse(g), Size(setup.coords));
                 pos := Position(elts,g);
 
                 # If we have already seen this elt then add the product <x> to the corresponding
@@ -863,9 +865,12 @@ function(u, v, innerproducts, setup)
     # Loop over the non-zero coefficients of u and v
     for i in Reversed([1..Size(u!.indices[1])]) do
         for j in Reversed([1..Size(v!.indices[1])]) do
-            # Find the representative of the orbital containing the pair (i,j)
-            k := UnorderedOrbitalRepresentative(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-            k := setup.pairrepsmap[k];
+
+            # Find the canonizing element of the pair (i,j)
+            g := UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+
+            # Find the representative of the orbital containing (i,j)
+            k := setup.pairrepsmap[ OnPairs( [u!.indices[1, i], v!.indices[1, j]], g) ];;
 
             # Adjust the sign
             if k > 0 then
@@ -912,8 +917,6 @@ InstallGlobalFunction(MAJORANA_FindBadIndices,
         for j in list do
             k := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, [i,j]);;
             k := rep.setup.pairrepsmap[k];
-
-            if k < 0 then k := -k; fi;
 
             if rep.algebraproducts[k] = false then
                 # Add this index to the list of unknown indices and remove it
@@ -1085,9 +1088,11 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            # Find the representative of the orbital containing the pair (i,j)
-            k := UnorderedOrbitalRepresentative(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-            k := setup.pairrepsmap[k];
+            # Find the canonizing element of the pair (i,j)
+            g := UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+
+            # Find the representative of the orbital containing (i,j)
+            k := setup.pairrepsmap[ OnPairs( [u!.indices[1, i], v!.indices[1, j]], g) ];;
 
             # Adjust the sign
             if k > 0 then
@@ -1104,9 +1109,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             # If product is known then calculate as usual
             if x <> false then
 
-                g := UnorderedOrbitalCanonizingElementInverse(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-                g := ListSignedPerm(g, Size(setup.coords));
-
+                # We now need the inverse of the canonizing element
+                g := ListSignedPerm( Inverse(g), Size(setup.coords));
                 pos := Position(elts,g);
 
                 if pos <> fail then
@@ -1258,14 +1262,12 @@ InstallGlobalFunction( MAJORANA_RecordSolution,
 
     local   y, g, sign;
 
-    y := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, x);
-    y := rep.setup.pairrepsmap[y];
     g := UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, x);
+    y := rep.setup.pairrepsmap[ OnPairs( x, g ) ];
     g := ListSignedPerm(g, Size(rep.setup.coords));
 
     # Adjust the sign
-    sign := 1;
-    if y < 0 then sign := -1; y := -y; fi;
+    sign := 1; if y < 0 then sign := -1; y := -y; fi;
 
     # Record the new product
     if rep.algebraproducts[y] = false then
@@ -1310,21 +1312,21 @@ InstallGlobalFunction( MAJORANA_RemoveKnownAlgProducts,
     # Loop over the unknown algebra products
     for i in [1..Size(system.unknowns)] do
 
-        # Find the representative of the orbital containing the unknown value
+        # Find the canonizing element and representative of the pair x
         x := system.unknowns[i];
-        y := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, x);
-        y := rep.setup.pairrepsmap[y];
+        g := UnorderedOrbitalCanonizingElement(rep.setup.orbitalstruct, x);
+        y := rep.setup.pairrepsmap[ OnPairs( x, g ) ];
 
         # Adjust the sign
-        sign := 1;
-        if y < 0 then sign := -1; y := -y; fi;
+        sign := 1; if y < 0 then sign := -1; y := -y; fi;
 
         prod := rep.algebraproducts[y];
 
         # If the product is now known the remove its value from the rhs
         if prod <> false then
-            g := UnorderedOrbitalCanonizingElementInverse(rep.setup.orbitalstruct, x);
-            g := ListSignedPerm(g, Size(rep.setup.coords));
+
+            # We actually want the inverse of g
+            g := ListSignedPerm( Inverse(g), Size(rep.setup.coords));
             prod := MAJORANA_ConjugateVec(prod,g);
 
             for j in [1..Nrows(system.vec)] do
@@ -1367,7 +1369,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             sum,            # record values of knowns
             i,              # index for dim of u
             j,              # index for dim of v
-            m,              # orbit of i,j
+            k,              # orbit of i,j
             pos,            # position of m in unknowns
             sign;           # correct sign of 5A axes
 
@@ -1378,24 +1380,26 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
     for i in [1..Size(u!.indices[1])] do
         for j in [1..Size(v!.indices[1])] do
 
-            # Find the orbital containing the pair (i,j)
-            m := UnorderedOrbitalRepresentative(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
-            m := setup.pairrepsmap[m];
+            # Find the canonizing element of the pair (i,j)
+            g := UnorderedOrbitalCanonizingElement(setup.orbitalstruct, [u!.indices[1, i], v!.indices[1, j]]);
+
+            # Find the representative of the orbital containing (i,j)
+            k := setup.pairrepsmap[ OnPairs( [u!.indices[1, i], v!.indices[1, j]], g) ];;
 
             # Adjust the sign
-            if m > 0 then
+            if k > 0 then
                 sign := 1;
             else
                 sign := -1;
-                m := -m;
+                k := -k;
             fi;
 
             # If the product is known the calculate as usual. Otherwise, add the coefficient
             # to the matrix of the system of linear equations.
-            if innerproducts[m] <> false then
-                AddToEntry(sum, 1, 1, - sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[m]);
+            if innerproducts[k] <> false then
+                AddToEntry(sum, 1, 1, - sign*u!.entries[1, i]*v!.entries[1, j]*innerproducts[k]);
             else
-                pos := Position(unknowns,m);
+                pos := Position(unknowns,k);
                 AddToEntry(row, 1, pos, sign*u!.entries[1, i]*v!.entries[1, j]);
             fi;
         od;
@@ -1524,9 +1528,9 @@ function(range, innerproducts, setup)
     for i in [1..l] do
         for j in [i..l] do
 
-            # Find the representative of the orbital containing the pair <range{[i,j]}>
-            k := UnorderedOrbitalRepresentative(setup.orbitalstruct, range{[i,j]});
-            k := setup.pairrepsmap[k];
+            # Find the canonizing element of the pair
+            g := UnorderedOrbitalCanonizingElement( setup.orbitalstruct, range{[i,j]});
+            k := setup.pairrepsmap[ OnPairs( range{[i,j]}, g ) ];
 
             # Adjust for the sign
             if k > 0 then
