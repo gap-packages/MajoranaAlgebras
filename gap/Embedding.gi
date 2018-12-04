@@ -150,6 +150,7 @@ InstallGlobalFunction( "MAJORANA_CheckEmbedding",
                 pos := List(im, x -> Position(rep.involutions, x));
 
                 k := UnorderedOrbitalRepresentative(rep.setup.orbitalstruct, pos);
+                k := rep.setup.pairrepsmap[k];
 
                 if subrep.shape[i] <> rep.shape[k] then
                     return false;
