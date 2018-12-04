@@ -31,3 +31,23 @@ DeclareGlobalFunction( "MAJORANA_TestEvecs" );
 DeclareGlobalFunction( "MAJORANA_TestPrimitivity" );
 
 DeclareGlobalFunction( "MAJORANA_TestSetup");
+
+#! @BeginExampleSession
+#! gap> G := AlternatingGroup(5);;
+#! gap> T := AsList( ConjugacyClass(G, (1,2)(3,4)));;
+#! gap> input := ShapesOfMajoranaRepresentation(G,T);;
+#! gap> rep := MajoranaRepresentation(input, 2);;
+#! gap> NClosedMajoranaRepresentation(rep);;
+#! gap> MAJORANA_IsComplete(rep);
+#! true
+#! gap> MajoranaAlgebraTest(rep);
+#! true
+#! gap> MAJORANA_TestFrobeniusForm(rep);
+#! true
+#! gap> MAJORANA_TestInnerProduct(rep);
+#! true
+#! gap> MAJORANA_TestAxiomM2(rep);
+#! true
+#! gap> MAJORANA_TestPrimitivity(rep);
+#! true
+#! @EndExampleSession
