@@ -42,9 +42,9 @@ true
 ##
 ## Test FindEmbedding
 ##
-gap> MAJORANA_FindEmbedding(rep, MAJORANA_DihedralAlgebras.5A, [ 1, 5 ]);
+gap> MAJORANA_FindEmbedding(rep, MAJORANA_DihedralAlgebras("5A"), [ 1, 5 ]);
 [ 1, 5, 9, 15, 10, 141 ]
-gap> MAJORANA_FindEmbedding(rep, MAJORANA_DihedralAlgebras.2A, [ 1, 2 ]);
+gap> MAJORANA_FindEmbedding(rep, MAJORANA_DihedralAlgebras("2A"), [ 1, 2 ]);
 [ 1, 2, 3 ]
 
 ##
