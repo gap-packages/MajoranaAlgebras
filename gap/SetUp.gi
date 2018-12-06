@@ -7,12 +7,10 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     function( input, index, options )
 
-    local rep, s, t, i, dim, algebras, ev, orbs;
+    local rep, s, t, i, dim, ev, orbs;
 
     if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
     if not IsBound(options.form) then options.form := true; fi;
-
-    algebras := MAJORANA_DihedralAlgebras;
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
@@ -62,15 +60,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
     ## Embed dihedral algebras
 
     for i in Positions(rep.shape, "4B") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, MAJORANA_DihedralAlgebras("4B") );
     od;
 
     for i in Positions(rep.shape, "6A") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, MAJORANA_DihedralAlgebras("6A") );
     od;
 
     for i in PositionsProperty(rep.shape, x -> not x in [ "1A", "4B", "6A" ]) do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]) );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, MAJORANA_DihedralAlgebras(rep.shape[i]) );
     od;
 
     ## Finish off setup
@@ -388,7 +386,7 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
                 for g in Filtered(rep.setup.pairconjelts, h -> h[i] = i) do
                     # Find the image of each eigenvector under g
                     im := MAJORANA_ConjugateVec(v, g);
-                    
+
                     # Add the image to the new eigenspaces
                     if not _IsRowOfSparseMatrix(new.(ev), im) then
                         new.(ev) := UnionOfRows(new.(ev), im);
