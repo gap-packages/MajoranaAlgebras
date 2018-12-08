@@ -1,0 +1,155 @@
+  
+  [1X1 [33X[0;0YIntroduction[133X[101X
+  
+  
+  [1X1.1 [33X[0;0YA quick guide[133X[101X
+  
+  [33X[0;0YIn  order to construct the Majorana representation of a group [3XG[103X with respect
+  to     a     set     of    involutions    [3XT[103X,    you    must    first    call
+  [2XShapesOfMajoranaRepresentation[102X ([14X2.1-1[114X).[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XG := AlternatingGroup(5);;[127X[104X
+    [4X[25Xgap>[125X [27XT := AsList( ConjugacyClass(G, (1,2)(3,4)));;[127X[104X
+    [4X[25Xgap>[125X [27Xinput := ShapesOfMajoranaRepresentation(G,T);;[127X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThis  function  outputs  a  record. One component of this record is labelled
+  [3Xshapes[103X  and contains the possible shapes of a Majorana representation of the
+  form [23X(G,T,V)[123X.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xinput.shapes;[127X[104X
+    [4X[28X[ [ "1A", "2B", "5A", "3C", "5A" ], [ "1A", "2B", "5A", "3A", "5A" ],[128X[104X
+    [4X[28X  [ "1A", "2A", "5A", "3C", "5A" ], [ "1A", "2A", "5A", "3A", "5A" ] ][128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YTo  construct  the  Majorana representation with shape at position [3Xi[103X of this
+  list,  call  the  function  [2XMajoranaRepresentation[102X ([14X3.1-1[114X) with [3Xinput[103X as its
+  first argument and [3Xi[103X as its second.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xrep := MajoranaRepresentation(input, 1);;[127X[104X
+    [4X[25Xgap>[125X [27Xrep.shape;[127X[104X
+    [4X[28X[ "1A", "2B", "5A", "3C", "5A" ][128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YThere  are  then  a  number  of  functions  (see [14X4[114X) that one case use on the
+  (potentially  incomplete)  Majorana  representation  that  this function has
+  outputted.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_IsComplete(rep);[127X[104X
+    [4X[28Xtrue[128X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_Dimension(rep);[127X[104X
+    [4X[28X21[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YIf    an    incomplete    algebra    is    returned    then   the   function
+  [2XNClosedMajoranaRepresentation[102X  ([14X3.2-1[114X)  can  be  used to attempt to find the
+  3-closed part of the algebra.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XG := AlternatingGroup(5);;[127X[104X
+    [4X[25Xgap>[125X [27XT := AsList( ConjugacyClass(G, (1,2)(3,4)));;[127X[104X
+    [4X[25Xgap>[125X [27Xinput := ShapesOfMajoranaRepresentation(G,T);;[127X[104X
+    [4X[25Xgap>[125X [27Xinput.shapes;[127X[104X
+    [4X[28X[ [ "1A", "2B", "5A", "3C", "5A" ], [ "1A", "2B", "5A", "3A", "5A" ],[128X[104X
+    [4X[28X  [ "1A", "2A", "5A", "3C", "5A" ], [ "1A", "2A", "5A", "3A", "5A" ] ][128X[104X
+    [4X[25Xgap>[125X [27Xrep := MajoranaRepresentation(input, 2);;[127X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_IsComplete(rep);[127X[104X
+    [4X[28Xfalse[128X[104X
+    [4X[25Xgap>[125X [27XNClosedMajoranaRepresentation(rep);;[127X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_IsComplete(rep);[127X[104X
+    [4X[28Xtrue[128X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_Dimension(rep);[127X[104X
+    [4X[28X46[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X1.2 [33X[0;0YUnderstanding the output[133X[101X
+  
+  [33X[0;0Y[13XNote  that  all  vectors  and matrices are given in sparse matrix format, as
+  provided by the GAP package [3XGauss[103X. If [3Xmat[103X is such a matrix then the integers
+  in  [3Xmat!.indices[103X  refer to a spanning set of the algebra indexed by the list
+  [3Xrep.setup.coords[103X.   The   list   [3Xmat!.entries[103X   give   their   corresponding
+  coefficients.[113X[133X
+  
+  [33X[0;0YThe  function  [2XMajoranaRepresentation[102X  ([14X3.1-1[114X) outputs a record that encodes
+  the   information   required   to   perform  calculations  in  the  Majorana
+  representation  that  has been calculated. The record contains the following
+  components.[133X
+  
+  [8X [10Xgroup[110X[8X[108X
+        [33X[0;6YThe group [3XG[103X, as inputted by the user.[133X
+  
+  [8X [10Xinvolutions[110X[8X[108X
+        [33X[0;6YThe set [3XT[103X, as inputted by the user.[133X
+  
+  [8X [10Xshape[110X[8X[108X
+        [33X[0;6YThe shape of the representation, as chosen by the user in the input of
+        [2XMajoranaRepresentation[102X ([14X3.1-1[114X).[133X
+  
+  [8X [10Xeigenvalues[110X[8X[108X
+        [33X[0;6YA  list whose values give the eigenvalues of the adjoint action of the
+        axes  of  the  algebra. In this case, it must be equal to (or a subset
+        of)  [3X[0,  1/4,  1/32][103X. Note that we omit the eigenvalue 1 as we assume
+        the algebra to be primitive.[133X
+  
+  [8X [10Xaxioms[110X[8X[108X
+        [33X[0;6YA   string   representing  the  axiomatic  setting  of  the  algebra's
+        construction,  potentially  chosen by the user with the [3Xoptions[103X record
+        in the input of [2XMajoranaRepresentation[102X ([14X3.1-1[114X).[133X
+  
+  [8X [10Xsetup[110X[8X[108X
+        [33X[0;6YIs   itself   a   record,  containing  (among  others)  the  following
+        components.[133X
+  
+        [8X [10Xcoords[110X[8X[108X
+              [33X[0;12YA list whose elements index a spanning set of the algebra.[133X
+  
+        [8X [10Xnullspace[110X[8X[108X
+              [33X[0;12YAgain  a record such that [3Xnullspace.vectors[103X gives a basis of the
+              nullspace  of  the algebra (as the elements [3Xrep.setup.coords[103X are
+              not necessarily linearly independent).[133X
+  
+        [8X [10Xorbitreps[110X[8X[108X
+              [33X[0;12YA  list  of  indices giving the representatives of the orbits of
+              the action of the group [3XG[103X on [3XT[103X.[133X
+  
+        [8X [10Xpairreps[110X[8X[108X
+              [33X[0;12YA  list  of  pairs  of  indices  giving  representatives  of the
+              orbitals of the action of the group [3XG[103X on [3Xrep.setup.coords[103X.[133X
+  
+  [8X [10Xalgebraproducts[110X[8X[108X
+        [33X[0;6YA  list  where the vector at position [3Xi[103X denotes the algebra product of
+        the  two  spanning set vectors whose indices (in [3Xrep.setup.coords[103X) are
+        given  by [3Xrep.setup.pairreps[i][103X. If the [3Xi[103Xth entry is set to [3Xfalse[103X then
+        this  algebra  product  has  not  yet  been  found  and the algebra is
+        incomplete.[133X
+  
+  [8X [10Xinnerproducts[110X[8X[108X
+        [33X[0;6YPerforms  the  same  role  as  [3Xalgebraproducts[103X except that, instead of
+        vectors,  the  entries are rational numbers denoting the inner product
+        between two spanning set vectors.[133X
+  
+  [8X [10Xevecs[110X[8X[108X
+        [33X[0;6YA   list   where   if  [3Xi[103X  is  contained  in  [3Xrep.setup.orbitreps[103X  then
+        [3Xrep.evecs[i][103X  is  bound  to  a record. This record has components [3X"ev"[103X
+        where [3Xev[103X is an eigenvalue contained in [3Xrep.eigenvalues[103X. This component
+        gives  a  basis  for  the  eigenspace  of  the  axis  corresponding to
+        [3Xrep.involutions[i][103X with eigenvalue [3Xev[103X.[133X
+  
+  
+  [1X1.3 [33X[0;0YInfo levels[133X[101X
+  
+  [1X1.3-1 InfoMajorana[101X
+  
+  [33X[1;0Y[29X[2XInfoMajorana[102X[32X info class[133X
+  
+  [33X[0;0YThe  default  info  level of [3XInfoMajorana[103X is 0. No information is printed at
+  this  level. If the info level is at least 10 then [3XSuccess[103X is printed if the
+  algorithm  has  produced  a  complete  Majorana  algebra,  otherwise [3XFail[103X is
+  printed.  If  the info level is at least 20 then more information is printed
+  about the progress of the algorithm, up to a maximum info level of 100.[133X
+  

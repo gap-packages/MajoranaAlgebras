@@ -1,0 +1,130 @@
+  
+  [1X4 [33X[0;0YFunctions for calculating with Majorana representations[133X[101X
+  
+  
+  [1X4.1 [33X[0;0YCalculating products[133X[101X
+  
+  [1X4.1-1 MAJORANA_AlgebraProduct[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_AlgebraProduct[102X( [3Xu[103X, [3Xv[103X, [3Xalgebraproducts[103X, [3Xsetup[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ythe algebra product of vectors [3Xu[103X and [3Xv[103X[133X
+  
+  [33X[0;0YThe  arguments  [3Xu[103X  and  [3Xv[103X  must  be row vectors in sparse matrix format. The
+  arguments  [3Xalgebraproducts[103X and [3Xsetup[103X must be the components with these names
+  of  a  representation  as  outputted  by [2XMajoranaRepresentation[102X ([14X3.1-1[114X). The
+  output is the algebra product of [3Xu[103X and [3Xv[103X, also in sparse matrix format.[133X
+  
+  [1X4.1-2 MAJORANA_InnerProduct[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_InnerProduct[102X( [3Xu[103X, [3Xv[103X, [3Xinnerproducts[103X, [3Xsetup[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ythe inner product of vectors [3Xu[103X and [3Xv[103X[133X
+  
+  [33X[0;0YThe  arguments  [3Xu[103X  and  [3Xv[103X  must  be row vectors in sparse matrix format. The
+  arguments [3Xinnerproducts[103X and [3Xsetup[103X must be the components with these names of
+  a  representation as outputted by [2XMajoranaRepresentation[102X ([14X3.1-1[114X). The output
+  is the inner product of [3Xu[103X and [3Xv[103X.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XG := AlternatingGroup(5);;[127X[104X
+    [4X[25Xgap>[125X [27XT := AsList(ConjugacyClass(G, (1,2)(3,4)));;[127X[104X
+    [4X[25Xgap>[125X [27Xinput := ShapesOfMajoranaRepresentation(G,T);;[127X[104X
+    [4X[25Xgap>[125X [27Xrep := MajoranaRepresentation(input, 1);;[127X[104X
+    [4X[25Xgap>[125X [27XSize(rep.setup.coords);[127X[104X
+    [4X[28X21[128X[104X
+    [4X[25Xgap>[125X [27Xu := SparseMatrix( 1, 21, [ [ 1 ] ], [ [ 1 ] ], Rationals);;[127X[104X
+    [4X[25Xgap>[125X [27Xv := SparseMatrix( 1, 21, [ [ 17 ] ], [ [ 1 ] ], Rationals);;[127X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);[127X[104X
+    [4X[28X<a 1 x 21 sparse matrix over Rationals>[128X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);[127X[104X
+    [4X[28X-1/8192[128X[104X
+  [4X[32X[104X
+  
+  
+  [1X4.2 [33X[0;0YBasic functions[133X[101X
+  
+  [1X4.2-1 MAJORANA_IsComplete[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_IsComplete[102X( [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ytrue  is  all  algebra products have been found, otherwise returns
+            false[133X
+  
+  [33X[0;0YTakes  a Majorana representation [3Xrep[103X, as outputted by [2XMajoranaRepresentation[102X
+  ([14X3.1-1[114X).  If  the  representation is complete, that is to say, if the vector
+  space   spanned   by   the   basis   vectors  indexed  by  the  elements  in
+  [3Xrep.setup.coords[103X   is   closed   under   the   algebra   product   given  by
+  [3Xrep.algebraproducts[103X,  return true. Otherwise, if some products are not known
+  then return false.[133X
+  
+  [1X4.2-2 MAJORANA_Dimension[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_Dimension[102X( [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ythe dimension of the representation [3Xrep[103X as an integer[133X
+  
+  [33X[0;0YTakes  a Majorana representation [3Xrep[103X, as outputted by [2XMajoranaRepresentation[102X
+  ([14X3.1-1[114X)  and  returns its dimension as a vector space. If the representation
+  is not complete (cf. [2XMAJORANA_IsComplete[102X ([14X4.2-1[114X) ) then this value might not
+  be the true dimension of the algebra.[133X
+  
+  [1X4.2-3 MAJORANA_Eigenvectors[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_Eigenvectors[102X( [3Xindex[103X, [3Xeval[103X, [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya  basis  of  the  eigenspace  of  the axis as position [3Xindex[103X with
+            eigenvalue [3Xeval[103X as a sparse matrix[133X
+  
+  [1X4.2-4 MAJORANA_Basis[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_Basis[102X( [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya sparse matrix that gives a basis of the algebra[133X
+  
+  [1X4.2-5 MAJORANA_AdjointAction[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_AdjointAction[102X( [3Xaxis[103X, [3Xbasis[103X, [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya sparse matrix representing the adjoint action of [3Xaxis[103X on [3Xbasis[103X[133X
+  
+  [33X[0;0YTakes  a Majorana representation [3Xrep[103X, as outputted by [2XMajoranaRepresentation[102X
+  ([14X3.1-1[114X),  a  row  vector  [3Xaxis[103X  in  sparse  matrix format and a set of basis
+  vectors,  also  in  sparse  matrix  format. Returns a matrix, also in sparse
+  matrix format, that represents the adjoint action of [3Xaxis[103X on [3Xbasis[103X.[133X
+  
+  
+  [1X4.3 [33X[0;0YThe subalgebra structure[133X[101X
+  
+  [1X4.3-1 MAJORANA_Subalgebra[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_Subalgebra[102X( [3Xvecs[103X, [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ythe subalgebra of the representation [3Xrep[103X that is generated by [3Xvecs[103X[133X
+  
+  [33X[0;0YTakes  a Majorana representation [3Xrep[103X, as outputted by [2XMajoranaRepresentation[102X
+  ([14X3.1-1[114X)  and  a  set of vectors [3Xvecs[103X in sparse matrix format and returns the
+  subalgebra generated by [3Xvecs[103X, also in sparse matrix format.[133X
+  
+  [1X4.3-2 MAJORANA_IsJordanAlgebra[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_IsJordanAlgebra[102X( [3Xsubalg[103X, [3Xrep[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ytrue  if  the  subalgebra  [3Xsubalg[103X  is  a Jordan algebra, otherwise
+            returns false[133X
+  
+  [33X[0;0YTakes  a Majorana representation [3Xrep[103X, as outputted by [2XMajoranaRepresentation[102X
+  ([14X3.1-1[114X)  and  a  subalgebra  [3Xsubalg[103X  of  rep. If this subalgebra is a Jordan
+  algebra then function returns true, otherwise returns false.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XG := G := AlternatingGroup(5);;[127X[104X
+    [4X[25Xgap>[125X [27XT := AsList( ConjugacyClass(G, (1,2)(3,4)));;[127X[104X
+    [4X[25Xgap>[125X [27Xinput := ShapesOfMajoranaRepresentation(G,T);;[127X[104X
+    [4X[25Xgap>[125X [27Xrep := MajoranaRepresentation(input, 2);;[127X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_IsComplete(rep);[127X[104X
+    [4X[28Xfalse[128X[104X
+    [4X[25Xgap>[125X [27XNClosedMajoranaRepresentation(rep);;[127X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_IsComplete(rep);[127X[104X
+    [4X[28Xtrue[128X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_Dimension(rep);[127X[104X
+    [4X[28X46[128X[104X
+    [4X[25Xgap>[125X [27Xbasis := MAJORANA_Basis(rep);[127X[104X
+    [4X[28X<a 46 x 61 sparse matrix over Rationals>[128X[104X
+    [4X[25Xgap>[125X [27Xsubalg := MAJORANA_Subalgebra(basis, rep);[127X[104X
+    [4X[28X<a 46 x 61 sparse matrix over Rationals>[128X[104X
+    [4X[25Xgap>[125X [27XMAJORANA_IsJordanAlgebra(subalg, rep);[127X[104X
+    [4X[28Xfalse[128X[104X
+  [4X[32X[104X
+  
