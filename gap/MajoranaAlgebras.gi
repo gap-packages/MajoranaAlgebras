@@ -171,6 +171,9 @@ function(rep)
 
         # Continue to loop until no new eigenvectors have been found
         while true do
+
+            if MAJORANA_CheckBasis(Size(rep.setup.coords), rep.evecs[i], rep) then break; fi;
+
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
             # A record in which to store the new eigenvectors found from fusion
@@ -432,14 +435,15 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
 
     function(dim, evecs, rep)
 
-    local i, basis;
+    local sum, ev;
 
-    # If there is no inner product then we cannot tell if we have a full eigenspace decomposition
-    if rep.innerproducts = false then return false; fi;
+    sum := Nrows(rep.setup.nullspace.vectors);
 
-    if Sum(List(evecs, Nrows)) + Nrows(rep.setup.nullspace.vectors) < dim - 1 then
-        return false;
-    fi;
+    for ev in RecNames(evecs) do
+        sum := sum + Nrows(evecs.(ev));
+    od;
+
+    if sum < dim - 1 then return false; fi;
 
     return true;
 
