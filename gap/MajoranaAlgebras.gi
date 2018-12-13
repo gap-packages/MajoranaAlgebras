@@ -491,6 +491,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
                 if not x in [fail, false] then
+                    MAJORANA_AddEvec(null, x - ev*v);
                     null := UnionOfRows(null, x - ev*v);
                 fi;
             od;
@@ -516,6 +517,8 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     null := UnionOfRows(rep.setup.nullspace.vectors, conj);
 
     rep.setup.nullspace := ReversedEchelonMatDestructive(null);
+
+    Info(InfoMajorana, 60, STRINGIFY("Found ",  Nrows(rep.setup.nullspace.vectors), " nullspace vectors"));
 
     for i in [1..Size(rep.setup.pairreps)] do
         list := UnorderedTuples([1..dim], 2);
