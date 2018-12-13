@@ -158,9 +158,10 @@ InstallGlobalFunction( MAJORANA_Fusion,
 
 function(rep)
 
-    local   i, ev, a, b, dim, new, FUSE, u;
+    local   i, ev, a, b, dim, new, FUSE, u, span;
 
     FUSE := MAJORANA_FuseEigenvectors;
+    span := Size(rep.setup.coords);
 
     # If specified by the optional second argument, do not assume that we have a Frobenius form
     if not IsBound(rep.innerproducts) then FUSE := MAJORANA_FuseEigenvectorsNoForm; fi;
@@ -172,7 +173,7 @@ function(rep)
         # Continue to loop until no new eigenvectors have been found
         while true do
 
-            if MAJORANA_CheckBasis(Size(rep.setup.coords), rep.evecs[i], rep) then break; fi;
+            if MAJORANA_CheckBasis(span, rep.evecs[i], rep) then break; fi;
 
             Info(   InfoMajorana, 50, STRINGIFY("Fusion of ", i, " evecs")) ;
 
@@ -187,7 +188,26 @@ function(rep)
                         FUSE(a, b, u, ev, new, rep);
                     od;
                 od;
+
+                # if any of the new eigenspaces have got too big then find their
+                # bases, run intersect eigenspaces on new then check if we already
+                # have an eigenspace decomposition
+                if ForAny(RecNames(new), ev -> Nrows(new.(ev)) > span) then
+
+                    for ev in Filtered(RecNames(new), x -> Nrows(new.(x)) > span) do
+                        new.(ev) := ReversedEchelonMatDestructive(new.(ev)).vectors;
+                    od;
+
+                    MAJORANA_IntersectEigenspaces(new, rep);
+
+                    if MAJORANA_CheckBasis(span, new, rep) then
+                        rep.evecs[i] := new;
+                        break;
+                    fi;
+                fi;
             od;
+
+            if MAJORANA_CheckBasis(span, rep.evecs[i], rep) then break; fi;
 
             # Find a basis of the new eigenspaces
             for ev in RecNames(new) do
@@ -202,7 +222,7 @@ function(rep)
             rep.evecs[i] := new;
 
             # Calculate the intersection of the eigenspaces to find new nullspace vectors
-            MAJORANA_IntersectEigenspaces(rep);
+            MAJORANA_IntersectEigenspaces(rep.evecs[i], rep);
         od;
     od;
 
@@ -455,7 +475,7 @@ InstallGlobalFunction( MAJORANA_CheckBasis,
 
 InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
-    function(rep)
+    function(evecs, rep)
 
     local dim, null, i, ev, evecs_a, evecs_b, Z, x, u, v, g, conj, list;
 
@@ -465,15 +485,13 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     # Add intersection of eigenspaces to nullspace
 
-    for i in rep.setup.orbitreps do
-        for ev in Combinations(RecNames(rep.evecs[i]), 2) do
-            evecs_a := ConvertSparseMatrixToMatrix(rep.evecs[i].(ev[1]));
-            evecs_b := ConvertSparseMatrixToMatrix(rep.evecs[i].(ev[2]));
+    for ev in Combinations(RecNames(evecs), 2) do
+        evecs_a := ConvertSparseMatrixToMatrix(evecs.(ev[1]));
+        evecs_b := ConvertSparseMatrixToMatrix(evecs.(ev[2]));
 
-            Z := SumIntersectionMat(evecs_a, evecs_b);
+        Z := SumIntersectionMat(evecs_a, evecs_b);
 
-            Append(null, Z[2]);
-        od;
+        Append(null, Z[2]);
     od;
 
     null := SparseMatrix(null, Rationals);
@@ -544,7 +562,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         od;
     od;
 
-    MAJORANA_IntersectEigenspaces(rep);
+    MAJORANA_IntersectEigenspaces(evecs, rep);
 
     end );
 
