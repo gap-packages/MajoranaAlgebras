@@ -99,7 +99,7 @@ gap> Determinant( ConvertSparseMatrixToMatrix(gram) );
 ##
 gap> ex := S4T1();;
 gap> rep := MAJORANA_SetUp(ex, 2, rec( axioms := "AllAxioms"));;
-gap> MAJORANA_IntersectEigenspaces(rep);;
+gap> for i in rep.setup.orbitreps do MAJORANA_IntersectEigenspaces(rep.evecs[i],rep);; od;
 gap> MAJORANA_Dimension(rep);
 0
 
