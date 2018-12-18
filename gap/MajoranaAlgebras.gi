@@ -194,7 +194,7 @@ function(rep)
                 # have an eigenspace decomposition
                 if ForAny(RecNames(new), ev -> Nrows(new.(ev)) > span) then
 
-                    for ev in Filtered(RecNames(new), x -> Nrows(new.(x)) > span) do
+                    for ev in Filtered(RecNames(new), x -> Nrows(new.(x)) > Nrows(rep.evecs[i].(x))) do
                         new.(ev) := ReversedEchelonMatDestructive(new.(ev)).vectors;
                     od;
 
