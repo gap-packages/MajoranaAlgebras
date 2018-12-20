@@ -131,6 +131,7 @@ InstallGlobalFunction(ShapesOfMajoranaRepresentation,
             i,              # indices
             j,
             k,
+            g,
             perm,
             x,              # result of orbitals
             shape,          # one shape

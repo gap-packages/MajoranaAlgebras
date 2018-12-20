@@ -12,19 +12,19 @@ true
 ##
 ## Test main funcs for S4
 ##
-gap> s4 := S4T1();;
+gap> s4 := MAJORANA_Example_S4T1();;
 gap> setup := ShapesOfMajoranaRepresentationAxiomM8(s4.group, s4.involutions);;
 gap> Size(setup.shapes);
 2
-gap> s4 := S4T2();;
+gap> s4 := MAJORANA_Example_S4T2();;
 gap> setup := ShapesOfMajoranaRepresentationAxiomM8(s4.group, s4.involutions);;
 gap> Size(setup.shapes);
 2
-gap> s5 := S5();;
+gap> s5 := MAJORANA_Example_S5();;
 gap> setup := ShapesOfMajoranaRepresentation(s5.group, s5.involutions);;
 gap> Size(setup.shapes);
 2
-gap> ex := min3gen9();;
+gap> ex := MAJORANA_Example_min3gen9();;
 gap> shapes := ShapesOfMajoranaRepresentationAxiomM8(ex.group, ex.involutions);;
 gap> Size(setup.shapes);
 2

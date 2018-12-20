@@ -3,7 +3,7 @@ gap> SetInfoLevel( InfoMajorana, 0);
 ##
 ## Set up infinite family example
 ##
-gap> ex := min3gen9();;
+gap> ex := MAJORANA_Example_min3gen9();;
 gap> rep := MajoranaRepresentation(ex, 2);;
 gap> MAJORANA_Dimension(rep);
 7
@@ -68,6 +68,6 @@ gap> vec!.entries;
 ##
 ## Test eigenvectors (again)
 ##
-gap> rep := MAJORANA_DihedralAlgebras.3C;;
+gap> rep := MAJORANA_DihedralAlgebras("3C");;
 gap> List( [1, 0, 1/4, 1/32], i -> Nrows(MAJORANA_Eigenvectors( 1, i, rep)) );
 [ 1, 1, 0, 1 ]

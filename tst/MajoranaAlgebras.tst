@@ -3,7 +3,7 @@ gap> SetInfoLevel(InfoMajorana, 0);
 ##
 ## Test each part of main loop on A5 shape 4
 ##
-gap> ex := A5();;
+gap> ex := MAJORANA_Example_A5();;
 gap> rep := MAJORANA_SetUp(ex, 4, rec( axioms := "AllAxioms"));;
 gap> MAJORANA_FindInnerProducts(rep);;
 gap> AsSet(rep.innerproducts) = AsSet([ 1, 1/8, 13/256, 3/128, 3/128, 1/4, 8/5, 0, 875/524288, 1/9, 1/18, 1/18, 49/16384, -49/16384, false, 16/405, 35/4608, -35/4608, 203/524288 ]);
@@ -28,7 +28,7 @@ true
 ##
 ## Now test all of the smaller components on A5 shape 4
 ##
-gap> ex := A5();;
+gap> ex := MAJORANA_Example_A5();;
 gap> rep := MAJORANA_SetUp(ex, 4, rec(axioms := "AllAxioms"));;
 
 ##
@@ -97,7 +97,7 @@ gap> Determinant( ConvertSparseMatrixToMatrix(gram) );
 ##
 ## Test IntersectEigenspaces
 ##
-gap> ex := S4T1();;
+gap> ex := MAJORANA_Example_S4T1();;
 gap> rep := MAJORANA_SetUp(ex, 2, rec( axioms := "AllAxioms"));;
 gap> for i in rep.setup.orbitreps do MAJORANA_IntersectEigenspaces(rep.evecs[i],rep);; od;
 gap> MAJORANA_Dimension(rep);

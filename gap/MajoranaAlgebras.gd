@@ -4,8 +4,6 @@
 # Declarations
 #
 
-DeclareInfoClass( "InfoMajorana" );
-
 ################################################################################
 ##
 ## The main Majorana representation function.

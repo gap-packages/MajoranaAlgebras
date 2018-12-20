@@ -18,8 +18,6 @@ InstallGlobalFunction( MAJORANA_SetUp,
     if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
     if not IsBound(options.form) then options.form := true; fi;
 
-    algebras := MAJORANA_DihedralAlgebras;
-
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
                         eigenvalues := [0, 1/4, 1/32], # The eigenvalues not equal to one
@@ -67,15 +65,15 @@ InstallGlobalFunction( MAJORANA_SetUp,
     algebras := MAJORANA_DihedralAlgebras;
 
     for i in Positions(rep.shape, "4B") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.4B );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, MAJORANA_DihedralAlgebras("4B") );
     od;
 
     for i in Positions(rep.shape, "6A") do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.6A );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, MAJORANA_DihedralAlgebras("6A") );
     od;
 
     for i in PositionsProperty(rep.shape, x -> not x in [ "1A", "4B", "6A" ]) do
-        MAJORANA_EmbedDihedralAlgebra( i, rep, algebras.(rep.shape[i]) );
+        MAJORANA_EmbedDihedralAlgebra( i, rep, MAJORANA_DihedralAlgebras(rep.shape[i]) );
     od;
 
     ## Finish off setup

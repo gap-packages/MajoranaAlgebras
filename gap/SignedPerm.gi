@@ -334,18 +334,16 @@ function(filt, degree)
 end);
 
 BindGlobal("TestSomeRandomPerms",
-function()
+function(n, k, l)
     local perms, i, p, q, r, t1, t2, t3, t4, t;
-
-    perms := List([1..100], x->RandomSignedPermList(40));
 
     t1 := 0;
     t2 := 0;
     t3 := 0;
     t4 := 0;
 
-    for i in [1..500] do
-        perms := List([1..Random([1..100])], x->RandomSignedPermList(1000));
+    for i in [1..n] do
+        perms := List([1..Random([1..k])], x->RandomSignedPermList(l));
         t := NanosecondsSinceEpoch();
         p := ListSignedPerm(Product(perms, x -> NewSignedPerm(IsSignedPermRep, x)));
         t1 := t1 + (NanosecondsSinceEpoch() - t);

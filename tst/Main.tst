@@ -3,7 +3,7 @@ gap> SetInfoLevel( InfoMajorana, 0 );
 ##
 ## Test main funcs for A5
 ##
-gap> ex := A5();;
+gap> ex := MAJORANA_Example_A5();;
 gap> rep := MajoranaRepresentation(ex, 1);;
 gap> MAJORANA_IsComplete(rep);
 true
@@ -36,7 +36,7 @@ true
 ##
 ## Test an A6 example that gives no algebra
 ##
-gap> ex := A6();;
+gap> ex := MAJORANA_Example_A6();;
 gap> rep := MajoranaRepresentation(ex, 2);;
 gap> MAJORANA_Dimension(rep);
 0
@@ -44,7 +44,7 @@ gap> MAJORANA_Dimension(rep);
 ##
 ## Test Axiom M2 and positive definiteness and fusion on S4
 ##
-gap> ex := S4T1();;
+gap> ex := MAJORANA_Example_S4T1();;
 gap> rep := MajoranaRepresentation(ex, 1);;
 gap> MAJORANA_Dimension(rep);
 12
@@ -58,7 +58,7 @@ true
 ##
 ## Test a 3-closed example with no form
 ##
-gap> ex := S4T2();;
+gap> ex := MAJORANA_Example_S4T2();;
 gap> rep := MajoranaRepresentation(ex, 3, rec( form := false ));;
 gap> NClosedMajoranaRepresentation(rep);;
 gap> MAJORANA_IsComplete(rep);
