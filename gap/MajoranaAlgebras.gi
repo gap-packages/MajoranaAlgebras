@@ -307,7 +307,7 @@ InstallGlobalFunction(MAJORANA_FindAlgebraProducts,
                             fi;
                         od;
                         # If the matrix is over a certain size then for performance reasons, solve it already
-                        if Nrows(system.mat) > Ncols(system.mat) or Nrows(system.mat) > 8000 then
+                        if Nrows(system.mat) + Ncols(system.mat) > 1200 then
                             MAJORANA_SolutionAlgProducts(system, rep);
 
                             if not false in rep.algebraproducts then return true; fi;
