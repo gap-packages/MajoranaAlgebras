@@ -45,6 +45,7 @@ function(arg)
         fi;
 
         if not false in rep.algebraproducts then
+            MAJORANA_IntersectEigenspaces(rec(), rep);
             # We have completely constructed the algebra
             Info( InfoMajorana, 10, "Success" );
             return rep;
@@ -887,6 +888,7 @@ function(u, v, innerproducts, setup)
     local   i,              # loop over u
             j,              # loop over v
             k,              # pair orbit index
+            g,
             sign,           # correct for 5A axes
             sum;            # output value
 
@@ -1400,6 +1402,7 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             i,              # index for dim of u
             j,              # index for dim of v
             k,              # orbit of i,j
+            g,
             pos,            # position of m in unknowns
             sign;           # correct sign of 5A axes
 
@@ -1549,7 +1552,7 @@ InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
 function(range, innerproducts, setup)
 
-    local   i, j, k, mat, l;
+    local   i, j, k, mat, l, g;
 
     l := Length(range);
 
