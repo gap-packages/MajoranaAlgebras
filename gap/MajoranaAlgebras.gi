@@ -477,7 +477,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     function(evecs, rep)
 
-    local dim, null, i, ev, evecs_a, evecs_b, Z, x, u, v, g, conj, list;
+    local dim, null, i, ev, evecs_a, evecs_b, za, x, u, v, g, conj, list;
 
     dim := Size(rep.setup.coords);
 
@@ -489,9 +489,9 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         evecs_a := ConvertSparseMatrixToMatrix(evecs.(ev[1]));
         evecs_b := ConvertSparseMatrixToMatrix(evecs.(ev[2]));
 
-        Z := SumIntersectionMat(evecs_a, evecs_b);
+        za := SumIntersectionMat(evecs_a, evecs_b);
 
-        Append(null, Z[2]);
+        Append(null, za[2]);
     od;
 
     null := SparseMatrix(null, Rationals);
@@ -556,10 +556,15 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     od;
 
     for i in rep.setup.orbitreps do
-        for ev in RecNames(evecs) do
-            evecs.(ev) := RemoveMatWithHeads(evecs.(ev), rep.setup.nullspace);
-            evecs.(ev) := ReversedEchelonMatDestructive(evecs.(ev)).vectors;
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev) := RemoveMatWithHeads(rep.evecs[i].(ev), rep.setup.nullspace);
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
         od;
+    od;
+
+    for ev in RecNames(evecs) do
+        evecs.(ev) := RemoveMatWithHeads(evecs.(ev), rep.setup.nullspace);
+        evecs.(ev) := ReversedEchelonMatDestructive(evecs.(ev)).vectors;
     od;
 
     MAJORANA_IntersectEigenspaces(evecs, rep);
