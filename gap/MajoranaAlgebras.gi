@@ -505,7 +505,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
         for ev in rep.eigenvalues do
-            for v in Iterator( evecs.(String(ev)) ) do
+            for v in Iterator( rep.evecs[i].(String(ev)) ) do
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
                 if not x in [fail, false] then
