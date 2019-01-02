@@ -250,6 +250,8 @@ InstallGlobalFunction(ReversedEchelonMatDestructive,
 
     end );
 
+# TODO Currently broken - need some shallow copying in there!
+
 InstallGlobalFunction( SumIntersectionSparseMat,
 
     function(M1, M2)
@@ -295,7 +297,10 @@ InstallGlobalFunction( SumIntersectionSparseMat,
     for i in [n+1 .. 2*n] do
         if mat.heads[i] <> 0 then
             row := CertainRows(mat.vectors, [mat.heads[i]]);
-            sum := UnionOfRows(sum, CertainColumns(row, [n+1 .. 2*n]) );
+            # Correct indices
+            row := CertainColumns(row, [n+1 .. 2*n]);
+            row!.indices[1] := row!.indices[1] - n;
+            sum := UnionOfRows(sum, row );
         fi;
     od;
 

@@ -478,27 +478,19 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
 
     function(evecs, rep)
 
-    local dim, null, i, ev, evecs_a, evecs_b, za, x, u, v, g, conj, list;
+    local dim, null, i, ev, za, x, u, v, g, conj, list;
 
     dim := Size(rep.setup.coords);
 
-    null := [];
+    null := SparseMatrix(0, dim, [], [], Rationals);
 
     # Add intersection of eigenspaces to nullspace
 
     for ev in Combinations(RecNames(evecs), 2) do
-        evecs_a := ConvertSparseMatrixToMatrix(evecs.(ev[1]));
-        evecs_b := ConvertSparseMatrixToMatrix(evecs.(ev[2]));
-
-        za := SumIntersectionMat(evecs_a, evecs_b);
-
-        Append(null, za[2]);
+        za := SumIntersectionSparseMat(evecs.(ev[1]), evecs.(ev[2]));
+        null := UnionOfRows(null, za[2]);
     od;
-
-    null := SparseMatrix(null, Rationals);
-
-    null!.ncols := dim;
-
+    
     # Use eigenvectors to find potentially more nullspace vectors
 
     for i in Filtered(rep.setup.orbitreps, x -> rep.setup.nullspace.heads[x] = 0) do
