@@ -254,9 +254,13 @@ InstallGlobalFunction(ReversedEchelonMatDestructive,
 
 InstallGlobalFunction( SumIntersectionSparseMat,
 
-    function(M1, M2)
+    function(mat1, mat2)
 
-    local mat, n, v, sum, row, int, i;
+    local mat, n, v, sum, row, int, i, M1, M2;
+
+
+        M1 := CopyMat(mat1);
+        M2 := CopyMat(mat2);
 
     # Basic checks on input
     if Nrows(M1) = 0 then

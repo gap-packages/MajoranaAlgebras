@@ -490,10 +490,10 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
         za := SumIntersectionSparseMat(evecs.(ev[1]), evecs.(ev[2]));
         null := UnionOfRows(null, za[2]);
     od;
-    
+
     # Use eigenvectors to find potentially more nullspace vectors
 
-    for i in Filtered(rep.setup.orbitreps, x -> rep.setup.nullspace.heads[x] = 0) do
+    for i in rep.setup.orbitreps do
 
         u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
 
