@@ -1173,7 +1173,7 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
 
     end);
 
-MAJORANA_SolveSystem_Whatever := MAJORANA_SolveSystem;
+MAJORANA_SolveSystem_Whatever := C0GAUSS_SolutionMatVecs_Padic;
 InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
     function( system, rep)
