@@ -208,3 +208,21 @@ InstallGlobalFunction( MAJORANA_ConvertToBasis,
     fi;
 
     end );
+
+InstallGlobalFunction( MAJORANA_NaiveProduct,
+
+    function(u, v, prod)
+
+    local vec, i, j;
+
+    vec := SparseMatrix(1, Ncols(u), [], [], u!.ring );
+
+    for i in [ 1 .. Size(u!.indices) ] do
+        for j in [ 1 .. Size(v!.indices) ] do
+            vec := vec + u!.entries[i]*v!.entries[j]*prod[u!.indices[i], v!.entries[j]];
+        od;
+    od;
+
+    return vec;
+
+end );
