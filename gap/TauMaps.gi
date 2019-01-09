@@ -13,7 +13,7 @@ InstallGlobalFunction(TauMapsShapesOfMajoranaRepresentation,
     input.involutions := taumaps;
     input.group       := Group(taumaps);
     input.generators  := GeneratorsOfGroup(input.group);
-    input.generators  := List(input.generators, ListPerm);
+    input.generators  := List(input.generators, x -> ListPerm(x, t));
 
     MAJORANA_FindOrbitals(input, input.generators, [1..t]);
 
