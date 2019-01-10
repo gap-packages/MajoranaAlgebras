@@ -5,13 +5,14 @@
 
 BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
 
-    local f, g;
+    local f, g, e;
 
     f := FreeGroup(2);
 
     if type = "2A" then
 
         g := f/[f.1^2, f.2^2, (f.1*f.2)^2];
+        e := Identity(g);
 
         return rec(
             algebraproducts := [    SparseMatrix( 1, 3, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -30,6 +31,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2 ],
             setup := rec(   conjelts := [ [ 1 .. 3 ] ],
                             coords := [ g.1, g.2, [1,2] ],
+                            orbits := [ [ e, ], [ , e ] ],
                             longcoords := [ g.1, g.2, [1,2] ],
                             nullspace := rec( heads := [ 0, 0, 0], vectors := SparseMatrix( 0, 3, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1, 2 ],
@@ -56,6 +58,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2 ],
             setup := rec(   conjelts := [ [ 1 .. 2 ] ],
                             coords := [ g.1, g.2 ],
+                            orbits := [ [ e, ], [ , e ] ],
                             longcoords := [ g.1, g.2 ],
                             orbitreps := [ 1, 2 ],
                             nullspace := rec(   vectors := SparseMatrix( 0, 2, [  ], [  ], Rationals ), heads := [0, 0] ),
@@ -69,6 +72,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
     elif type = "3A" then
 
         g := f/[f.1^2, f.2^2, (f.1*f.2)^3];
+        e := Identity(g);
 
         return rec(
             algebraproducts := [    SparseMatrix( 1, 4, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -84,6 +88,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2, g.1*g.2*g.1 ],
             setup := rec(   conjelts := [ [ 1 .. 4 ], [ 2, 3, 1, 4 ], [ 3, 2, 1, 4 ] ],
                             coords := [ g.1, g.2, g.1*g.2*g.1, [1,2] ],
+                            orbits := [ [ e, g.2*g.1, g.1 ] ],
                             longcoords := [ g.1, g.2, g.1*g.2*g.1, [1,2], [1,3], [2,3] ],
                             nullspace := rec( heads := [1..4]*0, vectors := SparseMatrix( 0, 4, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1 ],
@@ -97,6 +102,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
     elif type = "3C" then
 
         g := f/[f.1^2, f.2^2, (f.1*f.2)^3];
+        e := Identity(g);
 
         return rec(
             algebraproducts := [    SparseMatrix( 1, 3, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -110,6 +116,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2, g.1*g.2*g.1 ],
             setup := rec(   conjelts := [ [ 1 .. 3 ], [ 2, 3, 1 ], [ 3, 2, 1 ] ],
                               coords := [ g.1, g.2, g.1*g.2*g.1 ],
+                              orbits := [ [ e, g.2*g.1, g.1 ] ],
                               longcoords := [ g.1, g.2, g.1*g.2*g.1 ],
                               nullspace := rec( heads := [0, 0, 0], vectors := SparseMatrix( 0, 3, [  ], [  ], Rationals ) ),
                               orbitreps := [ 1 ],
@@ -123,6 +130,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
     elif type = "4A" then
 
         g := f/[f.1^2, f.2^2, (f.1*f.2)^4];
+        e := Identity(g);
 
         return rec(
             algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -145,6 +153,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [g.1, g.2, g.2*g.1*g.2, g.1*g.2*g.1],
             setup := rec(   conjelts := [ [ 1 .. 5 ], [ 3, 2, 1, 4, 5 ], [ 1, 4, 3, 2, 5 ] ],
                             coords := [g.1, g.2, g.2*g.1*g.2, g.1*g.2*g.1, [1,2] ],
+                            orbits := [[e, , g.2, ], [ , e, ,g.1]],
                             longcoords := [g.1, g.2, g.2*g.1*g.2, g.1*g.2*g.1, [1,2], [1,4], [2,3], [3,4] ],
                             nullspace := rec( heads := [1..5]*0, vectors := SparseMatrix( 0, 5, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1, 2 ],
@@ -158,6 +167,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
     elif type = "4B" then
 
         g := f/[f.1^2, f.2^2, (f.1*f.2)^4];
+        e := Identity(g);
 
         return rec(
             algebraproducts := [    SparseMatrix( 1, 5, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -180,6 +190,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [g.1, g.2, g.2*g.1*g.2, g.1*g.2*g.1],
             setup := rec(   conjelts := [ [ 1 .. 5 ], [ 3, 2, 1, 4, 5 ], [ 1, 4, 3, 2, 5 ] ],
                             coords := [g.1, g.2, g.2*g.1*g.2, g.1*g.2*g.1, [1,3]  ],
+                            orbits := [[e, , g.2, ], [ , e, ,g.1]],
                           longcoords := [g.1, g.2, g.2*g.1*g.2, g.1*g.2*g.1, [1,3], [2,4] ],
                           nullspace := rec( heads := [1..5]*0, vectors := SparseMatrix( 0, 5, [  ], [  ], Rationals ) ),
                           orbitreps := [ 1, 2,],
@@ -192,6 +203,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
     elif type = "5A" then
 
         g := f/[f.1^2, f.2^2, (f.1*f.2)^5];
+        e := Identity(g);
 
         return rec(
             algebraproducts := [    SparseMatrix( 1, 6, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -208,6 +220,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2, g.1*g.2*g.1, g.1*g.2*g.1*g.2*g.1, g.2*g.1*g.2 ],
             setup := rec(   conjelts := [ [ 1 .. 6 ], [ 2, 5, 1, 3, 4, 6 ], [ 3, 4, 1, 2, 5, 6 ], [ 4, 3, 5, 2, 1, 6 ], [ 5, 2, 4, 3, 1, 6 ] ],
                             coords := [ g.1, g.2, g.1*g.2*g.1, g.1*g.2*g.1*g.2*g.1, g.2*g.1*g.2, [1,2],  ],
+                            orbits := [ [e, , , g.2*g.1, g.2 ], [ , e, g.1, , , ]],
                             longcoords := [ g.1, g.2, g.1*g.2*g.1, g.1*g.2*g.1*g.2*g.1, g.2*g.1*g.2, [1,2], [1,3], [1,4], [1,5], [2,3], [2,4], [2,5], [3,4], [3,5], [4,5]  ],
                             nullspace := rec( heads := [1..6]*0, vectors := SparseMatrix( 0, 6, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1 ],
@@ -221,6 +234,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
         elif type = "6A" then
 
             g := f/[f.1^2, f.2^2, (f.1*f.2)^6];
+            e := Identity(g);
 
             return rec(
                 algebraproducts := [    SparseMatrix( 1, 8, [ [ 1 ] ], [ [ 1 ] ], Rationals ),
@@ -247,6 +261,7 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2, g.1*g.2*g.1, g.2*g.1*g.2*g.1*g.2, g.2*g.1*g.2, g.1*g.2*g.1*g.2*g.1],
             setup := rec(   conjelts := [ [ 1 .. 8 ], [ 1, 3, 2, 4, 6, 5, 7, 8 ], [ 5, 4, 2, 3, 6, 1, 7, 8 ], [ 5, 2, 4, 3, 1, 6, 7, 8 ], [ 6, 3, 4, 2, 1, 5, 7, 8 ] ],
                             coords := [ g.1, g.2, g.1*g.2*g.1, g.2*g.1*g.2*g.1*g.2, g.2*g.1*g.2, g.1*g.2*g.1*g.2*g.1, [1,4], [1,5]],
+                            orbits := [ [ e, , , , g.2, g.2*g.1 ], [ , e, g.1, g.1*g.2, , ]],
                             longcoords := [ g.1, g.2, g.1*g.2*g.1, g.2*g.1*g.2*g.1*g.2, g.2*g.1*g.2, g.1*g.2*g.1*g.2*g.1, [1,4], [1,5], [1,6], [2,3], [2,4], [2,6], [3,4], [3,5], [5,6] ],
                             nullspace := rec( heads := [1..8]*0, vectors := SparseMatrix( 0, 4, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1, 2 ],
