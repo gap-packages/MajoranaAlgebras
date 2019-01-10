@@ -214,7 +214,6 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2, g.1*g.2*g.1, g.1*g.2*g.1*g.2*g.1, g.2*g.1*g.2 ],
             setup := rec(   conjelts := [ [ 1 .. 6 ], [ 2, 5, 1, 3, 4, 6 ], [ 3, 4, 1, 2, 5, 6 ], [ 4, 3, 5, 2, 1, 6 ], [ 5, 2, 4, 3, 1, 6 ] ],
                             coords := [ g.1, g.2, g.1*g.2*g.1, g.1*g.2*g.1*g.2*g.1, g.2*g.1*g.2, [1,2],  ],
-                            orbits := [ [e, , , g.2*g.1, g.2 ], [ , e, g.1, , , ]],
                             longcoords := [ g.1, g.2, g.1*g.2*g.1, g.1*g.2*g.1*g.2*g.1, g.2*g.1*g.2, [1,2], [1,3], [1,4], [1,5], [2,3], [2,4], [2,5], [3,4], [3,5], [4,5]  ],
                             nullspace := rec( heads := [1..6]*0, vectors := SparseMatrix( 0, 6, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1 ],
@@ -255,7 +254,6 @@ BindGlobal( "MAJORANA_DihedralAlgebras", function(type)
             involutions := [ g.1, g.2, g.1*g.2*g.1, g.2*g.1*g.2*g.1*g.2, g.2*g.1*g.2, g.1*g.2*g.1*g.2*g.1],
             setup := rec(   conjelts := [ [ 1 .. 8 ], [ 1, 3, 2, 4, 6, 5, 7, 8 ], [ 5, 4, 2, 3, 6, 1, 7, 8 ], [ 5, 2, 4, 3, 1, 6, 7, 8 ], [ 6, 3, 4, 2, 1, 5, 7, 8 ] ],
                             coords := [ g.1, g.2, g.1*g.2*g.1, g.2*g.1*g.2*g.1*g.2, g.2*g.1*g.2, g.1*g.2*g.1*g.2*g.1, [1,4], [1,5]],
-                            orbits := [ [ e, , , , g.2, g.2*g.1 ], [ , e, g.1, g.1*g.2, , ]],
                             longcoords := [ g.1, g.2, g.1*g.2*g.1, g.2*g.1*g.2*g.1*g.2, g.2*g.1*g.2, g.1*g.2*g.1*g.2*g.1, [1,4], [1,5], [1,6], [2,3], [2,4], [2,6], [3,4], [3,5], [5,6] ],
                             nullspace := rec( heads := [1..8]*0, vectors := SparseMatrix( 0, 4, [  ], [  ], Rationals ) ),
                             orbitreps := [ 1, 2 ],
@@ -286,8 +284,11 @@ BindGlobal( "MAJORANA_TauMapsDihedralAlgebras", function(type)
     elif type in ["3A", "3C"] then
         rep.setup.orbits := [ [ e, g.2*g.1, g.1 ] ];
     elif type in ["4A", "4B"] then
-        rep.setup.orbits := [[e, , g.2, ], [ , e, ,g.1]];
+        rep.setup.orbits := [ [e, , g.2, ], [ , e, ,g.1] ];
     elif type = "5A" then
+        rep.setup.orbits := [ [e, , , g.2*g.1, g.2 ], [ , e, g.1, , , ] ];
+    elif type = "6A" then
+        rep.setup.orbits := [ [ e, , , , g.2, g.2*g.1 ], [ , e, g.1, g.1*g.2, , ] ];
     fi;
 
     return rep;

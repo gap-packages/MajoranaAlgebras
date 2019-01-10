@@ -127,7 +127,7 @@ end);
 
 InstallGlobalFunction( MAJORANA_EmbedDihedralAlgebra,
 function( i, rep, subrep )
-    local gens, inv, elts, emb;
+    local gens, inv, elts, emb, g;
 
     inv := rep.setup.pairreps[i];
 
@@ -138,8 +138,8 @@ function( i, rep, subrep )
     emb := MAJORANA_FindEmbedding( rep, subrep, inv );
 
     ## Add any new orbits
-    gens := List( GeneratorsOfGroup(rep.group), g -> MAJORANA_FindPerm(g, rep, rep) );
-    MAJORANA_FindOrbitals(rep, gens, [1 .. Size(rep.setup.coords)]);
+    for g in rep.generators do MAJORANA_ExtendPerm( g, rep); od;
+    MAJORANA_FindOrbitals(rep, rep.generators, [1 .. Size(rep.setup.coords)]);
 
     ## Embed products and evecs
     MAJORANA_Embed( rep, subrep, emb );
@@ -465,4 +465,4 @@ InstallGlobalFunction(SP_Product,
 
     return prod;
 
-    end );
+end );
