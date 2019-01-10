@@ -79,8 +79,8 @@ Dependencies := rec(
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
                          , [ "automata", ">= 1.13"]
                          , [ "Gauss", ">=0" ]
-                         , [ "datastructures", ">=0.2.2" ] ],
-  SuggestedOtherPackages := [ [ "Char0Gauss", ">=0" ] ],
+                         , [ "datastructures", ">=0.2.2" ]
+                         , [ "Char0Gauss", ">=0" ] ],
   ExternalConditions := [ ],
 ),
 
