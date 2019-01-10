@@ -224,10 +224,10 @@ InstallGlobalFunction( MAJORANA_FindPerm,
 
             if im[1] > im[2] then im := im{[2,1]}; fi;
 
-            list[i] := rep.setup.coordmap[ im ];
+            list[i] := sign*rep.setup.coordmap[ im ];
 
             if list[i] = fail then
-                list[i] := rep.setup.coordmap[ Product( rep.involutions{im} ) ];
+                list[i] := sign*rep.setup.coordmap[ Product( rep.involutions{im} ) ];
             fi;
         else
             # Otherwise, use the images of the group elements
