@@ -171,7 +171,7 @@ InstallGlobalFunction( MAJORANA_TauMapsRecordSubalgebras,
 ##
 ##
 
-InstallGlobalFunction( MAJORANA_TauMappedWord,
+InstallGlobalFunction( MAJORANA_TauMapsMappedWord,
 
     function(rep, subrep, w, gens, inv)
 
@@ -180,7 +180,7 @@ InstallGlobalFunction( MAJORANA_TauMappedWord,
     imgs := rep.involutions{inv};
 
     if IsRowVector(w) then
-        im := List(w, i -> MAJORANA_TauMappedWord( rep, subrep, subrep.setup.coords[i], gens, inv) );
+        im := List(w, i -> MAJORANA_TauMapsMappedWord( rep, subrep, subrep.setup.coords[i], gens, inv) );
 
         if im[1] = im[2] then Error(); fi;
 

@@ -15,8 +15,13 @@ InstallGlobalFunction( MAJORANA_SetUp,
 
     local rep, s, t, i, dim, algebras, ev, orbs, gens;
 
+    # The default options
+
     if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
     if not IsBound(options.form) then options.form := true; fi;
+    if not IsBound(options.taumaps) then options.taumaps := false; fi;
+
+    # Initial setup of the representation record
 
     rep         := rec( group       := input.group,
                         involutions := input.involutions,
@@ -62,7 +67,11 @@ InstallGlobalFunction( MAJORANA_SetUp,
     od;
 
     ## Embed dihedral algebras
-    algebras := MAJORANA_DihedralAlgebras;
+    if options.taumaps = false then
+        algebras := MAJORANA_DihedralAlgebras;
+    else
+        algebras := MAJORANA_TauMapsDihedralAlgebras;
+    fi;
 
     for i in Positions(rep.shape, "4B") do
         MAJORANA_EmbedDihedralAlgebra( i, rep, algebras("4B") );
@@ -151,7 +160,11 @@ function( rep, subrep, inv)
     ## Find the images of the embedding of the subrep into the main rep
     gens := GeneratorsOfGroup(subrep.group);
 
-    imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    if not  IsBound(subrep.setup.orbits) then
+        imgs := List(subrep.setup.coords, w -> MAJORANA_MappedWord(rep, subrep, w, gens, inv) );
+    else
+        imgs := List(subrep.setup.coords, w -> MAJORANA_TauMapsMappedWord(rep, subrep, w, gens, inv) );
+    fi;
 
     emb := [];
 
@@ -230,11 +243,19 @@ function(rep, subrep, inv)
         new := []; new_5A := [];
 
         for x in subrep.setup.longcoords{list} do
-            Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            if not IsBound(subrep.setup.orbits) then
+                Add( new, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            else
+                Add( new, MAJORANA_TauMapsMappedWord(rep, subrep, x, gens, inv));
+            fi;
         od;
 
         for x in subrep.setup.longcoords{list_5A} do
-            Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            if not IsBound(subrep.setup.orbits) then
+                Add( new_5A, MAJORANA_MappedWord(rep, subrep, x, gens, inv));
+            else
+                Add( new_5A, MAJORANA_TauMapsMappedWord(rep, subrep, x, gens, inv));
+            fi;
         od;
 
         MAJORANA_AddConjugateVectors( rep, new, new_5A );
