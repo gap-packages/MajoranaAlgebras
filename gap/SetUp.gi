@@ -20,6 +20,7 @@ InstallGlobalFunction( MAJORANA_SetUp,
     if not IsBound(options.axioms) then options.axioms := "AllAxioms"; fi;
     if not IsBound(options.form) then options.form := true; fi;
     if not IsBound(options.taumaps) then options.taumaps := false; fi;
+    if options.taumaps = true then options.axioms := "NoAxioms"; fi;
 
     # Initial setup of the representation record
 

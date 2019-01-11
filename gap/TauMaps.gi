@@ -1,4 +1,26 @@
 
+InstallGlobalFunction(TauMapsMajoranaRepresentation,
+
+    function(arg)
+
+    local input, index, options;
+
+    input := arg[1];
+    index := arg[2];
+
+    if IsBound(arg[3]) then
+        options := arg[3];
+    else
+        options := rec();
+    fi;
+
+    options.axioms := "NoAxioms";
+    options.taumaps := true;
+
+    return MajoranaRepresentation( input, index, options );
+
+end );
+
 InstallGlobalFunction(TauMapsShapesOfMajoranaRepresentation,
 
     function(taumaps)
