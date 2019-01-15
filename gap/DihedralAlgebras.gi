@@ -282,7 +282,7 @@ BindGlobal( "MAJORANA_TauMapsDihedralAlgebras", function(type)
     if type in ["2A", "2B"] then
         rep.setup.orbits := [ [ e, ], [ , e ] ];
     elif type in ["3A", "3C"] then
-        rep.setup.orbits := [ [ e, g.2*g.1, g.1 ] ];
+        rep.setup.orbits := [ [ e, g.2*g.1, g.2 ] ];
     elif type in ["4A", "4B"] then
         rep.setup.orbits := [ [e, , g.2, ], [ , e, ,g.1] ];
     elif type = "5A" then
