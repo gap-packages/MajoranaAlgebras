@@ -220,3 +220,168 @@ InstallGlobalFunction( MAJORANA_TauMapsMappedWord,
     fi;
 
     end );
+
+InstallGlobalFunction( JoinPerms,
+
+    function( n, perm)
+
+    local list, i;
+
+    list := [];;
+
+    for i in [1..Size(n)] do
+        Append(list, ListPerm( perm[i], n[i] ) + Sum(n{[1 .. i - 1]}));
+    od;
+
+    return PermList(list);
+
+end );
+
+InstallGlobalFunction(TauMaps,
+
+    function(groups, k) # Finds possible tau maps from A -> G with k orbits
+
+    local actions, G, gens, indices, cc, C, Cl, all, p, action, lens, list, i, j, map, GG, n, o, oo, a, b, D, Oa, Ob, case, good, reps, pos, rep, im;
+
+    actions := [];
+
+    for G in groups do
+
+        cc := List( [1..3], i -> ConjugacyClass(G, G.(i)) );
+
+        # Choose subsets of the generators which give fewer or equal number of conj classes than desired orbits
+
+        good := Filtered( Combinations( [1..3], k),     x -> Size(DuplicateFreeList(cc{x})) <= k and Size(Group( Concatenation(List(cc{x}, AsList)))) = Size(G)      );
+
+        for indices in good do
+
+            gens := List( indices, i -> G.(i));
+
+            # Find subgroups up to conj of the centralisers which will become axis stabilisers
+
+            C := List( gens, x -> Centralizer(G, x));
+
+            Cl := List( C, ConjugacyClassesSubgroups);
+            Cl := List( Cl, x -> List(x, Representative));
+
+            for i in [1 .. k] do
+                Cl[i] := Filtered( Cl[i], h -> gens[i] in h);
+            od;
+
+            all := Cartesian(Cl);
+
+            for p in all do
+
+                # Find permutation action on subgroups, which gives action on axes
+
+                action := List(p, x -> Action(G, RightCosets(G, x), OnRight));
+
+                lens := List(p, x -> Index(G, x));
+
+                list := [];;
+
+                for i in [1..3] do
+                    Add(list, JoinPerms(lens, List(action, x -> x.(i))));
+                od;
+
+                GG := Group(list);
+
+                if Size(G) = Size(GG) then # if the permutations generate the group
+
+                    map := [];
+
+                    for i in [1 .. k] do
+                        for j in [1..lens[i]] do
+                            Add(map, GG.(indices[i])^RepresentativeAction(GG, 1 + Sum(lens{[1..i-1]}), j + Sum(lens{[1..i-1]})));
+                        od;
+                    od;
+
+                    Add(actions, [GG, map] );
+                fi;
+            od;
+        od;
+    od;
+
+    # Find the admissible actions
+
+    for i in [1..Length(actions)] do
+
+        case := actions[i];
+
+        G := case[1];
+        n := Length(case[2]);
+
+        oo := Orbits(G, Cartesian([1..n],[1..n]), OnPairs);
+        good := true;
+
+        for o in oo do
+            a := o[1][1];
+            b := o[1][2];
+            D := Group(case[2][a],case[2][b]);
+            Oa := Set(Orbit(D,a));
+            Ob := Set(Orbit(D,b));
+            if Oa=Ob then
+                if not (Length(Oa) in [1,3,5]) then
+                    good := false;
+                    break;
+                fi;
+            else
+                if Length(Oa)<>Length(Ob) then
+                    good := false;
+                    break;
+                fi;
+
+                if not (Length(Oa) in [1,2,3]) then
+                    good := false;
+                    break;
+                fi;
+            fi;
+        od;
+
+        if not good then
+            Unbind(actions[Position(actions,case)]);
+        fi;
+    od;
+
+    actions := DuplicateFreeList(Compacted(actions));
+
+    # return actions;
+
+    # Remove duplicates
+
+    for i in [1..Length(actions)] do
+
+        if IsBound(actions[i]) then
+
+            case := actions[i];
+
+            G := case[1];
+            n := Length(case[2]);
+
+            reps := ListWithIdenticalEntries(Length(actions), fail);
+
+            for j in [i + 1 .. Length(actions)] do
+                if IsBound(actions[j]) then
+                    reps[j] :=  RepresentativeAction(SymmetricGroup(n), G, actions[j][1]);
+                fi;
+            od;
+
+            pos := PositionsProperty(reps, x -> x <> fail);
+
+            for j in pos do
+
+                im := List(case[2], x -> x^reps[j]);
+
+                if List(im, k -> Size(Positions(im, k))) = List(actions[j][2], k -> Size(Positions(actions[j][2], k))) then
+
+                    Unbind(actions[j]);
+                fi;
+            od;
+        fi;
+    od;
+    
+    actions := Compacted(actions);
+
+    return actions;
+
+end );
