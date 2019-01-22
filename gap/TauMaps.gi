@@ -237,132 +237,163 @@ InstallGlobalFunction( JoinPerms,
 
 end );
 
+InstallOtherMethod( \+,
+    [ IsPerm, IsInt ],
+    function(perm, int)
+        local list;
+
+        list := ListPerm(perm) + int;
+        list := Concatenation([1..int], list);
+
+        return PermList(list);
+
+    end );
+
+InstallOtherMethod( \+,
+    [ IsInt, IsPerm ],
+    function(int, perm)
+        local list;
+
+        list := ListPerm(perm) + int;
+        list := Concatenation([1..int], list);
+
+        return PermList(list);
+
+    end );
+
 InstallGlobalFunction(TauMaps,
 
-    function(groups, k) # Finds possible tau maps from A -> G with k orbits
+    function(G, k) # Finds possible tau maps from A -> G with k orbits
 
-    local actions, G, gens, indices, cc, C, Cl, all, p, action, lens, list, i, j, map, GG, n, o, oo, a, b, D, Oa, Ob, case, good, reps, pos, rep, im;
+    local  actions, indices, good, reps, C, Cl, cc, i, j, all, p, action, lens, GG, map;
 
     actions := [];
 
-    for G in groups do
+    cc := ConjugacyClasses(G);
+    cc := Filtered(cc, x -> Order(Representative(x)) in [1,2]);;
 
-        cc := List( [1..3], i -> ConjugacyClass(G, G.(i)) );
+    # Choose subsets of the conj classes which generate the whole group
 
-        # Choose subsets of the generators which give fewer or equal number of conj classes than desired orbits
+    good := UnorderedTuples([1..Size(cc)], k);
+    good := Filtered(good, x -> Size(Group( Concatenation(List(cc{x}, AsList)))) = Size(G));
 
-        good := Filtered( Combinations( [1..3], k),     x -> Size(DuplicateFreeList(cc{x})) <= k and Size(Group( Concatenation(List(cc{x}, AsList)))) = Size(G)      );
+    for indices in good do
 
-        for indices in good do
+        reps := List(cc{indices}, Representative);
 
-            gens := List( indices, i -> G.(i));
+        # Find subgroups up to conj of the centralisers which will become axis stabilisers
 
-            # Find subgroups up to conj of the centralisers which will become axis stabilisers
+        C := List( reps, x -> Centralizer(G, x));
 
-            C := List( gens, x -> Centralizer(G, x));
+        Error();
 
-            Cl := List( C, ConjugacyClassesSubgroups);
-            Cl := List( Cl, x -> List(x, Representative));
+        Cl := List( C, ConjugacyClassesSubgroups);
+        Cl := List( Cl, x -> List(x, Representative));
 
-            for i in [1 .. k] do
-                Cl[i] := Filtered( Cl[i], h -> gens[i] in h);
+        for i in [1 .. k] do
+            Cl[i] := Filtered( Cl[i], h -> reps[i] in h);
+        od;
+
+        all := Cartesian(Cl);
+
+        for p in all do
+
+            # Find permutation action on subgroups, which gives action on axes
+
+            action := List(p, x -> Action(G, RightCosets(G, x), OnRight));
+            action := List(action, GeneratorsOfGroup);
+
+            lens := List(p, x -> Index(G, x));
+
+            # Convert the group into a subgroup of Sym( Sum(lens) )
+            for i in [2..Size(action)] do
+                action[i] := List( action[i], perm -> perm + Sum(lens{[1 .. i - 1]}) );
             od;
 
-            all := Cartesian(Cl);
+            GG := Group(DuplicateFreeList(Flat(action)));
 
-            for p in all do
+            if Size(G) = Size(GG) then # if the permutations generate the group
 
-                # Find permutation action on subgroups, which gives action on axes
+                map := [];
 
-                action := List(p, x -> Action(G, RightCosets(G, x), OnRight));
-
-                lens := List(p, x -> Index(G, x));
-
-                list := [];;
-
-                for i in [1..3] do
-                    Add(list, JoinPerms(lens, List(action, x -> x.(i))));
+                for i in [1 .. k] do
+                    for j in [1..lens[i]] do
+                        Add(map, reps[i]^RepresentativeAction(GG, 1 + Sum(lens{[1..i-1]}), j + Sum(lens{[1..i-1]})));
+                    od;
                 od;
 
-                GG := Group(list);
-
-                if Size(G) = Size(GG) then # if the permutations generate the group
-
-                    map := [];
-
-                    for i in [1 .. k] do
-                        for j in [1..lens[i]] do
-                            Add(map, GG.(indices[i])^RepresentativeAction(GG, 1 + Sum(lens{[1..i-1]}), j + Sum(lens{[1..i-1]})));
-                        od;
-                    od;
-
-                    Add(actions, [GG, map] );
-                fi;
-            od;
+                Add( actions, [GG, map] );
+            fi;
         od;
     od;
 
     # Find the admissible actions
 
-    for i in [1..Length(actions)] do
+    actions := Filtered( actions, x -> MAJORANA_IsAdmissible(x[2]));
 
-        case := actions[i];
+    # Remove duplicates
 
-        G := case[1];
-        n := Length(case[2]);
+    MAJORANA_RemoveDuplicateTauMaps(actions);
 
-        oo := Orbits(G, Cartesian([1..n],[1..n]), OnPairs);
-        good := true;
+    return actions;
 
-        for o in oo do
-            a := o[1][1];
-            b := o[1][2];
-            D := Group(case[2][a],case[2][b]);
-            Oa := Set(Orbit(D,a));
-            Ob := Set(Orbit(D,b));
-            if Oa=Ob then
-                if not (Length(Oa) in [1,3,5]) then
-                    good := false;
-                    break;
-                fi;
-            else
-                if Length(Oa)<>Length(Ob) then
-                    good := false;
-                    break;
-                fi;
+end );
 
-                if not (Length(Oa) in [1,2,3]) then
-                    good := false;
-                    break;
-                fi;
+InstallGlobalFunction( MAJORANA_IsAdmissible,
+
+    function(action)
+
+    local G, n, oo, o, a, b, D, Oa, Ob;
+
+    G := Group(action);
+    n := Length(action);
+
+    oo := Orbits(G, Cartesian([1..n],[1..n]), OnPairs);
+
+    for o in oo do
+        a := o[1][1];
+        b := o[1][2];
+        D := Group(action[a],action[b]);
+        Oa := Set(Orbit(D,a));
+        Ob := Set(Orbit(D,b));
+        if Oa = Ob then
+            if not (Length(Oa) in [1,3,5]) then
+                return false;
+                break;
             fi;
-        od;
+        else
+            if Length(Oa)<>Length(Ob) then
+                return false;
+            fi;
 
-        if not good then
-            Unbind(actions[Position(actions,case)]);
+            if not (Length(Oa) in [1,2,3]) then
+                return false;
+            fi;
         fi;
     od;
 
-    actions := DuplicateFreeList(Compacted(actions));
+    return true;
 
-    # return actions;
+    end );
 
-    # Remove duplicates
+InstallGlobalFunction( MAJORANA_RemoveDuplicateTauMaps,
+
+    function(actions)
+
+    local i, j, case, G, n, reps, pos, im;
 
     for i in [1..Length(actions)] do
 
         if IsBound(actions[i]) then
 
-            case := actions[i];
-
-            G := case[1];
-            n := Length(case[2]);
+            G := actions[i, 1];
+            n := Length(actions[i, 2]);
 
             reps := ListWithIdenticalEntries(Length(actions), fail);
 
             for j in [i + 1 .. Length(actions)] do
                 if IsBound(actions[j]) then
-                    reps[j] :=  RepresentativeAction(SymmetricGroup(n), G, actions[j][1]);
+                    reps[j] :=  RepresentativeAction(SymmetricGroup(n), G, actions[j, 1]);
                 fi;
             od;
 
@@ -370,18 +401,63 @@ InstallGlobalFunction(TauMaps,
 
             for j in pos do
 
-                im := List(case[2], x -> x^reps[j]);
+                im := List(actions[i, 2], x -> x^reps[j]);
 
-                if List(im, k -> Size(Positions(im, k))) = List(actions[j][2], k -> Size(Positions(actions[j][2], k))) then
+                if List(im, k -> Size(Positions(im, k))) = List(actions[j, 2], k -> Size(Positions(actions[j, 2], k))) then
 
                     Unbind(actions[j]);
                 fi;
             od;
         fi;
     od;
-    
+
     actions := Compacted(actions);
 
-    return actions;
+    end );
 
-end );
+InstallGlobalFunction( MAJORANA_TauMapsRemoveDuplicateShapes,
+
+    function(input)
+
+    local S, t, stab, perms, g, perm, im, k, i, pos, rep;
+
+    t := Size(input.involutions);
+
+    S := SymmetricGroup(t);
+
+    stab := Stabilizer(S, AsSet(input.involutions), OnSets);
+
+    Display(StructureDescription(stab));
+
+    perms := [];;
+
+    for g in stab do
+
+        perm := [];
+
+        for rep in input.setup.pairreps do
+            im := OnPairs(rep, g);
+            k := UnorderedOrbitalRepresentative(input.setup.orbitalstruct, im);
+            Add(perm, input.setup.pairrepsmap[k]);
+        od;
+
+        Add(perms, perm);
+
+    od;
+
+    Display(Size(perms));
+
+    for i in [1..Size(input.shapes)] do
+        if IsBound(input.shapes[i]) then
+            for g in perms do
+                pos := Position(input.shapes, input.shapes[i]{g});
+                if pos <> fail and pos <> i then
+                    Unbind(input.shapes[pos]);
+                fi;
+            od;
+        fi;
+    od;
+
+    input.shapes := Compacted(input.shapes);
+
+    end );
