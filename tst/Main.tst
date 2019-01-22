@@ -32,6 +32,11 @@ gap> MAJORANA_Dimension(rep);
 21
 gap> MajoranaAlgebraTest(rep);
 true
+gap> rep := MajoranaRepresentation(ex, 3);;
+gap> MAJORANA_IsComplete(rep);
+true
+gap> MAJORANA_Dimension(rep);
+20
 
 ##
 ## Test an A6 example that gives no algebra
