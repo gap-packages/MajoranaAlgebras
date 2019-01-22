@@ -286,7 +286,7 @@ InstallGlobalFunction( SumIntersectionSparseMat,
 
     # Transform <mat> into echelon form
     mat := EchelonMatDestructive(mat);
-
+    
     # Extract the basis for the sum
     sum := SparseMatrix(0, n, [], [], M1!.ring);
     for i in [1 .. n] do
@@ -301,10 +301,8 @@ InstallGlobalFunction( SumIntersectionSparseMat,
     for i in [n+1 .. 2*n] do
         if mat.heads[i] <> 0 then
             row := CertainRows(mat.vectors, [mat.heads[i]]);
-            # Correct indices
             row := CertainColumns(row, [n+1 .. 2*n]);
-            row!.indices[1] := row!.indices[1] - n;
-            sum := UnionOfRows(sum, row );
+            int := UnionOfRows(int, row );
         fi;
     od;
 
