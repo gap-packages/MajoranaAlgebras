@@ -363,8 +363,6 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
 
     local i, new, ev, v, g, im_i, im_v, conj, index, transversal;
 
-    transversal := UnorderedOrbitalTransversalIterator(rep.setup.orbitalstruct, pair);
-
     new := [];
 
     for i in rep.setup.orbitreps do
@@ -379,8 +377,8 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
         # Loop over eigenvalues
         for ev in RecNames(rep.evecs[i]) do
             for v in Iterator(rep.evecs[i].(ev)) do
+                transversal := UnorderedOrbitalTransversalIterator(rep.setup.orbitalstruct, pair);
                 for g in transversal do
-
                     # Find which axis i gets sent to
                     im_i := i^g;
                     conj := SP_Inverse(rep.setup.conjelts[im_i]);
