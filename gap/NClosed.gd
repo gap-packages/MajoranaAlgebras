@@ -21,7 +21,6 @@ DeclareGlobalFunction( "MAJORANA_NClosedNullspace" );
 #! user wishes.
 
 #! @Arguments rep
-#! @Returns nothing
 #! @Description Takes as its input an incomplete Majorana representation rep that has been
 #! generated using the function <Ref Func="MajoranaRepresentation"/>. Again runs the
 #! main algorithm in order to attempt construction of the $3$-closed part of the algebra.

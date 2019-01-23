@@ -1,64 +1,63 @@
-# Table of fusion rules
+##
+## The Majorana fusion table, implemented as a hashmap.
+##
 
-BindGlobal("MAJORANA_FusionTable",
-           [ [    1,    0,   1/4, 1/32]
-            ,[    0,    0,   1/4, 1/32]
-            ,[  1/4,  1/4,     0, 1/32]
-            ,[ 1/32, 1/32,  1/32, 1/4 ] ]);
+BindGlobal("MAJORANA_FusionTable", HashMap( 16 ) );
 
-InstallGlobalFunction( MAJORANA_TestFusionTable,
+MAJORANA_FusionTable[ [ "0", "0" ] ]        := [ 0 ];
+MAJORANA_FusionTable[ [ "0", "1/4" ] ]      := [ 1/4 ];
+MAJORANA_FusionTable[ [ "0", "1/32" ] ]     := [ 1/32 ];
 
-    function(adjoint, evals, table, rep)
+MAJORANA_FusionTable[ [ "1/4", "0" ] ]      := [ 1/4 ];
+MAJORANA_FusionTable[ [ "1/4", "1/4" ] ]    := [ 1, 0 ];
+MAJORANA_FusionTable[ [ "1/4", "1/32" ] ]   := [ 1/32 ];
 
-    local n, field, eigenvectors, ev, eigenspaces, i, j, k, l, u, v, x, space;
+MAJORANA_FusionTable[ [ "1/32", "0" ] ]     := [ 1/32 ];
+MAJORANA_FusionTable[ [ "1/32", "1/4" ] ]   := [ 1/32 ];
+MAJORANA_FusionTable[ [ "1/32", "1/32" ] ]  := [ 1, 0, 1/4 ];
 
-    n := Nrows(adjoint);
+##
+## The main test func, returns true if the algebra is a Majorana algebra and
+## enters a break loop if not.
+##
 
-    field := adjoint!.ring;
+InstallGlobalFunction(MajoranaAlgebraTest,
 
-    eigenvectors := [];
+    function(rep)
 
-    for ev in evals do
-        Add(eigenvectors, KernelMat(adjoint - ev*SparseIdentityMatrix(15, field)).relations);
-    od;
+    if IsBound(rep.innerproducts) then
+        if MAJORANA_TestFrobeniusForm(rep) = false then
+            return false;
+        elif MAJORANA_TestInnerProduct(rep) = false then
+            return false;
+        fi;
+    fi;
 
-    eigenspaces := List(eigenvectors, x -> ConvertSparseMatrixToMatrix(x));;
-    eigenspaces := List(eigenspaces, x -> Subspace(field^n, x));;
+    if MAJORANA_TestPrimitivity(rep) = false then
+        return false;
+    fi;
 
-    for i in [1..Size(evals)] do
-        for j in [1..Size(evals)] do
-            space := Subspace(field^n, Union(List(eigenspaces, Basis){table[i][j]}));
-
-            for k in [1..Nrows(eigenvectors[i])] do
-                u := CertainRows(eigenvectors[i], [k]);
-                for l in [1..Nrows(eigenvectors[j])] do
-                    v := CertainRows(eigenvectors[j], [l]);
-
-                    x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
-
-                    if not ConvertSparseMatrixToMatrix(x)[1] in space then
-                        Error("Fusion table is not obeyed");
-                    fi;
-                od;
-            od;
-        od;
-    od;
+    return true;
 
     end );
+
+##
+## Tests that the vectors stored in rep.evecs are indeed eigenvectors
+##
 
 InstallGlobalFunction(MAJORANA_TestEvecs,
 
     function(rep)
 
-    local   u, v, i, j, k, ev, x, y;
+    local   u, v, i, ev, x, y;
 
+    # Loop over the representatives of the orbits of G on T
     for i in rep.setup.orbitreps do
         u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], rep.field);
 
-        for j in [1..3] do
-            ev := MAJORANA_FusionTable[1, j + 1];
-            for k in [1..Nrows(rep.evecs[i, j])] do
-                v := CertainRows(rep.evecs[i, j], [k]);
+        # For each of the three eigenvalues 0, 1/4, 1/32, check that the eqn u*v = ev*v holds
+        for ev in rep.eigenvalues do
+            for v in Iterator( rep.evecs[i].(String(ev)) ) do
 
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
@@ -67,71 +66,10 @@ InstallGlobalFunction(MAJORANA_TestEvecs,
                 fi;
             od;
         od;
+
     od;
 
     return true;
-
-    end );
-
-InstallGlobalFunction( MAJORANA_TestFusionAxis,
-
-    function(u, evecs, innerproducts, algebraproducts, setup)
-
-    local   dim,            # size of setup.coords
-            field,
-            evals,
-            new,
-            a,              # first eigenvalue
-            b,              # second eigenvalue
-            ev_a,           # a - eigenvectors
-            ev_b,           # b - eigenvectors
-            ev,             # new eigenvalue
-            i,              # loop over T
-            j,
-            k,
-            x,              # product of eigenvectors
-            y;              # product of x with u
-
-    field := algebraproducts[1]!.ring;
-    dim := Size(setup.coords);
-
-    for evals in [[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]] do
-
-        new := [0,0,0];
-
-        for j in [1..3] do
-            new[j] := SparseMatrix(0, dim, [], [], field);
-        od;
-
-        ev_a := evecs[evals[1]];
-        ev_b := evecs[evals[2]];
-
-        for j in [1..Nrows(ev_a)] do
-            a := CertainRows(ev_a, [j]);
-            for k in [1..Nrows(ev_b)] do
-                b := CertainRows(ev_b, [k]);
-                MAJORANA_FuseEigenvectorsNoForm(  a, b, u, evals, new,
-                                            innerproducts,
-                                            algebraproducts,
-                                            setup );
-            od;
-        od;
-
-        for j in [1..3] do
-            ev := MAJORANA_FusionTable[1][j + 1];
-
-            # new[j] := EchelonMatDestructive(new[j]).vectors;
-
-            for k in [1..Nrows(new[j])] do
-                a := CertainRows(new[j], [k]);
-                x := MAJORANA_AlgebraProduct(u, a, algebraproducts, setup);
-                if x <> ev*a and x <> false then
-                    Error("Algebra does not obey the fusion rules");
-                fi;
-            od;
-        od;
-
-    od;
 
     end );
 
@@ -141,106 +79,52 @@ InstallGlobalFunction(MAJORANA_TestFusion,
 
     function(rep)
 
-    local   dim, u, i;
+    local   dim, u, i, evals, new, a, b, ev, x;
 
     dim := Size(rep.setup.coords);
 
+    # Loop over the representatives of the orbits of G on T
     for i in rep.setup.orbitreps do
-        u := SparseMatrix(1, dim, [[i]], [[1]], Rationals);
+        u := SparseMatrix(1, dim, [[i]], [[1]], rep.field);
 
-        MAJORANA_TestFusionAxis(u, rep.evecs[i], rep.innerproducts, rep.algebraproducts, rep.setup);
+        # Loop over all pairs of eigenvalues and perform fusion, storing new vecs in <new>
+        for evals in UnorderedTuples( RecNames(rep.evecs[i]), 2 ) do
+
+            new := rec();
+
+            for ev in RecNames(rep.evecs[i]) do
+                new.(ev) := SparseMatrix(0, dim, [], [], rep.field);
+            od;
+
+            for a in Iterator( rep.evecs[i].(evals[1]) ) do
+                for b in Iterator( rep.evecs[i].(evals[2]) ) do
+                    MAJORANA_FuseEigenvectorsNoForm(  a, b, u, evals, new, rep );
+                od;
+            od;
+
+            # Check whether the new eigenvectors found by fusion are indeed eigevectors
+            for ev in rep.eigenvalues do
+                new.(String(ev)) := EchelonMatDestructive(new.(String(ev))).vectors;
+
+                for a in Iterator( new.(String(ev)) ) do
+                    x := MAJORANA_AlgebraProduct(u, a, rep.algebraproducts, rep.setup);
+                    if not x in [ev*a, false, fail] then
+                        Error("The algebra does not obey the fusion rules");
+                    fi;
+                od;
+            od;
+        od;
     od;
 
     return true;
 
     end );
 
-InstallGlobalFunction(MajoranaAlgebraTest,
+#
+## Checks if algebra obeys axiom M1
+##
 
-    function(rep)
-
-    MAJORANA_TestAxiomM1(rep);
-
-    MAJORANA_TestFusion(rep);
-
-    MAJORANA_TestPrimitivity(rep);
-
-    return true;
-
-    end );
-
-InstallGlobalFunction(MAJORANA_TestOrthogonality,
-
-    function(rep)
-
-    # Tests that eigenspaces are orthogonal with respect to the inner product
-
-        local   errorortho, # list of indices which do not obey orthogonality of eigenvectors
-                u,          # vector with 1 in j th position
-                a,          # first eigenvalue
-                b,          # second eigenvalue
-                ev_a,       # list of a - eigenvectors
-                ev_b,       # list of b - eigenvectors
-                i,
-                j,          # loop over T
-                k,
-                v,          # a - eigenvector
-                w,          # b - eigenvector
-                x;          # inner product
-
-        errorortho := [];
-
-        for i in rep.setup.orbitreps do
-
-            u := SparseMatrix(1, Size(rep.setup.coords), [[i]], [[1]], rep.field);
-
-            for a in [1..3] do
-
-                # orthogonality with 1-eigenvectors
-
-                ev_a := rep.evecs[i][a];
-
-                for j in [1..Nrows(ev_a)] do
-                    v := CertainRows(ev_a, [j]);
-                    x := MAJORANA_InnerProduct(u, v, rep.innerproducts, rep.setup);
-
-                    if (x <> false) and (x <> 0) then
-
-                        Add(errorortho, [i,0,a,u,v]);
-                    fi;
-                od;
-
-                # orthogonality with all other eigenvectors
-
-                for b in [a+1..3] do
-
-                    ev_b := rep.evecs[i][b];
-
-                    for j in [1..Nrows(ev_a)] do
-                        v := CertainRows(ev_a, [j]);
-                        for k in [1..Nrows(ev_b)] do
-                            w := CertainRows(ev_b, [k]);
-
-                            x := MAJORANA_InnerProduct(v, w, rep.innerproducts, rep.setup);
-
-                            if (x <> false) and (x <> 0) then
-                                Add(errorortho, [i,a,b,v,w]);
-                            fi;
-                        od;
-                    od;
-                od;
-            od;
-        od;
-
-        if Size(errorortho) > 0 then Error("Orthog"); fi;
-
-        return true;
-
-        end );
-
-# Checks if bilinear and algebra products obey Fusion, outputs a list which is empty if they do obey the axiom
-
-InstallGlobalFunction(MAJORANA_TestAxiomM1,
+InstallGlobalFunction(MAJORANA_TestFrobeniusForm,
 
     function(rep)
 
@@ -276,8 +160,8 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
                         y := MAJORANA_InnerProduct(rep.algebraproducts[j],w,rep.innerproducts, rep.setup);
 
                         if x <> false and y <> false and x <> y then
-                            # return false;
-                            Error("Axiom M1");
+                            return false;
+                            # Error("Axiom M1");
                             Add(ErrorM1,[l[1], l[2] ,k]);
                         fi;
 
@@ -287,7 +171,7 @@ InstallGlobalFunction(MAJORANA_TestAxiomM1,
         fi;
     od;
 
-    if Size(ErrorM1) > 0 then Error("Axiom M1"); fi;
+    # if Size(ErrorM1) > 0 then Error("Axiom M1"); fi;
 
     return true;
 
@@ -300,6 +184,8 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
     local i, dim, u, v, j, x, mat, espace, basis;
 
     if false in rep.algebraproducts then return fail; fi;
+
+    if MAJORANA_Dimension(rep) = 0 then return true; fi;
 
     dim := Size(rep.setup.coords);
 
@@ -328,32 +214,21 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
 
     end );
 
-InstallGlobalFunction( MAJORANA_IsComplete,
-
-    function(rep)
-
-    if false in rep.algebraproducts then
-        return false;
-    else
-        return true;
-    fi;
-
-    end );
-
-InstallGlobalFunction( MAJORANA_TestPositiveDefiniteForm,
+InstallGlobalFunction( MAJORANA_TestInnerProduct,
 
     function(rep)
 
     local dim, gram;
 
-    dim := Size(rep.setup.coords);
+    if IsBound(rep.innerproducts) and not false in rep.innerproducts then
+        dim := Size(rep.setup.coords);
 
     gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep);
 
     if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram), rep.field) < 0 then
         return false;
     else
-        return true;
+        return fail;
     fi;
 
     end );
@@ -443,5 +318,7 @@ InstallGlobalFunction( MAJORANA_TestSetup,
             if sign <> sign_k then Error("Sign error"); fi;
         od;
     od;
+
+    return true;
 
     end );

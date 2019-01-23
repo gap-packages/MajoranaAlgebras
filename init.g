@@ -4,11 +4,17 @@
 # Reading the declaration part of the package.
 #
 
+ReadPackage( "MajoranaAlgebras", "gap/SignedPerm.gd");
+
+ReadPackage( "MajoranaAlgebras", "gap/OrbitalStructure.gd");
+
 ReadPackage( "MajoranaAlgebras", "gap/LinAlg.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Test.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/SetUp.gd" );
+
+ReadPackage( "MajoranaAlgebras", "gap/Shapes.gd" );
 
 ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
 
