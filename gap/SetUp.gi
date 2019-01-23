@@ -401,12 +401,13 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
     od;
 
     for i in rep.setup.orbitreps do
-        # Find a basis of the new eigenspaces
-        rep.evecs[i].(ev) := UnionOfRows(rep.evecs[i].(ev), new[i].(ev));
-        rep.evecs[i].(ev)!.ncols := Size(rep.setup.coords);
-        rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
+        for ev in RecNames(rep.evecs[i]) do
+            # Find a basis of the new eigenspaces
+            rep.evecs[i].(ev) := UnionOfRows(rep.evecs[i].(ev), new[i].(ev));
+            rep.evecs[i].(ev)!.ncols := Size(rep.setup.coords);
+            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
+        od;
     od;
-
 
 end );
 
