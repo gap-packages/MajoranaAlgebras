@@ -361,37 +361,53 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
 
     function(rep, pair)
 
-    local i, new, ev, v, g, im, transversal;
+    local i, new, ev, v, g, im_i, im_v, conj, index, transversal;
 
     transversal := UnorderedOrbitalTransversalIterator(rep.setup.orbitalstruct, pair);
+
+    new := [];
+
+    for i in rep.setup.orbitreps do
+        new[i] := rec();
+        for ev in RecNames(rep.evecs[i]) do
+            new[i].(ev) := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals);
+        od;
+    od;
 
     for i in rep.setup.orbitreps do
 
         # Loop over eigenvalues
         for ev in RecNames(rep.evecs[i]) do
-            new := SparseMatrix(0, Size(rep.setup.coords), [], [], Rationals);
-
             for v in Iterator(rep.evecs[i].(ev)) do
                 for g in transversal do
-                    if i^g = i then
 
-                        # Find the image of each eigenvector under g
-                        im := MAJORANA_ConjugateVec(v, ListSignedPerm(g, Size(rep.setup.coords)));
+                    # Find which axis i gets sent to
+                    im_i := i^g;
+                    conj := SP_Inverse(rep.setup.conjelts[im_i]);
 
-                        # Add the image to the new eigenspaces
-                        if not _IsRowOfSparseMatrix(new, im) then
-                            new := UnionOfRows(new, im);
-                        fi;
+                    # Find the image of each eigenvector under g
+                    im_v := MAJORANA_ConjugateVec(v, ListSignedPerm(g, Size(rep.setup.coords)));
+                    im_v := MAJORANA_ConjugateVec(im_v, conj);
+
+                    index := conj[im_i];
+
+                    # Add the image to the new eigenspaces
+                    if not _IsRowOfSparseMatrix(new[index].(ev), im_v) then
+                        new[index].(ev) := UnionOfRows(new[index].(ev), im_v);
                     fi;
                 od;
             od;
-
-            # Find a basis of the new eigenspaces
-            rep.evecs[i].(ev) := UnionOfRows(rep.evecs[i].(ev), new);
-            rep.evecs[i].(ev)!.ncols := Size(rep.setup.coords);
-            rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
         od;
     od;
+
+    for i in rep.setup.orbitreps do
+        # Find a basis of the new eigenspaces
+        rep.evecs[i].(ev) := UnionOfRows(rep.evecs[i].(ev), new[i].(ev));
+        rep.evecs[i].(ev)!.ncols := Size(rep.setup.coords);
+        rep.evecs[i].(ev) := ReversedEchelonMatDestructive(rep.evecs[i].(ev)).vectors;
+    od;
+
+
 end );
 
 ##
