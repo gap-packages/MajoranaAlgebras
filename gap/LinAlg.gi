@@ -250,8 +250,6 @@ InstallGlobalFunction(ReversedEchelonMatDestructive,
 
     end );
 
-# TODO Currently broken - need some shallow copying in there!
-
 InstallGlobalFunction( SumIntersectionSparseMat,
 
     function(mat1, mat2)
@@ -286,7 +284,7 @@ InstallGlobalFunction( SumIntersectionSparseMat,
 
     # Transform <mat> into echelon form
     mat := EchelonMatDestructive(mat);
-    
+
     # Extract the basis for the sum
     sum := SparseMatrix(0, n, [], [], M1!.ring);
     for i in [1 .. n] do
