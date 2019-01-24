@@ -221,12 +221,16 @@ InstallGlobalFunction( MAJORANA_TestInnerProduct,
     local dim, gram;
 
     if IsBound(rep.innerproducts) and not false in rep.innerproducts then
+
         dim := Size(rep.setup.coords);
 
-    gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep);
+        gram := MAJORANA_FillGramMatrix(Filtered([1..dim], i -> rep.setup.nullspace.heads[i] = 0), rep);
 
-    if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram), rep.field) < 0 then
-        return false;
+        if MAJORANA_PositiveDefinite(ConvertSparseMatrixToMatrix(gram), rep.field) < 0 then
+            return false;
+        else
+            return false;
+        fi;
     else
         return fail;
     fi;

@@ -17,7 +17,8 @@ InstallGlobalFunction( MAJORANA_SetUp,
                         eigenvalues := [0, 1/4, 1/32], # The eigenvalues not equal to one
                         generators  := StructuralCopy(input.generators),
                         shape       := input.shapes[index],
-                        field       := Rationals  );
+                        field       := Rationals,
+                        axioms      := options.axioms  );
 
     if IsBound(input.tau) then
         rep.tau := input.tau;

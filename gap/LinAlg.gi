@@ -134,13 +134,13 @@ InstallGlobalFunction(MAJORANA_LDLTDecomposition,
 
 InstallGlobalFunction(MAJORANA_PositiveDefinite,
 
-    function(GramMatrix, field) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
+    function(mat, field) # Check returns 1, 0, -1 if Gram matrix is positive definite, positive semidefinite or neither respectively
 
     local   L,          # decomposition of matrix
             Diagonals,  # list of diagonals from decomposition
             i;          # loop over sze of matrix
 
-    L := MAJORANA_LDLTDecomposition(GramMatrix, field);
+    L := MAJORANA_LDLTDecomposition(mat, field);
 
     if L = false then
         return -1;

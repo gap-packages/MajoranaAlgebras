@@ -5,7 +5,7 @@ BindGlobal( "MAJORANA_DihedralAlgebraOfJordanType", rec() );
 
 f := FreeGroup(2);
 
-MAJORANA_DihedralAlgebraOfJordanType.2B := MAJORANA_DihedralAlgebras.2B;
+MAJORANA_DihedralAlgebraOfJordanType.2B := MAJORANA_DihedralAlgebras("2B");
 
 MAJORANA_DihedralAlgebraOfJordanType.3X := function( eta )
 

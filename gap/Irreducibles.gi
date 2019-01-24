@@ -80,11 +80,3 @@ InstallGlobalFunction( MAJORANA_MiyamotoGroup,
     return Group(gens);
 
     end);
-
-InstallGlobalFunction( MAJORANA_Dimension,
-
-    function(rep)
-
-    return Size(rep.setup.coords) - Nrows(rep.setup.nullspace.vectors);
-
-    end );

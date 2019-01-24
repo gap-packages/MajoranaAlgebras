@@ -274,8 +274,6 @@ function(rep)
 
             # Calculate the intersection of the eigenspaces to find new nullspace vectors
             MAJORANA_IntersectEigenspaces(rep);
-
-            Info( InfoMajorana, 50, STRINGIFY( "Eigenspace dimensions: ", List(rep.evecs[i], Nrows), ". Nullspace dimension: ", Nrows(rep.setup.nullspace.vectors)));
         od;
     od;
 
@@ -1056,7 +1054,7 @@ InstallGlobalFunction( MAJORANA_ConjugateVec,
     # If g is the identity on vec then return
     if ForAll(mat!.indices[1], i -> g[i] = i) then return mat; fi;
 
-    res := SparseMatrix(1, Ncols(mat), [[]], [[]], rep.field);
+    res := SparseMatrix(1, Ncols(mat), [[]], [[]], mat!.ring);
 
     # Loop over the non-zero indices of vec and add their image to res
     for i in [1..Size(mat!.indices[1])] do
@@ -1091,7 +1089,7 @@ InstallGlobalFunction(MAJORANA_ConjugateRow,
     # If the elt is the identity then return
     if ForAll(g, i -> g[i] = i) then return row; fi;
 
-    output  := SparseMatrix(1, Ncols(row), [[]], [[]], rep.field);
+    output  := SparseMatrix(1, Ncols(row), [[]], [[]], row!.ring);
 
     # Loop over the non-zero coefficients of row
     for i in [1..Size(row!.indices[1])] do
@@ -1143,8 +1141,8 @@ InstallGlobalFunction(MAJORANA_SeparateAlgebraProduct,
             y,
             pos;        # position of unknown product
 
-    row := SparseMatrix( 1, Size(unknowns), [[]], [[]], rep.field);
-    sum := SparseMatrix( 1, Size(setup.coords), [[]], [[]], rep.field);
+    row := SparseMatrix( 1, Size(unknowns), [[]], [[]], u!.ring);
+    sum := SparseMatrix( 1, Size(setup.coords), [[]], [[]], u!.ring);
 
     # <elts> will record the permutations that we have to conjugate by
     # <vecs> will record the corresponding vector that we are permuting
@@ -1218,11 +1216,7 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
     function( system, rep)
 
-    local   sol,        # solution of system
-            sign,       # correct sign of 5A axes
-            i,          # loop over <unknowns>
-            d,
-            nonzero;
+    local   x, i;
 
     # If the matrix is zero then return
     if ForAll(system.mat!.indices, x -> x = []) then return; fi;
@@ -1231,11 +1225,11 @@ InstallGlobalFunction( MAJORANA_SolutionAlgProducts,
 
     Info( InfoMajorana, 40, STRINGIFY("Solving a ", Nrows(system.mat), " x ", Ncols(system.mat), " matrix") );
 
-    if algebraproducts[1]!.ring = Rationals then
-        for i in [1..Nrows(mat)] do
-            x := _FoldList2(mat!.entries[i], DenominatorRat, LcmInt);
-            mat!.entries[i] := mat!.entries[i]*x;
-            vec!.entries[i] := vec!.entries[i]*x;
+    if rep.algebraproducts[1]!.ring = Rationals then
+        for i in [1..Nrows(system.mat)] do
+            x := _FoldList2(system.mat!.entries[i], DenominatorRat, LcmInt);
+            system.mat!.entries[i] := system.mat!.entries[i]*x;
+            system.vec!.entries[i] := system.vec!.entries[i]*x;
         od;
     fi;
 
@@ -1437,8 +1431,8 @@ InstallGlobalFunction(MAJORANA_SeparateInnerProduct,
             pos,            # position of m in unknowns
             sign;           # correct sign of 5A axes
 
-    sum := SparseZeroMatrix(1, 1, rep.field);
-    row := SparseZeroMatrix(1, Size(unknowns), rep.field);
+    sum := SparseZeroMatrix(1, 1, u!.ring);
+    row := SparseZeroMatrix(1, Size(unknowns), u!.ring);
 
     # Loop over the nonzero coefficients of u and v
     for i in [1..Size(u!.indices[1])] do
@@ -1528,7 +1522,7 @@ InstallGlobalFunction( MAJORANA_SingleInnerSolution,
     x := system.unknowns[eq[1]!.indices[1, 1]];
 
     if eq[2]!.entries[1] = [] then
-        innerproducts[x] := Zero(mat!.ring);
+        innerproducts[x] := Zero(system.mat!.ring);
     else
         innerproducts[x] := eq[2]!.entries[1, 1]/eq[1]!.entries[1, 1];
     fi;
@@ -1558,7 +1552,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
         if system.solutions[i] <> fail then
             x := system.unknowns[i];
             if system.solutions[i]!.entries[1] = [] then
-                innerproducts[x] := Zero(mat!.ring);
+                innerproducts[x] := Zero(system.mat!.ring);
             else
                 innerproducts[x] := system.solutions[i]!.entries[1, 1];
             fi;
@@ -1577,7 +1571,7 @@ InstallGlobalFunction( MAJORANA_SolutionInnerProducts,
 
 InstallGlobalFunction(MAJORANA_FillGramMatrix,
 
-function(range, innerproducts, setup)
+function(range, rep)
 
     local   i, j, k, mat, l;
 
@@ -1589,15 +1583,15 @@ function(range, innerproducts, setup)
         for j in [i..l] do
 
             # Find the representative of the orbital containing the pair <range{[i,j]}>
-            k := setup.pairorbit[range[i], range[j]];
+            k := rep.setup.pairorbit[range[i], range[j]];
 
             # Adjust for the sign
             if k > 0 then
-                SetEntry(mat, i, j, innerproducts[k]);
-                SetEntry(mat, j, i, innerproducts[k]);
+                SetEntry(mat, i, j, rep.innerproducts[k]);
+                SetEntry(mat, j, i, rep.innerproducts[k]);
             else
-                SetEntry(mat, i, j, -innerproducts[-k]);
-                SetEntry(mat, j, i, -innerproducts[-k]);
+                SetEntry(mat, i, j, -rep.innerproducts[-k]);
+                SetEntry(mat, j, i, -rep.innerproducts[-k]);
             fi;
         od;
     od;
