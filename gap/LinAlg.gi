@@ -303,3 +303,61 @@ InstallOtherMethod( Iterator, "for a sparse matrix",
         return IteratorByFunctions(iter);
 
     end );
+
+    InstallGlobalFunction( SumIntersectionSparseMat,
+
+        function(mat1, mat2)
+
+        local mat, n, v, sum, row, int, i, M1, M2;
+
+
+            M1 := CopyMat(mat1);
+            M2 := CopyMat(mat2);
+
+        # Basic checks on input
+        if Nrows(M1) = 0 then
+            return [ M2, M1 ];
+        elif Nrows(M2) = 0 then
+            return [ M1, M2 ];
+        elif Ncols(M1) <> Ncols(M2) then
+            Error("Matrices must have the same number of columns");
+        elif RingOfDefinition(M1) <> RingOfDefinition(M2) then
+            Error("Matrices must be defined over the same ring");
+        fi;
+
+        n := Ncols(M1);
+
+        # Set up the matrix for Zassenhaus' algorithm
+        mat := SparseMatrix(0, 2*n, [], [], M1!.ring);
+        for v in Iterator(M1) do
+            mat := UnionOfRows( mat, UnionOfColumns(v, v) );
+        od;
+        for v in Iterator(M2) do
+            mat := UnionOfRows( mat, v );
+        od;
+
+        # Transform <mat> into echelon form
+        mat := EchelonMatDestructive(mat);
+
+        # Extract the basis for the sum
+        sum := SparseMatrix(0, n, [], [], M1!.ring);
+        for i in [1 .. n] do
+            if mat.heads[i] <> 0 then
+                row := CertainRows( mat.vectors, [mat.heads[i]] );
+                sum := UnionOfRows( sum, CertainColumns(row, [1..n]) );
+            fi;
+        od;
+
+        # Extract the basis for the intersection
+        int := SparseMatrix(0, n, [], [], M1!.ring);
+        for i in [n+1 .. 2*n] do
+            if mat.heads[i] <> 0 then
+                row := CertainRows(mat.vectors, [mat.heads[i]]);
+                row := CertainColumns(row, [n+1 .. 2*n]);
+                int := UnionOfRows(int, row );
+            fi;
+        od;
+
+        return [ sum, int ];
+
+    end );

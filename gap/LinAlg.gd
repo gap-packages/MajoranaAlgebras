@@ -11,3 +11,5 @@ DeclareGlobalFunction( "_IsRowOfSparseMatrix" );
 DeclareGlobalFunction( "ReversedEchelonMatDestructive" );
 
 DeclareGlobalFunction( "RemoveMatWithHeads" );
+
+DeclareGlobalFunction( "SumIntersectionSparseMat" );
