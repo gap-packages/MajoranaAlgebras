@@ -8,7 +8,7 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
 
     function(rep, field)
 
-    local i, j;
+    local i, j, ev;
 
     rep.field := field;
 
@@ -28,9 +28,9 @@ InstallGlobalFunction( MAJORANA_ChangeFieldOfRep,
     fi;
 
     for i in rep.setup.orbitreps do
-        rep.evecs[i] := rep.evecs[i]*One(field);
-        for j in [1..3] do
-            rep.evecs[i][j]!.ring := field;
+        for ev in RecNames(rep.evecs[i]) do
+            rep.evecs[i].(ev) := rep.evecs[i].(ev)*One(field);
+            rep.evecs[i].(ev)!.ring := field;
         od;
     od;
 
