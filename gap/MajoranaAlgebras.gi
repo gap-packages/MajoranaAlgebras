@@ -471,8 +471,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
                 if not x in [fail, false] then
-                    MAJORANA_AddEvec(null, x - ev*v);
-                    null := UnionOfRows(null, x - ev*v);
+                    null := MAJORANA_AddEvec(null, x - ev*v);
                 fi;
             od;
         od;
