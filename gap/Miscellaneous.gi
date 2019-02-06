@@ -215,11 +215,15 @@ InstallGlobalFunction( MAJORANA_NaiveProduct,
 
     local vec, i, j;
 
-    vec := SparseMatrix(1, Ncols(u), [], [], u!.ring );
+    vec := SparseMatrix(1, Ncols(u), [[]], [[]], u!.ring );
 
-    for i in [ 1 .. Size(u!.indices) ] do
-        for j in [ 1 .. Size(v!.indices) ] do
-            vec := vec + u!.entries[i]*v!.entries[j]*prod[u!.indices[i], v!.entries[j]];
+    for i in [ 1 .. Size(u!.indices[1]) ] do
+        for j in [ 1 .. Size(v!.indices[1]) ] do
+            if not prod[u!.indices[1][i], v!.indices[1][j]] in [fail, false] then
+                vec := vec + u!.entries[1][i]*v!.entries[1][j]*prod[u!.indices[1][i], v!.indices[1][j]];
+            else
+                return prod[u!.indices[1][i], v!.indices[1][j]];
+            fi;
         od;
     od;
 
