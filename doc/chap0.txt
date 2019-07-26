@@ -1,1 +1,65 @@
-Placeholder
+  
+  
+                               [1X MajoranaAlgebras [101X
+  
+  
+       [1X A package for constructing Majorana algebras and representations [101X
+  
+  
+                                      1.4
+  
+  
+                                6 December 2018
+  
+  
+                                Markus Pfeiffer
+  
+                               Madeleine Whybrow
+  
+  
+  
+  Markus Pfeiffer
+      Email:    [7Xmailto:markus.pfeiffer@st-andrews.ac.uk[107X
+      Homepage: [7Xhttps://markusp.morphism.de/[107X
+      Address:  [33X[0;14YSchool  of  Computer  Science, University of St Andrews, North
+                Haugh, KY16 9SX[133X
+  
+  
+  Madeleine Whybrow
+      Email:    [7Xmailto:mlw10@ic.ac.uk[107X
+      Homepage: [7Xhttps://www.madeleinewhybrow.wordpress.com[107X
+      Address:  [33X[0;14YDepartment of Mathematics, Imperial College, South Kensington,
+                SW7 2AZ[133X
+  
+  
+  
+  -------------------------------------------------------
+  [1XCopyright[101X
+  [33X[0;0Y© 2018 by Markus Pfeiffer and Madeleine Whybrow[133X
+  
+  [33X[0;0Y[5XMajoranaAlgebras[105X  package  is  free software; you can redistribute it and/or
+  modify   it   under   the   terms   of   the   GNU  General  Public  License
+  ([7Xhttp://www.fsf.org/licenses/gpl.html[107X)  as  published  by  the Free Software
+  Foundation;  either  version 2 of the License, or (at your option) any later
+  version.[133X
+  
+  
+  -------------------------------------------------------
+  
+  
+  [1XContents (MajoranaAlgebras)[101X
+  
+  1 [33X[0;0YIntroduction[133X
+    1.1 [33X[0;0YA quick guide[133X
+    1.2 [33X[0;0YUnderstanding the output[133X
+    1.3 [33X[0;0YInfo levels[133X
+  2 [33X[0;0YShapes of a Majorana representation[133X
+    2.1 [33X[0;0YThe shapes functions[133X
+  3 [33X[0;0YMajorana representations[133X
+    3.1 [33X[0;0YThe n-closed function[133X
+  4 [33X[0;0YFunctions for calculating with Majorana representations[133X
+    4.1 [33X[0;0YThe subalgebra structure[133X
+  5 [33X[0;0YFunctions for testing Majorana representations[133X
+  
+  
+  [32X

@@ -2,27 +2,6 @@
   
   [1XIndex[101X
   
-  [2XInfoMajorana[102X 1.3-1 
-  [2XMAJORANA_AdjointAction[102X 4.2-5 
-  [2XMAJORANA_AlgebraProduct[102X 4.1-1 
-  [2XMAJORANA_Basis[102X 4.2-4 
-  [2XMAJORANA_Dimension[102X 4.2-2 
-  [2XMAJORANA_Eigenvectors[102X 4.2-3 
-  [2XMAJORANA_InnerProduct[102X 4.1-2 
-  [2XMAJORANA_IsComplete[102X 4.2-1 
-  [2XMAJORANA_IsJordanAlgebra[102X 4.3-2 
-  [2XMAJORANA_IsSixTranspositionGroup[102X 2.1-3 
-  [2XMAJORANA_RemoveDuplicateShapes[102X 2.1-4 
-  [2XMAJORANA_Subalgebra[102X 4.3-1 
-  [2XMAJORANA_TestAxiomM2[102X 5.2-3 
-  [2XMAJORANA_TestFrobeniusForm[102X 5.2-1 
-  [2XMAJORANA_TestInnerProduct[102X 5.2-2 
-  [2XMAJORANA_TestPrimitivity[102X 5.2-4 
-  [2XMajoranaAlgebraTest[102X 5.1-1 
-  [2XMajoranaRepresentation[102X 3.1-1 
-  [2XNClosedMajoranaRepresentation[102X 3.2-1 
-  [2XShapesOfMajoranaRepresentation[102X 2.1-1 
-  [2XShapesOfMajoranaRepresentationAxiomM8[102X 2.1-2 
   
   
   -------------------------------------------------------
