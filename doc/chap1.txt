@@ -6,7 +6,7 @@
   
   [33X[0;0YIn  order to construct the Majorana representation of a group [3XG[103X with respect
   to     a     set     of    involutions    [3XT[103X,    you    must    first    call
-  [2XShapesOfMajoranaRepresentation[102X ([14X???ShapesOfMajoranaRepresentation???[114X).[133X
+  [2XShapesOfMajoranaRepresentation[102X ([14X2.1-1[114X).[133X
   
   [4X[32X  Example  [32X[104X
     [4X[25Xgap>[125X [27XG := AlternatingGroup(5);;[127X[104X
@@ -25,9 +25,8 @@
   [4X[32X[104X
   
   [33X[0;0YTo  construct  the  Majorana representation with shape at position [3Xi[103X of this
-  list,         call         the        function        [2XMajoranaRepresentation[102X
-  ([14X???MajoranaRepresentation???[114X) with [3Xinput[103X as its first argument and [3Xi[103X as its
-  second.[133X
+  list,  call  the  function  [2XMajoranaRepresentation[102X ([14X3.1-1[114X) with [3Xinput[103X as its
+  first argument and [3Xi[103X as its second.[133X
   
   [4X[32X  Example  [32X[104X
     [4X[25Xgap>[125X [27Xrep := MajoranaRepresentation(input, 1);;[127X[104X
@@ -47,8 +46,8 @@
   [4X[32X[104X
   
   [33X[0;0YIf    an    incomplete    algebra    is    returned    then   the   function
-  [2XNClosedMajoranaRepresentation[102X  ([14X???NClosedMajoranaRepresentation???[114X)  can be
-  used to attempt to find the 3-closed part of the algebra.[133X
+  [2XNClosedMajoranaRepresentation[102X  ([14X3.2-1[114X)  can  be  used to attempt to find the
+  3-closed part of the algebra.[133X
   
   [4X[32X  Example  [32X[104X
     [4X[25Xgap>[125X [27XG := AlternatingGroup(5);;[127X[104X
@@ -76,10 +75,10 @@
   [3Xrep.setup.coords[103X.   The   list   [3Xmat!.entries[103X   give   their   corresponding
   coefficients.[113X[133X
   
-  [33X[0;0YThe function [2XMajoranaRepresentation[102X ([14X???MajoranaRepresentation???[114X) outputs a
-  record  that encodes the information required to perform calculations in the
-  Majorana  representation  that  has been calculated. The record contains the
-  following components.[133X
+  [33X[0;0YThe  function  [2XMajoranaRepresentation[102X  ([14X3.1-1[114X) outputs a record that encodes
+  the   information   required   to   perform  calculations  in  the  Majorana
+  representation  that  has been calculated. The record contains the following
+  components.[133X
   
   [8X [10Xgroup[110X[8X[108X
         [33X[0;6YThe group [3XG[103X, as inputted by the user.[133X
@@ -89,7 +88,7 @@
   
   [8X [10Xshape[110X[8X[108X
         [33X[0;6YThe shape of the representation, as chosen by the user in the input of
-        [2XMajoranaRepresentation[102X ([14X???MajoranaRepresentation???[114X).[133X
+        [2XMajoranaRepresentation[102X ([14X3.1-1[114X).[133X
   
   [8X [10Xeigenvalues[110X[8X[108X
         [33X[0;6YA  list whose values give the eigenvalues of the adjoint action of the
@@ -100,7 +99,7 @@
   [8X [10Xaxioms[110X[8X[108X
         [33X[0;6YA   string   representing  the  axiomatic  setting  of  the  algebra's
         construction,  potentially  chosen by the user with the [3Xoptions[103X record
-        in the input of [2XMajoranaRepresentation[102X ([14X???MajoranaRepresentation???[114X).[133X
+        in the input of [2XMajoranaRepresentation[102X ([14X3.1-1[114X).[133X
   
   [8X [10Xsetup[110X[8X[108X
         [33X[0;6YIs   itself   a   record,  containing  (among  others)  the  following
@@ -143,4 +142,14 @@
   
   
   [1X1.3 [33X[0;0YInfo levels[133X[101X
+  
+  [1X1.3-1 InfoMajorana[101X
+  
+  [33X[1;0Y[29X[2XInfoMajorana[102X[32X info class[133X
+  
+  [33X[0;0YThe  default  info  level of [3XInfoMajorana[103X is 0. No information is printed at
+  this  level. If the info level is at least 10 then [3XSuccess[103X is printed if the
+  algorithm  has  produced  a  complete  Majorana  algebra,  otherwise [3XFail[103X is
+  printed.  If  the info level is at least 20 then more information is printed
+  about the progress of the algorithm, up to a maximum info level of 100.[133X
   

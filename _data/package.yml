@@ -67,12 +67,12 @@ citeas: |
 bibtex: |
     @misc{ MajoranaAlgebras1.4,
       author =           {Pfeiffer, M. and Whybrow, M.},
-      title =            {{MajoranaAlgebras},  A  package  for constructing Majorana
-                          algebras and representations, {V}ersion 1.4},
+      title =            {{MajoranaAlgebras},   A   package   for   constructing
+                          Majorana algebras and representations, {V}ersion 1.4},
       month =            {Dec},
       year =             {2018},
       note =             {GAP package},
-      howpublished =     {\href     {https://MWhybrow92.github.io/MajoranaAlgebras/}
+      howpublished =     {\href {https://MWhybrow92.github.io/MajoranaAlgebras/}
                           {\texttt{https://MWhybrow92.github.io/}\discretionary
                           {}{}{}\texttt{MajoranaAlgebras/}}},
       keywords =         {Majorana algebras; axial algebras},

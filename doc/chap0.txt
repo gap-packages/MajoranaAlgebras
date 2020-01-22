@@ -53,13 +53,39 @@
     1.1 [33X[0;0YA quick guide[133X
     1.2 [33X[0;0YUnderstanding the output[133X
     1.3 [33X[0;0YInfo levels[133X
+      1.3-1 InfoMajorana
   2 [33X[0;0YShapes of a Majorana representation[133X
     2.1 [33X[0;0YThe shapes functions[133X
+      2.1-1 ShapesOfMajoranaRepresentation
+      2.1-2 ShapesOfMajoranaRepresentationAxiomM8
+      2.1-3 MAJORANA_IsSixTranspositionGroup
+      2.1-4 MAJORANA_RemoveDuplicateShapes
   3 [33X[0;0YMajorana representations[133X
-    3.1 [33X[0;0YThe n-closed function[133X
+    3.1 [33X[0;0YThe main function[133X
+      3.1-1 MajoranaRepresentation
+    3.2 [33X[0;0YThe n-closed function[133X
+      3.2-1 NClosedMajoranaRepresentation
   4 [33X[0;0YFunctions for calculating with Majorana representations[133X
-    4.1 [33X[0;0YThe subalgebra structure[133X
+    4.1 [33X[0;0YCalculating products[133X
+      4.1-1 MAJORANA_AlgebraProduct
+      4.1-2 MAJORANA_InnerProduct
+    4.2 [33X[0;0YBasic functions[133X
+      4.2-1 MAJORANA_IsComplete
+      4.2-2 MAJORANA_Dimension
+      4.2-3 MAJORANA_Eigenvectors
+      4.2-4 MAJORANA_Basis
+      4.2-5 MAJORANA_AdjointAction
+    4.3 [33X[0;0YThe subalgebra structure[133X
+      4.3-1 MAJORANA_Subalgebra
+      4.3-2 MAJORANA_IsJordanAlgebra
   5 [33X[0;0YFunctions for testing Majorana representations[133X
+    5.1 [33X[0;0YThe main function[133X
+      5.1-1 MajoranaAlgebraTest
+    5.2 [33X[0;0YOther functions[133X
+      5.2-1 MAJORANA_TestFrobeniusForm
+      5.2-2 MAJORANA_TestInnerProduct
+      5.2-3 MAJORANA_TestAxiomM2
+      5.2-4 MAJORANA_TestPrimitivity
   
   
   [32X

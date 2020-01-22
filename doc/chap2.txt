@@ -4,3 +4,48 @@
   
   [1X2.1 [33X[0;0YThe shapes functions[133X[101X
   
+  [1X2.1-1 ShapesOfMajoranaRepresentation[101X
+  
+  [33X[1;0Y[29X[2XShapesOfMajoranaRepresentation[102X( [3XG[103X, [3XT[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya record with a component [3Xshapes[103X[133X
+  
+  [33X[0;0YTakes a group [3XG[103X and a [3XG[103X-invariant set of generating involutions [3XT[103X. Returns a
+  list  of  possible  shapes  of a Majorana Representation of the form [3X(G,T,V)[103X
+  that is stored in the [3Xshapes[103X component of the output.[133X
+  
+  [1X2.1-2 ShapesOfMajoranaRepresentationAxiomM8[101X
+  
+  [33X[1;0Y[29X[2XShapesOfMajoranaRepresentationAxiomM8[102X( [3XG[103X, [3XT[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya record with a component [3Xshapes[103X[133X
+  
+  [33X[0;0YPerforms exactly the same function as [2XShapesOfMajoranaRepresentation[102X ([14X2.1-1[114X)
+  but  gives  only  those  shapes  at  obey  axiom  M8.  That  is  to  say, we
+  additionally  assume  that if [23Xt,s \in T[123X such that [23X|ts| = 2[123X then the dihedral
+  subalgebra  [23X\langle  \langle  a_t,  a_s \rangle \rangle[123X is of type [23X2A[123X if and
+  only if [23Xts \in T[123X (and otherwise is of type [23X2B[123X).[133X
+  
+  [1X2.1-3 MAJORANA_IsSixTranspositionGroup[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_IsSixTranspositionGroup[102X( [3XG[103X, [3XT[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ytrue if [3X(G,T)[103X is a 6-transposition group, otherwise returns false[133X
+  
+  [33X[0;0YFor  a  group  [3XG[103X  and  a subset [3XT[103X of [3XG[103X, returns true if all of the following
+  conditions  are satisfied: *[3XT[103X is a set of involutions that generate [3XG[103X; *[3XT[103X is
+  closed  under conjugation by [3XG[103X; *the order of the product of two elements of
+  [3XT[103X is at most 6.[133X
+  
+  [1X2.1-4 MAJORANA_RemoveDuplicateShapes[101X
+  
+  [33X[1;0Y[29X[2XMAJORANA_RemoveDuplicateShapes[102X( [3Xinput[103X ) [32X function[133X
+  
+  [33X[0;0YIf  an  automorphism  of the group [3XG[103X stabilises the set [3XT[103X then it induces an
+  action  on  the  pairs  of  elements  of  [3XT[103X and therefore on the shapes of a
+  possible Majorana representation of the form [3X(G,T,V)[103X. If one shape is mapped
+  to another in this way then their corresponding algebras must be isomorphic.[133X
+  
+  [33X[0;0YThis   function   takes  the  record  [3Xinput[103X  as  produced  by  the  function
+  [2XShapesOfMajoranaRepresentation[102X                   ([14X2.1-1[114X)                  or
+  [2XShapesOfMajoranaRepresentationAxiomM8[102X ([14X2.1-2[114X) and replaces [3Xinput.shapes[103X with
+  a  list  of  shapes  such  that  no  two  can  be mapped to each other by an
+  automorphism of [3XG[103X.[133X
+  
