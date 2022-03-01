@@ -12,6 +12,7 @@ PackageName := "MajoranaAlgebras",
 Subtitle := "A package for constructing Majorana algebras and representations",
 Version := "1.4",
 Date := "06/12/2018", # dd/mm/yyyy format
+License := "GPL-2.0-or-later",
 
 Persons := [
   rec(
