@@ -16,14 +16,11 @@ Date := "06/12/2018", # dd/mm/yyyy format
 Persons := [
   rec(
     IsAuthor := true,
-    IsMaintainer := true,
+    IsMaintainer := false,
     FirstNames := "Markus",
     LastName := "Pfeiffer",
     WWWHome := "https://markusp.morphism.de/",
     Email := "markus.pfeiffer@st-andrews.ac.uk",
-    PostalAddress := "School of Computer Science, University of St Andrews, North Haugh, KY16 9SX",
-    Place := "St Andrews, UK",
-    Institution := "University of St Andrews",
   ),
   rec(
     IsAuthor := true,
