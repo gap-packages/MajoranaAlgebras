@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/MWhybrow92/MajoranaAlgebras.svg?branch=master)](https://travis-ci.org/MWhybrow92/MajoranaAlgebras)
+[![Build Status](https://github.com/MWhybrow92/YangBaxter/workflows/CI/badge.svg?branch=master)](https://github.com/MWhybrow92/YangBaxter/actions?query=workflow%3ACI+branch%3Amaster)
 [![Code Coverage](https://codecov.io/github/gap-system/gap/coverage.svg?branch=master&token=)](https://codecov.io/gh/MWhybrow92/MajoranaAlgebras)
 
 # MajoranaAlgebras
