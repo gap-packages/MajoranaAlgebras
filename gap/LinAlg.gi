@@ -1,17 +1,13 @@
 ##
 ##
-## A fix for the UnionOfRows bug in some versions of Gauss
+## A local UnionOfRows inspired by Gauss package
 ##
 ##
 
-Info(InfoMajorana, 10, "Warning, rebinding `UnionOfRows`, because it was broken sometime");
-MakeReadWriteGVar("UnionOfRows");
-UnbindGlobal("UnionOfRows");
-BindGlobal("UnionOfRows",
+InstallGlobalFunction("MAJORANA_UnionOfRows",
     function( A, B )
       return SparseMatrix( A!.nrows + B!.nrows, A!.ncols, Concatenation( A!.indices, B!.indices ), Concatenation( A!.entries, B!.entries ), A!.ring );
     end );
-
 
 ##
 ## Takes as its input a record <system> with the components <mat>, <vec> and <unknowns>

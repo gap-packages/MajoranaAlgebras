@@ -201,7 +201,7 @@ InstallGlobalFunction( MAJORANA_TestPrimitivity,
 
             x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
-            mat := UnionOfRows(mat, x);
+            mat := MAJORANA_UnionOfRows(mat, x);
         od;
 
         espace := KernelMat(mat - SparseIdentityMatrix(dim, Rationals));

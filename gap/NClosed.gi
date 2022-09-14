@@ -93,7 +93,7 @@ InstallGlobalFunction( MAJORANA_NClosedNullspace,
                 pos := Position(rep.setup.coords, rep.system.unknowns[x]);
                 SetEntry(v, 1, pos, -rep.system.mat!.entries[i, j]);
 
-                rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, v);
+                rep.setup.nullspace.vectors := MAJORANA_UnionOfRows(rep.setup.nullspace.vectors, v);
             od;
         fi;
     od;

@@ -389,7 +389,7 @@ InstallGlobalFunction( MAJORANA_AddConjugateEvecs,
 
                     # Add the image to the new eigenspaces
                     if not _IsRowOfSparseMatrix(new.(ev), im) then
-                        new.(ev) := UnionOfRows(new.(ev), im);
+                        new.(ev) := MAJORANA_UnionOfRows(new.(ev), im);
                     fi;
                 od;
             od;
