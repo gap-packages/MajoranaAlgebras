@@ -44,7 +44,7 @@ InstallGlobalFunction( MAJORANA_Eigenvectors,
     # Conjugate the eigevectors of the orbit rep by g
     evecs := SparseMatrix( 0, Size(rep.setup.coords), [], [], Rationals);
     for v in Iterator( rep.evecs[i].(String(eval)) ) do
-        evecs := UnionOfRows( evecs, MAJORANA_ConjugateVec( v, g) );
+        evecs := MAJORANA_UnionOfRows( evecs, MAJORANA_ConjugateVec( v, g) );
     od;
 
     return RemoveMatWithHeads( evecs, rep.setup.nullspace);
@@ -69,7 +69,7 @@ InstallGlobalFunction( MAJORANA_Subalgebra,
             v := CertainRows( vecs, [x[2]]);
 
             prod := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
-            vecs := UnionOfRows( vecs, prod );
+            vecs := MAJORANA_UnionOfRows( vecs, prod );
         od;
 
         vecs := EchelonMatDestructive(vecs).vectors;
@@ -156,7 +156,7 @@ InstallGlobalFunction( MAJORANA_Basis,
 
     for i in [1..dim] do
         if rep.setup.nullspace.heads[i] = 0 then
-            basis := UnionOfRows(basis, SparseMatrix(1, dim, [[i]], [[1]], Rationals));
+            basis := MAJORANA_UnionOfRows(basis, SparseMatrix(1, dim, [[i]], [[1]], Rationals));
         fi;
     od;
 
@@ -181,7 +181,7 @@ InstallGlobalFunction( MAJORANA_AdjointAction,
         v := CertainRows(basis, [i]);
         prod := MAJORANA_AlgebraProduct(axis, v, rep.algebraproducts, rep.setup);
         prod := MAJORANA_ConvertToBasis(basis, prod);
-        adj := UnionOfRows(adj, prod);
+        adj := MAJORANA_UnionOfRows(adj, prod);
     od;
 
     return adj;

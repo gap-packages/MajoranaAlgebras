@@ -298,7 +298,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
                 im := MAJORANA_ImageMat(subrep.evecs[i].(ev), emb, rep, subrep);
                 for v in Iterator(im) do
                     v := MAJORANA_ConjugateVec(v, g);
-                    rep.evecs[g[k]].(ev) := UnionOfRows(rep.evecs[g[k]].(ev), v);
+                    rep.evecs[g[k]].(ev) := MAJORANA_UnionOfRows(rep.evecs[g[k]].(ev), v);
                 od;
             fi;
         od;
@@ -307,7 +307,7 @@ InstallGlobalFunction( "MAJORANA_Embed",
     # Record new nullspace vectors
     if Nrows( subrep.setup.nullspace.vectors ) > 0 then
         im := MAJORANA_ImageMat(subrep.setup.nullspace.vectors, emb, rep, subrep);
-        rep.setup.nullspace.vectors := UnionOfRows(rep.setup.nullspace.vectors, im);
+        rep.setup.nullspace.vectors := MAJORANA_UnionOfRows(rep.setup.nullspace.vectors, im);
     fi;
 
     end );

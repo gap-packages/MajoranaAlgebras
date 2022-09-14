@@ -134,8 +134,8 @@ InstallGlobalFunction(MAJORANA_FindInnerProducts,
                         # Otherwise, add this equation to the system of unknowns
                         eq := eq*(1/eq[1]!.entries[1, 1]);
                         if not _IsRowOfSparseMatrix(system.mat, eq[1]) then
-                            system.mat := UnionOfRows(system.mat, eq[1]);
-                            system.vec := UnionOfRows(system.vec, eq[2]);
+                            system.mat := MAJORANA_UnionOfRows(system.mat, eq[1]);
+                            system.vec := MAJORANA_UnionOfRows(system.vec, eq[2]);
                         fi;
                     fi;
                 fi;
@@ -277,8 +277,8 @@ InstallGlobalFunction(MAJORANA_FindAlgebraProducts,
                                         if not false in rep.algebraproducts then return true; fi;
                                     elif not _IsRowOfSparseMatrix(system.mat, x[1]) then
                                         # Otherwise, add the equation to the system of linear equations
-                                        system.mat := UnionOfRows(system.mat, x[1]);
-                                        system.vec := UnionOfRows(system.vec, x[2]);
+                                        system.mat := MAJORANA_UnionOfRows(system.mat, x[1]);
+                                        system.vec := MAJORANA_UnionOfRows(system.vec, x[2]);
                                     fi;
                                 fi;
                             fi;
@@ -330,7 +330,7 @@ InstallGlobalFunction(MAJORANA_AddEvec,
     if _IsRowOfSparseMatrix(mat, x) then
         return mat;
     else
-        return UnionOfRows(mat, x);
+        return MAJORANA_UnionOfRows(mat, x);
     fi;
 
     end);
@@ -487,7 +487,7 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
                 x := MAJORANA_AlgebraProduct(u, v, rep.algebraproducts, rep.setup);
 
                 if not x in [fail, false] then
-                    null := UnionOfRows(null, x - ev*v);
+                    null := MAJORANA_UnionOfRows(null, x - ev*v);
                 fi;
             od;
         od;
@@ -500,16 +500,16 @@ InstallGlobalFunction( MAJORANA_IntersectEigenspaces,
     if Nrows(null) = 0 then return; fi;
 
     conj := SparseMatrix(0, dim, [], [], Rationals);
-    conj := UnionOfRows(conj, null);
+    conj := MAJORANA_UnionOfRows(conj, null);
 
     for g in rep.setup.conjelts do
         for i in [1..Nrows(null)] do
             x := CertainRows(null, [i]);
-            conj := UnionOfRows(conj, MAJORANA_ConjugateVec(x, g));
+            conj := MAJORANA_UnionOfRows(conj, MAJORANA_ConjugateVec(x, g));
         od;
     od;
 
-    null := UnionOfRows(rep.setup.nullspace.vectors, conj);
+    null := MAJORANA_UnionOfRows(rep.setup.nullspace.vectors, conj);
 
     rep.setup.nullspace := ReversedEchelonMatDestructive(null);
 
@@ -585,8 +585,8 @@ function(system, rep)
 
                     elif x[1]!.indices[1] <> [] and not _IsRowOfSparseMatrix(system.mat, x[1]) then
                         # Otherwise add the equation to the linear system
-                        system.mat := UnionOfRows(system.mat, x[1]);
-                        system.vec := UnionOfRows(system.vec, x[2]);
+                        system.mat := MAJORANA_UnionOfRows(system.mat, x[1]);
+                        system.vec := MAJORANA_UnionOfRows(system.vec, x[2]);
                     fi;
                 fi;
             od;
@@ -639,8 +639,8 @@ InstallGlobalFunction( MAJORANA_NullspaceUnknowns,
                 elif x <> fail and x[1]!.indices[1] <> [] then
                     # Otherwise add this equation to the system of linear equations
                     if not _IsRowOfSparseMatrix(system.mat, x[1]) then
-                        system.mat := UnionOfRows(system.mat, x[1]);
-                        system.vec := UnionOfRows(system.vec, x[2]);
+                        system.mat := MAJORANA_UnionOfRows(system.mat, x[1]);
+                        system.vec := MAJORANA_UnionOfRows(system.vec, x[2]);
                     fi;
                 fi;
             od;
@@ -733,8 +733,8 @@ InstallGlobalFunction( MAJORANA_AllConjugates,
                 conj[1] := MAJORANA_ConjugateRow(CertainRows(system.mat, [i]), g, new.unknowns );
                 conj[2] := MAJORANA_ConjugateVec(CertainRows(system.vec, [i]), g);
 
-                new.mat := UnionOfRows(new.mat, conj[1]);
-                new.vec := UnionOfRows(new.vec, conj[2]);
+                new.mat := MAJORANA_UnionOfRows(new.mat, conj[1]);
+                new.vec := MAJORANA_UnionOfRows(new.vec, conj[2]);
             fi;
         od;
 
