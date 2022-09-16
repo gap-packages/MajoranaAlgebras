@@ -38,11 +38,10 @@ Persons := [
 
 SourceRepository := rec(
     Type := "git",
-    URL := Concatenation( "https://github.com/MWhybrow92/", ~.PackageName ),
+    URL := Concatenation( "https://github.com/gap-packages/", ~.PackageName ),
 ),
 IssueTrackerURL := Concatenation( ~.SourceRepository.URL, "/issues" ),
-SupportEmail   := "mlw10@ic.ac.uk",
-PackageWWWHome  := "https://MWhybrow92.github.io/MajoranaAlgebras/",
+PackageWWWHome  := "https://gap-packages.github.io/MajoranaAlgebras/",
 PackageInfoURL  := Concatenation( ~.PackageWWWHome, "PackageInfo.g" ),
 README_URL      := Concatenation( ~.PackageWWWHome, "README.md" ),
 ArchiveURL      := Concatenation( ~.SourceRepository.URL,
