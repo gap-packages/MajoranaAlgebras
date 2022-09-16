@@ -4,7 +4,7 @@
 ##
 ##
 
-InstallGlobalFunction("MAJORANA_UnionOfRows",
+BindGlobal("MAJORANA_UnionOfRows",
     function( A, B )
       return SparseMatrix( A!.nrows + B!.nrows, A!.ncols, Concatenation( A!.indices, B!.indices ), Concatenation( A!.entries, B!.entries ), A!.ring );
     end );
