@@ -13,8 +13,8 @@
 #! <M> \omega ^ { (\pi, sgn) } = sgn(\omega)\cdot sgn(|\omega|^\pi) \cdot (|\omega|^\pi) </M>.
 #!
 #! We provide two representations of signed permutations, one as a list of images
-#! <Ref Filt="IsSignedPermListRep"/> and one formed as pair of a permutation and
-#! a sign map <Ref Filt="IsSignedPermRep"/>. Our benchmarks indicate that a list of
+#! <Ref Filt="IsSignedPermListRep" Label="for IsSignedPerm and IsPositionalObjectRep"/> and one formed as pair of a permutation and
+#! a sign map <Ref Filt="IsSignedPermRep" Label="for IsSignedPerm and IsPositionalObjectRep"/>. Our benchmarks indicate that a list of
 #! images is the better representation, and hence this is the default.
 #!
 #! To get started with signed permutations consider the following example
@@ -96,7 +96,7 @@ DeclareOperation( "ListSignedPerm", [ IsSignedPerm, IsPosInt] );
 
 #! @Description
 #! Given a list of signed images create a signed permutation object
-#! in <Ref Filt="IsSignedPermListRep"/>.
+#! in <Ref Filt="IsSignedPermListRep" Label="for IsSignedPerm and IsPositionalObjectRep"/>.
 DeclareGlobalFunction("SignedPerm");
 DeclareConstructor( "NewSignedPerm", [ IsSignedPerm, IsList ] );
 DeclareConstructor( "NewSignedPerm", [ IsSignedPerm, IsPerm, IsList ] );
