@@ -25,7 +25,7 @@ Persons := [
   ),
   rec(
     IsAuthor := true,
-    IsMaintainer := true,
+    IsMaintainer := false,
     FirstNames := "Madeleine",
     LastName := "Whybrow",
     WWWHome := "https://madeleinewhybrow.wordpress.com",
@@ -33,6 +33,13 @@ Persons := [
     PostalAddress := "Department of Mathematics, Imperial College, South Kensington, SW7 2AZ",
     Place := "London, UK",
     Institution := "Imperial College London",
+  ),
+  rec(
+    IsAuthor := false,
+    IsMaintainer := true,
+    FirstNames := "The",
+    LastName := "GAP Team",
+    Email := "support@gap-system.org",
   ),
 ],
 
