@@ -60,12 +60,17 @@ ArchiveFormats := ".tar.gz",
 ##
 Status := "deposited",
 
-AbstractHTML   :=  "MajoranaAlgebras is a package for constructing Majorana representations of finite groups. It also offers some functions to calculate with a constructed Majorana representation. The main constructive functions use the algorithm described in the preprint Constructing Majorana Representations (https://arxiv.org/abs/1803.10723) by Markus Pfeiffer and Madeleine Whybrow.",
+AbstractHTML   :=  """MajoranaAlgebras is a package for constructing Majorana
+representations of finite groups. It also offers some functions to calculate
+with a constructed Majorana representation. The main constructive functions
+use the algorithm described in the preprint Constructing Majorana
+Representations (https://arxiv.org/abs/1803.10723) by Markus Pfeiffer and
+Madeleine Whybrow.""",
 
 PackageDoc := rec(
   BookName  := "MajoranaAlgebras",
   ArchiveURLSubset := ["doc"],
-  HTMLStart := "doc/chap0.html",
+  HTMLStart := "doc/chap0_mj.html",
   PDFFile   := "doc/manual.pdf",
   SixFile   := "doc/manual.six",
   LongTitle := "A package for constructing Majorana algebras and representations.",
@@ -95,7 +100,7 @@ AutoDoc := rec(
 """&copyright; 2018 by Markus Pfeiffer and Madeleine Whybrow<P/>
 &MajoranaAlgebras; package is free software;
 you can redistribute it and/or modify it under the terms of the
-<URL Text="GNU General Public License">http://www.fsf.org/licenses/gpl.html</URL>
+<URL Text="GNU General Public License">https://www.fsf.org/licenses/gpl.html</URL>
 as published by the Free Software Foundation; either version 2 of the License,
 or (at your option) any later version.""",
     ),
