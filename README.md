@@ -1,5 +1,5 @@
-[![Build Status](https://github.com/MWhybrow92/YangBaxter/workflows/CI/badge.svg?branch=master)](https://github.com/MWhybrow92/YangBaxter/actions?query=workflow%3ACI+branch%3Amaster)
-[![Code Coverage](https://codecov.io/github/gap-system/gap/coverage.svg?branch=master&token=)](https://codecov.io/gh/MWhybrow92/MajoranaAlgebras)
+[![Build Status](https://github.com/gap-packages/MajoranaAlgebras/workflows/CI/badge.svg?branch=master)](https://github.com/gap-packages/MajoranaAlgebras/actions?query=workflow%3ACI+branch%3Amaster)
+[![Code Coverage](https://codecov.io/github/gap-packages/MajoranaAlgebras/coverage.svg?branch=master&token=)](https://codecov.io/gh/gap-packages/MajoranaAlgebras)
 
 # MajoranaAlgebras
 
@@ -7,7 +7,7 @@ This is a GAP package for constructing Majorana representations of finite groups
 
 ## Getting Started
 
-To get the latest version of the package, go to the [MajoranaAlgebras](https://mwhybrow92.github.io/MajoranaAlgebras/) and download `MajoranaAlgebras-x.x.tar.gz`. Inside the `pkg` directory of your GAP installation, unpack `MajoranaAlgebras-x.x.tar.gz` by, for example, doing
+To get the latest version of the package, go to the [MajoranaAlgebras](https://gap-packages.github.io/MajoranaAlgebras/) and download `MajoranaAlgebras-x.x.tar.gz`. Inside the `pkg` directory of your GAP installation, unpack `MajoranaAlgebras-x.x.tar.gz` by, for example, doing
 
     tar -xzf MajoranaAlgebras-x.x.tar.gz
 
