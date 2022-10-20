@@ -145,7 +145,7 @@
   
   [1X1.3-1 InfoMajorana[101X
   
-  [33X[1;0Y[29X[2XInfoMajorana[102X[32X info class[133X
+  [33X[1;0Y[29X[2XInfoMajorana[102X [32X info class[133X
   
   [33X[0;0YThe  default  info  level of [3XInfoMajorana[103X is 0. No information is printed at
   this  level. If the info level is at least 10 then [3XSuccess[103X is printed if the

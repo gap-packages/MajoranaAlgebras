@@ -2,7 +2,16 @@
   
   [1XIndex[101X
   
+  [2XAllOrbitalRepresentatives[102X 6.1-8 
+  [2XAllUnorderedOrbitalRepresentatives[102X 6.1-13 
   [2XInfoMajorana[102X 1.3-1 
+  [2XIsOrbitalStructure[102X, for IsObject 6.1-1 
+  [2XIsSignedPerm[102X, for IsAssociativeElement andIsExtLElement andIsExtRElement andIsMultiplicativeElement andIsMultiplicativeElementWithOne andIsMultiplicativeElementWithInverse andIsFiniteOrderElement 7.2-1 
+  [2XIsSignedPermListRep[102X, for IsSignedPerm and IsPositionalObjectRep 7.2-8 
+  [2XIsSignedPermRep[102X, for IsSignedPerm and IsPositionalObjectRep 7.2-7 
+  [2XLargestMovedPoint[102X, for IsSignedPerm 7.2-10 
+  [2XListSignedPerm[102X, for IsSignedPerm 7.2-2 
+      for IsSignedPerm, IsPosInt 7.2-3 
   [2XMAJORANA_AdjointAction[102X 4.2-5 
   [2XMAJORANA_AlgebraProduct[102X 4.1-1 
   [2XMAJORANA_Basis[102X 4.2-4 
@@ -21,8 +30,27 @@
   [2XMajoranaAlgebraTest[102X 5.1-1 
   [2XMajoranaRepresentation[102X 3.1-1 
   [2XNClosedMajoranaRepresentation[102X 3.2-1 
+  [2XNewSignedPerm[102X, for IsSignedPerm, IsList 7.2-5 
+      for IsSignedPerm, IsPerm, IsList 7.2-6 
+  [2XOnPosPoints[102X 7.2-9 
+  [2XOrbitalCanonizingElement[102X 6.1-9 
+  [2XOrbitalCanonizingElementInverse[102X 6.1-10 
+  [2XOrbitalRepresentative[102X 6.1-7 
+  [2XOrbitalStructure[102X 6.1-2 
+  [2XOrbitalTransversalIterator[102X 6.1-11 
+  [2XOS_CanonisingElement[102X 6.1-4 
+  [2XOS_CanonisingElementAndRepresentative[102X 6.1-5 
+  [2XOS_OrbitRepresentative[102X 6.1-3 
+  [2XOS_StabilizerOf[102X 6.1-6 
+  [2XRandomSignedPerm[102X 7.2-12 
+  [2XRandomSignedPermList[102X 7.2-11 
   [2XShapesOfMajoranaRepresentation[102X 2.1-1 
   [2XShapesOfMajoranaRepresentationAxiomM8[102X 2.1-2 
+  [2XSignedPerm[102X 7.2-4 
+  [2XUnorderedOrbitalCanonizingElement[102X 6.1-15 
+  [2XUnorderedOrbitalCanonizingElementInverse[102X 6.1-16 
+  [2XUnorderedOrbitalRepresentative[102X 6.1-12 
+  [2XUnorderedOrbitalTransversalIterator[102X 6.1-14 
   
   
   -------------------------------------------------------

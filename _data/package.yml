@@ -1,6 +1,6 @@
 name: MajoranaAlgebras
-version: 1.4
-date: 2018-12-06
+version: 1.5
+date: 2022-10-20
 description: |
     A package for constructing Majorana algebras and representations
 
@@ -8,13 +8,11 @@ authors:
     - name: Markus Pfeiffer
       url: https://markusp.morphism.de/
     - name: Madeleine Whybrow
-      url: https://www.madeleinewhybrow.wordpress.com
+      url: https://madeleinewhybrow.wordpress.com
 
 maintainers:
-    - name: Markus Pfeiffer
-      url: https://markusp.morphism.de/
-    - name: Madeleine Whybrow
-      url: https://www.madeleinewhybrow.wordpress.com
+    - name: The GAP Team
+      url: mailto:support@gap-system.org
 
 GAP: ">= 4.8"
 
@@ -27,7 +25,7 @@ needed-pkgs:
       url: "https://gap-packages.github.io/automata/"
     - name: "Gauss"
       version: ">=0"
-      url: "http://homalg-project.github.io/homalg_project/Gauss/"
+      url: "https://homalg-project.github.io/pkg/Gauss"
     - name: "datastructures"
       version: ">=0.2.2"
       url: "https://gap-packages.github.io/datastructures"
@@ -35,47 +33,52 @@ needed-pkgs:
 suggested-pkgs:
     - name: "Char0Gauss"
       version: ">=0"
-      url: "https://markuspf.github.io/Char0Gauss/"
 
-www: https://MWhybrow92.github.io/MajoranaAlgebras/
+www: https://gap-packages.github.io/MajoranaAlgebras/
 readme: README.md
-packageinfo: https://MWhybrow92.github.io/MajoranaAlgebras/PackageInfo.g
+packageinfo: https://gap-packages.github.io/MajoranaAlgebras/PackageInfo.g
 
 downloads:
     - name: .tar.gz
-      url: https://github.com/MWhybrow92/MajoranaAlgebras/releases/download/v1.4/MajoranaAlgebras-1.4.tar.gz
+      url: https://github.com/gap-packages/MajoranaAlgebras/releases/download/v1.5/MajoranaAlgebras-1.5.tar.gz
 
 abstract: |
-    MajoranaAlgebras is a package for constructing Majorana representations of finite groups. It also offers some functions to calculate with a constructed Majorana representation. The main constructive functions use the algorithm described in the preprint Constructing Majorana Representations (https://arxiv.org/abs/1803.10723) by Markus Pfeiffer and Madeleine Whybrow.
+    MajoranaAlgebras is a package for constructing Majorana
+    representations of finite groups. It also offers some functions to calculate
+    with a constructed Majorana representation. The main constructive functions
+    use the algorithm described in the preprint Constructing Majorana
+    Representations (https://arxiv.org/abs/1803.10723) by Markus Pfeiffer and
+    Madeleine Whybrow.
 
-status: dev
-doc-html: doc/chap0.html
+status: deposited
+doc-html: doc/chap0_mj.html
 doc-pdf: doc/manual.pdf
 keywords: |
     Majorana algebras, axial algebras.
 citeas: |
     <p class='BibEntry'>
-    [<span class='BibKey'>PW18</span>]   <b class='BibAuthor'>Pfeiffer, M. and Whybrow, M.</b>,
+    [<span class='BibKey'>PWT22</span>]   <b class='BibAuthor'>Pfeiffer, M., Whybrow, M. and GAP Team, T.</b>,
      <i class='BibTitle'>MajoranaAlgebras, A package for constructing Majorana algebras and representations,
-             Version 1.4</i>
-     (<span class='BibYear'>2018</span>)<br />
+             Version 1.5</i>
+     (<span class='BibYear'>2022</span>)<br />
     (<span class='BibNote'>GAP package</span>),
-    <span class='BibHowpublished'><a href="https://MWhybrow92.github.io/MajoranaAlgebras/">https://MWhybrow92.github.io/MajoranaAlgebras/</a></span>.
+    <span class='BibHowpublished'><a href="https://gap-packages.github.io/MajoranaAlgebras/">https://gap-packages.github.io/MajoranaAlgebras/</a></span>.
     </p>
     
 
 bibtex: |
-    @misc{ MajoranaAlgebras1.4,
-      author =           {Pfeiffer, M. and Whybrow, M.},
+    @misc{ MajoranaAlgebras1.5,
+      author =           {Pfeiffer, M. and Whybrow, M. and GAP Team, T.},
       title =            {{MajoranaAlgebras},   A   package   for   constructing
-                          Majorana algebras and representations, {V}ersion 1.4},
-      month =            {Dec},
-      year =             {2018},
+                          Majorana algebras and representations, {V}ersion 1.5},
+      month =            {Oct},
+      year =             {2022},
       note =             {GAP package},
-      howpublished =     {\href {https://MWhybrow92.github.io/MajoranaAlgebras/}
-                          {\texttt{https://MWhybrow92.github.io/}\discretionary
+      howpublished =     {\href
+                          {https://gap-packages.github.io/MajoranaAlgebras/}
+                          {\texttt{https://gap-packages.github.io/}\discretionary
                           {}{}{}\texttt{MajoranaAlgebras/}}},
       keywords =         {Majorana algebras; axial algebras},
-      printedkey =       {PW18}
+      printedkey =       {PWT22}
     }
 
