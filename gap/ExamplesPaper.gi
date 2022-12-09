@@ -11,7 +11,7 @@ BindGlobal("MAJORANA_Example_S4T1", function() # Shapes 1, 3, 5*, 8
     local G, T;
 
     G := SymmetricGroup(4);
-    T := Filtered(AsList(G), x -> Order(x) = 2);
+    T := Filtered(AsSet(G), x -> Order(x) = 2);
 
     return ShapesOfMajoranaRepresentation(G,T);
 
@@ -33,7 +33,7 @@ BindGlobal("MAJORANA_Example_A5", function() # Shapes 1, 2, 3*, 4
     local G, T;
 
     G := AlternatingGroup(5);
-    T := Filtered(AsList(G), x -> Order(x) = 2);
+    T := Filtered(AsSet(G), x -> Order(x) = 2);
 
     return ShapesOfMajoranaRepresentation(G,T);
 
@@ -44,7 +44,7 @@ BindGlobal("MAJORANA_Example_S5", function() # Shape 1
     local G, T;
 
     G := SymmetricGroup(5);
-    T := Filtered(AsList(G), x -> Order(x) = 2);
+    T := Filtered(AsSet(G), x -> Order(x) = 2);
 
     return ShapesOfMajoranaRepresentationAxiomM8(G,T);
 
@@ -55,7 +55,7 @@ BindGlobal("MAJORANA_Example_L32", function() # Shapes 1 and 2
     local G, T;
 
     G := PSL(3,2);
-    T := Filtered(AsList(G), x -> Order(x) = 2);
+    T := Filtered(AsSet(G), x -> Order(x) = 2);
 
     return ShapesOfMajoranaRepresentationAxiomM8(G,T);
 
@@ -66,7 +66,7 @@ BindGlobal("MAJORANA_Example_A6", function() # Shapes 1, 4
     local G, T;
 
     G := AlternatingGroup(6);
-    T := Filtered(AsList(G),x->Order(x) = 2);
+    T := Filtered(AsSet(G),x->Order(x) = 2);
 
     return ShapesOfMajoranaRepresentationAxiomM8(G,T);
 
@@ -135,7 +135,7 @@ BindGlobal("MAJORANA_Example_A7",function() # Shape 2
     local G, T;
 
     G := AlternatingGroup(7);
-    T := Filtered(AsList(G),x->Order(x) = 2);
+    T := Filtered(AsSet(G),x->Order(x) = 2);
 
     return ShapesOfMajoranaRepresentationAxiomM8(G,T);
 
@@ -196,7 +196,7 @@ BindGlobal("MAJORANA_Example_PSL211", function() # Shape 1n
     local G, T, input;
 
     G := PSL(2,11);
-    T := Filtered(AsList(G), x -> Order(x) = 2);
+    T := Filtered(AsSet(G), x -> Order(x) = 2);
 
     return ShapesOfMajoranaRepresentationAxiomM8(G,T);
 
@@ -218,7 +218,7 @@ BindGlobal("MAJORANA_Example_M11",function() # Shape 1
     local G, T;
 
     G := MathieuGroup(11);
-    T := Filtered(AsList(G), x -> Order(x) = 2);
+    T := Filtered(AsSet(G), x -> Order(x) = 2);
 
     return ShapesOfMajoranaRepresentationAxiomM8(G,T);
 
