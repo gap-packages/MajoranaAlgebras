@@ -1,5 +1,6 @@
 name: MajoranaAlgebras
-version: 1.5.1
+version: "1.5.1"
+license: "GPL-2.0-or-later"
 date: 2022-12-09
 description: |
     A package for constructing Majorana algebras and representations
