@@ -35,16 +35,8 @@ ReadPackage( "MajoranaAlgebras", "gap/ExamplesPaper.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/NClosed.gi");
 
-ReadPackage( "MajoranaAlgebras", "gap/NoForm.gi");
-
 ReadPackage( "MajoranaAlgebras", "gap/Orbits.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gi");
-
-ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gi");
-
-ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gi");
-
-ReadPackage( "MajoranaAlgebras", "gap/TauMaps.gi");
 
 ReadPackage( "MajoranaAlgebras", "gap/Miscellaneous.gi");

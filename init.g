@@ -20,16 +20,8 @@ ReadPackage( "MajoranaAlgebras", "gap/MajoranaAlgebras.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/NClosed.gd");
 
-ReadPackage( "MajoranaAlgebras", "gap/NoForm.gd");
-
 ReadPackage( "MajoranaAlgebras", "gap/Orbits.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Embedding.gd");
-
-ReadPackage( "MajoranaAlgebras", "gap/Irreducibles.gd");
-
-ReadPackage( "MajoranaAlgebras", "gap/AxialAlgebras.gd");
-
-ReadPackage( "MajoranaAlgebras", "gap/TauMaps.gd");
 
 ReadPackage( "MajoranaAlgebras", "gap/Miscellaneous.gd");
