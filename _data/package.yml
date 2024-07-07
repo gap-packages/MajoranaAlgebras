@@ -1,7 +1,7 @@
 name: MajoranaAlgebras
-version: "1.5.1"
+version: "1.5.2"
 license: "GPL-2.0-or-later"
-date: 2022-12-09
+date: 2024-07-07
 description: |
     A package for constructing Majorana algebras and representations
 
@@ -20,7 +20,7 @@ GAP: ">= 4.8"
 needed-pkgs:
     - name: "GAPDoc"
       version: ">= 1.5"
-      url: "http://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc"
+      url: "https://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc"
     - name: "automata"
       version: ">= 1.13"
       url: "https://gap-packages.github.io/automata/"
@@ -41,7 +41,7 @@ packageinfo: https://gap-packages.github.io/MajoranaAlgebras/PackageInfo.g
 
 downloads:
     - name: .tar.gz
-      url: https://github.com/gap-packages/MajoranaAlgebras/releases/download/v1.5.1/MajoranaAlgebras-1.5.1.tar.gz
+      url: https://github.com/gap-packages/MajoranaAlgebras/releases/download/v1.5.2/MajoranaAlgebras-1.5.2.tar.gz
 
 abstract: |
     MajoranaAlgebras is a package for constructing Majorana
@@ -58,28 +58,28 @@ keywords: |
     Majorana algebras, axial algebras.
 citeas: |
     <p class='BibEntry'>
-    [<span class='BibKey'>PWT22</span>]   <b class='BibAuthor'>Pfeiffer, M., Whybrow, M. and GAP Team, T.</b>,
+    [<span class='BibKey'>PWT24</span>]   <b class='BibAuthor'>Pfeiffer, M., Whybrow, M. and GAP Team, T.</b>,
      <i class='BibTitle'>MajoranaAlgebras, A package for constructing Majorana algebras and representations,
-             Version 1.5.1</i>
-     (<span class='BibYear'>2022</span>)<br />
+             Version 1.5.2</i>
+     (<span class='BibYear'>2024</span>)<br />
     (<span class='BibNote'>GAP package</span>),
     <span class='BibHowpublished'><a href="https://gap-packages.github.io/MajoranaAlgebras/">https://gap-packages.github.io/MajoranaAlgebras/</a></span>.
     </p>
     
 
 bibtex: |
-    @misc{ MajoranaAlgebras1.5.1,
+    @misc{ MajoranaAlgebras,
       author =           {Pfeiffer, M. and Whybrow, M. and GAP Team, T.},
       title =            {{MajoranaAlgebras},   A   package   for   constructing
-                          Majorana algebras and representations, {V}ersion 1.5.1},
-      month =            {Dec},
-      year =             {2022},
+                          Majorana algebras and representations, {V}ersion 1.5.2},
+      month =            {Jul},
+      year =             {2024},
       note =             {GAP package},
       howpublished =     {\href
                           {https://gap-packages.github.io/MajoranaAlgebras/}
-                          {\texttt{https://gap-packages.github.io/}\discretionary
+                          {\texttt{https://gap\texttt{\symbol{45}}packages.github.io/}\discretionary
                           {}{}{}\texttt{MajoranaAlgebras/}}},
       keywords =         {Majorana algebras; axial algebras},
-      printedkey =       {PWT22}
+      printedkey =       {PWT24}
     }
 

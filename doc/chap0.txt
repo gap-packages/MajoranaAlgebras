@@ -6,10 +6,10 @@
        [1X A package for constructing Majorana algebras and representations [101X
   
   
-                                     1.5.1
+                                     1.5.2
   
   
-                                9 December 2022
+                                  7 July 2024
   
   
                                 Markus Pfeiffer
