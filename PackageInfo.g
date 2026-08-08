@@ -84,7 +84,7 @@ PackageDoc := rec(
 ),
 
 Dependencies := rec(
-  GAP := ">= 4.8",
+  GAP := ">= 4.9",
   NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
                          , [ "automata", ">= 1.13"]
                          , [ "Gauss", ">=0" ]
